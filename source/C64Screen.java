@@ -14,6 +14,30 @@ class C64Screen extends JFrame implements KeyListener {
   int cursX=0;
   int cursY=0;
   short cursColour=2;
+
+  String colourname[]={"BLACK","WHITE","RED","CYAN","MAGENTA","GREEN","DARK BLUE","YELLOW","BROWN",
+                        "DARK BROWN","PINK","DARK GREY","GREY","LIGHT GREEN","LIGHT BLUE","LIGHT GREY"};
+  int fullcolour[]={
+        0xFF000000, // black
+        0xFFFFFFFF, // white
+        0xFFFF2020, // red
+        0xFF20FFFF, // cyan
+        0xFFFF20FF, // magenta
+        0xFF20FF20, // green
+        0xFF2020A0, // dark blue
+        0xFFFFFF20, // yellow
+        0xFF808020, // brown
+        0xFF404000, // dark brown
+        0xFFFF8080, // pink
+        0xFF404040, // dark grey
+        0xFF808080, // grey
+        0xFF8080FF, // light green
+        0xFFA0A0A0, // light blue
+        0xFFA0A0A0  // light grey
+      };
+          //modImage.setRGB(posx*8+i,posy*8+j,0xFFA0AAFF);
+  int backgroundColour=fullcolour[2];
+  int borderColour=fullcolour[5];
   
   //int scale=2;
   int scale=1;
@@ -152,6 +176,13 @@ class C64Screen extends JFrame implements KeyListener {
     repaint();
   }
 
+  public void setcursColour(String colour) {
+    for (int i=0; i<16; ++i) {
+      if (colour.equals(colourname[i])) { setcursColour((short)i); }
+    } 
+    return;
+  }
+
   public void writechar(char ch) {
     // here we define the line to be written on the screen
     // for now, implement this as an array of lines
@@ -183,18 +214,19 @@ class C64Screen extends JFrame implements KeyListener {
 
      // sometimes this is not ready yet
      if (offGraphics != null) {
-       offGraphics.setColor(new Color(160,170,255)); // this colour was such a good guess!
+       //offGraphics.setColor(new Color(160,170,255)); // this colour was such a good guess!
+       offGraphics.setColor(new Color(backgroundColour,true)); // this colour was such a good guess!
        offGraphics.fillRect(0,0,scale*maxX*8+50*scale,scale*maxY*8+50*scale+topY);
-       offGraphics.setColor(new Color(50,60,90)); // this colour was such a good guess!
+       offGraphics.setColor(new Color(borderColour,true)); // this colour was such a good guess!
        offGraphics.fillRect(25*scale,25*scale+topY,scale*maxX*8,scale*maxY*8);
        // draw all the lines
-       offGraphics.setColor(new Color(160,170,255)); // this colour was such a good guess!
+       ////offGraphics.setColor(new Color(160,170,255)); // this colour was such a good guess!
        //offGraphics.setFont(new Font("Helvetica", Font.PLAIN, 14));
        //offGraphics.setFont(new Font("monospaced", Font.PLAIN,15));
        //offGraphics.setFont(new Font("monospaced", Font.BOLD,8*scale));
        //offGraphics.setFont(new Font("monospaced", Font.PLAIN,8*scale));
        //offGraphics.setFont(new Font("Monospaced", Font.PLAIN,8*scale+2));
-       offGraphics.setFont(new Font("Courier", 18,14));
+       ////offGraphics.setFont(new Font("Courier", 18,14));
        //offGraphics.setFont(new Font("ISOCP", Font.PLAIN,12));
        //offGraphics.setFont(new Font("Lucida sans Console", Font.PLAIN,12));
        for (int j=0; j<maxY; ++j) {
@@ -247,25 +279,7 @@ class C64Screen extends JFrame implements KeyListener {
     offGraphics.drawImage(charsetUpp,x,y,x+8,y+8,posx*8,posy*8,posx*8+8,posy*8+8,this);
   }
 
-    Image gradientImage;
-  int fullcolour[]={0xFF0000FF,
-        0xFFA0AAFF,
-        0xFFFF2020,
-        0xFFFF20FF,
-        0xFFFFFFFF,
-        0xFF2020FF,
-        0xFF20FFFF,
-        0xFF202020,
-        0xFF00FF00,
-        0xFFFFFF00,
-        0xFF00FF00,
-        0xFFFF00FF,
-        0xFFFF00FF,
-        0xFFFF00FF,
-        0xFFFF00FF,
-        0xFFFF00FF
-      };
-          //modImage.setRGB(posx*8+i,posy*8+j,0xFFA0AAFF);
+  Image gradientImage;
 
   public void drawchar(char ch, int x, int y, int colour) {
     int pos;
