@@ -8,8 +8,10 @@ import java.awt.image.*;
 import java.util.*;
 
 // things to do:
-// change the screen writing process from being done EVERY paint
-// to being done on change only, and painting the static image
+// . change the screen writing process from being done EVERY paint
+//   to being done on change only, and painting the static image
+//   -tried this 10's to 100's of times slower!!!
+// . not display until all scrolls etc finished (otherwise blanking etc shows up)
 //--------------------------------------------------------------------------
 class C64Screen extends JFrame implements KeyListener {
   Graphics2D offGraphics;
@@ -23,7 +25,7 @@ class C64Screen extends JFrame implements KeyListener {
     // external use (like Screen.out, but C64Screen.screen)
 
   String colourname[]={"BLACK","WHITE","RED","CYAN","MAGENTA","GREEN","BLUE","YELLOW","BROWN",
-                        "DARK BROWN","PINK","DARK GREY","GREY","LIGHT GREEN","LIGHT BLUE","LIGHT GREY"};
+                        "DARK BROWN","LIGHT RED","DARK GREY","GREY","LIGHT GREEN","LIGHT BLUE","LIGHT GREY"};
   int fullcolour[]={
         0xFF000000, // black
         0xFFFFFFFF, // white
@@ -35,7 +37,7 @@ class C64Screen extends JFrame implements KeyListener {
         0xFFFFFF20, // yellow
         0xFF808020, // brown
         0xFF404000, // dark brown
-        0xFFFF8080, // pink
+        0xFFFF8080, // pink , light red
         0xFF404040, // dark grey
         0xFF808080, // grey
         0xFF80FF80, // light green
@@ -146,9 +148,6 @@ class C64Screen extends JFrame implements KeyListener {
     repaint(); // another one!
   }
   public void println(String line) {
-    writeline(line);
-  }
-  public void writeline(String line) {
 
     if (cursY<maxY-1) {
       //lines[cursY++]=line;
@@ -190,7 +189,7 @@ class C64Screen extends JFrame implements KeyListener {
     repaint();
   }
 
-  public void writeline() {
+  public void println() {
     // here we define the line to be written on the screen
     // for now, implement this as an array of lines
     // should really stop it from repainting whilst inside this routine
@@ -232,7 +231,7 @@ class C64Screen extends JFrame implements KeyListener {
     screencharColour[cursX][cursY]=cursColour;
     //drawrelevent(cursX,cursX+1,cursY,cursY+1);
     cursX++;
-    if (cursX==maxX) { writeline(); }
+    if (cursX==maxX) { println(); }
     // now signal it to be redrawn
     repaint();
   }
@@ -248,7 +247,7 @@ class C64Screen extends JFrame implements KeyListener {
     screencharColour[cursX][cursY]=cursColour;
     //drawrelevent(cursX,cursX+1,cursY,cursY+1);
     cursX++;
-    if (cursX==maxX) { writeline(); }
+    if (cursX==maxX) { println(); }
     // now signal it to be redrawn
     repaint();
   }
@@ -385,6 +384,18 @@ class C64Screen extends JFrame implements KeyListener {
     return rets;
   }
 
+  public void startupscreen() {
+    backgroundColour=fullcolour[6];
+    borderColour=fullcolour[6+8];
+    clearscreen();
+    C64Screen.out.println("");
+    C64Screen.out.println("    **** commodore 64 basic v2 ****");
+    C64Screen.out.println("");
+    C64Screen.out.println(" 64k ram system  38911 basic bytes free");
+    C64Screen.out.println("");
+    C64Screen.out.println("ready.");
+  }
+
   public void initcolour() {
     // here we initially repaint the characters (this method means
     // we would need to do it for every different colour
@@ -436,7 +447,7 @@ class C64Screen extends JFrame implements KeyListener {
   public char givemekey() {
     char returnval;
     // is this the right spot?
-    cursVisible=true; //repaint();
+    cursVisible=true; repaint();
     // should block until there is a key!
     while (keybuftop==keybufbot) { 
       try {
