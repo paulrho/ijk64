@@ -15,7 +15,6 @@ import java.util.*;
 //--------------------------------------------------------------------------
 class C64Screen extends JFrame implements KeyListener {
   Graphics2D offGraphics;
-  Image offImage;
   int cursX=0;
   int cursY=0;
   short cursColour=2;
@@ -67,31 +66,27 @@ class C64Screen extends JFrame implements KeyListener {
   //end key
 
   // charset
-  //Image charsetUpp;
   Image charsetUpp;
-  Graphics2D charsetUppGraphics;
-  //Image charsetUppoffImage;
+  Image charsetUpp2;
   // should we start a cursor flashing thread?
-  Image charsetUpp_BB[]=new Image[16]; // repainted blue blue
   BufferedImage modImage;
+  BufferedImage modImage2;
   BufferedImage charBuffImage=new BufferedImage(64,64,BufferedImage.TYPE_INT_ARGB);
+  BufferedImage screenBuffImage=new BufferedImage(8*40*2+200,150*8*2+200,BufferedImage.TYPE_INT_RGB);
 
   public C64Screen(String title) {
     super(title);
     // create the screeen 
-    setSize(scale*maxX*8+50*scale,scale*maxY*8+50*scale+topY);
+    reshapeScreen();
     setVisible(true);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     addKeyListener(this); // for listening to key strokes
-
-    offImage=createImage(scale*maxX*8+50*scale,scale*maxY*8+50*scale+topY);
-    offGraphics=(Graphics2D) offImage.getGraphics();
-
     create_screen_updater();
-
     Toolkit kit = Toolkit.getDefaultToolkit();
     charsetUpp=kit.getImage("c64_upp.gif");
+    charsetUpp2=kit.getImage("c64_upp_2.gif");
     initcolour(); 
+    drawchar_init();
     // initialise screen
     clearscreen();
     out=this; // for external references
@@ -100,20 +95,24 @@ class C64Screen extends JFrame implements KeyListener {
 
   public void reshapeScreen() {
       setSize(scale*maxX*8+50*scale,scale*maxY*8+50*scale+topY);
-      offImage=createImage(scale*maxX*8+50*scale,scale*maxY*8+50*scale+topY);
-      offGraphics=(Graphics2D) offImage.getGraphics();
+      offGraphics=(Graphics2D) screenBuffImage.getGraphics();
       offGraphics.setColor(new Color(borderColour,true)); // this colour was such a good guess!
       offGraphics.fillRect(0,0,scale*maxX*8+50*scale,scale*maxY*8+50*scale+topY);
       offGraphics.setColor(new Color(backgroundColour,true)); // this colour was such a good guess!
       offGraphics.fillRect(25*scale,25*scale+topY,scale*maxX*8,scale*maxY*8);
+
+      for (int j=0; j<MAXmaxY; ++j) {  //last screen was CLEARed
+        for (int i=0; i<maxX; ++i) {
+          pscreenchar[i][j]=' ';
+          pscreencharColour[i][j]=0;
+        }
+      }
       repaint();
   }
 
   public boolean setRows(int rows) {
     if (rows>=25 && rows<=MAXmaxY) {
       //// this will clear existing rows!
-      //screenchar=new char[maxX][maxY];
-      //screencharColour=new short[maxX][maxY];
       if (C64Screen.maxY<rows) {
         // we are growing the screen
         for (int j=C64Screen.maxY; j<rows; ++j) {  //clear ALL the screen that was not previously written
@@ -153,12 +152,20 @@ class C64Screen extends JFrame implements KeyListener {
   }
 
   // this isn't working
+  long cursflash=0;
   public void create_screen_updater() {
     //javax.swing.Timer timer1 = new javax.swing.Timer(200, new  // this worked well with 40x25 on win but not bigger
-    javax.swing.Timer timer1 = new javax.swing.Timer(400, new 
+    //javax.swing.Timer timer1 = new javax.swing.Timer(400, new 
+    javax.swing.Timer timer1 = new javax.swing.Timer(250, new 
       ActionListener() {
         public void actionPerformed(ActionEvent event) {
           //scrollscreen();
+          // blink cursor
+          if (System.currentTimeMillis()-cursflash>=500) { //
+            cursflash=System.currentTimeMillis();
+            cursVisible=!cursVisible;
+            screenneedsupdate=true;
+          }
           repaint_ifupdated();
         }
       }
@@ -209,7 +216,6 @@ class C64Screen extends JFrame implements KeyListener {
     for (i=0; i<line.length(); ++i) {
       screenchar[cursX][cursY]=petconvert(line.charAt(i));
       screencharColour[cursX][cursY]=cursColour;
-      //drawrelevent(cursX,cursX+1,cursY,cursY+1);
       cursX++;
       if (cursX==maxX) { // same as in println
         cursX=0;
@@ -225,11 +231,9 @@ class C64Screen extends JFrame implements KeyListener {
 
   public void println(String line) {
 
-    //lines[cursY++]=line;
     for (int i=0; i<line.length(); ++i) {
       screenchar[cursX][cursY]=petconvert(line.charAt(i));
       screencharColour[cursX][cursY]=cursColour;
-      //drawrelevent(cursX,cursX+1,cursY,cursY+1);
       cursX++;
       if (cursX==maxX) {
         cursX=0;
@@ -262,11 +266,6 @@ class C64Screen extends JFrame implements KeyListener {
       cursY++;
     } else {
       scrollscreen();
-      //lines[cursY]="";
-      // i think this is done in scrollscreen// for (int i=0; i<cursX; ++i) {
-      // i think this is done in scrollscreen//   screenchar[i][cursY]=' ';
-      // i think this is done in scrollscreen// }
-      //drawrelevent(0,cursX,cursY,cursY+1);
     }
     cursX=0;
 
@@ -291,11 +290,8 @@ class C64Screen extends JFrame implements KeyListener {
     // for now, implement this as an array of lines
     // should really stop it from repainting whilst inside this routine
     // note, doesnt wrap yet
-    //if (lines[cursY]==null) { lines[cursY]=""; }
-    //lines[cursY]=lines[cursY]+ch;
     screenchar[cursX][cursY]=petconvert(ch);
     screencharColour[cursX][cursY]=cursColour;
-    //drawrelevent(cursX,cursX+1,cursY,cursY+1);
     cursX++;
     if (cursX==maxX) { println(); }
     // now signal it to be redrawn
@@ -307,11 +303,8 @@ class C64Screen extends JFrame implements KeyListener {
     // for now, implement this as an array of lines
     // should really stop it from repainting whilst inside this routine
     // note, doesnt wrap yet
-    //if (lines[cursY]==null) { lines[cursY]=""; }
-    //lines[cursY]=lines[cursY]+ch;
     screenchar[cursX][cursY]=ch;
     screencharColour[cursX][cursY]=cursColour;
-    //drawrelevent(cursX,cursX+1,cursY,cursY+1);
     cursX++;
     if (cursX==maxX) { println(); }
     // now signal it to be redrawn
@@ -321,7 +314,6 @@ class C64Screen extends JFrame implements KeyListener {
   public void backspace() {
     if (cursX>0) {
       screenchar[cursX-1][cursY]=' ';
-      //drawrelevent(cursX-1,cursX,cursY,cursY+1);
       cursX--;
     }
     repaint();
@@ -348,17 +340,21 @@ class C64Screen extends JFrame implements KeyListener {
  
      // sometimes this is not ready yet
      if (offGraphics != null) {
-       if (false) {
-         offGraphics.setColor(new Color(borderColour,true)); // this colour was such a good guess!
-         offGraphics.fillRect(0,0,scale*maxX*8+50*scale,scale*maxY*8+50*scale+topY);
-         offGraphics.setColor(new Color(backgroundColour,true)); // this colour was such a good guess!
-         offGraphics.fillRect(25*scale,25*scale+topY,scale*maxX*8,scale*maxY*8);
-       }
          // draw all the lines
-         if (modImage != null) { // hold off until ready
+         if (modImage != null && modImage2 != null ) { // hold off until ready
            for (int j=0; j<maxY; ++j) {
                for (int i=0; i<maxX; i++) {
-                 drawchar(screenchar[i][j],0+25*scale+i*8*scale,j*8*scale+25*scale+topY,screencharColour[i][j]);
+      
+                 if (pscreenchar[i][j]==screenchar[i][j] && pscreencharColour[i][j]==screencharColour[i][j]) { } else {
+                   pscreenchar[i][j]=screenchar[i][j];
+                   pscreencharColour[i][j]=screencharColour[i][j];
+
+                  if (scale==1) {
+                   drawchar(screenchar[i][j],0+25*scale+i*8*scale,j*8*scale+25*scale+topY,screencharColour[i][j]);
+                  } else {
+                   drawchar2(screenchar[i][j],0+25*scale+i*8*scale,j*8*scale+25*scale+topY,screencharColour[i][j]);
+                  }
+                 }
                }
                if (true && j==4) {
                  ttime_paintl=System.currentTimeMillis()-tstart;
@@ -366,15 +362,28 @@ class C64Screen extends JFrame implements KeyListener {
            }
            // drawcursor - in the curColor
            if (cursVisible) {
-             drawchar((char)(' '+128),0+25*scale+cursX*8*scale,cursY*8*scale+25*scale+topY,cursColour);
+                 if (pscreenchar[cursX][cursY]==(char)(' '+128) && pscreencharColour[cursX][cursY]==cursColour) { } else {
+                   pscreenchar[cursX][cursY]=(char)(' '+128);
+                   pscreencharColour[cursX][cursY]=cursColour;
+
+               if (scale==1) {
+                 drawchar((char)(' '+128),0+25*scale+cursX*8*scale,cursY*8*scale+25*scale+topY,cursColour);
+               } else {
+                 drawchar2((char)(' '+128),0+25*scale+cursX*8*scale,cursY*8*scale+25*scale+topY,cursColour);
+               }
+             }
            }
          }
+
        if (true) {
          ttime_paintm=System.currentTimeMillis()-tstart;
        }
 
-       g2d.drawImage(offImage,0,0,this);
+       g2d.drawImage(screenBuffImage,0,0,8*scale*maxX+50*scale,8*scale*maxY+50*scale+topY,
+           0,0,8*scale*maxX+50*scale,8*scale*maxY+50*scale+topY,this);
+
      }
+
      if (true) {
        ttime_paint=System.currentTimeMillis()-tstart;
      }
@@ -390,75 +399,109 @@ class C64Screen extends JFrame implements KeyListener {
     System.out.println("--------------------------");
   }
 
-  public void drawrelevent(int x0, int x1, int y0, int y1) {
-    // redraw only where it is relevent
-         // draw all the lines
-         if (modImage != null) { // hold off until ready
-           for (int j=y0; j<y1; ++j) {
-               for (int i=x0; i<x1; i++) {
-                 drawchar(screenchar[i][j],0+25*scale+i*8*scale,j*8*scale+25*scale+topY,screencharColour[i][j]);
-               }
-           }
-           // drawcursor - in the curColor
-           if (cursVisible) {
-             drawchar((char)(' '+128),0+25*scale+cursX*8*scale,cursY*8*scale+25*scale+topY,cursColour);
-           }
-         }
+  boolean dots[][];
+  boolean dots2[][];
+  public void drawchar_init() {
+    dots=new boolean[32*8][8*8];
+    //System.out.println("Allocated space for dots");
+    if (dots==null) {
+      System.out.println("but it is null");
+    }
+    for (int posx=0; posx<32; ++posx) {
+    for (int posy=0; posy<8; ++posy) {
+    for (int i=0; i<8; ++i) {
+      for (int j=0; j<8; ++j) {
+        int rgb=modImage.getRGB(posx*8+i,posy*8+j);
+        if ((rgb & 0xFFFFFF) ==0 ) {
+          dots[posx*8+i][posy*8+j]=true;
+        } else {
+          dots[posx*8+i][posy*8+j]=false;
+        }
+      }
+    }
+    }
+    }
+
+    dots2=new boolean[32*16][8*16];
+    //System.out.println("Allocated space for dots");
+    if (dots2==null) {
+      System.out.println("but it is null");
+    }
+    for (int posx=0; posx<32; ++posx) {
+    for (int posy=0; posy<8; ++posy) {
+    for (int i=0; i<16; ++i) {
+      for (int j=0; j<16; ++j) {
+        int rgb=modImage2.getRGB(posx*16+i,posy*16+j);
+        if ((rgb & 0xFFFFFF) ==0 ) {
+          dots2[posx*16+i][posy*16+j]=true;
+        } else {
+          dots2[posx*16+i][posy*16+j]=false;
+        }
+      }
+    }
+    }
+    }
   }
 
-  public void drawchar_old(char ch, int x, int y) {
-    // we want to draw char ch, to work out where it is:
-    // 
-    int pos;
-    int posx;
-    int posy;
-    pos=0;
-    if (ch>='a' && ch<='z') pos=1+(ch-'a');
-    else if (ch>='A' && ch<='Z') pos=1+(ch-'A')+64;
-    else if (ch==' ') pos=32;
-    else if (ch=='.') pos=46;
-    else if (ch>='0' && ch<='9' || ch>='(' && ch<=')') pos=(ch);
-    posx=pos%32; posy=pos/32;
-    offGraphics.drawImage(charsetUpp,x,y,x+8,y+8,posx*8,posy*8,posx*8+8,posy*8+8,this);
-  }
-
-  Image gradientImage;
+  char[][] pscreenchar=new char[maxX][MAXmaxY];
+  short[][] pscreencharColour=new short[maxX][MAXmaxY];
 
   public void drawchar(char ch, int x, int y, int colour) {
     int pos;
     int posx;
     int posy;
-    pos=ch; posx=pos%32; posy=pos/32;
+    int col;
 
+    pos=ch; posx=pos%32; posy=pos/32;
+    col=fullcolour[colour];
     // modify here the colours of the source to match what we want
     // then draw it onto the offGraphics place
     for (int i=0; i<8; ++i) {
       for (int j=0; j<8; ++j) {
-        int rgb=modImage.getRGB(posx*8+i,posy*8+j);
-        if ((rgb & 0xFFFFFF) ==0 ) { 
-          charBuffImage.setRGB(i*scale,j*scale,fullcolour[colour]);
+        //int rgb=modImage.getRGB(posx*8+i,posy*8+j);
+        int xx=i*scale+x;
+        int yy=j*scale+y;
+        if (dots[posx*8+i][posy*8+j]) {
+          screenBuffImage.setRGB(xx,yy,col);
           if (scale==2) {
-            charBuffImage.setRGB(i*scale+1,j*scale,fullcolour[colour]);
-            charBuffImage.setRGB(i*scale,j*scale+1,fullcolour[colour]);
-            charBuffImage.setRGB(i*scale+1,j*scale+1,fullcolour[colour]);
+            screenBuffImage.setRGB(xx+1,yy,col);
+            screenBuffImage.setRGB(xx,yy+1,col);
+            screenBuffImage.setRGB(xx+1,yy+1,col);
           }
-          //modImage.setRGB(i,j,fullcolour[colour]);
         } else {
-          //charBuffImage.setRGB(i,j,0xFF323C64);
-          charBuffImage.setRGB(i*scale,j*scale,backgroundColour);
+          screenBuffImage.setRGB(xx,yy,backgroundColour);
           if (scale==2) {
-            charBuffImage.setRGB(i*scale+1,j*scale,backgroundColour);
-            charBuffImage.setRGB(i*scale,j*scale+1,backgroundColour);
-            charBuffImage.setRGB(i*scale+1,j*scale+1,backgroundColour);
+            screenBuffImage.setRGB(xx+1,yy,backgroundColour);
+            screenBuffImage.setRGB(xx,yy+1,backgroundColour);
+            screenBuffImage.setRGB(xx+1,yy+1,backgroundColour);
           }
-          //modImage.setRGB(i,j,backgroundColour);
         }
       }
     }
-    offGraphics.drawImage(charBuffImage,x,y,x+8*scale,y+8*scale,0,0,8*scale,8*scale,this);
-    // scaling is too slow... offGraphics.drawImage(charBuffImage,x,y,x+8*scale,y+8*scale,0,0,8,8,this);
-    //offGraphics.drawImage(modImage,x,y,x+8,y+8,0,0,8,8,this);
   }
+  public void drawchar2(char ch, int x, int y, int colour) {
+    int pos;
+    int posx;
+    int posy;
+    int col;
+
+    pos=ch; posx=pos%32; posy=pos/32;
+    col=fullcolour[colour];
+    // modify here the colours of the source to match what we want
+    // then draw it onto the offGraphics place
+    for (int i=0; i<16; ++i) {
+      for (int j=0; j<16; ++j) {
+        int xx=i+x;
+        int yy=j+y;
+        if (dots2[posx*16+i][posy*16+j]) {
+          screenBuffImage.setRGB(xx,yy,col);
+        } else {
+          screenBuffImage.setRGB(xx,yy,backgroundColour);
+        }
+      }
+    }
+  }
+
 
   public void clearscreen() {
     for (int j=0; j<MAXmaxY; ++j) {  //clear ALL the screen
@@ -468,11 +511,6 @@ class C64Screen extends JFrame implements KeyListener {
       }
     }
     cursX=0; cursY=0;
-         offGraphics.setColor(new Color(borderColour,true)); // this colour was such a good guess!
-         offGraphics.fillRect(0,0,scale*maxX*8+50*scale,scale*maxY*8+50*scale+topY);
-         offGraphics.setColor(new Color(backgroundColour,true)); // this colour was such a good guess!
-         offGraphics.fillRect(25*scale,25*scale+topY,scale*maxX*8,scale*maxY*8);
-    //drawrelevent(0,maxX,0,maxY);
   }
 
   public String getline() {
@@ -498,16 +536,8 @@ class C64Screen extends JFrame implements KeyListener {
   }
 
   public void initcolour() {
-    // here we initially repaint the characters (this method means
-    // we would need to do it for every different colour
-    GradientFilter imgf = new GradientFilter();
-    ImageProducer ip = charsetUpp.getSource();
-    ip = new FilteredImageSource(ip, imgf);
-    charsetUpp_BB[0] = getToolkit().createImage(ip);
-    //offGraphics.drawImage(gradientImage,x,y,x+8,y+8,posx*8,posy*8,posx*8+8,posy*8+8,this);
     modImage=toBufferedImage(charsetUpp);
-    modImage.setRGB(1,1,0xFF00FF00);
-    //charsetUpp_BB[0]=modImage;
+    modImage2=toBufferedImage(charsetUpp2);
   }
   public void update(Graphics g)
   {
@@ -589,7 +619,7 @@ class C64Screen extends JFrame implements KeyListener {
   public void repaint() {
     //if (qval%100==0) { // this works!
     // the value 100 needs tuning, 100 gives mostly good output on powerful, non-loaded machine
-    if (System.currentTimeMillis()-qval>200) {
+    if (System.currentTimeMillis()-qval>200) { // was 200
       // call the real one
       super.repaint();
       qval=System.currentTimeMillis();
@@ -600,11 +630,13 @@ class C64Screen extends JFrame implements KeyListener {
     }
     //qval++; // this works!
   }
+
   //public drawcursor() {
     //// draw a little block where the cursor is
   //}
   //public undrawcursor() {
   //}
+
 // This method returns a buffered image with the contents of an image
     public static BufferedImage toBufferedImage(Image image) {
         if (image instanceof BufferedImage) {
@@ -659,47 +691,4 @@ class C64Screen extends JFrame implements KeyListener {
 
 }
 
-///
-
-
-//class MyRGBImageFilter extends RGBImageFilter
-
-        //add("Center", new ImageCanvas(
-            //getToolkit().getImage(filename)));
-
-class GradientFilter extends RGBImageFilter {
-    //float[] hsb = new float[3];
-    int width, height;
-
-    public void setDimensions(int w, int h) {
-        super.setDimensions(w, h);
-        width = w;
-        height = h;
-    }
-
-       //public int filterRGB(int x, int y, int r)
-        //{       return  ((r & 0xff00ff00)|((r & 0xff0000) >> 16)
-                        //|((r & 0xff) << 16));
-        //}
-       public int filterRGB(int x, int y, int r) { 
-         int ret;
-         //if ((r & 0xffffff) == 0) ret=0xffffffff;
-         //else ret=0;
-         if ((r & 0xffffff) == 0) ret=0xFFA0AAFF;
-         else ret=0xFF323C64;
-         return ret;
-       }
-
-    //public int filterRGB(int x, int y, int rgb) {
-        //Color c = new Color(rgb);
-        //Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), hsb);
-        //hsb[2] += .5f - (float)x / width;
-        //hsb[2] += .5f - (float)y / height;
-        //hsb[2] = Math.max(0.0f, Math.min(1.0f, hsb[2]));
-        //return Color.HSBtoRGB(hsb[0], hsb[1], hsb[2]);
-    //}
-
-}
-
 ///end
-
