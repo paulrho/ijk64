@@ -154,7 +154,8 @@ class C64Screen extends JFrame implements KeyListener {
 
   // this isn't working
   public void create_screen_updater() {
-    javax.swing.Timer timer1 = new javax.swing.Timer(200, new 
+    //javax.swing.Timer timer1 = new javax.swing.Timer(200, new  // this worked well with 40x25 on win but not bigger
+    javax.swing.Timer timer1 = new javax.swing.Timer(400, new 
       ActionListener() {
         public void actionPerformed(ActionEvent event) {
           //scrollscreen();
