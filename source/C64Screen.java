@@ -192,6 +192,7 @@ class C64Screen extends JFrame implements KeyListener {
     //drawrelevent(0,maxX,0,maxY);
   }
 
+  // converts a keyboard (PC) character to the best "PETASCII" char
   public char petconvert(char ch) {
     int pos=0;
     if (ch>='a' && ch<='z') pos=1+(ch-'a');
@@ -200,6 +201,9 @@ class C64Screen extends JFrame implements KeyListener {
     else if (ch==' '+128) pos=32+128;  // reversed block
     else if (ch>='0' && ch<='9' || ch>=' ' && ch<='?') pos=(ch);
     else if (ch>=91 && ch<=95) pos=(ch-64);
+    else if (ch=='`') pos=31;
+    else if (ch=='|') pos=29+64;
+    else if (ch=='~') pos=30+64;
     if (pos>=256) pos=0;
     return (char)pos;
   }
@@ -217,14 +221,15 @@ class C64Screen extends JFrame implements KeyListener {
     for (i=0; i<line.length(); ++i) {
       screenchar[cursX][cursY]=petconvert(line.charAt(i));
       screencharColour[cursX][cursY]=cursColour;
-      cursX++;
-      if (cursX==maxX) { // same as in println
+      if (cursX==maxX-1) { // same as in println
         cursX=0;
         if (cursY==maxY-1) {
           scrollscreen();
         } else {
           cursY++;
         }
+      } else {
+        cursX++;
       }
     }
     repaint(); // another one!
@@ -235,14 +240,15 @@ class C64Screen extends JFrame implements KeyListener {
     for (int i=0; i<line.length(); ++i) {
       screenchar[cursX][cursY]=petconvert(line.charAt(i));
       screencharColour[cursX][cursY]=cursColour;
-      cursX++;
-      if (cursX==maxX) {
+      if (cursX==maxX-1) {
         cursX=0;
         if (cursY==maxY-1) {
           scrollscreen();
         } else {
           cursY++;
         }
+      } else {
+        cursX++;
       }
     }
 
@@ -293,8 +299,7 @@ class C64Screen extends JFrame implements KeyListener {
     // note, doesnt wrap yet
     screenchar[cursX][cursY]=petconvert(ch);
     screencharColour[cursX][cursY]=cursColour;
-    cursX++;
-    if (cursX==maxX) { println(); }
+    if (cursX==maxX-1) { println(); } else { cursX++; }
     // now signal it to be redrawn
     repaint();
   }
@@ -306,8 +311,7 @@ class C64Screen extends JFrame implements KeyListener {
     // note, doesnt wrap yet
     screenchar[cursX][cursY]=ch;
     screencharColour[cursX][cursY]=cursColour;
-    cursX++;
-    if (cursX==maxX) { println(); }
+    if (cursX==maxX-1) { println(); } else { cursX++; }
     // now signal it to be redrawn
     repaint();
   }
@@ -548,17 +552,25 @@ class C64Screen extends JFrame implements KeyListener {
 /// key stuff
   boolean altdown=false;
   boolean ctrldown=false;
+  boolean tabdown=false;
 
   public void keyPressed(KeyEvent e)
   {
     // first look at it to see if it is just a shift/control/alt event
     if (e.getKeyCode()==KeyEvent.VK_ALT) { altdown=true; }
     if (e.getKeyCode()==KeyEvent.VK_CONTROL) { ctrldown=true; }
+    if (e.getKeyCode()==KeyEvent.VK_TAB) { tabdown=true; }
     if (e.getKeyChar()!=KeyEvent.CHAR_UNDEFINED) {
       
       keybuf[keybuftop]=e.getKeyChar();
-      if (altdown) { keybuf[keybuftop]+=128; }
-      if (ctrldown && keybuf[keybuftop]>='0' && keybuf[keybuftop]<='9') { keybuf[keybuftop]+=256; }
+      //if (altdown) { keybuf[keybuftop]+=128; }
+      //if (ctrldown && keybuf[keybuftop]>='0' && keybuf[keybuftop]<='9') { keybuf[keybuftop]+=256; }
+      if (e.isAltDown()) { keybuf[keybuftop]+=128; }
+      if (e.isControlDown() && keybuf[keybuftop]>='0' && keybuf[keybuftop]<='9') { keybuf[keybuftop]+=256; }
+      //notwork//if (tabdown && keybuf[keybuftop]>='0' && keybuf[keybuftop]<='9') { keybuf[keybuftop]+=256; }
+      //notwork//if (e.isControlDown() && keybuf[keybuftop]>='0' && keybuf[keybuftop]<='9') { keybuf[keybuftop]+=256+8; }
+
+      //if (ctrldown && keybuf[keybuftop]>='!' && keybuf[keybuftop]<=')') { keybuf[keybuftop]+=256+8-33; }
       keybuftop++;
       if (keybuftop>=keybufmax) {
         keybuftop=0;
@@ -570,6 +582,7 @@ class C64Screen extends JFrame implements KeyListener {
   {
     if (e.getKeyCode()==KeyEvent.VK_ALT) { altdown=false; }
     if (e.getKeyCode()==KeyEvent.VK_CONTROL) { ctrldown=false; }
+    if (e.getKeyCode()==KeyEvent.VK_TAB) { tabdown=false; }
   }
 
   public void keyTyped(KeyEvent e)
