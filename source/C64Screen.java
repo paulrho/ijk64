@@ -327,12 +327,25 @@ class C64Screen extends JFrame implements KeyListener {
     repaint();
   }
 
+
+  // Timings
+  long tstart;
+  long ttime_paint;
+  long ttime_paintl;
+  long ttime_paintm;
+  long tcount_paint=0;
+                                                                                                                          
   //public void paint(Graphics g)
   // try this
   public synchronized void paint(Graphics g)
   {
      Graphics2D g2d = (Graphics2D) g;
 
+     if (true) {
+       tstart=System.currentTimeMillis();
+       tcount_paint++;
+     }
+ 
      // sometimes this is not ready yet
      if (offGraphics != null) {
        if (false) {
@@ -347,14 +360,33 @@ class C64Screen extends JFrame implements KeyListener {
                for (int i=0; i<maxX; i++) {
                  drawchar(screenchar[i][j],0+25*scale+i*8*scale,j*8*scale+25*scale+topY,screencharColour[i][j]);
                }
+               if (true && j==4) {
+                 ttime_paintl=System.currentTimeMillis()-tstart;
+               }
            }
            // drawcursor - in the curColor
            if (cursVisible) {
              drawchar((char)(' '+128),0+25*scale+cursX*8*scale,cursY*8*scale+25*scale+topY,cursColour);
            }
          }
+       if (true) {
+         ttime_paintm=System.currentTimeMillis()-tstart;
+       }
+
        g2d.drawImage(offImage,0,0,this);
      }
+     if (true) {
+       ttime_paint=System.currentTimeMillis()-tstart;
+     }
+  }
+
+  public void printstats() {
+    System.out.println("ttime-paintm = "+ttime_paintm);
+    System.out.println("ttime-paintl (5 lines)= "+ttime_paintl);
+    System.out.println("ttime-paint = "+ttime_paint);
+    System.out.println("ttime-paint draw = "+(ttime_paint-ttime_paintm));
+    System.out.println("tcount-paint = "+tcount_paint);
+    System.out.println("--------------------------");
   }
 
   public void drawrelevent(int x0, int x1, int y0, int y1) {
