@@ -24,7 +24,7 @@ class C64Screen extends JFrame implements KeyListener {
   static public C64Screen out=null; // a pointer to the last (really first) instansiated screen for 
     // external use (like Screen.out, but C64Screen.screen)
 
-  String colourname[]={"BLACK","WHITE","RED","CYAN","MAGENTA","GREEN","BLUE","YELLOW","ORANGE",
+  String colourname[]={"BLACK","WHITE","RED","CYAN","PURPLE","GREEN","BLUE","YELLOW","ORANGE",
                         "BROWN","LIGHT RED","GREY 1","GREY 2","LIGHT GREEN","LIGHT BLUE","GREY 3"};
   int fullcolour[]={
         0xFF000000, // black
@@ -50,13 +50,14 @@ class C64Screen extends JFrame implements KeyListener {
   
   //int scale=2;
   //int scale=1;
-  int scale=2;
+  int scale=1;
   int maxX=40;
   static int maxY=25;
+  final static int MAXmaxY=125;
   int topY=12;
   //String lines[]=new String[maxY];
-  char[][] screenchar=new char[maxX][maxY];
-  short[][] screencharColour=new short[maxX][maxY];
+  char[][] screenchar=new char[maxX][MAXmaxY];
+  short[][] screencharColour=new short[maxX][MAXmaxY];
 
   //key
   static int keybufmax=1000;
@@ -95,6 +96,60 @@ class C64Screen extends JFrame implements KeyListener {
     clearscreen();
     out=this; // for external references
     return;
+  }
+
+  public void reshapeScreen() {
+      setSize(scale*maxX*8+50*scale,scale*maxY*8+50*scale+topY);
+      offImage=createImage(scale*maxX*8+50*scale,scale*maxY*8+50*scale+topY);
+      offGraphics=(Graphics2D) offImage.getGraphics();
+      offGraphics.setColor(new Color(borderColour,true)); // this colour was such a good guess!
+      offGraphics.fillRect(0,0,scale*maxX*8+50*scale,scale*maxY*8+50*scale+topY);
+      offGraphics.setColor(new Color(backgroundColour,true)); // this colour was such a good guess!
+      offGraphics.fillRect(25*scale,25*scale+topY,scale*maxX*8,scale*maxY*8);
+      repaint();
+  }
+
+  public boolean setRows(int rows) {
+    if (rows>=25 && rows<=MAXmaxY) {
+      //// this will clear existing rows!
+      //screenchar=new char[maxX][maxY];
+      //screencharColour=new short[maxX][maxY];
+      if (C64Screen.maxY<rows) {
+        // we are growing the screen
+        for (int j=C64Screen.maxY; j<rows; ++j) {  //clear ALL the screen that was not previously written
+          for (int i=0; i<maxX; ++i) {
+            screenchar[i][j]=' ';
+            screencharColour[i][j]=0;
+          }
+        }
+      } else {
+        // we are shrinking the screen
+        // this is only really good when we shrink a full screen, if it is partially empty
+        // we will start to loose output
+        for (int j=0; j<rows; ++j) {  //move the last out to the new last output
+          for (int i=0; i<maxX; ++i) {
+            screenchar[i][j]=screenchar[i][j+(C64Screen.maxY-rows)];
+            screencharColour[i][j]=screencharColour[i][j+(C64Screen.maxY-rows)];
+          }
+        }
+        cursY=cursY-(C64Screen.maxY-rows); // not sure if we always want to do this
+        if (cursY<0) cursY=0;
+        if (cursY>=rows) cursY=rows-1;
+      }
+      C64Screen.maxY=rows;
+      reshapeScreen();
+      return true;
+    }
+    return false;
+  }
+
+  public boolean setScale(int scale) {
+    if (scale>=1 && scale<=2) { 
+      this.scale=scale;
+      reshapeScreen();
+      return true;
+    }
+    return false;
   }
 
   // this isn't working
@@ -381,7 +436,7 @@ class C64Screen extends JFrame implements KeyListener {
   }
 
   public void clearscreen() {
-    for (int j=0; j<maxY; ++j) {
+    for (int j=0; j<MAXmaxY; ++j) {  //clear ALL the screen
       for (int i=0; i<maxX; ++i) {
         screenchar[i][j]=' ';
         screencharColour[i][j]=0;
