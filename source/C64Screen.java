@@ -1,10 +1,14 @@
-//import java.io;
+////////////////////////////////////////////////////////////     
+// $Id$
+//                                                               
+// $Log$
+////////////////////////////////////////////////////////////     
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*; // for key events
 import java.awt.Toolkit.*; // for image loading
 import java.awt.image.*;
-
 import java.util.*;
 
 // things to do:
@@ -218,8 +222,64 @@ class C64Screen extends JFrame implements KeyListener {
 
   public void print(String line) {
     int i;
+    char theChar;
     for (i=0; i<line.length(); ++i) {
-      screenchar[cursX][cursY]=petconvert(line.charAt(i));
+      // allow "special" characters
+      // backslash followed by [ is a real /
+      theChar=line.charAt(i);
+      if (theChar=='\\') {
+        if (i+1<line.length() && line.charAt(i+1)=='[') {
+          theChar='[';
+        }
+        theChar=petconvert(theChar);
+      } else if (theChar=='[') {
+        // now read until the next ']'
+        String cS;
+        cS="";
+        for (i++; i<line.length(); ++i) if (line.charAt(i)!=']') {
+          cS=cS+line.charAt(i);
+        } else break;
+        // special code is now in cS
+        //System.out.println("The string is "+cS+"\n\n");
+        for (int j=0; j<16; ++j) {
+          if (cS.equals(colourname[j])) { setcursColour((short)j); }
+          continue;
+        } 
+        if (cS.equals("testing")) { 
+          cursColour=3;
+          continue;
+        } else if (cS.equals("BLOCK")) {
+          theChar=petconvert((char)(' '+128));
+        } else if (cS.equals("LOW-HLINE")) {
+          theChar=(char)('c');
+        } else if (cS.equals("UPP-LEFT-LINE")) {
+          theChar=(char)('p');
+        } else if (cS.equals("UPP-RIGHT-LINE")) {
+          theChar=(char)('n');
+        } else if (cS.equals("LOW-LEFT-LINE")) {
+          theChar=(char)('m');
+        } else if (cS.equals("LOW-RIGHT-LINE")) {
+          theChar=(char)(']'+32);
+        } else if (cS.equals("VLINE")) {
+          theChar=(char)(']');
+        } else if (cS.equals("HLINE")) {
+          theChar=petconvert('C');
+        } else if (cS.equals("CR")) {
+          // same as println()
+          if (cursY<maxY-1) {
+            cursY++;
+          } else {
+            // we are on the last line of the screen so scroll it
+            scrollscreen();
+          }
+          cursX=0;
+          continue;
+        } else {
+          continue;
+        }
+      } else { theChar=petconvert(theChar); }
+      /* normal processing */
+      screenchar[cursX][cursY]=theChar;
       screencharColour[cursX][cursY]=cursColour;
       if (cursX==maxX-1) { // same as in println
         cursX=0;
@@ -237,20 +297,7 @@ class C64Screen extends JFrame implements KeyListener {
 
   public void println(String line) {
 
-    for (int i=0; i<line.length(); ++i) {
-      screenchar[cursX][cursY]=petconvert(line.charAt(i));
-      screencharColour[cursX][cursY]=cursColour;
-      if (cursX==maxX-1) {
-        cursX=0;
-        if (cursY==maxY-1) {
-          scrollscreen();
-        } else {
-          cursY++;
-        }
-      } else {
-        cursX++;
-      }
-    }
+    print(line);
 
     // same as println()
     if (cursY<maxY-1) {
