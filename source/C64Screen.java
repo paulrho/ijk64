@@ -24,25 +24,25 @@ class C64Screen extends JFrame implements KeyListener {
   static public C64Screen out=null; // a pointer to the last (really first) instansiated screen for 
     // external use (like Screen.out, but C64Screen.screen)
 
-  String colourname[]={"BLACK","WHITE","RED","CYAN","MAGENTA","GREEN","BLUE","YELLOW","BROWN",
-                        "DARK BROWN","LIGHT RED","DARK GREY","GREY","LIGHT GREEN","LIGHT BLUE","LIGHT GREY"};
+  String colourname[]={"BLACK","WHITE","RED","CYAN","MAGENTA","GREEN","BLUE","YELLOW","ORANGE",
+                        "BROWN","LIGHT RED","GREY 1","GREY 2","LIGHT GREEN","LIGHT BLUE","GREY 3"};
   int fullcolour[]={
         0xFF000000, // black
         0xFFFFFFFF, // white
         0xFFE00000, // red //0xFFFF2020, // red
         0xFF20FFFF, // cyan
-        0xFFFF20FF, // magenta
-        0xFF20FF20, // green
-        0xFF2020A0, // dark blue
+        0xFFD020FF, // purple        was magenta 0xFFFF20FF, 
+        0xFF20E020, // green         was 0xFF20FF20, // green
+        0xFF2020A0, // blue          was 0xFF2020A0, // dark blue
         0xFFFFFF20, // yellow
-        0xFF808020, // brown
-        0xFF404000, // dark brown
-        0xFFFF8080, // pink , light red
-        0xFF404040, // dark grey
-        0xFF808080, // grey
+        0xFFC87020, // orange        was 0xFF808020, // brown
+        0xFF704020, // brown
+        0xFFFF8080, // light red
+        0xFF404040, // grey 1
+        0xFF808080, // grey 2
         0xFF80FF80, // light green
         0xFFA0A0FF, // light blue
-        0xFFA0A0A0  // light grey
+        0xFFA0A0A0  // grey 3
       };
           //modImage.setRGB(posx*8+i,posy*8+j,0xFFA0AAFF);
   int backgroundColour=fullcolour[0]; // for test 2
@@ -444,6 +444,11 @@ class C64Screen extends JFrame implements KeyListener {
   {
   }
  
+  public boolean hasinput() {
+    if (keybuftop!=keybufbot) { return true; };
+    return false;
+  }
+
   public char givemekey() {
     char returnval;
     // is this the right spot?
