@@ -86,6 +86,8 @@ class C64Screen extends JFrame implements KeyListener {
     offImage=createImage(scale*maxX*8+50*scale,scale*maxY*8+50*scale+topY);
     offGraphics=(Graphics2D) offImage.getGraphics();
 
+    create_screen_updater();
+
     Toolkit kit = Toolkit.getDefaultToolkit();
     charsetUpp=kit.getImage("c64_upp.gif");
     initcolour(); 
@@ -95,7 +97,24 @@ class C64Screen extends JFrame implements KeyListener {
     return;
   }
 
-  private void scrollscreen() {
+  // this isn't working
+  public void create_screen_updater() {
+    javax.swing.Timer timer1 = new javax.swing.Timer(200, new 
+      ActionListener() {
+        public void actionPerformed(ActionEvent event) {
+          //scrollscreen();
+          repaint_ifupdated();
+        }
+      }
+    );
+    timer1.start();
+  }
+
+  // add synchronized to see if it stops cracked screen scrolls!
+  // this, together with a synchronized paint stops the "cracked" screen
+  // problem, but it is VERY SLOW!
+  private synchronized void scrollscreen() {
+  //private void scrollscreen() {
       // scroll them
       for (int j=0; j<maxY-1; ++j) {
         for (int i=0; i<maxX; ++i) {
@@ -261,7 +280,9 @@ class C64Screen extends JFrame implements KeyListener {
     repaint();
   }
 
-  public void paint(Graphics g)
+  //public void paint(Graphics g)
+  // try this
+  public synchronized void paint(Graphics g)
   {
      Graphics2D g2d = (Graphics2D) g;
 
@@ -453,6 +474,7 @@ class C64Screen extends JFrame implements KeyListener {
     char returnval;
     // is this the right spot?
     cursVisible=true; repaint();
+    forcedrepaint(); //dodgy work around
     // should block until there is a key!
     while (keybuftop==keybufbot) { 
       try {
@@ -468,6 +490,36 @@ class C64Screen extends JFrame implements KeyListener {
     return returnval;
   }
 
+  // TRY this
+  //int qval=0; // this works
+  long qval=0;
+
+  public void forcedrepaint() {
+    qval=0; repaint();
+  }
+
+  boolean screenneedsupdate=false;
+  public void repaint_ifupdated() {
+    if (screenneedsupdate) {
+      qval=0; repaint();
+      screenneedsupdate=false;
+    }
+  }
+
+  public void repaint() {
+    //if (qval%100==0) { // this works!
+    // the value 100 needs tuning, 100 gives mostly good output on powerful, non-loaded machine
+    if (System.currentTimeMillis()-qval>200) {
+      // call the real one
+      super.repaint();
+      qval=System.currentTimeMillis();
+    } else {
+      // set a timer, to get it to repaint finally, (after everything stops)
+      // one shot, just to repaint, if it is already going, reset the timer
+      screenneedsupdate=true;
+    }
+    //qval++; // this works!
+  }
   //public drawcursor() {
     //// draw a little block where the cursor is
   //}
