@@ -15,12 +15,12 @@ class C64Screen extends JFrame implements KeyListener {
   int cursY=0;
   short cursColour=2;
 
-  String colourname[]={"BLACK","WHITE","RED","CYAN","MAGENTA","GREEN","DARK BLUE","YELLOW","BROWN",
+  String colourname[]={"BLACK","WHITE","RED","CYAN","MAGENTA","GREEN","BLUE","YELLOW","BROWN",
                         "DARK BROWN","PINK","DARK GREY","GREY","LIGHT GREEN","LIGHT BLUE","LIGHT GREY"};
   int fullcolour[]={
         0xFF000000, // black
         0xFFFFFFFF, // white
-        0xFFFF2020, // red
+        0xFFE00000, // red //0xFFFF2020, // red
         0xFF20FFFF, // cyan
         0xFFFF20FF, // magenta
         0xFF20FF20, // green
@@ -31,16 +31,17 @@ class C64Screen extends JFrame implements KeyListener {
         0xFFFF8080, // pink
         0xFF404040, // dark grey
         0xFF808080, // grey
-        0xFF8080FF, // light green
-        0xFFA0A0A0, // light blue
+        0xFF80FF80, // light green
+        0xFFA0A0FF, // light blue
         0xFFA0A0A0  // light grey
       };
           //modImage.setRGB(posx*8+i,posy*8+j,0xFFA0AAFF);
-  int backgroundColour=fullcolour[2];
-  int borderColour=fullcolour[5];
+  int backgroundColour=fullcolour[0]; // for test 2
+  int borderColour=fullcolour[0]; // for test 5
   
   //int scale=2;
-  int scale=1;
+  //int scale=1;
+  int scale=2;
   int maxX=40;
   static int maxY=25;
   int topY=12;
@@ -63,6 +64,7 @@ class C64Screen extends JFrame implements KeyListener {
   // should we start a cursor flashing thread?
   Image charsetUpp_BB[]=new Image[16]; // repainted blue blue
   BufferedImage modImage;
+  BufferedImage charBuffImage=new BufferedImage(64,64,BufferedImage.TYPE_INT_ARGB);
 
   public C64Screen(String title) {
     super(title);
@@ -79,12 +81,7 @@ class C64Screen extends JFrame implements KeyListener {
     charsetUpp=kit.getImage("c64_upp.gif");
     initcolour(); 
     // initialise screen
-    for (int j=0; j<maxY; ++j) {
-      for (int i=0; i<maxX; ++i) {
-        screenchar[i][j]=' ';
-        screencharColour[i][j]=0;
-      }
-    }
+    clearscreen();
     return;
   }
 
@@ -101,10 +98,30 @@ class C64Screen extends JFrame implements KeyListener {
       }
   }
 
+  public char petconvert(char ch) {
+    int pos=0;
+    if (ch>='a' && ch<='z') pos=1+(ch-'a');
+    else if (ch>='A' && ch<='Z') pos=1+(ch-'A')+64;
+    else if (ch>='a'+128 && ch<='z'+128) pos=1+(ch-'a')-32;
+    else if (ch==' '+128) pos=32+128;  // reversed block
+    else if (ch>='0' && ch<='9' || ch>=' ' && ch<='?') pos=(ch);
+    else if (ch>=91 && ch<=95) pos=(ch-64);
+    if (pos>=256) pos=0;
+    return (char)pos;
+  }
+
+  public char petunconvert(char pos) {
+    int ch=0;
+    if (pos>=0 && pos<=26) ch='A'+pos-1;
+    if (pos>=32 && pos<64) ch=pos;
+    if (pos>=64 && pos<=26+64) ch='a'+pos-1-64;
+    return (char)ch;
+  }
+
   public void print(String line) {
     int i;
     for (i=0; i<line.length(); ++i) {
-      screenchar[cursX][cursY]=line.charAt(i);
+      screenchar[cursX][cursY]=petconvert(line.charAt(i));
       screencharColour[cursX][cursY]=cursColour;
       cursX++;
       if (cursX==maxX) {
@@ -126,11 +143,15 @@ class C64Screen extends JFrame implements KeyListener {
     if (cursY<maxY-1) {
       //lines[cursY++]=line;
       for (int i=0; i<line.length(); ++i) {
-        screenchar[cursX][cursY]=line.charAt(i);
+        screenchar[cursX][cursY]=petconvert(line.charAt(i));
         screencharColour[cursX][cursY]=cursColour;
         cursX++;
         if (cursX==maxX) {
-          scrollscreen();
+          cursY++;
+          if (cursY==maxY) {
+            cursY--;
+            scrollscreen();
+          }
           cursX=0;
         }
       }
@@ -138,11 +159,15 @@ class C64Screen extends JFrame implements KeyListener {
     } else {
       //lines[cursY]=line;
       for (int i=0; i<line.length(); ++i) {
-        screenchar[cursX][cursY]=line.charAt(i);
+        screenchar[cursX][cursY]=petconvert(line.charAt(i));
         screencharColour[cursX][cursY]=cursColour;
         cursX++;
         if (cursX==maxX) {
-          scrollscreen();
+          cursY++;
+          if (cursY==maxY) {
+            cursY--;
+            scrollscreen();
+          }
           cursX=0;
         }
       }
@@ -190,6 +215,21 @@ class C64Screen extends JFrame implements KeyListener {
     // note, doesnt wrap yet
     //if (lines[cursY]==null) { lines[cursY]=""; }
     //lines[cursY]=lines[cursY]+ch;
+    screenchar[cursX][cursY]=petconvert(ch);
+    screencharColour[cursX][cursY]=cursColour;
+    cursX++;
+    if (cursX==maxX) { writeline(); }
+    // now signal it to be redrawn
+    repaint();
+  }
+ 
+  public void writechar_raw(char ch) {
+    // here we define the line to be written on the screen
+    // for now, implement this as an array of lines
+    // should really stop it from repainting whilst inside this routine
+    // note, doesnt wrap yet
+    //if (lines[cursY]==null) { lines[cursY]=""; }
+    //lines[cursY]=lines[cursY]+ch;
     screenchar[cursX][cursY]=ch;
     screencharColour[cursX][cursY]=cursColour;
     cursX++;
@@ -215,9 +255,9 @@ class C64Screen extends JFrame implements KeyListener {
      // sometimes this is not ready yet
      if (offGraphics != null) {
        //offGraphics.setColor(new Color(160,170,255)); // this colour was such a good guess!
-       offGraphics.setColor(new Color(backgroundColour,true)); // this colour was such a good guess!
-       offGraphics.fillRect(0,0,scale*maxX*8+50*scale,scale*maxY*8+50*scale+topY);
        offGraphics.setColor(new Color(borderColour,true)); // this colour was such a good guess!
+       offGraphics.fillRect(0,0,scale*maxX*8+50*scale,scale*maxY*8+50*scale+topY);
+       offGraphics.setColor(new Color(backgroundColour,true)); // this colour was such a good guess!
        offGraphics.fillRect(25*scale,25*scale+topY,scale*maxX*8,scale*maxY*8);
        // draw all the lines
        ////offGraphics.setColor(new Color(160,170,255)); // this colour was such a good guess!
@@ -229,14 +269,16 @@ class C64Screen extends JFrame implements KeyListener {
        ////offGraphics.setFont(new Font("Courier", 18,14));
        //offGraphics.setFont(new Font("ISOCP", Font.PLAIN,12));
        //offGraphics.setFont(new Font("Lucida sans Console", Font.PLAIN,12));
-       for (int j=0; j<maxY; ++j) {
-         //if (lines[i] != null) {
-           //offGraphics.drawString(lines[i],0+25*scale,i*8*scale+25*scale+scale*8-1+topY);
-           //System.out.println("Writing out line " +lines[i]+" at "+(0+50)+","+i*16+50+15);
-           for (int i=0; i<maxX; i++) {
-             drawchar(screenchar[i][j],0+25*scale+i*8*scale,j*8*scale+25*scale+topY,screencharColour[i][j]);
-           }
-         //}
+       if (modImage != null) { // hold off until ready
+         for (int j=0; j<maxY; ++j) {
+           //if (lines[i] != null) {
+             //offGraphics.drawString(lines[i],0+25*scale,i*8*scale+25*scale+scale*8-1+topY);
+             //System.out.println("Writing out line " +lines[i]+" at "+(0+50)+","+i*16+50+15);
+             for (int i=0; i<maxX; i++) {
+               drawchar(screenchar[i][j],0+25*scale+i*8*scale,j*8*scale+25*scale+topY,screencharColour[i][j]);
+             }
+           //}
+         }
        }
        // drawcursor - in the curColor
        drawchar((char)(' '+128),0+25*scale+cursX*8*scale,cursY*8*scale+25*scale+topY,cursColour);
@@ -285,42 +327,53 @@ class C64Screen extends JFrame implements KeyListener {
     int pos;
     int posx;
     int posy;
-    pos=0;
-    if (ch>='a' && ch<='z') pos=1+(ch-'a');
-    else if (ch>='A' && ch<='Z') pos=1+(ch-'A')+64;
-    else if (ch>='a'+128 && ch<='z'+128) pos=1+(ch-128-'A')+64;
-    else if (ch==' '+128) pos=32+128;  // reversed block
-    else if (ch>='0' && ch<='9' || ch>=' ' && ch<='?') pos=(ch);
-    else if (ch>=91 && ch<=95) pos=(ch-64);
+    pos=ch;
+    //if (ch>='a' && ch<='z') pos=1+(ch-'a');
+    //else if (ch>='A' && ch<='Z') pos=1+(ch-'A')+64;
+    //else if (ch>='a'+64 && ch<='z'+64) pos=ch;
+    //else if (ch==' '+128) pos=32+128;  // reversed block
+    //else if (ch>='0' && ch<='9' || ch>=' ' && ch<='?') pos=(ch);
+    //else if (ch>=91 && ch<=95) pos=(ch-64);
     posx=pos%32; posy=pos/32;
 
     // modify here the colours of the source to match what we want
     // then draw it onto the offGraphics place
-    //modImage
     for (int i=0; i<8; ++i) {
       for (int j=0; j<8; ++j) {
         int rgb=modImage.getRGB(posx*8+i,posy*8+j);
         if ((rgb & 0xFFFFFF) ==0 ) { 
-          //modImage.setRGB(posx*8+i,posy*8+j,0xFFFFFFFF);
-          //modImage.setRGB(posx*8+i,posy*8+j,0xFFA0AAFF);
-          modImage.setRGB(posx*8+i,posy*8+j,fullcolour[colour]);
+          charBuffImage.setRGB(i*scale,j*scale,fullcolour[colour]);
+          if (scale==2) {
+            charBuffImage.setRGB(i*scale+1,j*scale,fullcolour[colour]);
+            charBuffImage.setRGB(i*scale,j*scale+1,fullcolour[colour]);
+            charBuffImage.setRGB(i*scale+1,j*scale+1,fullcolour[colour]);
+          }
+          //modImage.setRGB(i,j,fullcolour[colour]);
         } else {
-          modImage.setRGB(posx*8+i,posy*8+j,0xFF323C64);
+          //charBuffImage.setRGB(i,j,0xFF323C64);
+          charBuffImage.setRGB(i*scale,j*scale,backgroundColour);
+          if (scale==2) {
+            charBuffImage.setRGB(i*scale+1,j*scale,backgroundColour);
+            charBuffImage.setRGB(i*scale,j*scale+1,backgroundColour);
+            charBuffImage.setRGB(i*scale+1,j*scale+1,backgroundColour);
+          }
+          //modImage.setRGB(i,j,backgroundColour);
         }
       }
     }
-    offGraphics.drawImage(modImage,x,y,x+8,y+8,posx*8,posy*8,posx*8+8,posy*8+8,this);
-    // really cludgy, just for the moment, set them back
-    for (int i=0; i<8; ++i) {
-      for (int j=0; j<8; ++j) {
-        int rgb=modImage.getRGB(posx*8+i,posy*8+j);
-        if (rgb == 0xFF323C64) { 
-          modImage.setRGB(posx*8+i,posy*8+j,0xFFFFFFFF);
-        } else {
-          modImage.setRGB(posx*8+i,posy*8+j,0xFF000000);
-        }
+    offGraphics.drawImage(charBuffImage,x,y,x+8*scale,y+8*scale,0,0,8*scale,8*scale,this);
+    // scaling is too slow... offGraphics.drawImage(charBuffImage,x,y,x+8*scale,y+8*scale,0,0,8,8,this);
+    //offGraphics.drawImage(modImage,x,y,x+8,y+8,0,0,8,8,this);
+  }
+
+  public void clearscreen() {
+    for (int j=0; j<maxY; ++j) {
+      for (int i=0; i<maxX; ++i) {
+        screenchar[i][j]=' ';
+        screencharColour[i][j]=0;
       }
     }
+    cursX=0; cursY=0;
   }
 
   public String getline() {
@@ -328,7 +381,7 @@ class C64Screen extends JFrame implements KeyListener {
     String rets="";
     int y=cursY-1;  if (y<0) { y=0; }
     for (int i=0; i<maxX; ++i) {
-      rets=rets+screenchar[i][y];
+      rets=rets+petunconvert(screenchar[i][y]);
     }
     return rets;
   }
