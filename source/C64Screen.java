@@ -381,11 +381,12 @@ class C64Screen extends JFrame implements KeyListener {
   }
 
   public void printstats() {
-    System.out.println("ttime-paintm = "+ttime_paintm);
-    System.out.println("ttime-paintl (5 lines)= "+ttime_paintl);
-    System.out.println("ttime-paint = "+ttime_paint);
-    System.out.println("ttime-paint draw = "+(ttime_paint-ttime_paintm));
-    System.out.println("tcount-paint = "+tcount_paint);
+    System.out.println("Config: scale="+scale+" rows="+maxY);
+    System.out.println("ttime-paintm          = "+ttime_paintm+" ms");
+    System.out.println("ttime-paintl (5 lines)= "+ttime_paintl+" ms");
+    System.out.println("ttime-paint           = "+ttime_paint+" ms");
+    System.out.println("ttime-paint draw      = "+(ttime_paint-ttime_paintm)+" ms");
+    System.out.println("tcount-paint = #"+tcount_paint);
     System.out.println("--------------------------");
   }
 
