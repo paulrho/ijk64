@@ -19,6 +19,7 @@ class C64Screen extends JFrame implements KeyListener {
   int cursY=0;
   short cursColour=2;
   boolean cursVisible=false;
+  boolean cursEnabled=false;
 
   static public C64Screen out=null; // a pointer to the last (really first) instansiated screen for 
     // external use (like Screen.out, but C64Screen.screen)
@@ -361,7 +362,7 @@ class C64Screen extends JFrame implements KeyListener {
                }
            }
            // drawcursor - in the curColor
-           if (cursVisible) {
+           if (cursEnabled && cursVisible) {
                  if (pscreenchar[cursX][cursY]==(char)(' '+128) && pscreencharColour[cursX][cursY]==cursColour) { } else {
                    pscreenchar[cursX][cursY]=(char)(' '+128);
                    pscreencharColour[cursX][cursY]=cursColour;
@@ -583,7 +584,7 @@ class C64Screen extends JFrame implements KeyListener {
   public char givemekey() {
     char returnval;
     // is this the right spot?
-    cursVisible=true; repaint();
+    cursEnabled=true; cursVisible=true; repaint();
     forcedrepaint(); //dodgy work around
     // should block until there is a key!
     while (keybuftop==keybufbot) { 
@@ -596,7 +597,7 @@ class C64Screen extends JFrame implements KeyListener {
     if (keybufbot>=keybufmax) {
       keybufbot=0;
     } 
-    cursVisible=false; //repaint();
+    cursEnabled=false; cursVisible=false; //repaint();
     return returnval;
   }
 
