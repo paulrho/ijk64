@@ -211,55 +211,45 @@ class C64Screen extends JFrame implements KeyListener {
       screencharColour[cursX][cursY]=cursColour;
       //drawrelevent(cursX,cursX+1,cursY,cursY+1);
       cursX++;
-      if (cursX==maxX) {
-        scrollscreen();
+      if (cursX==maxX) { // same as in println
         cursX=0;
+        if (cursY==maxY-1) {
+          scrollscreen();
+        } else {
+          cursY++;
+        }
       }
-    }
-    if (cursX==maxX) {
-      scrollscreen();
-      cursX=0;
     }
     repaint(); // another one!
   }
+
   public void println(String line) {
 
-    if (cursY<maxY-1) {
-      //lines[cursY++]=line;
-      for (int i=0; i<line.length(); ++i) {
-        screenchar[cursX][cursY]=petconvert(line.charAt(i));
-        screencharColour[cursX][cursY]=cursColour;
-        //drawrelevent(cursX,cursX+1,cursY,cursY+1);
-        cursX++;
-        if (cursX==maxX) {
+    //lines[cursY++]=line;
+    for (int i=0; i<line.length(); ++i) {
+      screenchar[cursX][cursY]=petconvert(line.charAt(i));
+      screencharColour[cursX][cursY]=cursColour;
+      //drawrelevent(cursX,cursX+1,cursY,cursY+1);
+      cursX++;
+      if (cursX==maxX) {
+        cursX=0;
+        if (cursY==maxY-1) {
+          scrollscreen();
+        } else {
           cursY++;
-          if (cursY==maxY) {
-            cursY--;
-            scrollscreen();
-          }
-          cursX=0;
         }
       }
+    }
+
+    // same as println()
+    if (cursY<maxY-1) {
       cursY++;
     } else {
-      //lines[cursY]=line;
-      for (int i=0; i<line.length(); ++i) {
-        screenchar[cursX][cursY]=petconvert(line.charAt(i));
-        screencharColour[cursX][cursY]=cursColour;
-        //drawrelevent(cursX,cursX+1,cursY,cursY+1);
-        cursX++;
-        if (cursX==maxX) {
-          cursY++;
-          if (cursY==maxY) {
-            cursY--;
-            scrollscreen();
-          }
-          cursX=0;
-        }
-      }
+      // we are on the last line of the screen so scroll it
       scrollscreen();
     }
     cursX=0;
+
     // now signal it to be redrawn
     repaint();
   }
@@ -273,12 +263,13 @@ class C64Screen extends JFrame implements KeyListener {
     } else {
       scrollscreen();
       //lines[cursY]="";
-      for (int i=0; i<cursX; ++i) {
-        screenchar[i][cursY]=' ';
-      }
+      // i think this is done in scrollscreen// for (int i=0; i<cursX; ++i) {
+      // i think this is done in scrollscreen//   screenchar[i][cursY]=' ';
+      // i think this is done in scrollscreen// }
       //drawrelevent(0,cursX,cursY,cursY+1);
     }
     cursX=0;
+
     // now signal it to be redrawn
     repaint();
   }
