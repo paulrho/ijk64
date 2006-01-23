@@ -19,7 +19,39 @@ class evaluate {
     right=new double[100];
     oper=new String[100];
     operprec=new int[100];
-    interpret_string("(4+3*3)/2^3-7");
+    interpret_string("(5)^2+1",26);
+    interpret_string("1+(5)^2",26);
+    interpret_string("(1)+(2*3)*4+(5)^2",1+2*3*4+25);
+    interpret_string("1+(5)",6);
+    interpret_string("(2*3)*4+(5)",(2*3)*4+5);
+    interpret_string("(1)+(2*3)*4+(5)",1+2*3*4+5);
+    interpret_string("(4+3*3)/2^3-7",-5.37500000000000000000);
+    interpret_string("1+1",2);
+    interpret_string("(1+1)",2);
+    interpret_string("((1+1))",2);
+    interpret_string("1+2*3^4",1+2*3*3*3*3);
+    interpret_string("3^4*2+1",1+2*3*3*3*3);
+    interpret_string("3^4+2^3",3*3*3*3+8);
+    interpret_string("2*3",2*3);
+    interpret_string("2^3",8);
+    interpret_string("2*(3+4)",2*(3+4));
+    interpret_string("(3+4)*2",2*(3+4));
+    interpret_string("2+(3*4)",2+(3*4));
+    interpret_string("(3*4)+2",2+(3*4));
+    interpret_string("(3+4)/2",(3+4)/2.0);
+    interpret_string("1+1+1",3);
+    interpret_string("1+1+1+1",4);
+    interpret_string("1+2*3*4",1+2*3*4);
+    interpret_string("1+2*3*4+5",1+2*3*4+5);
+    interpret_string("(1)+(2*3)*4+(5)",1+2*3*4+5);
+    interpret_string("(1)+(2*3)*4+(5^2)",1+2*3*4+25);
+  }
+
+  void show_state() {
+    System.out.printf("STATE:\n",printprefix);
+    for (int levelx=0; levelx<=level; levelx++) {
+      System.out.printf("%slevel=%d left[level]=%f oper[level]=%s right[level]=%f\n",printprefix,levelx,left[levelx],oper[levelx],right[levelx]);
+    }
   }
 
   double calc(double left, String oper, double right) {
@@ -36,6 +68,7 @@ class evaluate {
       answer=0.0;
     }
     System.out.printf("%sCalculating %f %s %f, Answer = %f\n",printprefix,left,oper,right,answer);
+    show_state();
     return answer;
   }
 
@@ -48,7 +81,7 @@ class evaluate {
     return answer;
   }
 
-  int interpret_string(String intstring) {
+  int interpret_string(String intstring, double expecting) {
     System.out.printf("%sInterpreting %s\n",printprefix,intstring);
 
     level=0;
@@ -77,9 +110,12 @@ class evaluate {
       } else if (doing==2 /* RIGHT */) {
         if (a.equals("(")) {
           // here we need to push down two levels ?
-          level++;
+          level++; printprefix=printprefix+"  ";
           oper[level]="(";
-          level++;
+          show_state();
+          level++; printprefix=printprefix+"  ";
+          show_state();
+          doing=0;
         } else if (a.equals("+")) {
           // fixme
         } else if (a.equals("-")) {
@@ -111,13 +147,24 @@ class evaluate {
           doing=2 /*right*/;
           operprec[level]=9;
         } else if (a.equals(")")) {
-          while(true) {
-            left[level]=pop_level();
+          System.out.printf("%sCLOSING BRACKET from doing=%d (confirm, doing=1)\n",printprefix,doing);
+          // this one does not have an equation to calc
+          show_state();
+          oper[level]="("; // just to trick it into a no calc
+          while(level>0) {
+            double x=pop_level();
+            left[level]=x;
             if (oper[level].equals("(")) {
-              left[level]=pop_level();
+              if (level>0) { 
+                double xx=pop_level();
+                right[level]=xx;
+              }
               break;
             }
           }
+          System.out.printf("%sFINISHED CLOSING BRACKET from doing=%d (confirm, doing=1)\n",printprefix,doing);
+          doing=3;
+          show_state();
         } else { 
           System.out.printf("?SYNTAX ERROR 002\n***Not correct syntax - invalid operator \"%s\"\n",a);
         }
@@ -126,37 +173,50 @@ class evaluate {
         if (a.equals("^")) {
           System.out.printf("%sGot ^ oper\n",printprefix);
           if (operprec[level]>=11) {
-            calc(left[level],oper[level],right[level]);
+            left[level]=calc(left[level],oper[level],right[level]);
+            oper[level]=a; operprec[level]=11;
+            doing=2 /* RIGHT */;
           } else {
             // push down a level
             //push_level();
+            System.out.printf("%sDescending a level\n",printprefix);
             left[level+1]=right[level];
             level++;
             printprefix=printprefix+"  ";
-            oper[level]=a;
-            operprec[level]=11;
+            oper[level]=a; operprec[level]=11;
             doing=2 /* RIGHT */;
           }
         } else if (a.equals("*")||a.equals("/")) {
           System.out.printf("%sGot */ oper\n",printprefix);
           if (operprec[level]>=10) {
             // calculate and keep shift to left
-            calc(left[level],oper[level],right[level]);
+            left[level]=calc(left[level],oper[level],right[level]);
+            oper[level]=a; operprec[level]=10;
+            doing=2 /* RIGHT */;
           } else {
             // push down a level
             //push_level();
             left[level+1]=right[level];
             level++;
             printprefix=printprefix+"  ";
-            oper[level]=a;
-            operprec[level]=10;
+            oper[level]=a; operprec[level]=10;
             doing=2 /* RIGHT */;
           }
         } else if (a.equals("+")||a.equals("-")) {
-          System.out.printf("%sGot +- oper\n",printprefix);
-          if (operprec[level]>=11) {
+          System.out.printf("%sGot +- oper in (operagain)\n",printprefix);
+          if (level>0 && operprec[level-1]>9) {
+            // the operator above is a higher precedence, pop!
+            show_state();
+            double x=pop_level();
+            System.out.printf("%sx=%f\n",printprefix,x);
+            right[level]=x;
             left[level]=calc(left[level],oper[level],right[level]);
-            oper[level]=a;
+            oper[level]=a; operprec[level]=9;
+            doing=2; /* RIGHT */
+            show_state();
+          } else if (operprec[level]>=9) {
+            left[level]=calc(left[level],oper[level],right[level]);
+            oper[level]=a; operprec[level]=9;
             doing=2 /* RIGHT */;
           } else {
             // push down a level
@@ -169,8 +229,9 @@ class evaluate {
             doing=2 /* RIGHT */;
           }
         } else if (a.equals(")")) {
-          while(level>=0) {
-            System.out.printf("%sending bracket\n",printprefix);
+          System.out.printf("%sCLOSING BRACKET from doing=%d\n",printprefix,doing);
+          while(level>0) {
+            System.out.printf("%sending bracket at level %d\n",printprefix,level);
             double x=pop_level();
             System.out.printf("%sx=%f\n",printprefix,x);
             //right[level]=pop_level();
@@ -201,28 +262,29 @@ class evaluate {
 
     } /* fop */
     /* final calc */
-          while(level>=0) {
-            System.out.printf("%sending bracket\n",printprefix);
-            double x=pop_level();
-            System.out.printf("%sx=%f\n",printprefix,x);
-            //right[level]=pop_level();
-            right[level]=x;
-            System.out.printf("%sright[level]=%f\n",printprefix,right[level]);
-            //left[level]=calc(left[level],oper[level],right[level]);
-            if (oper[level].equals("(")) {
-              System.out.printf("%sending bracket - found start\n",printprefix);
-              //left[level]=pop_level();
-              //double answer=left[level];
-              //level--;
-              //left[level]=answer;
-              doing=1;
-              break;
-            }
-          }
+    show_state();
+    while(level>0) {
+      System.out.printf("%sfinal calc\n",printprefix);
+      double x=pop_level();
+      System.out.printf("%sx=%f\n",printprefix,x);
+      right[level]=x;
+      System.out.printf("%sright[level]=%f\n",printprefix,right[level]);
+    }
+    left[level]=calc(left[level],oper[level],right[level]);
+    System.out.printf("-------------------------------\n");
+    System.out.printf("Evaluated %-20s  ",intstring);
+    System.out.printf("%sanswer=%12f  expecting=%12f  difference=%12f",printprefix,left[level],expecting,left[level]-expecting);
+    if (left[level]-expecting>0.0000001 || left[level]-expecting<-0.0000001) {
+      System.out.printf(" !!**BAD**!!\n");
+      System.out.printf("\n   ***************DISCREPENCY***************\n");
+      System.out.printf("-------------------------------\n\n");
+      return 1;
+    } else {
+      System.out.printf(" OKAY\n");
+      System.out.printf("-------------------------------\n\n");
+      return 0;
+    }
 
-
-
-    return 0;
   }
 
   public static void main(String[] args) {
