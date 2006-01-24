@@ -6,6 +6,11 @@
 // believe it or not, I programmed this without using any reference, and I don't actually fully understand how it works!!
 // but it does!
 
+// PGS20060124-2
+// revisited, totally new engine, again, rethought the solution and come up with a simple elegant algorithm
+// infact, based on the last equation that didn't work in the former, and made me realise I'd gone way off track
+// works!
+
 class evaluate {
 
   String stkop[];
@@ -21,6 +26,13 @@ class evaluate {
     stkop=new String[100];
     stkfunc=new String[100];
 
+    // errors on purpose
+    interpret_string("1+2)*3+1",0.0);
+    interpret_string("1+2*(3+1",0.0);
+
+    // should work
+    interpret_string("100+(1+(2+(3+(4+(5+(6+(7+8)))))))",100+1+2+3+4+5+6+7+8);
+    interpret_string("7+(2*3+1+4*4)",7+(2*3+1+4*4));
     interpret_string("sin(1)",0.841471);
     interpret_string("(1+1)/(5+2)",2.0/7.0);
     interpret_string("(1+1)",2);
@@ -105,25 +117,31 @@ class evaluate {
     System.out.printf("%sSTATE:  upto=%d\n",printprefix,upto);
     for (int levelx=0; levelx<upto; levelx++) {
       //System.out.printf("%supto=%d stknum[]=%f stkop[]=%s stkfunc[]=%s\n",printprefix,levelx,stknum[levelx],stkop[levelx],(stkop[levelx].equals("("))?stkfunc[levelx]:"N/A");
-      System.out.printf("%supto=%d stknum[]=%f stkop[]=%s stkfunc[]=%s\n",printprefix,levelx,stknum[levelx],stkop[levelx],(stkfunc[levelx]!=null)?stkfunc[levelx]:"N/A");
+      System.out.printf("%supto=%d stknum[]=%f stkop[]=%s%s%s\n",
+        printprefix,levelx,stknum[levelx],stkop[levelx],(stkfunc[levelx]!=null)?" stkfunc[]=":"",(stkfunc[levelx]!=null)?stkfunc[levelx]:"");
     }
+  }
+
+  // just a bit of shorthard to improve readability
+  double calc() {
+    return calc(stknum[upto-2],stkop[upto-2],stknum[upto-1],stkfunc[upto-2]);
   }
 
   double calc(double left, String oper, double right, String function) {
     double answer=0.0;
     if (oper.equals("(") && !function.equals("")) { 
-      answer=left; 
-      System.out.printf("%sfunction needs calculating : %s(%f)\n",printprefix,function,left);
+      answer=right; 
+      System.out.printf("%sfunction needs calculating : %s(%f)\n",printprefix,function,right);
       if (function.equals("sin")) {
-        answer=Math.sin(left);
+        answer=Math.sin(right);
       } else if (function.equals("cos")) {
-        answer=Math.cos(left);
+        answer=Math.cos(right);
       } else if (function.equals("tan")) {
-        answer=Math.tan(left);
+        answer=Math.tan(right);
       } else if (function.equals("sqrt")) {
-        answer=Math.sqrt(left);
+        answer=Math.sqrt(right);
       } else if (function.equals("sqt")) { // for basic
-        answer=Math.sqrt(left);
+        answer=Math.sqrt(right);
       } else {
         System.out.printf("%sUnknown/unsupported function %s\n",printprefix,function);
       }
@@ -151,7 +169,7 @@ class evaluate {
     else if (oper.equals("/")) { answer=left/right; }
     else if (oper.equals("^")) { answer=Math.pow(left,right); }
     else if (oper.equals("X")) { answer=left; } // no calc
-    else if (oper.equals("(")) { answer=left; }
+    else if (oper.equals("(")) { answer=right; }
     else if (oper.equals("")) { answer=left; }
     else {
       System.out.printf("?SYNTAX ERROR 003\n***Unsupported oper \"%s\"\n",oper);
@@ -322,7 +340,7 @@ class evaluate {
                 stknum[upto-2]=stknum[upto-1];
               } else {
                 System.out.printf("%sfunction found %s\n",printprefix,stkfunc[upto-2]);
-                stknum[upto-2]=calc(stknum[upto-1],stkop[upto-2],0.0,stkfunc[upto-2]);
+                stknum[upto-2]=calc(stknum[upto-2],stkop[upto-2],stknum[upto-1],stkfunc[upto-2]);
               }
               doing=D_OP; // efectively poping the op
               upto--;
@@ -345,7 +363,8 @@ class evaluate {
        
       System.out.printf("%sPerforming a calculation on %f %s %f\n",printprefix,stknum[upto-2],stkop[upto-2],stknum[upto-1]);
 
-      double val=calc(stknum[upto-2],stkop[upto-2],stknum[upto-1]);
+      // the only things that will need the function in it will be badly closed brackets, what is the overhead to do this?
+      double val=calc(stknum[upto-2],stkop[upto-2],stknum[upto-1],stkfunc[upto-2]); //add func for unclosed brackets
       stknum[upto-2]=val;
       upto--; // pop off stack one level
     }
