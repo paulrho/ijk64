@@ -6,7 +6,9 @@ class evaluate {
 
   double left[];
   double right[];
+  int prevdoing[];
   String oper[];
+  String operfunction[];
   int operprec[];
   int level;
   int doing; // 0=left 1=oper 2=right
@@ -19,6 +21,20 @@ class evaluate {
     right=new double[100];
     oper=new String[100];
     operprec=new int[100];
+    operfunction=new String[100];
+    prevdoing=new int[100];
+
+    interpret_string("(1)+(2)+(3)",1+2+3);
+    interpret_string("1+(5)^2",26);
+    interpret_string("sin(1)",0.1);
+    interpret_string("sin(1)",0.1);
+    interpret_string("sin(1)+cos(2)+tan(3)",0.1);
+    interpret_string("(1)+(2)",3);
+    interpret_string("(1+4)+(2+9)",(1+4)+(2+9));
+    interpret_string("17+12",17+12);
+    interpret_string("4+5*2^2",4+5*4);
+    interpret_string("(1+2+3+4+5+6)*4",4*(1+2+3+4+5+6));
+    interpret_string("(1+2+3+4+5+6)*4",4*(1+2+3+4+5+6));
     interpret_string("(5)^2+1",26);
     interpret_string("1+(5)^2",26);
     interpret_string("(1)+(2*3)*4+(5)^2",1+2*3*4+25);
@@ -45,13 +61,25 @@ class evaluate {
     interpret_string("1+2*3*4+5",1+2*3*4+5);
     interpret_string("(1)+(2*3)*4+(5)",1+2*3*4+5);
     interpret_string("(1)+(2*3)*4+(5^2)",1+2*3*4+25);
+    interpret_string("(1+2+3+4+5+6)",1+2+3+4+5+6);
+    interpret_string("4*(1+2+3+4+5+6)",4*(1+2+3+4+5+6));
+    interpret_string("(1+2+3+4+5+6)*4",4*(1+2+3+4+5+6));
   }
 
   void show_state() {
-    System.out.printf("STATE:\n",printprefix);
+    System.out.printf("%sSTATE:  doing=%d\n",printprefix,doing);
     for (int levelx=0; levelx<=level; levelx++) {
-      System.out.printf("%slevel=%d left[level]=%f oper[level]=%s right[level]=%f\n",printprefix,levelx,left[levelx],oper[levelx],right[levelx]);
+      System.out.printf("%slevel=%d left[level]=%f oper[level]=%s right[level]=%f %s\n",printprefix,levelx,left[levelx],oper[levelx],right[levelx],(oper[levelx].equals("("))?operfunction[levelx]:"");
     }
+  }
+
+  double calc(double left, String oper, double right, String function) {
+    double answer=0.0;
+    if (oper.equals("(") && !function.equals("")) { 
+      answer=left; 
+      System.out.printf("%sfunction needs calculating : %s(%f)\n",printprefix,function,left);
+    } else answer=calc(left,oper,right);
+    return answer; 
   }
 
   double calc(double left, String oper, double right) {
@@ -61,6 +89,7 @@ class evaluate {
     else if (oper.equals("*")) { answer=left*right; }
     else if (oper.equals("/")) { answer=left/right; }
     else if (oper.equals("^")) { answer=Math.pow(left,right); }
+    else if (oper.equals("X")) { answer=left; } // no calc
     else if (oper.equals("(")) { answer=left; }
     else {
       System.out.printf("?SYNTAX ERROR 003\n***Unsupported oper \"%s\"\n",oper);
@@ -74,14 +103,21 @@ class evaluate {
 
   double pop_level() {
     /* finished, come back up a level, after evaluating lower level */
-    double answer=calc(left[level],oper[level],right[level]);
+    double answer=calc(left[level],oper[level],right[level],operfunction[level]);
+    if (oper[level].equals("(") && !operfunction[level].equals("")) {
+      System.out.printf("%sLevel %d, Calc involves a function %s\n",printprefix,level,operfunction[level]);
+    }
     level--;
+    //new:
+    doing=prevdoing[level];
     printprefix=printprefix.substring(0,printprefix.length()-2);
     System.out.printf("%sLevel %d, Popping answer=%f\n",printprefix,level,answer);
     return answer;
   }
 
   int interpret_string(String intstring, double expecting) {
+    String functionname="";
+
     System.out.printf("%sInterpreting %s\n",printprefix,intstring);
 
     level=0;
@@ -93,39 +129,104 @@ class evaluate {
       if (doing==0 /* LEFT */) {
         if (a.equals("(")) {
           // left is not known yet, descend a level
-          oper[level]="(";
-          level++;
+          oper[level]="("; operprec[level]=0;
+          operfunction[level]=functionname; // if the oper is ( and the operfunction is not "" then it will do it
+          prevdoing[level]=doing; // now push state as well
+          level++; oper[level]="";
           printprefix=printprefix+"  ";
+          functionname=""; // disable it as a function
         } else if (a.equals("+")) {
           /* modifier or actual operator? */
         } else if (a.equals("-")) {
         } else if (a.compareTo("0")>=0 && a.compareTo("9")<=0) {
-          double value=Double.parseDouble(a);
+          // look ahead?
+          String building=a;
+          while (i<intstring.length()-1) {
+
+            a=intstring.substring(i+1,i+2);
+            if (a.compareTo("0")>=0 && a.compareTo("9")<=0) {
+              building=building+a;
+            } else { break; }
+            i++;
+          }
+          double value=Double.parseDouble(building);
           System.out.printf("%sGot value %f\n",printprefix,value);
           left[level]=value;
           doing=1 /*oper*/;
+        } else if (a.compareTo("a")>=0 && a.compareTo("z")<=0) {
+          String building=a;
+          while (i<intstring.length()-1) {
+            a=intstring.substring(i+1,i+2);
+            if (a.compareTo("a")>=0 && a.compareTo("z")<=0) {
+              building=building+a;
+            } else { break; }
+            i++;
+          }
+          System.out.printf("%sgot a string %s\n",printprefix,building);
+          // if the next char is ( then it is a function, otherwise it is a variable
+          if (i<intstring.length()-1 && (intstring.substring(i+1,i+2)).equals("(")) {
+            System.out.printf("%sgot a function %s\n",printprefix,building);
+            functionname=building;
+          } else {
+            System.out.printf("%sgot a variable %s\n",printprefix,building);
+          }
+          
         } else {
           System.out.printf("?SYNTAX ERROR 001\n***Not correct syntax\n");
         }
       } else if (doing==2 /* RIGHT */) {
         if (a.equals("(")) {
           // here we need to push down two levels ?
+          prevdoing[level]=doing; // now push state as well
           level++; printprefix=printprefix+"  ";
-          oper[level]="(";
+          oper[level]="("; operprec[level]=0;
+          operfunction[level]=functionname; // if the oper is ( and the operfunction is not "" then it will do it
           show_state();
-          level++; printprefix=printprefix+"  ";
+          prevdoing[level]=doing; // now push state as well
+          level++; printprefix=printprefix+"  "; oper[level]="";
           show_state();
           doing=0;
+          functionname=""; // disable it as a function
         } else if (a.equals("+")) {
           // fixme
         } else if (a.equals("-")) {
           // fixme
         } else if (a.compareTo("0")>=0 && a.compareTo("9")<=0) {
-          double value=Double.parseDouble(a);
+          // look ahead?
+          String building=a;
+          while (i<intstring.length()-1) {
+            a=intstring.substring(i+1,i+2);
+            if (a.compareTo("0")>=0 && a.compareTo("9")<=0) {
+              building=building+a;
+            } else { break; }
+            i++;
+          }
+          
+          double value=Double.parseDouble(building); //a
           System.out.printf("%sGot value %f\n",printprefix,value);
           right[level]=value;
           //doing=1 /*oper*/;
           doing=3 /* oper for second time */;
+
+        // } else ... { // read variable name or function name - store up
+        } else if (a.compareTo("a")>=0 && a.compareTo("z")<=0) {
+          String building=a;
+          while (i<intstring.length()-1) {
+            a=intstring.substring(i+1,i+2);
+            if (a.compareTo("a")>=0 && a.compareTo("z")<=0) {
+              building=building+a;
+            } else { break; }
+            i++;
+          }
+          System.out.printf("%sgot a string %s\n",printprefix,building);
+          // if the next char is ( then it is a function, otherwise it is a variable
+          if (i<intstring.length()-1 && (intstring.substring(i+1,i+2)).equals("(")) {
+            System.out.printf("%sgot a function %s\n",printprefix,building);
+            functionname=building;
+          } else {
+            System.out.printf("%sgot a variable %s\n",printprefix,building);
+          }
+          
         } else {
           System.out.printf("?SYNTAX ERROR 001\n***Not correct syntax\n");
         }
@@ -133,24 +234,22 @@ class evaluate {
       } else if (doing==1 /* OPER */) {
         if (a.equals("^")) {
           System.out.printf("%sGot ^ oper\n",printprefix);
-          oper[level]=a;
+          oper[level]=a; operprec[level]=11;
           doing=2 /*right*/;
-          operprec[level]=11;
         } else if (a.equals("*")||a.equals("/")) {
           System.out.printf("%sGot */ oper\n",printprefix);
-          oper[level]=a;
+          oper[level]=a; operprec[level]=10;
           doing=2 /*right*/;
-          operprec[level]=10;
         } else if (a.equals("+")||a.equals("-")) {
           System.out.printf("%sGot +- oper\n",printprefix);
-          oper[level]=a;
+          oper[level]=a; operprec[level]=9;
           doing=2 /*right*/;
-          operprec[level]=9;
         } else if (a.equals(")")) {
           System.out.printf("%sCLOSING BRACKET from doing=%d (confirm, doing=1)\n",printprefix,doing);
           // this one does not have an equation to calc
           show_state();
-          oper[level]="("; // just to trick it into a no calc
+          oper[level]="("; operprec[level]=0; // just to trick it into a no calc
+          operfunction[level]="";//?
           while(level>0) {
             double x=pop_level();
             left[level]=x;
@@ -162,8 +261,14 @@ class evaluate {
               break;
             }
           }
+          // need to do final calc, as it may be a function
+
           System.out.printf("%sFINISHED CLOSING BRACKET from doing=%d (confirm, doing=1)\n",printprefix,doing);
-          doing=3;
+          System.out.printf("%swould have been doing=%d\n",printprefix,doing);
+          doing++;  // either 1 or 3 now based on what pops off stack
+          //if (level>=0 && doing==1) { left[level]=calc(left[level],oper[level],right[level],operfunction[level]); }
+          //if (level>=0 && doing==3) { right[level]=calc(left[level],oper[level],right[level],operfunction[level]); }
+          //doing=3;
           show_state();
         } else { 
           System.out.printf("?SYNTAX ERROR 002\n***Not correct syntax - invalid operator \"%s\"\n",a);
@@ -181,6 +286,7 @@ class evaluate {
             //push_level();
             System.out.printf("%sDescending a level\n",printprefix);
             left[level+1]=right[level];
+            prevdoing[level]=doing; // now push state as well
             level++;
             printprefix=printprefix+"  ";
             oper[level]=a; operprec[level]=11;
@@ -197,6 +303,7 @@ class evaluate {
             // push down a level
             //push_level();
             left[level+1]=right[level];
+            prevdoing[level]=doing; // now push state as well
             level++;
             printprefix=printprefix+"  ";
             oper[level]=a; operprec[level]=10;
@@ -206,6 +313,7 @@ class evaluate {
           System.out.printf("%sGot +- oper in (operagain)\n",printprefix);
           if (level>0 && operprec[level-1]>9) {
             // the operator above is a higher precedence, pop!
+            System.out.printf("%slevel>0 && operprec[level-1]>9\n",printprefix);
             show_state();
             double x=pop_level();
             System.out.printf("%sx=%f\n",printprefix,x);
@@ -222,10 +330,10 @@ class evaluate {
             // push down a level
             //push_level();
             left[level+1]=right[level];
+            prevdoing[level]=doing; // now push state as well
             level++;
             printprefix=printprefix+"  ";
-            oper[level]=a;
-            operprec[level]=9;
+            oper[level]=a; operprec[level]=9;
             doing=2 /* RIGHT */;
           }
         } else if (a.equals(")")) {
@@ -249,7 +357,8 @@ class evaluate {
               break;
             }
           }
-          doing=1;
+          System.out.printf("%sdoing=%d\n",printprefix,doing);
+          //doing=1;
         } else { 
           System.out.printf("?SYNTAX ERROR 002\n***Not correct syntax - invalid operator \"%s\"\n",a);
         }
@@ -262,6 +371,8 @@ class evaluate {
 
     } /* fop */
     /* final calc */
+
+    System.out.printf("%sFINAL CALCS\n",printprefix);
     show_state();
     while(level>0) {
       System.out.printf("%sfinal calc\n",printprefix);
@@ -270,7 +381,7 @@ class evaluate {
       right[level]=x;
       System.out.printf("%sright[level]=%f\n",printprefix,right[level]);
     }
-    left[level]=calc(left[level],oper[level],right[level]);
+    left[level]=calc(left[level],oper[level],right[level],operfunction[level]);
     System.out.printf("-------------------------------\n");
     System.out.printf("Evaluated %-20s  ",intstring);
     System.out.printf("%sanswer=%12f  expecting=%12f  difference=%12f",printprefix,left[level],expecting,left[level]-expecting);
