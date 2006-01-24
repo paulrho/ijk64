@@ -21,6 +21,7 @@ class evaluate {
     stkop=new String[100];
     stkfunc=new String[100];
 
+    interpret_string("sin(1)",0.841471);
     interpret_string("(1+1)/(5+2)",2.0/7.0);
     interpret_string("(1+1)",2);
     interpret_string("+7*3*x^2-4*x^3-5*x^4",-12348);
@@ -28,7 +29,8 @@ class evaluate {
     interpret_string("+1*2*3^2-2*3^1-3*3^3",2*9-2*3-3*27);
     interpret_string("+0.07*3*x^2-0.1*4*x^3-0.1*5*x^4",-1327.410000);
     interpret_string("7-4*1^1-5",+7-4*1-5);
-    interpret_string("+0.7+0.1*2*x+0.07*3*x^2-0.1*4*x^3-0.1*5*x^4-0.09*6*x^5-0.02*x^6-0.001*8*x^7",0);
+    // need to work out the answer to this and set the corresponding expectation
+    //interpret_string("+0.7+0.1*2*x+0.07*3*x^2-0.1*4*x^3-0.1*5*x^4-0.09*6*x^5-0.02*x^6-0.001*8*x^7",0);
     interpret_string("1-4*3+2",1-4*3+2);
     interpret_string("1-4*x+2",1-4*7+2);
     interpret_string("1-4+2",1-4+2);
@@ -102,7 +104,8 @@ class evaluate {
   void show_state() {
     System.out.printf("%sSTATE:  upto=%d\n",printprefix,upto);
     for (int levelx=0; levelx<upto; levelx++) {
-      System.out.printf("%supto=%d stknum[]=%f stkop[]=%s\n",printprefix,levelx,stknum[levelx],stkop[levelx]);
+      //System.out.printf("%supto=%d stknum[]=%f stkop[]=%s stkfunc[]=%s\n",printprefix,levelx,stknum[levelx],stkop[levelx],(stkop[levelx].equals("("))?stkfunc[levelx]:"N/A");
+      System.out.printf("%supto=%d stknum[]=%f stkop[]=%s stkfunc[]=%s\n",printprefix,levelx,stknum[levelx],stkop[levelx],(stkfunc[levelx]!=null)?stkfunc[levelx]:"N/A");
     }
   }
 
@@ -178,6 +181,7 @@ class evaluate {
   static int D_OP=1;
   String a; // temp string variable containing current pointed to char
   boolean is_function=false;
+  String functionname="";
 
   void pushNum(double num) {
     stknum[upto]=num;
@@ -244,7 +248,7 @@ class evaluate {
           // if the next char is ( then it is a function, otherwise it is a variable
           if (ispnt<intstring.length()-1 && (intstring.substring(ispnt+1,ispnt+2)).equals("(")) {
             System.out.printf("%sgot a function %s\n",printprefix,building);
-            //functionname=building;
+            functionname=building;
             is_function=true;
           } else {
             System.out.printf("%sgot a variable %s\n",printprefix,building);
@@ -259,7 +263,6 @@ class evaluate {
   }
 
   void interpret_string(String intstring_param, double expecting) {
-    String functionname="";
 
     upto=0; // nothing is on the stack, upto points past the end of the current array, at the NEXT point
     //stkop[level]=""; // not reqd
@@ -278,6 +281,12 @@ class evaluate {
       if (doing==D_NUM /* looking for number */) {
         if (a.equals("(")) {
           pushOp(a); // (
+          if (is_function) {
+            System.out.printf("%sSetting functionname to %s at upto-1=%d\n",printprefix,functionname,upto-1);
+            stkfunc[upto-1]=functionname;
+          }  else { stkfunc[upto-1]=""; }
+          is_function=false;
+        
         } else if (a.compareTo("0")>=0 && a.compareTo("9")<=0 || a.equals("-") || a.equals("+")) {
           double num=readNum();
           pushNum(num);
@@ -307,8 +316,14 @@ class evaluate {
             System.out.printf("%sPerforming a calculation on %f %s %f\n",printprefix,stknum[upto-2],stkop[upto-2],stknum[upto-1]);
       
             if (stkop[upto-2].equals("(")) {
+              System.out.printf("%sleading bracket found and upto-2\n",printprefix);
               // pop this too, but end
-              stknum[upto-2]=stknum[upto-1];
+              if (stkfunc[upto-2].equals("")) {
+                stknum[upto-2]=stknum[upto-1];
+              } else {
+                System.out.printf("%sfunction found %s\n",printprefix,stkfunc[upto-2]);
+                stknum[upto-2]=calc(stknum[upto-1],stkop[upto-2],0.0,stkfunc[upto-2]);
+              }
               doing=D_OP; // efectively poping the op
               upto--;
               break;
@@ -339,7 +354,7 @@ class evaluate {
     System.out.printf("Evaluated %-20s  ",intstring);
     System.out.printf("%sanswer=%12f  expecting=%12f  difference=%12f",printprefix,stknum[0],expecting,stknum[0]-expecting);
     //System.out.printf("%sanswer=%12f  expecting=%12f  difference=%12f",printprefix,left[level],expecting,left[level]-expecting);
-    if (stknum[0]-expecting>0.0000001 || stknum[0]-expecting<-0.0000001) {
+    if (stknum[0]-expecting>0.00001 || stknum[0]-expecting<-0.00001) {
       System.out.printf(" !!**BAD**!!\n");
       System.out.printf("\n   ***************DISCREPENCY***************\n");
       System.out.printf("-------------------------------\n\n");
