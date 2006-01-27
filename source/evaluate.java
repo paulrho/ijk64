@@ -91,13 +91,13 @@ class evaluate {
     verbose=false;
     if (args.length>=1) {
     verbose=true;
-      interpret_string(args[0],0.0);
+      interpret_string(args[0]);
     } else {
 
     if (true) {
-    verbose=true;
+    //verbose=true;
     // 100 x  82 equations = about 40 seconds, is : 205 equations per second on yoink
-    for (int i=0; i<=1; ++i) {
+    for (int i=0; i<=100; ++i) {
     interpret_string("0 or 2 and 0",0.0);
     interpret_string("1 or 2 and 0",1.0);
     interpret_string("1 and 2 or 0",0.0);
@@ -226,8 +226,13 @@ class evaluate {
       if (function.equals("sin")) {
         answer=Math.sin(right);
       } else if (function.equals("silly")) {
-        if (verbose) { System.out.printf("%susing params %f %f %f\n",printprefix,stknum[upto-1],stknum[upto],stknum[upto+1]); }
-        answer=stknum[upto-1]+stknum[upto]*10.0+stknum[upto+1]*100.0;
+        if (parameters==3) {
+          if (verbose) { System.out.printf("%susing params %f %f %f\n",printprefix,stknum[upto-1],stknum[upto],stknum[upto+1]); }
+          answer=stknum[upto-1]+stknum[upto]*10.0+stknum[upto+1]*100.0;
+        } else {
+          System.out.printf("?SYNTAX ERROR 005 - wrong number of parameters - had %d params wanting %d\n",parameters,3);
+          answer=0.0;
+        }
       } else if (function.equals("sgn")) {
         answer=0.0; // NI yet
       } else if (function.equals("int")) {
@@ -331,13 +336,14 @@ class evaluate {
     // at this point we have filled the stknum[upto-1] element, but NOT the stkop[upto-1]
     // thus if doing==D_OP we have NOT filled stkop[upto-1], but we HAVE filled stnum[upto-1]
   }
+
   void pushOp(String op) {
-    stknum[upto]=0.0; // we are skipping the num -> no not anymore if it is a comma, we want it!
-       // no, I'm doing a set up now
+    stknum[upto]=0.0; // we are skipping the num
     stkop[upto]=op;
     upto++;
     doing=D_NUM; // if you are going to push an op, it is ( and therefore next is num
   }
+
   void setOp(String op) {
     if (verbose) { System.out.printf("%sGot %s oper\n",printprefix,op); }
     if (upto==0) {
@@ -447,7 +453,15 @@ class evaluate {
           }
   }
 
+  void interpret_string(String intstring_param) {
+    interpret_string(intstring_param, false, 0.0);
+  }
+
   void interpret_string(String intstring_param, double expecting) {
+    interpret_string(intstring_param, true, expecting);
+  }
+
+  void interpret_string(String intstring_param, boolean testing, double expecting) {
 
     upto=0; // nothing is on the stack, upto points past the end of the current array, at the NEXT point
     doing=D_NUM;
@@ -544,14 +558,18 @@ class evaluate {
       show_state();
       System.out.printf("-------------------------------\n");
       System.out.printf("Evaluated %-20s  ",intstring);
-      System.out.printf("%sanswer=%12f  expecting=%12f  difference=%12f",printprefix,stknum[0],expecting,stknum[0]-expecting);
-      if (stknum[0]-expecting>0.00001 || stknum[0]-expecting<-0.00001) {
-        System.out.printf(" !!**BAD**!!\n");
-        System.out.printf("\n   ***************DISCREPENCY***************\n");
-        System.out.printf("-------------------------------\n\n");
+      if (!testing) {
+        System.out.printf("%sanswer=%22.20f\n",printprefix,stknum[0]);
       } else {
-        System.out.printf(" OKAY\n");
-        System.out.printf("-------------------------------\n\n");
+        System.out.printf("%sanswer=%22.20f  expecting=%12f  difference=%12f",printprefix,stknum[0],expecting,stknum[0]-expecting);
+        if (stknum[0]-expecting>0.00001 || stknum[0]-expecting<-0.00001) {
+          System.out.printf(" !!**BAD**!!\n");
+          System.out.printf("\n   ***************DISCREPENCY***************\n");
+          System.out.printf("-------------------------------\n\n");
+        } else {
+          System.out.printf(" OKAY\n");
+          System.out.printf("-------------------------------\n\n");
+        }
       }
     } else {
       System.out.printf("Evaluated %-20s = %f\n",intstring,stknum[0]);
