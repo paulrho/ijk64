@@ -21,18 +21,63 @@
 // adding "," to allow multiple parameters
 // binary and and or
 // added > < <= >= <> = (etc)
+//
+//
 // todo:
-//   should allow NO parameters
+//   should allow NO parameters, easy to do, just need to do it
+//   separate out the test harness from the actual program!
+//   types too (double int boolean string)
+//   maybe add "[" and "]" bracketing too? (for arrays)
+//
+// note at least four possible grammars:
+//     c64
+//     c (java) like
+//     calculator like (brackets dont need closing)
+//     simple calculator like (function operates on current in display)
+//     hybrid, some of c64 and some of c
+//   
 
 class evaluate {
 
+  // state of the machine
+  // a stack looking like the following: (midway through a parse)
+  //  e.g. 5.3+1.6/sin(0.3 ...
+  //
+  //              D_NUM   D_OP
+  //            +-------+------+-------+
+  //            |  num  |  op  |  func |
+  //            +-------+------+-------+
+  //           0|  5.3  |  +   |  N/A  |
+  //           1|  1.6  |  /   |  N/A  |
+  //           2|  N/A  |  (   |  sin  |
+  // upto=4 -> 3|  0.3  | N/A  |  N/A  |
+  //            +-------+------+-------+
+  //              doing=D_OP^
+  //
   String stkop[];
   double stknum[];
   int upto;
+  int doing;
   String stkfunc[];
+  boolean is_function=false; // flag to indicate that the function name has been pre inserted in the array
+  //String functionname="";  // temporarily used until the bracket is confirmed! - no longer required, prestore it!
+  int parameters; // count of the number of parameters that a function is called with
+
+  // parsing the string
+  String intstring;
+  int ispnt; // pointer into intstring
+  String a; // temp string variable containing current pointed to char
+
+  // constants and enums
+  static int D_NUM=0;
+  static int D_OP=1;
+  static String OP_OPEN_BRACKET="(";
+  static String OP_CLOSE_BRACKET=")";
+  static String OP_COMMA=",";
+
+  // debugging/formatting etc
   String printprefix="";
   boolean verbose=true;
-  int parameters; // count of the number of parameters that a function is called with
 
   evaluate(String[] args)
   {
@@ -279,18 +324,6 @@ class evaluate {
     return 0.0;
   }
 
-  String intstring;
-  int ispnt; // pointer into intstring
-  int doing;
-  static int D_NUM=0;
-  static int D_OP=1;
-  static String OP_OPEN_BRACKET="(";
-  static String OP_CLOSE_BRACKET=")";
-  static String OP_COMMA=",";
-  String a; // temp string variable containing current pointed to char
-  boolean is_function=false;
-  String functionname="";
-
   void pushNum(double num) {
     stknum[upto]=num;
     upto++;
@@ -324,7 +357,7 @@ class evaluate {
   }
 
   double readNum() {
-          // look ahead?
+          // look ahead, this will look ahead one more character to see if it is NOT part of the number
           String building=a;
           boolean last_e=false;
           while (ispnt<intstring.length()-1) {
@@ -376,7 +409,6 @@ class evaluate {
               || building.equals("=>") || building.equals("=<")
               || building.equals("=") || building.equals("<>")
           ) {
-            //operatortoken=building;
             setOp(building);
             return;
           } else {
@@ -398,8 +430,11 @@ class evaluate {
           // if the next char is ( then it is a function, otherwise it is a variable
           if (ispnt<intstring.length()-1 && (intstring.substring(ispnt+1,ispnt+2)).equals(OP_OPEN_BRACKET)) {
             if (verbose) { System.out.printf("%sgot a function %s\n",printprefix,building); }
-            functionname=building;
+            //functionname=building; // we KNOW that the bracket is coming, so we can be tricky and place it there already
+            stkfunc[upto]=building; // note, we are writing passed the end of the reference at the moment
+            if (verbose) { System.out.printf("%sPre-Setting functionname to %s at stknum[(upto=)%d]\n",printprefix,stkfunc[upto],upto); }
             is_function=true;
+            // now, this could be a function, or an array!
           } else {
             if (verbose) { System.out.printf("%sgot a variable %s\n",printprefix,building); }
             // replace the variable with the value of the variable
@@ -408,38 +443,36 @@ class evaluate {
             // push this value on stack
             pushNum(value);
             doing=D_OP;
-            is_function=false;
+            //is_function=false; // probably no need to set this as it should normally sit on false!
           }
   }
 
   void interpret_string(String intstring_param, double expecting) {
 
     upto=0; // nothing is on the stack, upto points past the end of the current array, at the NEXT point
-    //stkop[level]=""; // not reqd
-    //operfunction[level]=""; // not reqd
     doing=D_NUM;
 
     intstring=intstring_param; // this may be a dumb way, but it will make code more readable
     if (verbose) { System.out.printf("%sInterpreting %s\n",printprefix,intstring); }
+
     /* take it a character at a time */
-    // i is now part of the object
     for (ispnt=0; ispnt<intstring.length() ;++ispnt) {
-      if (verbose) { System.out.printf("%sGot character %s (index %d) [upto=%d, doing=%d]\n",printprefix,intstring.substring(ispnt,ispnt+1),ispnt,upto,doing); }
+      if (verbose) { 
+        System.out.printf("%sGot character %s (index %d) [upto=%d, doing=%d]\n",
+          printprefix,intstring.substring(ispnt,ispnt+1),ispnt,upto,doing);
+      }
       a=intstring.substring(ispnt,ispnt+1);
       if (a.equals(" ")) { continue; }
-      // it is all different now:
-      
-      if (doing==D_NUM /* looking for number */) {
+      else if (doing==D_NUM /* looking for number */) {
         if (a.equals(OP_OPEN_BRACKET)) {
-          pushOp(a); // (
-          if (is_function) {
-            if (verbose) { System.out.printf("%sSetting functionname to %s at upto-1=%d\n",printprefix,functionname,upto-1); }
-            stkfunc[upto-1]=functionname;
+          pushOp(a);
+          if (is_function) { // by seeing this flag, we know we have stored the function already in the stack
             is_function=false;
           } else { stkfunc[upto-1]=""; } // must clear it as there is no function
-        
+
         // to implement
-        // } else if CLOSING BRACKET // we have no parameters or a  syntax error like: "1+)"
+        //  else if CLOSING BRACKET // we either have no parameters or a  syntax error like: "1+)"
+
         } else if (a.compareTo("0")>=0 && a.compareTo("9")<=0 || a.equals("-") || a.equals("+")) {
           double num=readNum();
           pushNum(num);
@@ -490,7 +523,7 @@ class evaluate {
           System.out.printf("?SYNTAX ERROR 002\n***Not correct syntax\n");
         }
         if (verbose) { show_state(); }
-      }
+      } // end D_OP
     } /* for */
 
     /* final calc */
@@ -505,12 +538,13 @@ class evaluate {
       }
       calc_and_pop();
     }
-    if (verbose) { show_state(); }
+
+    /* print the answer */
     if (verbose) {
+      show_state();
       System.out.printf("-------------------------------\n");
       System.out.printf("Evaluated %-20s  ",intstring);
       System.out.printf("%sanswer=%12f  expecting=%12f  difference=%12f",printprefix,stknum[0],expecting,stknum[0]-expecting);
-      //System.out.printf("%sanswer=%12f  expecting=%12f  difference=%12f",printprefix,left[level],expecting,left[level]-expecting);
       if (stknum[0]-expecting>0.00001 || stknum[0]-expecting<-0.00001) {
         System.out.printf(" !!**BAD**!!\n");
         System.out.printf("\n   ***************DISCREPENCY***************\n");
@@ -518,7 +552,6 @@ class evaluate {
       } else {
         System.out.printf(" OKAY\n");
         System.out.printf("-------------------------------\n\n");
-        //return 0;
       }
     } else {
       System.out.printf("Evaluated %-20s = %f\n",intstring,stknum[0]);
