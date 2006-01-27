@@ -17,6 +17,13 @@
 
 // thoughts - what about strings and ints, run special modes perhaps??  - match in with c64
 
+// PGS20060127-1
+// adding "," to allow multiple parameters
+// binary and and or
+// added > < <= >= <> = (etc)
+// todo:
+//   should allow NO parameters
+
 class evaluate {
 
   String stkop[];
@@ -25,6 +32,7 @@ class evaluate {
   String stkfunc[];
   String printprefix="";
   boolean verbose=true;
+  int parameters; // count of the number of parameters that a function is called with
 
   evaluate(String[] args)
   {
@@ -37,21 +45,22 @@ class evaluate {
 
     verbose=false;
     if (args.length>=1) {
+    verbose=true;
       interpret_string(args[0],0.0);
     } else {
 
     if (true) {
     verbose=true;
     // 100 x  82 equations = about 40 seconds, is : 205 equations per second on yoink
-    for (int i=0; i<1; ++i) {
+    for (int i=0; i<=1; ++i) {
     interpret_string("0 or 2 and 0",0.0);
-    interpret_string("1 or 2 and 0",-1.0);
-    interpret_string("1 and 2 or 0",-1.0);
-    interpret_string("1 or 2",-1.0);
-    interpret_string("1or2",-1.0);
-    interpret_string("1and2",-1.0);
+    interpret_string("1 or 2 and 0",1.0);
+    interpret_string("1 and 2 or 0",0.0);
+    interpret_string("1 or 2",3.0);
+    interpret_string("1or2",3.0);
+    interpret_string("1and2",0.0);
     interpret_string("1and0",0.0);
-    interpret_string("1or0",-1.0);
+    interpret_string("1or0",1.0);
 
     // errors on purpose
     interpret_string("1+2)*3+1",10.0); //syntax wrong, but calculator wise definable
@@ -144,11 +153,12 @@ class evaluate {
 
   void show_state() {
     System.out.printf("%s |STATE:  upto=%d doing=%d\n",printprefix,upto,doing);
+    // necessarily there it is the case when doing==D_OP that we DON'T know what stkop[upto-1] is - therefore, don't show it!
     for (int levelx=0; levelx<upto; levelx++) {
-      //System.out.printf("%supto=%d stknum[]=%f stkop[]=%s stkfunc[]=%s\n",printprefix,levelx,stknum[levelx],stkop[levelx],(stkop[levelx].equals("("))?stkfunc[levelx]:"N/A");
       System.out.printf("%s |upto=%d stknum[]=%f stkop[]=%s%s%s\n",
-        printprefix,levelx,stknum[levelx],stkop[levelx],(stkfunc[levelx]!=null)?" stkfunc[]=":"",(stkfunc[levelx]!=null)?stkfunc[levelx]:"");
+        printprefix,levelx,stknum[levelx],(levelx!=upto-1 || doing!=D_OP)?stkop[levelx]:"N/A",(stkfunc[levelx]!=null)?" stkfunc[]=":"",(stkfunc[levelx]!=null)?stkfunc[levelx]:"");
     }
+    System.out.printf("%s\n",printprefix);
   }
 
   // just a bit of shorthard to improve readability
@@ -157,6 +167,7 @@ class evaluate {
     stknum[upto-2]=calc(stknum[upto-2],stkop[upto-2],stknum[upto-1],stkfunc[upto-2]);
       // where ( - tried stknum[upto-2]=calc(stknum[upto-2],stkop[upto-2],stknum[upto-1]); //efficiency only - but no better - I think
     upto--;
+    if (verbose) { show_state(); }
     return;
   }
 
@@ -164,9 +175,14 @@ class evaluate {
     double answer=0.0;
     if (oper.equals(OP_OPEN_BRACKET) && function != null && !function.equals("")) { 
       answer=right; 
-      if (verbose) { System.out.printf("%sfunction needs calculating : %s(%f)\n",printprefix,function,right); }
+      if (verbose) { System.out.printf("%sfunction needs calculating : %s(%f) we have %d parameters\n",printprefix,function,right,parameters); }
+      // if it is a function the parameters are stored at upto-1, upto, upto+1, upto+2, upto+3... etc.
+      // for a single parameter it is stored simply in upto-1
       if (function.equals("sin")) {
         answer=Math.sin(right);
+      } else if (function.equals("silly")) {
+        if (verbose) { System.out.printf("%susing params %f %f %f\n",printprefix,stknum[upto-1],stknum[upto],stknum[upto+1]); }
+        answer=stknum[upto-1]+stknum[upto]*10.0+stknum[upto+1]*100.0;
       } else if (function.equals("sgn")) {
         answer=0.0; // NI yet
       } else if (function.equals("int")) {
@@ -186,7 +202,7 @@ class evaluate {
       } else if (function.equals("sqt")) { // for basic
         answer=Math.sqrt(right);
       } else {
-        System.out.printf("?SYTAX ERROR 003 *** Unknown/unsupported function %s\n",function);
+        System.out.printf("?SYTAX ERROR 003f *** Unknown/unsupported function %s\n",function);
       }
     
     } else answer=calc(left,oper,right);
@@ -194,7 +210,9 @@ class evaluate {
   }
 
   int prec(String oper) {
-         if (oper.equals("or")) { return 6; }
+         if (oper.equals(",")) { return 1; } // allows me to use setOp without changing code!
+    else if (oper.equals("or")) { return 6; }
+    else if (oper.equals("xor")) { return 6; }
     else if (oper.equals("and")) { return 7; }
     else if (oper.equals(">")) { return 8; }
     else if (oper.equals("<")) { return 8; }
@@ -218,8 +236,20 @@ class evaluate {
   }
   double calc(double left, String oper, double right) {
     double answer=0.0;
-         if (oper.equals("or")) { answer=(((left!=0.0)?true:false) || ((right!=0.0)?true:false))?-1.0:0.0; }
-    else if (oper.equals("and")) { answer=(((left!=0.0)?true:false) && ((right!=0.0)?true:false))?-1.0:0.0; }
+    // old boolean like way, lets do a c64 bit like way now
+         //if (oper.equals("or")) { answer=(((left!=0.0)?true:false) || ((right!=0.0)?true:false))?-1.0:0.0; }
+    //else if (oper.equals("and")) { answer=(((left!=0.0)?true:false) && ((right!=0.0)?true:false))?-1.0:0.0; }
+         if (oper.equals("or")) { answer=(double)(((int)(left)) | ((int)(right))); }
+    else if (oper.equals("xor")) { answer=(double)(((int)(left)) ^ ((int)(right))); }
+    else if (oper.equals("and")) { answer=(double)(((int)(left)) & ((int)(right))); }
+    else if (oper.equals(">")) { answer=(left>right)?-1.0:0.0; }
+    else if (oper.equals("<")) { answer=(left<right)?-1.0:0.0; }
+    else if (oper.equals("<=")) { answer=(left<=right)?-1.0:0.0; }
+    else if (oper.equals("=<")) { answer=(left<=right)?-1.0:0.0; } // for c64
+    else if (oper.equals(">=")) { answer=(left>=right)?-1.0:0.0; }
+    else if (oper.equals("=>")) { answer=(left>=right)?-1.0:0.0; } // for c64
+    else if (oper.equals("=")) { answer=(left==right)?-1.0:0.0; } // for c64
+    else if (oper.equals("<>")) { answer=(left!=right)?-1.0:0.0; } // for c64
     else if (oper.equals("+")) { answer=left+right; }
     else if (oper.equals("-")) { answer=left-right; }
     else if (oper.equals("*")) { answer=left*right; }
@@ -229,7 +259,7 @@ class evaluate {
     else if (oper.equals("(")) { answer=right; }
     else if (oper.equals("")) { answer=left; }
     else {
-      System.out.printf("?SYNTAX ERROR 003\n***Unsupported oper \"%s\"\n",oper);
+      System.out.printf("?SYNTAX ERROR 003o\n***Unsupported oper \"%s\"\n",oper);
       //answer=NaN;
       answer=0.0;
     }
@@ -256,6 +286,7 @@ class evaluate {
   static int D_OP=1;
   static String OP_OPEN_BRACKET="(";
   static String OP_CLOSE_BRACKET=")";
+  static String OP_COMMA=",";
   String a; // temp string variable containing current pointed to char
   boolean is_function=false;
   String functionname="";
@@ -264,9 +295,12 @@ class evaluate {
     stknum[upto]=num;
     upto++;
     doing=D_OP;
+    // at this point we have filled the stknum[upto-1] element, but NOT the stkop[upto-1]
+    // thus if doing==D_OP we have NOT filled stkop[upto-1], but we HAVE filled stnum[upto-1]
   }
   void pushOp(String op) {
-    stknum[upto]=0.0; // we are skipping the num
+    stknum[upto]=0.0; // we are skipping the num -> no not anymore if it is a comma, we want it!
+       // no, I'm doing a set up now
     stkop[upto]=op;
     upto++;
     doing=D_NUM; // if you are going to push an op, it is ( and therefore next is num
@@ -280,8 +314,8 @@ class evaluate {
     // now come the tricks, as soon as this op has a lower or equal precedence,
     // pop and calc the two above!
     while (upto>1 && prec(op)<=prec(stkop[upto-2])) {
-      if (stkop[upto-2].equals(OP_OPEN_BRACKET)) {
-        break; // go no further that the brackets
+      if (stkop[upto-2].equals(OP_OPEN_BRACKET) || stkop[upto-2].equals(OP_COMMA)) {
+        break; // go no further that the brackets or the ","
       }
       calc_and_pop(); //overhead of func passed too
     }
@@ -308,7 +342,7 @@ class evaluate {
     return value;
   }
 
-  void readStringOp() {
+  void readStringOpAlpha() {
           String building=a;
           while (ispnt<intstring.length()-1) {
             a=intstring.substring(ispnt+1,ispnt+2);
@@ -319,6 +353,29 @@ class evaluate {
           }
           if (verbose) { System.out.printf("%sgot a string %s\n",printprefix,building); }
           if (building.equals("or") || building.equals("and")) {
+            //operatortoken=building;
+            setOp(building);
+            return;
+          } else {
+            System.out.printf("?SYNTAX ERROR *** not a valid operator %s\n",building);
+            return;
+          }
+  }
+  void readStringOp() {
+          String building=a;
+          while (ispnt<intstring.length()-1) {
+            a=intstring.substring(ispnt+1,ispnt+2);
+            if (a.equals("=") || a.equals("<") || a.equals(">")) {
+              building=building+a;
+            } else { break; }
+            ispnt++;
+          }
+          if (verbose) { System.out.printf("%sgot a string %s\n",printprefix,building); }
+          if (building.equals("=") || building.equals(">") || building.equals("<") 
+              || building.equals(">=") || building.equals("<=")
+              || building.equals("=>") || building.equals("=<")
+              || building.equals("=") || building.equals("<>")
+          ) {
             //operatortoken=building;
             setOp(building);
             return;
@@ -381,6 +438,8 @@ class evaluate {
             is_function=false;
           } else { stkfunc[upto-1]=""; } // must clear it as there is no function
         
+        // to implement
+        // } else if CLOSING BRACKET // we have no parameters or a  syntax error like: "1+)"
         } else if (a.compareTo("0")>=0 && a.compareTo("9")<=0 || a.equals("-") || a.equals("+")) {
           double num=readNum();
           pushNum(num);
@@ -396,10 +455,19 @@ class evaluate {
         if (a.equals("^") || a.equals("*") || a.equals("/") || a.equals("+") || a.equals("-")) {
           setOp(a);
         } else if (a.equals(OP_CLOSE_BRACKET)) {
+          parameters=1;
           if (verbose) { System.out.printf("%sCLOSING BRACKET from doing=%d\n",printprefix,doing); }
-           // pop eveything off until we get to an op of ( and then pop that too
+           // pop eveything off until we get to an op of ( and then pop that too, but stop there
           while (upto>1) {
-            if (verbose) { System.out.printf("%sPerforming a calculation on %f %s %f\n",printprefix,stknum[upto-2],stkop[upto-2],stknum[upto-1]); }
+            if (stkop[upto-2].equals(OP_COMMA)) {
+              // if we get a comma, then we have a parameter to use in a function
+              // keep a note of it
+              if (verbose) { System.out.printf("%sFOUND COMMA\n",printprefix); }
+              // this is a wierd one, keep going back, when we do the calc we use all of the other numbers
+              upto--;
+              parameters++;
+              continue;
+            }
             if (stkop[upto-2].equals(OP_OPEN_BRACKET)) {
               // pop this too, but end
               calc_and_pop();
@@ -409,7 +477,14 @@ class evaluate {
             calc_and_pop(); //overhead of func passed too
           }
           // allow also multi charactor operators OR and AND
+        } else if (a.equals(OP_COMMA)) {
+          // comma separators allowed within brackets, when you hit a comma, calculate everything back to the
+          // brackets, note, I'm using setOp to do this and if prec of , is lower than all else it will do what I want
+          setOp(OP_COMMA);
+        // allow also multi charactor operators OR and AND
         } else if (a.compareTo("a")>=0 && a.compareTo("z")<=0) {
+          readStringOpAlpha();
+        } else if (a.equals("=") || a.equals("<") || a.equals(">")) {
           readStringOp();
         } else {
           System.out.printf("?SYNTAX ERROR 002\n***Not correct syntax\n");
@@ -417,12 +492,17 @@ class evaluate {
         if (verbose) { show_state(); }
       }
     } /* for */
-    /* final calc */
 
+    /* final calc */
     if (verbose) { System.out.printf("%sFINAL CALCS\n",printprefix); }
     while (upto>1) {
       // the only things that will need the function in it will be badly closed brackets, what is the overhead to do this?
       //add func for unclosed brackets
+      // notice, if we find an opening bracket, we just calculate through it, like we are closing all the brackets
+      // this is not really what we want normally in a program, but in a calculator we do
+      if (stkop[upto-2].equals(OP_COMMA)) {
+        break; // go no further that the ","
+      }
       calc_and_pop();
     }
     if (verbose) { show_state(); }
