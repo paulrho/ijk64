@@ -83,7 +83,14 @@ class Machine {
 
   void initialise_engines() {
     evaluate_engine = new evaluate(this);  // create engine
-    evaluate_engine.verbose=true;
+    //evaluate_engine.verbose=true;
+    evaluate_engine.verbose=false;
+  }
+
+  void dumpstate() {
+    for (int i=0; i<topvariable; ++i) {
+      System.out.printf("  variable %s = %f\n",variablename[i],variablevalue[i]);
+    }
   }
 }
 
