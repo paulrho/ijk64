@@ -116,6 +116,8 @@ int gotToken=0;
 String keepVariable;
 String keepExpression;
 
+Machine machine;
+
 void interpret_string(String passed_line)
 {
   line=passed_line;
@@ -128,7 +130,8 @@ void interpret_string(String passed_line)
   line=line.toUpperCase(); // convert to uppercase
 
   // instansiate the machine
-  Machine machine = new Machine();
+  machine = new Machine();
+  machine.initialise_engines(); // silly, but there is a reason
 
   // read the line# first
   while (true) {
@@ -219,6 +222,7 @@ boolean ReadStatement() {
     if (ReadAssignment()) {
       ReadExpression();
       System.out.printf("MachineVariableSet(variable=%s with evaluate( %s ))\n",keepVariable,keepExpression);
+      machine.setvariable(keepVariable,machine.evaluate(keepExpression));
       ReadColon();
       return true;
     } else {
@@ -276,6 +280,7 @@ boolean ProcessIFstatement()
   ReadExpression();
   
   System.out.printf("MachineEvaluate( %s )\n",keepExpression);
+  System.out.printf("  evaluates to %f\n",machine.evaluate(keepExpression));
   //ReadStatementToken(); // note MUST be THEN or GOTO
   // implicetly read already with the ReadExpression
   if (gotToken!=ST_GOTO && gotToken!=ST_THEN) {
