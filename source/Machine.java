@@ -29,18 +29,21 @@ class Machine {
     forloopstack=new int[MAXFORS];
     forloopstack_var=new String[MAXFORS];
     gosubstack=new int[MAXGOSUBS];
+
     variablename=new String[MAXVARIABLES];
     variablevalue=new double[MAXVARIABLES];
     variablestring=new String[MAXVARIABLES];
     variableint=new int[MAXVARIABLES];
+    variabletype=new int[MAXVARIABLES];
+    topvariable=0;
     executionpoint=0;
-    evaluate_engine = new evaluate(this);  // create engine
+    //evaluate_engine = new evaluate(this);  // create engine
        // if we pass a "Machine" class variable, then we have linked
        // the two together such that we can set and get variables
        // is this a good way? I don't know
   }
 
-  private createvariable(String variable, double val) {
+  private void createvariable(String variable, double val) {
     variablename[topvariable]=variable;
     variablevalue[topvariable]=val;
     variabletype[topvariable]=V_DOUBLE;
@@ -76,6 +79,11 @@ class Machine {
   // from within here we execute the evaluate?
   double evaluate(String expression) {
     return evaluate_engine.interpret_string(expression);
+  }
+
+  void initialise_engines() {
+    evaluate_engine = new evaluate(this);  // create engine
+    evaluate_engine.verbose=true;
   }
 }
 
