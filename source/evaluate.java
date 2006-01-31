@@ -23,6 +23,9 @@
 // binary and and or
 // added > < <= >= <> = (etc)
 //
+// a few changes for the intergration 20060131
+// fixed a few things
+//
 //
 // todo:
 //   should allow NO parameters, easy to do, just need to do it
@@ -37,6 +40,12 @@
 //     simple calculator like (function operates on current in display)
 //     hybrid, some of c64 and some of c
 //   
+// to do:
+//   make a "special" mode that does not evaluate the outer array or function
+//   this will be used in the case of DIM or assignments: i.e.
+//   DIM A(MAX+1) in this case A(MAX+1) is evaluated to A(100) and used to dimension the array
+//   A(I+2)=5124   in this case A(I+2) is evaluated to A(99) only and used to assign 
+//   will allow ,s too
 
 class evaluate {
 
@@ -79,6 +88,19 @@ class evaluate {
   // debugging/formatting etc
   String printprefix="";
   boolean verbose=true;
+
+  Machine using_machine=null;
+
+  evaluate(Machine machine)
+  {
+    using_machine=machine;
+    //evaluate(); // this is repeated 
+    if (false) { System.out.printf("Running evaluate\n"); }
+    stknum=new double[100];
+    stkop=new String[100];
+    stkfunc=new String[100];
+    // all setup ready
+  }
 
   evaluate()
   {
@@ -145,7 +167,9 @@ class evaluate {
       } else if (function.equals("sqt")) { // for basic
         answer=Math.sqrt(right);
       } else {
-        System.out.printf("?SYTAX ERROR 003f *** Unknown/unsupported function %s\n",function);
+        // have to assume that it is an array
+        //System.out.printf("?SYTAX ERROR 003f *** Unknown/unsupported function %s\n",function);
+        System.out.printf("Assuming array %s\n",function);
       }
     
     } else answer=calc(left,oper,right);
@@ -172,6 +196,7 @@ class evaluate {
     else if (oper.equals("*")) { return 10; }
     else if (oper.equals("/")) { return 10; }
     else if (oper.equals("^")) { return 11; }
+    else if (oper.equals("-ve")) { return 12; }
     else if (oper.equals("X")) { return 0; }
     else if (oper.equals("(")) { return 0; }
     else if (oper.equals("")) { return 0; }
@@ -198,6 +223,7 @@ class evaluate {
     else if (oper.equals("*")) { answer=left*right; }
     else if (oper.equals("/")) { answer=left/right; }
     else if (oper.equals("^")) { answer=Math.pow(left,right); }
+    else if (oper.equals("-ve")) { answer=(-right); }
     else if (oper.equals("X")) { answer=left; } // no calc
     else if (oper.equals("(")) { answer=right; }
     else if (oper.equals("")) { answer=left; }
@@ -212,6 +238,10 @@ class evaluate {
   }
 
   double get_value(String variablename) {
+    if (using_machine!=null) {
+      // -
+      return using_machine.getvariable(variablename.toUpperCase()); // convert back to uppercase
+    }
     if (variablename.equals("pi")) {
       return Math.PI;
     } else if (variablename.equals("x")) {
@@ -282,6 +312,10 @@ class evaluate {
               building=building+a;
             } else { break; }
             ispnt++;
+            // if we got or or and, then break out
+            if (building.equals("or") || building.equals("and")) {
+              break;
+            }
           }
           if (verbose) { System.out.printf("%sgot a string %s\n",printprefix,building); }
           if (building.equals("or") || building.equals("and")) {
@@ -316,12 +350,38 @@ class evaluate {
           }
   }
 
-  void readString() {
+  void readQuotedString() {
           String building=a;
           while (ispnt<intstring.length()-1) {
             a=intstring.substring(ispnt+1,ispnt+2);
-            if (a.compareTo("a")>=0 && a.compareTo("z")<=0) {
+            if (a.equals("\"")) {
+              ispnt++;
+              break;
+            }
+            ispnt++;
+          }
+    return;
+  }
+
+  void readString() {
+          String building=a;
+          while (ispnt<intstring.length()-1) {
+            // expensive - think of a better way! - trying to make it a bit better - dont know if it helps
+            a=intstring.substring(ispnt+1,ispnt+2);
+            if (a.equals("o") && ispnt<intstring.length()-2 && intstring.substring(ispnt+1,ispnt+3).equals("or")) {
+              //note, if we find an imbedded or or and, we must pop it off, and stop processing!
+              break;
+            }
+            if (a.equals("a") && ispnt<intstring.length()-3 && intstring.substring(ispnt+1,ispnt+4).equals("and")) {
+              //note, if we find an imbedded or or and, we must pop it off, and stop processing!
+              break;
+            }
+            if (a.compareTo("a")>=0 && a.compareTo("z")<=0 || a.compareTo("0")>=0 && a.compareTo("9")<=0) {
               building=building+a;
+            } else if (a.equals("$") || a.equals("%")) {
+              building=building+a;
+              ispnt++;
+              break;
             } else { break; }
             ispnt++;
           }
@@ -346,21 +406,22 @@ class evaluate {
           }
   }
 
-  void interpret_string(String intstring_param) {
-    interpret_string(intstring_param, false, 0.0);
+  double interpret_string(String intstring_param) {
+    return interpret_string(intstring_param, false, 0.0);
   }
 
-  void interpret_string(String intstring_param, double expecting) {
-    interpret_string(intstring_param, true, expecting);
+  double interpret_string(String intstring_param, double expecting) {
+    return interpret_string(intstring_param, true, expecting);
   }
 
-  void interpret_string(String intstring_param, boolean testing, double expecting) {
+  double interpret_string(String intstring_param, boolean testing, double expecting) {
 
     upto=0; // nothing is on the stack, upto points past the end of the current array, at the NEXT point
     doing=D_NUM;
 
     intstring=intstring_param; // this may be a dumb way, but it will make code more readable
-    if (verbose) { System.out.printf("%sInterpreting %s\n",printprefix,intstring); }
+    intstring=intstring.toLowerCase(); // opposite of statement.java!
+    if (true || verbose) { System.out.printf("%s>>Interpreting %s\n",printprefix,intstring); }
 
     /* take it a character at a time */
     for (ispnt=0; ispnt<intstring.length() ;++ispnt) {
@@ -380,13 +441,24 @@ class evaluate {
         // to implement
         //  else if CLOSING BRACKET // we either have no parameters or a  syntax error like: "1+)"
 
-        } else if (a.compareTo("0")>=0 && a.compareTo("9")<=0 || a.equals("-") || a.equals("+")) {
+        } else if (a.equals("+")) {
+          // totally ignore the + sign
+          //pushOp("+ve");
+        } else if (a.equals("-")) {
+          // push the sign on
+          pushOp("-ve");
+        } else if (a.compareTo("0")>=0 && a.compareTo("9")<=0 || a.equals(".")) { // allow leading . for numbers
           double num=readNum();
-          pushNum(num);
+          pushNum(num); 
           doing=D_OP;
         } else if (a.compareTo("a")>=0 && a.compareTo("z")<=0) {
           readString();
           if (!is_function) { doing=D_OP; }
+        } else if (a.equals("\"")) {
+          // quoted string
+          readQuotedString();
+          pushNum(0.0); // for now - just a 0
+          doing=D_OP;
         } else {
           System.out.printf("?SYNTAX ERROR 001\n***Not correct syntax\n");
         }
@@ -468,9 +540,8 @@ class evaluate {
       System.out.printf("Evaluated %-20s = %f\n",intstring,stknum[0]);
     }
 
-    return;
+    return stknum[0];
   }
-
 }
 
 /////////
