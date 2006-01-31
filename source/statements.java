@@ -157,6 +157,7 @@ void interpret_string(String passed_line)
     }
     SkipNewLines();
   }
+  machine.dumpstate();
 
 }
 
