@@ -30,9 +30,9 @@ class ev {
     // 100 x  82 equations = about 40 seconds, is : 205 equations per second on yoink
     // 100 x  72 equations  non verbose = about 2.0 seconds, is : 3600 equations per second on sirius
     for (int i=0; i<=(do_many?100:1); ++i) {
-    evaluate_engine.interpret_string("a>mxorb<3",0.0);
-    evaluate_engine.interpret_string("-3/-4",0.0);
-    evaluate_engine.interpret_string("-sin(x)",0.0);
+    evaluate_engine.interpret_string("a>mxorb<3",-1.0);
+    evaluate_engine.interpret_string("-3/-4",0.75);
+    evaluate_engine.interpret_string("-sin(x)",-0.656986598718);
     evaluate_engine.interpret_string("0 or 2 and 0",0.0);
     evaluate_engine.interpret_string("1 or 2 and 0",1.0);
     evaluate_engine.interpret_string("1 and 2 or 0",0.0);
