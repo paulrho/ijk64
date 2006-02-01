@@ -40,7 +40,7 @@ class GenericType {
     if (isNum()) {
       return new Double(aval).toString();
     } else {
-      System.out.printf("Returning a String\n");
+      if (false) { System.out.printf("Returning a String\n"); }
       return astring;
     }
   }
