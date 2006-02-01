@@ -68,7 +68,16 @@ class evaluate {
   double stknum[];
   int upto;
   int doing;
-  String stkfunc[];
+  String stkfunc[]; 
+        // ^maybe could also use this for the string
+
+  // to allow typeing
+  String stkstring[];
+  int stktype[];
+  static final int ST_NUM=0; // double the default
+  static final int ST_STRING=1; // new type
+  static final int ST_INT=2; // not implemented
+
   boolean is_function=false; // flag to indicate that the function name has been pre inserted in the array
   //String functionname="";  // temporarily used until the bracket is confirmed! - no longer required, prestore it!
   int parameters; // count of the number of parameters that a function is called with
@@ -88,6 +97,7 @@ class evaluate {
   // debugging/formatting etc
   String printprefix="";
   boolean verbose=true;
+  boolean quiet=false;
 
   Machine using_machine=null;
 
@@ -99,6 +109,11 @@ class evaluate {
     stknum=new double[100];
     stkop=new String[100];
     stkfunc=new String[100];
+
+    // to allow typeing
+    stktype=new int[100];
+    stkstring=new String[100];
+
     // all setup ready
   }
 
@@ -108,6 +123,11 @@ class evaluate {
     stknum=new double[100];
     stkop=new String[100];
     stkfunc=new String[100];
+
+    // to allow typeing
+    stktype=new int[100];
+    stkstring=new String[100];
+
     // all setup ready
   } // end func
 
@@ -115,29 +135,63 @@ class evaluate {
     System.out.printf("%s |STATE:  upto=%d doing=%d\n",printprefix,upto,doing);
     // necessarily there it is the case when doing==D_OP that we DON'T know what stkop[upto-1] is - therefore, don't show it!
     for (int levelx=0; levelx<upto; levelx++) {
-      System.out.printf("%s |upto=%d stknum[]=%f stkop[]=%s%s%s\n",
-        printprefix,levelx,stknum[levelx],(levelx!=upto-1 || doing!=D_OP)?stkop[levelx]:"N/A",(stkfunc[levelx]!=null)?" stkfunc[]=":"",(stkfunc[levelx]!=null)?stkfunc[levelx]:"");
+      System.out.printf("%s |upto=%d stknum[]=%f stkop[]=%s%s%s type=%d %s\n",
+        printprefix,levelx,stknum[levelx],(levelx!=upto-1 || doing!=D_OP)?stkop[levelx]:"N/A",(stkfunc[levelx]!=null)?" stkfunc[]=":"",(stkfunc[levelx]!=null)?stkfunc[levelx]:"",
+        stktype[levelx],stktype[levelx]==ST_STRING?stkstring[levelx]:"");
     }
     System.out.printf("%s\n",printprefix);
   }
 
+  //int return_type; // the type that calc returns
+  //double return_num; // if it is a double, the return value
+  //String return_string; // if it is a string the return string
+  ////////////////////////////////////////////////////
+  //
+  ////////////////////////////////////////////////////
   // just a bit of shorthard to improve readability
   void calc_and_pop() {
     if (verbose) { System.out.printf("%sPerforming a calculation on %f %s %f\n",printprefix,stknum[upto-2],stkop[upto-2],stknum[upto-1]); }
-    stknum[upto-2]=calc(stknum[upto-2],stkop[upto-2],stknum[upto-1],stkfunc[upto-2]);
-      // where ( - tried stknum[upto-2]=calc(stknum[upto-2],stkop[upto-2],stknum[upto-1]); //efficiency only - but no better - I think
+    //stknum[upto-2]=calc(stknum[upto-2],stkop[upto-2],stknum[upto-1],stkfunc[upto-2]);
+
+    //stknum[upto-2]=calc();
+    //upto--;
+    calc();
     upto--;
+
+    // where ( - tried stknum[upto-2]=calc(stknum[upto-2],stkop[upto-2],stknum[upto-1]); //efficiency only - but no better - I think
+
     if (verbose) { show_state(); }
     return;
   }
 
-  double calc(double left, String oper, double right, String function) {
+  //double calc(double left, String oper, double right, String function) {
+  // because we always call this with one and only one set (from calc_and_pop), we should make this only need the upto parameter
+    //called by stknum[upto-2]=calc(stknum[upto-2],stkop[upto-2],stknum[upto-1],stkfunc[upto-2]);
+    // upto is also implicit
+  ////////////////////////////////////////////////////
+  //
+  ////////////////////////////////////////////////////
+  // now does not return - perhaps should be a boolean
+  void calc() {
+
+    double left=stknum[upto-2];
+    String oper=stkop[upto-2];
+    double right=stknum[upto-1];
+    String function=stkfunc[upto-2];
+    int lefttype=stktype[upto-2]; // the type of variable we are working with
+    int righttype=stktype[upto-1]; // the type of variable we are working with
+
     double answer=0.0;
     if (oper.equals(OP_OPEN_BRACKET) && function != null && !function.equals("")) { 
-      answer=right; 
+      // if it is bracketed and there is a function
+      //answer=right;  why do this?
       if (verbose) { System.out.printf("%sfunction needs calculating : %s(%f) we have %d parameters\n",printprefix,function,right,parameters); }
       // if it is a function the parameters are stored at upto-1, upto, upto+1, upto+2, upto+3... etc.
       // for a single parameter it is stored simply in upto-1
+
+      // these functions take 1 numeric parameter:
+      //if (righttype!=ST_NUM) { System.out.printf("?INCORRECT TYPE\n"); }
+
       if (function.equals("sin")) {
         answer=Math.sin(right);
       } else if (function.equals("silly")) {
@@ -166,14 +220,73 @@ class evaluate {
         answer=Math.sqrt(right);
       } else if (function.equals("sqt")) { // for basic
         answer=Math.sqrt(right);
+
+      // string functions
+      } else if (function.equals("val")) {
+        // takes a string but returns a double
+        stktype[upto-2]=ST_NUM;
+        try {
+          stknum[upto-2]=Double.parseDouble(stkstring[upto-2]);
+        } catch (Exception e) { stknum[upto-2]=0.0; }
+        return;
+      } else if (function.equals("len")) {
+        stktype[upto-2]=ST_NUM;
+        stknum[upto-2]=stkstring[upto-2].length();
+        return;
+      } else if (function.equals("left$")) {
+        if (parameters==2) {
+          if (verbose) { System.out.printf("Calculating left$\n"); }
+          stktype[upto-2]=ST_STRING;
+          stkstring[upto-2]=stkstring[upto-1].substring(0,(int)stknum[upto]);
+          return;
+        } else {
+          System.out.printf("?WRONG NUMBER PARAMETERS\n");
+        }
       } else {
         // have to assume that it is an array
         //System.out.printf("?SYTAX ERROR 003f *** Unknown/unsupported function %s\n",function);
-        System.out.printf("Assuming array %s\n",function);
+        if (verbose) { System.out.printf("Assuming array %s\n",function); }
+            GenericType value=get_value(function,parameters,stknum[upto-1],stknum[upto],stknum[upto+1]);
+            if (value.isNum()) {
+              if (verbose) { System.out.printf("%sGot value %s\n",printprefix,value.print()); }
+              // push this value on stack
+              pushNum(value.num());
+            } else {
+              pushString(value.str());
+            }
       }
     
-    } else answer=calc(left,oper,right);
-    return answer; 
+    } else {
+      if (lefttype==ST_NUM && righttype==ST_NUM) {
+        answer=calc(left,oper,right);
+      } else {
+        String answerstr="";
+        // it will return a string
+        if (lefttype==ST_STRING && righttype==ST_NUM) {
+          answerstr=calc(stkstring[upto-2],oper,right);
+        } else if (lefttype==ST_NUM && righttype==ST_STRING) {
+          answerstr=calc(left,oper,stkstring[upto-1]);
+        } else if (lefttype==ST_STRING && righttype==ST_STRING) {
+          GenericType ganswer=calc(stkstring[upto-2],oper,stkstring[upto-1]);
+          if (ganswer.isNum()) {
+            stktype[upto-2]=ST_NUM;
+            stknum[upto-2]=ganswer.num();
+            return;
+          } else {
+            stktype[upto-2]=ST_STRING;
+            stkstring[upto-2]=ganswer.str();
+            return;
+          }
+        } else { /* there is none! */ }
+        stktype[upto-2]=ST_STRING;
+        stkstring[upto-2]=answerstr;
+        return;
+      }
+    }
+    // now done inside here!
+    stktype[upto-2]=ST_NUM;
+    stknum[upto-2]=answer;
+    return;         //return answer; 
   }
 
   int prec(String oper) {
@@ -202,6 +315,41 @@ class evaluate {
     else if (oper.equals("")) { return 0; }
     return 0;
   }
+
+  String calc(String leftstr, String oper, double right) {
+    return leftstr;
+  }
+
+  String calc(double left, String oper, String rightstr) {
+    return rightstr;
+  }
+
+  GenericType calc(String leftstr, String oper, String rightstr) {
+    // returns a number
+         if (oper.equals(">")) { return new GenericType((leftstr.compareTo(rightstr)>0)?-1.0:0.0); }
+    else if (oper.equals("<")) { return new GenericType((rightstr.compareTo(leftstr)>0)?-1.0:0.0); }
+    //else if (oper.equals("<=")) { answer=(left<=right)?-1.0:0.0; }
+    //else if (oper.equals("=<")) { answer=(left<=right)?-1.0:0.0; } // for c64
+    //else if (oper.equals(">=")) { answer=(left>=right)?-1.0:0.0; }
+    //else if (oper.equals("=>")) { answer=(left>=right)?-1.0:0.0; } // for c64
+    else if (oper.equals("=")) { return new GenericType(leftstr.equals(rightstr)?-1.0:0.0); }
+    else if (oper.equals("<>")) { return new GenericType(leftstr.equals(rightstr)?0.0:-1.0); }
+
+    // returns string
+    else if (oper.equals("+")) { return new GenericType(leftstr+rightstr); }
+    //else if (oper.equals("-")) { answer=left-right; }
+    //else if (oper.equals("*")) { answer=left*right; }
+    //else if (oper.equals("/")) { answer=left/right; }
+    //else if (oper.equals("^")) { answer=Math.pow(left,right); }
+    //else if (oper.equals("-ve")) { answer=(-right); }
+
+    //else if (oper.equals("X")) { answer=left; } // no calc
+    //else if (oper.equals("(")) { answer=right; }
+    //else if (oper.equals("")) { answer=left; }
+    System.out.printf("?ILLEGAL OPERATION : %s %s %s\n",leftstr,oper,rightstr);
+    return new GenericType(); // this is actually an error
+  }
+
   double calc(double left, String oper, double right) {
     double answer=0.0;
     // old boolean like way, lets do a c64 bit like way now
@@ -237,23 +385,40 @@ class evaluate {
     return answer;
   }
 
-  double get_value(String variablename) {
+  GenericType get_value(String variablename, int params, double p1, double p2, double p3) {
+    if (using_machine!=null) {
+      // -
+      return using_machine.getvariable(variablename.toUpperCase(),params,(int)p1,(int)p2,(int)p3); // convert back to uppercase
+    }
+    return new GenericType(0.0);
+  }
+
+  GenericType get_value(String variablename) {
     if (using_machine!=null) {
       // -
       return using_machine.getvariable(variablename.toUpperCase()); // convert back to uppercase
     }
     if (variablename.equals("pi")) {
-      return Math.PI;
+      return new GenericType(Math.PI);
     } else if (variablename.equals("x")) {
-      return 7.0;
+      return new GenericType(7.0);
     } else if (variablename.equals("a")) {
-      return 1.0;
+      return new GenericType(1.0);
     }
-    return 0.0;
+    return new GenericType(0.0);
+  }
+
+  void pushString(String thestring) {
+    stktype[upto]=ST_STRING; // new stack for typeing
+    stkstring[upto]=thestring; // new stack just for strings
+    upto++;
+    doing=D_OP;
+    // at this point we have filled the stknum[upto-1] element, but NOT the stkop[upto-1]
+    // thus if doing==D_OP we have NOT filled stkop[upto-1], but we HAVE filled stnum[upto-1]
   }
 
   void pushNum(double num) {
-    stknum[upto]=num;
+    stknum[upto]=num;  stktype[upto]=ST_NUM; // seems to be the only place we do it
     upto++;
     doing=D_OP;
     // at this point we have filled the stknum[upto-1] element, but NOT the stkop[upto-1]
@@ -350,17 +515,19 @@ class evaluate {
           }
   }
 
-  void readQuotedString() {
-          String building=a;
+  String readQuotedString() {
+          String building=""; // dont keep __a__ the quote
           while (ispnt<intstring.length()-1) {
             a=intstring.substring(ispnt+1,ispnt+2);
             if (a.equals("\"")) {
               ispnt++;
               break;
             }
+            building+=a;
             ispnt++;
           }
-    return;
+    if (verbose) { System.out.printf("Got quoted string %s\n",building); }
+    return building;
   }
 
   void readString() {
@@ -397,31 +564,35 @@ class evaluate {
           } else {
             if (verbose) { System.out.printf("%sgot a variable %s\n",printprefix,building); }
             // replace the variable with the value of the variable
-            double value=get_value(building);
-            if (verbose) { System.out.printf("%sGot value %f\n",printprefix,value); }
-            // push this value on stack
-            pushNum(value);
+            GenericType value=get_value(building);
+            if (value.isNum()) {
+              if (verbose) { System.out.printf("%sGot value %s\n",printprefix,value.print()); }
+              // push this value on stack
+              pushNum(value.num());
+            } else {
+              pushString(value.str());
+            }
             doing=D_OP;
             //is_function=false; // probably no need to set this as it should normally sit on false!
           }
   }
 
-  double interpret_string(String intstring_param) {
+  GenericType interpret_string(String intstring_param) {
     return interpret_string(intstring_param, false, 0.0);
   }
 
-  double interpret_string(String intstring_param, double expecting) {
+  GenericType interpret_string(String intstring_param, double expecting) {
     return interpret_string(intstring_param, true, expecting);
   }
 
-  double interpret_string(String intstring_param, boolean testing, double expecting) {
+  GenericType interpret_string(String intstring_param, boolean testing, double expecting) {
 
     upto=0; // nothing is on the stack, upto points past the end of the current array, at the NEXT point
     doing=D_NUM;
 
     intstring=intstring_param; // this may be a dumb way, but it will make code more readable
     intstring=intstring.toLowerCase(); // opposite of statement.java!
-    if (true || verbose) { System.out.printf("%s>>Interpreting %s\n",printprefix,intstring); }
+    if (verbose) { System.out.printf("%s>>Interpreting %s\n",printprefix,intstring); }
 
     /* take it a character at a time */
     for (ispnt=0; ispnt<intstring.length() ;++ispnt) {
@@ -456,8 +627,8 @@ class evaluate {
           if (!is_function) { doing=D_OP; }
         } else if (a.equals("\"")) {
           // quoted string
-          readQuotedString();
-          pushNum(0.0); // for now - just a 0
+          String qs=readQuotedString();
+          pushString(qs); // we push, not a number, but a string
           doing=D_OP;
         } else {
           System.out.printf("?SYNTAX ERROR 001\n***Not correct syntax\n");
@@ -524,7 +695,12 @@ class evaluate {
       System.out.printf("-------------------------------\n");
       System.out.printf("Evaluated %-20s  ",intstring);
       if (!testing) {
-        System.out.printf("%sanswer=%22.20f\n",printprefix,stknum[0]);
+        if (stktype[0]==ST_NUM) {
+          System.out.printf("%sanswer=%22.20f\n",printprefix,stknum[0]);
+        } else {
+          // add the quotes in too
+          System.out.printf("%sanswer=\"%s\"\n",printprefix,stkstring[0]);
+        }
       } else {
         System.out.printf("%sanswer=%22.20f  expecting=%12f  difference=%12f",printprefix,stknum[0],expecting,stknum[0]-expecting);
         if (stknum[0]-expecting>0.00001 || stknum[0]-expecting<-0.00001) {
@@ -537,10 +713,21 @@ class evaluate {
         }
       }
     } else {
-      System.out.printf("Evaluated %-20s = %f\n",intstring,stknum[0]);
+      if (stktype[0]==ST_NUM) {
+        if (!quiet) { System.out.printf("Evaluated %-20s = %f\n",intstring,stknum[0]); }
+      } else {
+        // add the quotes in too
+        if (!quiet) { System.out.printf("Evaluated %-20s = \"%s\"\n",intstring,stkstring[0]); }
+      }
     }
 
-    return stknum[0];
+    if (stktype[0]==ST_NUM) {
+      return  new GenericType(stknum[0]);
+    } else {
+      if (verbose) { System.out.printf("Returning a string type from evaluate\n"); }
+      return  new GenericType(stkstring[0]);
+    }
+    //return stknum[0]; // we cant do this now, we must return maybe a string (even if it is a number)
   }
 }
 
