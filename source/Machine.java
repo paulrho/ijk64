@@ -17,6 +17,7 @@ class Machine {
   int gosubstack[];
 
   boolean verbose=false;
+  //boolean verbose=true;
 
   int executionpoint; // ?? where we currently are at
 
@@ -88,8 +89,10 @@ class Machine {
       if (variable.equals(variablename[i])) {
         // found it, so set it
         if (contents.isNum()) {
+          variabletype[i]=V_DOUBLE;
           variablevalue[i]=contents.num();
         } else {
+          variabletype[i]=V_STRING;
           variablestring[i]=contents.str();
         }
         return;
@@ -99,16 +102,29 @@ class Machine {
     return;
   }
 
-  double getvariable(String variable) {
+  GenericType getvariable(String variable, int param, int p1, int p2, int p3) {
+    // array
+  }
+
+  GenericType getvariable(String variable) {
     // if we try to get a non existant variable, create it and set its value to 0.0
     for (int i=0; i<topvariable; ++i) {
       if (variable.equals(variablename[i])) {
         // found it, so set it
-        return variablevalue[i];
+        if (variabletype[i]==V_DOUBLE) {
+          return new GenericType(variablevalue[i]);
+        } else {
+          return new GenericType(variablestring[i]);
+        }
       }
     }
-    createvariable(variable,new GenericType(0.0));
-    return 0.0;
+    // work out the default type:
+    if (variable.substring(variable.length()-1,variable.length()).equals("$")) {
+      createvariable(variable,new GenericType(""));
+    } else {
+      createvariable(variable,new GenericType(0.0));
+    }
+    return new GenericType(0.0);
   }
 
   // from within here we execute the evaluate?
@@ -119,7 +135,8 @@ class Machine {
   void initialise_engines() {
     evaluate_engine = new evaluate(this);  // create engine
     //evaluate_engine.verbose=true;
-    evaluate_engine.verbose=false;
+    //evaluate_engine.verbose=false;
+    evaluate_engine.verbose=verbose; // inherit!
     evaluate_engine.quiet=true;
   }
 
@@ -172,7 +189,11 @@ class Machine {
 
   void dumpstate() {
     for (int i=0; i<topvariable; ++i) {
-      if (verbose) { System.out.printf("  variable %s = %f\n",variablename[i],variablevalue[i]); }
+      if (variabletype[i]==V_DOUBLE) {
+        System.out.printf("  variable %s = %f\n",variablename[i],variablevalue[i]);
+      } else {
+        System.out.printf("  variable %s (string) = %s\n",variablename[i],variablestring[i]);
+      }
     }
   }
 }
