@@ -16,6 +16,8 @@ import java.io.*;
 
 class statements {
 
+  //boolean verbose=false;
+  boolean verbose=true;
   String read_a_file() {
 
     String content="";
@@ -38,7 +40,7 @@ class statements {
 
     for (int i=0; i<args.length; ++i) {
       if (args[i].substring(0,1).equals("-")) {
-        if (true) { System.out.printf("Got a switch\n"); }
+        if (verbose) { System.out.printf("Got a switch\n"); }
 
         if (args[i].substring(0,2).equals("-v")) {
           //evaluate_engine.verbose=true;
@@ -56,28 +58,6 @@ class statements {
     // at the moment, spaces are passed onto the "evaluate interpreter" that's okay
     //interpret_string("FORI=1TO1000:PRINTI:NEXT");
     interpret_string( read_a_file() );
-    if (false) {
-    interpret_string(
-      " 2 mx=300:nc=2:rn=int(rnd(ti)*1000):a=rnd(-rn)" + "\n" +
-      "10 FORI=1TO1000+4:PRINTI;I*3:NEXTI" + "\n" +
-      "20 IFI<3THENPRINT\"HELLO\":GOTO10" + "\n" +
-      "30 IFI<3THENPRINT\"HELLO\";:GOTO10" + "\n" +
-      "40 X=SIN(I)*0.2142/232.4+124124+9*5^3:X=X+2" + "\n" +
-      "50 PRINT X" + "\n" +
-      "60 REM IGNORE THIS" + "\n" +
-      "70 FOR I = 1 TO 10 : NEXT I" + "\n" +
-      "99 END" + "\n" +
-      "110 dimlg%(mx,nc),rg%(mx,nc),t(50),d%(mx),le%(mx),al%(mx),pm%(mx),pf%(mx)" + "\n" +
-      "112 print\"do you want to bypass the generating    proceedures? (y/n):\"" + "\n" +
-      "114 geta$:ifa$=\"\"then14" + "\n" +
-      "116 ifa$=\"y\"thenprint\"<?> for help\":goto100" + "\n" +
-      "118 print\"o.k.generating creatures.  (seed\";rn;\")\"" + "\n" +
-      "120 FORip=1TO20:FORk=0TOnc:FORj=0TO14" + "\n" +
-      "122 IFk<>1orj<>11THENlg%(ip,k)=lg%(ip,k)or(2^j*(int(rnd(rn)*2)))" + "\n" +
-      "124 rg%(ip,k)=rg%(ip,k)or(2^j*(int(rnd(rn)*2)))" + "\n" +
-      "126 NEXTj,k" + "\n" 
-     );
-     }
 
 
   } // end func
@@ -115,15 +95,44 @@ int gotToken=0;
 
 String keepVariable;
 String keepExpression;
+String keepLine;
 
 Machine machine;
+
+void precache_all_lines()
+{
+  // read_all_lines
+  // read the line# first
+  pnt=0;
+  while (true) {
+    SkipSpaces();
+    //System.out.printf("\n");
+    int start=pnt;
+    if (!ReadLineNo()) {
+      if (verbose) { System.out.printf("No line # -finishing\n"); }
+      break;
+    }
+    // got a line # cache it
+    machine.cacheLine(keepLine,pnt); //was start
+    // read out rest of line
+    IgnoreRestofLine();
+
+    if (pnt>=line.length()) {
+      break;
+    }
+    SkipNewLines();
+  }
+
+}
+
+//boolean newline; // this is a bit of a work around, when we change the execution point to a new line
+//hmm, actually, changing mind, set the line cache to the first statement!
 
 void interpret_string(String passed_line)
 {
   line=passed_line;
   linelength=line.length();
-  pnt=0;
-  System.out.printf("\n**************************************\n");
+  if (verbose) { System.out.printf("\n**************************************\n"); }
   //System.out.printf("Got line %s\n",line);
 
   // fix up code
@@ -133,12 +142,16 @@ void interpret_string(String passed_line)
   machine = new Machine();
   machine.initialise_engines(); // silly, but there is a reason
 
+  // skip to the chase, and just read the line #s
+  precache_all_lines();
+
+  pnt=0;
   // read the line# first
   while (true) {
     SkipSpaces();
-    System.out.printf("\n");
+    if (verbose) { System.out.printf("\n"); }
     if (!ReadLineNo()) {
-      System.out.printf("No line # -finishing\n");
+      if (verbose) { System.out.printf("No line # -finishing\n"); }
       break;
     }
     SkipSpaces();
@@ -181,7 +194,7 @@ boolean ReadStatement() {
         if (ProcessGOSUBstatement()) { return true; }
         break;
       case ST_RETURN: 
-        if (ProcessREMstatement()) { return true; }
+        if (ProcessRETURNstatement()) { return true; }
         break;
       case ST_PRINT: 
         if (ProcessPRINTstatement()) { return true; }
@@ -222,7 +235,7 @@ boolean ReadStatement() {
     // could be an assignment
     if (ReadAssignment()) {
       ReadExpression();
-      System.out.printf("MachineVariableSet(variable=%s with evaluate( %s ))\n",keepVariable,keepExpression);
+      if (verbose) { System.out.printf("MachineVariableSet(variable=%s with evaluate( %s ))\n",keepVariable,keepExpression); }
       machine.setvariable(keepVariable,machine.evaluate(keepExpression));
       ReadColon();
       return true;
@@ -247,7 +260,7 @@ boolean ReadStatementToken() {
     if (at==basicTokens[tok].length()) {
       // we matched it completely
       pnt+=at;
-      System.out.printf("Found match for %s\n",basicTokens[tok]);
+      if (verbose) { System.out.printf("Found match for %s\n",basicTokens[tok]); }
       gotToken=tok;
       return true;
     }
@@ -260,16 +273,18 @@ boolean ReadStatementToken() {
 
 boolean ProcessPRINTstatement()
 {
-  System.out.printf("Processing PRINT statement\n");
+  if (verbose) { System.out.printf("Processing PRINT statement\n"); }
   ReadExpression();
-  System.out.printf("MachinePrintEvaluate( %s )\n",keepExpression);
+  if (verbose) { System.out.printf("MachinePrintEvaluate( %s )\n",keepExpression); }
+  System.out.printf("%s\n",machine.evaluate(keepExpression).print());
   // Machine evaluate this expression and PRINT it!
   //System.out.printf("Would evaluate the expression %s\n","not finished coding yet");
   // if we finished with ";", then loop again
   while (pnt<linelength && line.substring(pnt,pnt+1).equals(";")) {
     pnt++;
     ReadExpression();
-    System.out.printf("MachinePrintEvaluate( %s )\n",keepExpression);
+    if (verbose) { System.out.printf("MachinePrintEvaluate( %s )\n",keepExpression); }
+    System.out.printf("%s\n",machine.evaluate(keepExpression).print());
     //System.out.printf("  also would evaluate the expression %s\n","not finished coding yet");
   }
   ReadColon(); // check
@@ -280,16 +295,30 @@ boolean ProcessIFstatement()
 {
   ReadExpression();
   
-  System.out.printf("MachineEvaluate( %s )\n",keepExpression);
-  System.out.printf("  evaluates to %f\n",machine.evaluate(keepExpression));
+  if (verbose) { System.out.printf("MachineEvaluate( %s )\n",keepExpression); }
+  if (verbose) { System.out.printf("  evaluates to %s\n",machine.evaluate(keepExpression).print()); }
   //ReadStatementToken(); // note MUST be THEN or GOTO
   // implicetly read already with the ReadExpression
   if (gotToken!=ST_GOTO && gotToken!=ST_THEN) {
     System.out.printf("?SYNTAX ERROR 104: did not get THEN or GOTOT token\n");
     return false;
   }
+  // IF the evaluated expression is true (non zero), continue...
+  // otherwise read out rest of line and skip to new line
+  //if (machine.evaluate(keepExpression)==0.0) { // num only returns a num
+  if (machine.evaluate(keepExpression).equals(0.0)) { // num only returns a num
+    // read everthing to the end of line
+    while (pnt<linelength && !line.substring(pnt,pnt+1).equals("\n")) {
+      pnt++;
+    }
+    return true; // parsed okay
+  }
   // it might be just a line # - try and read it - if it isn't keep going
   if (ReadLineNo()) {
+    if (machine.enabledmovement) {
+      machine.gotoLine(keepLine);
+      pnt=machine.executionpoint; // we should now have a different execution point
+    }
     // then read out till end of line
     //while (pnt<linelength && !line.substring(pnt,pnt+1).equals("\n")) {
       //pnt++;
@@ -300,14 +329,36 @@ boolean ProcessIFstatement()
 
 boolean ProcessGOTOstatement()
 {
+  SkipSpaces(); // added this in as there may be leading spaces (probably a better way to do this)
   ReadExpression(); // not really, should just be a numberic??? maybe an expression is good
+  // lets go!
+  // only with this line will we not do a front to back parse
+  if (machine.enabledmovement) {
+    machine.gotoLine(keepExpression);
+    pnt=machine.executionpoint; // we should now have a different execution point
+  }
   ReadColon();
   return true;
 }
+
 boolean ProcessGOSUBstatement()
 {
   ReadExpression(); // not really, should just be a numberic??? maybe an expression is good
+  if (machine.enabledmovement) {
+    machine.gosubLine(keepExpression,pnt);
+    pnt=machine.executionpoint; // we should now have a different execution point
+  }
   ReadColon();
+  return true;
+}
+
+boolean ProcessRETURNstatement()
+{
+  if (machine.enabledmovement) {
+    machine.popReturn();
+    pnt=machine.executionpoint; // we should now have a different execution point
+  }
+  IgnoreRestofLine();
   return true;
 }
 
@@ -320,10 +371,10 @@ boolean ProcessNEXTstatement()
 
 boolean ProcessFORstatement()
 {
-  System.out.printf("Processing FOR statement\n");
+  if (verbose) { System.out.printf("Processing FOR statement\n"); }
   ReadAssignment();
   ReadExpression();
-  System.out.printf("MachineVariableSet(variable=%s with evaluate( %s ))\n",keepVariable,keepExpression);
+  if (verbose) { System.out.printf("MachineVariableSet(variable=%s with evaluate( %s ))\n",keepVariable,keepExpression); }
   ReadStatementToken(); // note MUST be TO
   if (gotToken!=ST_TO) {
     System.out.printf("?SYNTAX ERROR 104: did not get TO token\n");
@@ -334,6 +385,7 @@ boolean ProcessFORstatement()
     ReadStatementToken(); // note CAN be STEP
     if (gotToken==ST_STEP) {
       ReadExpression();
+      // do we need to read the colon?
       return true;
     } else {
       System.out.printf("?SYNTAX ERROR 105: did not get STEP token\n");
@@ -343,16 +395,24 @@ boolean ProcessFORstatement()
     // no STEP keyword
   }
   // MachineProcessFOR...
+  // should to be an expression or a evaluated number?
+  //machine.processFOR(/*position*/pnt,/*variable*/..,/*to*/..,/*step*/..);
   ReadColon(); // check
   return true;
 }
 
-boolean ProcessREMstatement() 
+void IgnoreRestofLine()
 {
   // read everthing to the end of line
   while (pnt<linelength && !line.substring(pnt,pnt+1).equals("\n")) {
     pnt++;
   }
+  return;
+}
+
+boolean ProcessREMstatement() 
+{
+  IgnoreRestofLine();
   return true;
 }
 
@@ -396,7 +456,7 @@ boolean ReadExpression()
       pnt++;
     }
   if (pnt==linelength) previous=pnt; // special case when we read to end of line
-  System.out.printf("Interpreting \"%s\" as an expression\n",line.substring(start,previous));
+  if (verbose) { System.out.printf("Interpreting \"%s\" as an expression\n",line.substring(start,previous)); }
   keepExpression=line.substring(start,previous);
   return true;
 }
@@ -417,7 +477,7 @@ boolean ReadAssignment()
     }
     if (pnt+at<linelength) {
       // we have got variable =
-      System.out.printf("Found variable %s\n",line.substring(pnt,pnt+at));
+      if (verbose) { System.out.printf("Found variable %s\n",line.substring(pnt,pnt+at)); }
       keepVariable=line.substring(pnt,pnt+at); // keep it
       pnt+=at+1; // read out the variable and the "=" sign
       return true;
@@ -433,7 +493,8 @@ boolean ReadLineNo() {
       String a=line.substring(pnt+at,pnt+at+1);
       if (a.equals("\n")) {
         // dont read this
-        System.out.printf("Line number %s\n",line.substring(pnt,pnt+at));
+        if (verbose) { System.out.printf("Line number %s\n",line.substring(pnt,pnt+at)); }
+        keepLine=line.substring(pnt,pnt+at);
         pnt+=at;
         return true;
       }
@@ -448,7 +509,8 @@ boolean ReadLineNo() {
     //if (pnt+at<linelength && at>0) {  // no, not now, as we may be reading a ...THEN100 line
     if (at>0) {
       // we have got number
-      System.out.printf("Line number %s\n",line.substring(pnt,pnt+at));
+      if (verbose) { System.out.printf("Line number %s\n",line.substring(pnt,pnt+at)); }
+      keepLine=line.substring(pnt,pnt+at);
       pnt+=at+1;
       return true;
     } else {
@@ -486,7 +548,7 @@ boolean MachineEND() {
 ///////////////////////////////
 
   public static void main(String[] args) {
-    if (true) { System.out.printf("Mello Word\n"); }
+    if (false) { System.out.printf("Mello Word\n"); }
     new statements(args);
   }
 }
