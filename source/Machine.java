@@ -2,19 +2,27 @@ class Machine {
   //
   String code; // here is the code, stored as one big string
   static final int MAXLINES=10000;
-  int linecache[]; // when we get to them, we store the pointer into the code of each line
+  int toplinecache=0;
+  int linecacheline[]; // when we get to them, we store the pointer into the code of each line
                            // of course we have to read ahead one we get a GOTO or GOSUB
+  int linecachepnt[];
+
   static final int MAXFORS=300;
+  int topforloopstack=0;
   int forloopstack[];
   String forloopstack_var[];
 
   static final int MAXGOSUBS=300;
+  int topgosubstack=0;
   int gosubstack[];
+
+  boolean verbose=false;
 
   int executionpoint; // ?? where we currently are at
 
   static final int MAXVARIABLES=300;
-  static int V_DOUBLE=0;
+  static final int V_DOUBLE=0;
+  static final int V_STRING=1;
   int topvariable=0;
   String variablename[];
   int variabletype[];
@@ -22,10 +30,15 @@ class Machine {
   String variablestring[]; // not coded for in evaluate yet
   int variableint[]; // not coded for in evaluate yet
   evaluate evaluate_engine;
+  boolean enabledmovement=true;  // if this is false, we just parse from top to bottom, good for debugging!
+
+  static final int ST_NUM=0;
+  static final int ST_STRING=1;
 
   Machine() {
-    System.out.printf("Initialising machine\n");
-    linecache=new int[MAXLINES];
+    if (verbose) { System.out.printf("Initialising machine\n"); }
+    linecacheline=new int[MAXLINES];
+    linecachepnt=new int[MAXLINES];
     forloopstack=new int[MAXFORS];
     forloopstack_var=new String[MAXFORS];
     gosubstack=new int[MAXGOSUBS];
@@ -43,24 +56,46 @@ class Machine {
        // is this a good way? I don't know
   }
 
-  private void createvariable(String variable, double val) {
+  private void createvariable(String variable, GenericType contents) {
     variablename[topvariable]=variable;
-    variablevalue[topvariable]=val;
-    variabletype[topvariable]=V_DOUBLE;
+    if (contents.isNum()) {
+      variablevalue[topvariable]=contents.num();
+      variabletype[topvariable]=V_DOUBLE;
+    } else {
+      variablestring[topvariable]=contents.str();
+      variabletype[topvariable]=V_STRING;
+    }
     topvariable++;
     return;
   }
 
-  void setvariable(String variable, double val) {
+  // void setvariable(String variable, double val) {
+    // // search for this variable, if it isn't there - then create it
+    // for (int i=0; i<topvariable; ++i) {
+      // if (variable.equals(variablename[i])) {
+        // // found it, so set it
+        // variablevalue[i]=val;
+        // return;
+      // }
+    // }
+    // createvariable(variable,val);
+    // return;
+  // }
+
+  void setvariable(String variable, GenericType contents) {
     // search for this variable, if it isn't there - then create it
     for (int i=0; i<topvariable; ++i) {
       if (variable.equals(variablename[i])) {
         // found it, so set it
-        variablevalue[i]=val;
+        if (contents.isNum()) {
+          variablevalue[i]=contents.num();
+        } else {
+          variablestring[i]=contents.str();
+        }
         return;
       }
     }
-    createvariable(variable,val);
+    createvariable(variable,contents);
     return;
   }
 
@@ -72,12 +107,12 @@ class Machine {
         return variablevalue[i];
       }
     }
-    createvariable(variable,0.0);
+    createvariable(variable,new GenericType(0.0));
     return 0.0;
   }
 
   // from within here we execute the evaluate?
-  double evaluate(String expression) {
+  GenericType evaluate(String expression) {
     return evaluate_engine.interpret_string(expression);
   }
 
@@ -85,11 +120,59 @@ class Machine {
     evaluate_engine = new evaluate(this);  // create engine
     //evaluate_engine.verbose=true;
     evaluate_engine.verbose=false;
+    evaluate_engine.quiet=true;
+  }
+
+  void gotoLine(String lineNostr) {
+    int value=Integer.parseInt(lineNostr);
+    gotoLine(value);
+  }
+
+  void gotoLine(int lineNo) {
+    // put code in here
+    // look up line in cache and set pnt to correct place and return
+    for (int i=0; i<toplinecache; ++i) {
+      if (linecacheline[i]==lineNo) {
+        executionpoint=linecachepnt[i]; // set this, and then pnt must be set after return
+        return;
+      }
+    }
+    System.out.printf("?LINE NOT FOUND\n");
+    return; // should fail
+  }
+
+  void gosubLine(String lineNostr, int pnt) {
+    int value=Integer.parseInt(lineNostr);
+    gosubLine(value,pnt);
+  }
+
+  void gosubLine(int lineNo, int pnt) {
+    // push on the stack where we are
+    gosubstack[topgosubstack]=pnt;
+    topgosubstack++;
+    gotoLine(lineNo);
+  }
+
+  void popReturn() {
+    if (topgosubstack>0) {
+      topgosubstack--;
+      executionpoint=gosubstack[topgosubstack];
+    } else {
+      System.out.printf("?TOO MANY RETURNS\n");
+    }
+  }
+
+  void cacheLine(String lineNostr, int pnt) {
+    int value=Integer.parseInt(lineNostr);
+    if (verbose) { System.out.printf("Caching line %d pointer at %d\n",value,pnt); }
+    linecacheline[toplinecache]=value;
+    linecachepnt[toplinecache]=pnt;
+    toplinecache++;
   }
 
   void dumpstate() {
     for (int i=0; i<topvariable; ++i) {
-      System.out.printf("  variable %s = %f\n",variablename[i],variablevalue[i]);
+      if (verbose) { System.out.printf("  variable %s = %f\n",variablename[i],variablevalue[i]); }
     }
   }
 }
