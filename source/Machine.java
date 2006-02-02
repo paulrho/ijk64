@@ -29,7 +29,7 @@ class Machine {
                            // of course we have to read ahead one we get a GOTO or GOSUB
   int linecachepnt[];
 
-  static final int MAXFORS=300;
+  static final int MAXFORS=30; // make it break faster
   int topforloopstack=0;
   int forloopstack[];
   String forloopstack_var[];
@@ -93,7 +93,17 @@ class Machine {
 
   void createFORloop(int current, String variable, double forto, double forstep)
   {
+    // I think that if we use an already used variable, we pop off the rest of the stack
+    // e.g.  FOR I   FOR J   FOR K ......then FOR I again
     if (verbose) { System.out.printf("processing FOR %s to %f step %f at current=%d\n",variable,forto,forstep,current); }
+    // find current variable
+    for (int i=0; i<topforloopstack; ++i) {
+      if (forloopstack_var[i].equals(variable)) {
+        // use this one and pop the rest off
+        topforloopstack=i;
+        break;
+      }
+    }
     forloopstack[topforloopstack]=current;
     forloopstack_var[topforloopstack]=variable;
     forloopstack_to[topforloopstack]=forto;
@@ -111,13 +121,14 @@ class Machine {
       fl--;
       if (var.equals("") || forloopstack_var[fl].equals(var)) {
         // just pop the last one
-        setvariable(var,evaluate(var+"+"+forloopstack_step[fl]));
-        if (verbose) { System.out.printf("about to add to loop at stack location %d %f>%f\n",fl,getvariable(var).num(),forloopstack_to[fl]); }
+        setvariable(forloopstack_var[fl],evaluate(forloopstack_var[fl]+"+"+forloopstack_step[fl]));
+        if (verbose) { System.out.printf("about to add to loop at stack location %d %f>%f\n",fl,getvariable(forloopstack_var[fl]).num(),forloopstack_to[fl]); }
         if (verbose) { dumpstate(); }
-        if (getvariable(var).num()>forloopstack_to[fl]) {
+        if (getvariable(forloopstack_var[fl]).num()>forloopstack_to[fl]) {
           if (verbose) { System.out.printf("NEXT: At end of stack\n"); }
           // pop it off, but keep on going, we may be popping off many
           topforloopstack=fl; // at least one
+          return false; // I think we need to exit now
         } else {
           if (verbose) { System.out.printf("NEXT: Looping back\n"); }
           // goto the end of that for loop
