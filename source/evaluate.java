@@ -47,6 +47,8 @@
 //   A(I+2)=5124   in this case A(I+2) is evaluated to A(99) only and used to assign 
 //   will allow ,s too
 
+import java.util.*; // for Random
+
 class evaluate {
 
   // state of the machine
@@ -100,6 +102,8 @@ class evaluate {
   boolean quiet=false;
 
   Machine using_machine=null;
+
+  Random generator = new Random();
 
   evaluate(Machine machine)
   {
@@ -203,13 +207,15 @@ class evaluate {
           answer=0.0;
         }
       } else if (function.equals("sgn")) {
-        answer=0.0; // NI yet
+        if (right<0.0) { answer=-1.0; }
+        else if (right==0.0) { answer=0.0; }
+        else answer=1.0;
       } else if (function.equals("int")) {
-        answer=0.0; // NI yet
+        answer=(double)((int)(right));
       } else if (function.equals("abs")) {
-        answer=0.0; // NI yet
+        answer=Math.abs(right);
       } else if (function.equals("rnd")) {
-        answer=0.0; // NI yet
+        answer=generator.nextDouble();
       } else if (function.equals("exp")) {
         answer=Math.exp(right);
       } else if (function.equals("cos")) {
@@ -229,10 +235,42 @@ class evaluate {
           stknum[upto-2]=Double.parseDouble(stkstring[upto-2]);
         } catch (Exception e) { stknum[upto-2]=0.0; }
         return;
+      } else if (function.equals("tab") || function.equals("spc")) { // they probably are different
+        stktype[upto-2]=ST_STRING;
+        String building="";
+        for (int i=0; i<stknum[upto-1]; ++i) {
+          building+=" ";
+        }
+        stkstring[upto-2]=building;
+        return;
       } else if (function.equals("len")) {
         stktype[upto-2]=ST_NUM;
         stknum[upto-2]=stkstring[upto-2].length();
         return;
+      } else if (function.equals("str$")) {
+        if (parameters==1) {
+          stktype[upto-2]=ST_STRING;
+          if (stknum[upto-1]-(int)stknum[upto-1]==0.0) {
+            stkstring[upto-2]=" "+(int)(stknum[upto-1]);
+          } else {
+            stkstring[upto-2]=" "+(new Double(stknum[upto-1]).toString());
+          }
+          return;
+        }
+      } else if (function.equals("mid$")) {
+        if (parameters==3) {
+          if (verbose) { System.out.printf("Calculating mid$\n"); }
+          stktype[upto-2]=ST_STRING;
+          stkstring[upto-2]=stkstring[upto-1].substring((int)stknum[upto]-1,(int)stknum[upto]-1+(int)stknum[upto+1]);
+          return;
+        } else if (parameters==2) {
+          if (verbose) { System.out.printf("Calculating mid$\n"); }
+          stktype[upto-2]=ST_STRING;
+          stkstring[upto-2]=stkstring[upto-1].substring((int)stknum[upto]-1,stkstring[upto-1].length());
+          return;
+        } else {
+          System.out.printf("?WRONG NUMBER PARAMETERS\n");
+        }
       } else if (function.equals("left$")) {
         if (parameters==2) {
           if (verbose) { System.out.printf("Calculating left$\n"); }
@@ -246,14 +284,22 @@ class evaluate {
         // have to assume that it is an array
         //System.out.printf("?SYTAX ERROR 003f *** Unknown/unsupported function %s\n",function);
         if (verbose) { System.out.printf("Assuming array %s\n",function); }
-            GenericType value=get_value(function,parameters,stknum[upto-1],stknum[upto],stknum[upto+1]);
-            if (value.isNum()) {
-              if (verbose) { System.out.printf("%sGot value %s\n",printprefix,value.print()); }
-              // push this value on stack
-              pushNum(value.num());
-            } else {
-              pushString(value.str());
-            }
+        // for an array, add the distinguishing trailing (
+        GenericType value=get_value(function+"(",parameters,stknum[upto-1],stknum[upto],stknum[upto+1]);
+        if (value.isNum()) {
+          if (verbose) { System.out.printf("%sGot value %s\n",printprefix,value.print()); }
+          // push this value on stack
+          //pushNum(value.num());
+          stktype[upto-2]=ST_NUM;
+          stknum[upto-2]=value.num();
+          return;
+        } else {
+          if (verbose) { System.out.printf("%sGot value %s\n",printprefix,value.print()); }
+          //pushString(value.str());
+          stktype[upto-2]=ST_STRING;
+          stkstring[upto-2]=value.str();
+          return;
+        }
       }
     
     } else {
@@ -564,15 +610,15 @@ class evaluate {
           } else {
             if (verbose) { System.out.printf("%sgot a variable %s\n",printprefix,building); }
             // replace the variable with the value of the variable
-            GenericType value=get_value(building);
-            if (value.isNum()) {
-              if (verbose) { System.out.printf("%sGot value %s\n",printprefix,value.print()); }
-              // push this value on stack
-              pushNum(value.num());
-            } else {
-              pushString(value.str());
-            }
-            doing=D_OP;
+              GenericType value=get_value(building);
+              if (value.isNum()) {
+                if (verbose) { System.out.printf("%sGot value %s\n",printprefix,value.print()); }
+                // push this value on stack
+                pushNum(value.num());
+              } else {
+                pushString(value.str());
+              }
+              doing=D_OP;
             //is_function=false; // probably no need to set this as it should normally sit on false!
           }
   }
@@ -689,6 +735,10 @@ class evaluate {
       calc_and_pop();
     }
 
+    if (upto==0) {
+      // return empty string
+      return new GenericType("");
+    }
     /* print the answer */
     if (verbose) {
       show_state();
@@ -721,12 +771,23 @@ class evaluate {
       }
     }
 
+    if (verbose) { System.out.printf("upto=%d\n",upto); }
+    GenericType gt; //only allow list of 
     if (stktype[0]==ST_NUM) {
-      return  new GenericType(stknum[0]);
+      gt=new GenericType(stknum[0]);
     } else {
       if (verbose) { System.out.printf("Returning a string type from evaluate\n"); }
-      return  new GenericType(stkstring[0]);
+      gt=new GenericType(stkstring[0]);
     }
+    // if there are more, add to it
+    for (int i=1; i<upto; ++i) {
+      if (stktype[i]==ST_NUM) {
+        gt.add(stknum[i]);
+      } else {
+        gt.add(stkstring[i]);
+      }
+    }
+    return gt;
     //return stknum[0]; // we cant do this now, we must return maybe a string (even if it is a number)
   }
 }
