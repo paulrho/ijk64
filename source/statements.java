@@ -16,8 +16,9 @@ import java.io.*;
 
 class statements {
 
-  //boolean verbose=false;
-  boolean verbose=true;
+  boolean verbose=false;
+  //boolean verbose=true;
+
   String read_a_file() {
 
     String content="";
@@ -140,7 +141,9 @@ void interpret_string(String passed_line)
 
   // instansiate the machine
   machine = new Machine();
+  machine.verbose=verbose;
   machine.initialise_engines(); // silly, but there is a reason
+  machine.verbose=verbose;
 
   // skip to the chase, and just read the line #s
   precache_all_lines();
@@ -154,6 +157,16 @@ void interpret_string(String passed_line)
       if (verbose) { System.out.printf("No line # -finishing\n"); }
       break;
     }
+    // debugging
+    if (false) {
+      if (keepLine.equals("5110")) {
+        verbose=true;
+        machine.dumpstate();
+      } else {
+        verbose=false;
+      }
+    }
+
     SkipSpaces();
     while(true) {
       SkipSpaces();
@@ -215,7 +228,7 @@ boolean ReadStatement() {
         if (ProcessIGNOREstatement()) { return true; }
         break;
       case ST_DIM: 
-        if (ProcessIGNOREstatement()) { return true; }
+        if (ProcessDIMstatement()) { return true; }
         break;
       case ST_GET: 
         if (ProcessIGNOREstatement()) { return true; }
@@ -236,7 +249,8 @@ boolean ReadStatement() {
     if (ReadAssignment()) {
       ReadExpression();
       if (verbose) { System.out.printf("MachineVariableSet(variable=%s with evaluate( %s ))\n",keepVariable,keepExpression); }
-      machine.setvariable(keepVariable,machine.evaluate(keepExpression));
+      // parse the keep variable in the machine to turn X(I+1) into X(42)
+      machine.setvariable(machine.parse(keepVariable),machine.evaluate(keepExpression));
       ReadColon();
       return true;
     } else {
@@ -269,6 +283,16 @@ boolean ReadStatementToken() {
   //ReadAssignment();
 
   return false;
+}
+
+boolean ProcessDIMstatement()
+{
+  if (verbose) { System.out.printf("Processing DIM statement\n"); }
+  ReadExpression();
+  if (verbose) { System.out.printf("Machine to DIM( %s )\n",keepExpression); }
+  machine.evaluate(keepExpression); // throw away the result, we are just dimensioning the array
+  ReadColon();
+  return true;
 }
 
 boolean ProcessPRINTstatement()
@@ -365,15 +389,41 @@ boolean ProcessRETURNstatement()
 boolean ProcessNEXTstatement()
 {
   ReadExpression(); // not really, should just be a variable!!
+  // split up between commas
+  int at=0; 
+  int start=0;
+  while (at<keepExpression.length()) {
+    if (keepExpression.substring(at,at+1).equals(",")) {
+      if (machine.processNEXT(pnt,keepExpression.substring(start,at))) {
+        // we did loop
+        pnt=machine.executionpoint;
+        return true; // we skip the following ones
+      }
+      start=at+1;
+    }
+    at++;
+  }
+  if (machine.processNEXT(pnt,keepExpression.substring(start,keepExpression.length()))) {
+    // we did loop
+    pnt=machine.executionpoint;
+    return true; // we skip the following ones
+  }
   ReadColon();
   return true;
 }
 
 boolean ProcessFORstatement()
 {
+  String forto;
+  String forstep="1";
   if (verbose) { System.out.printf("Processing FOR statement\n"); }
   ReadAssignment();
   ReadExpression();
+
+  if (verbose) { System.out.printf("MachineVariableSet(variable=%s with evaluate( %s ))\n",keepVariable,keepExpression); }
+  // parse the keep variable in the machine to turn X(I+1) into X(42)
+  machine.setvariable(machine.parse(keepVariable),machine.evaluate(keepExpression));
+
   if (verbose) { System.out.printf("MachineVariableSet(variable=%s with evaluate( %s ))\n",keepVariable,keepExpression); }
   ReadStatementToken(); // note MUST be TO
   if (gotToken!=ST_TO) {
@@ -381,10 +431,13 @@ boolean ProcessFORstatement()
     return false;
   }
   ReadExpression();
+  forto=keepExpression;
+  if (verbose) { System.out.printf("NEXT: to string = %s\n",forto); }
   if (!ReadColon() && pnt<linelength && !line.substring(pnt,pnt+1).equals("\n")) {
     ReadStatementToken(); // note CAN be STEP
     if (gotToken==ST_STEP) {
       ReadExpression();
+      forstep=keepExpression;
       // do we need to read the colon?
       return true;
     } else {
@@ -398,6 +451,7 @@ boolean ProcessFORstatement()
   // should to be an expression or a evaluated number?
   //machine.processFOR(/*position*/pnt,/*variable*/..,/*to*/..,/*step*/..);
   ReadColon(); // check
+  machine.createFORloop(pnt, keepVariable, machine.evaluate(forto).num(), machine.evaluate(forstep).num());
   return true;
 }
 
@@ -465,9 +519,22 @@ boolean ReadAssignment()
 {
     int at=0;
     // up here - should we get rid of spaces?
+    int bracketcount=0;
+    boolean isarray=false;
+    int start=pnt;
     while (pnt+at<linelength) {
       
-      if (line.substring(pnt+at,pnt+at+1).equals("=")) {
+      String a=line.substring(pnt+at,pnt+at+1);
+      if (a.equals("(")) { 
+        if (!isarray && bracketcount==0) {
+          // okay, we mark the start here
+          start=pnt+at+1;
+          isarray=true; 
+        }
+        bracketcount++; 
+      } else if (a.equals(")")) { bracketcount--; }
+        // okay, we have an array
+      else if (a.equals("=")) {
         // should only allow variables
         // if (at==0) start allowed
         // else internal allowed
@@ -477,6 +544,17 @@ boolean ReadAssignment()
     }
     if (pnt+at<linelength) {
       // we have got variable =
+      if (false) {
+        if (isarray) {
+          if (verbose) { System.out.printf("Found an ARRAY variable %s\n",line.substring(pnt,pnt+at)); }
+          // really, should evaluate the bit in the middle
+          // assuming (very big assumption that we end with )= when there is an array assignment)
+          if (verbose) { System.out.printf("Found an ARRAY contents= %s\n",line.substring(start,pnt+at-1)); }
+     
+          keepVariable=line.substring(pnt,start)+machine.evaluate(line.substring(start,pnt+at-1)).print()+")"; // the contents of the array evaluated
+          if (verbose) { System.out.printf("Found an ARRAY variable %s\n",keepVariable); }
+        }
+      }
       if (verbose) { System.out.printf("Found variable %s\n",line.substring(pnt,pnt+at)); }
       keepVariable=line.substring(pnt,pnt+at); // keep it
       pnt+=at+1; // read out the variable and the "=" sign
