@@ -2,10 +2,19 @@ class GenericType {
 
   static final int ST_NUM=0;
   static final int ST_STRING=1;
+  static final int ST_LIST=10; // these are comma separated (possible mixed) values
 
   int type;
   double aval;
   String astring;
+  GenericType gtlist[]; // an array of generic types
+  int gttop=1; // normally is initialised as a singleton
+
+  GenericType(GenericType base)
+  {
+    type=base.type;
+    aval=base.aval;
+  }
 
   GenericType()
   { //default
@@ -24,6 +33,29 @@ class GenericType {
     aval=val;
   }
 
+  // here we add to a list
+  void add(double val) {
+    //add a generic type
+   if (gttop==1) {
+     gtlist=new GenericType[10]; // empty types
+     gtlist[0]=new GenericType(this); // duplicate this generic type and put it on the list
+   }
+   // add to list
+   gtlist[gttop]=new GenericType(val);
+   gttop++;
+  }
+
+  void add(String thestring) {
+    //add a generic type
+   if (gttop==1) {
+     gtlist=new GenericType[10]; // empty types
+     gtlist[0]=new GenericType(this); // duplicate this generic type and put it on the list
+   }
+   // add to list
+   gtlist[gttop]=new GenericType(thestring);
+   gttop++;
+  }
+
   boolean isNum() {
     if (type==ST_NUM) { return true; } else { return false; }
   }
@@ -39,9 +71,19 @@ class GenericType {
   String print() {
     if (isNum()) {
       return new Double(aval).toString();
-    } else {
+    } else if (type==ST_STRING) {
       if (false) { System.out.printf("Returning a String\n"); }
       return astring;
+    } else if (type==ST_LIST) {
+      // in turn, separated by commas, display all:
+      String building="";
+      for (int i=0; i<gttop; ++i) {
+        if (i!=0) { building+=","; }
+        building+=gtlist[i].print();
+      }
+      return building;
+    } else {
+      return "";
     }
   }
 
