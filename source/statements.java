@@ -11,6 +11,12 @@
 //   count the brackets and separate on the outer commas
 //  or change evaluate to know about a DIM statement (it separates commas etc)
 
+// other notes, 20060203
+// in c64 it appears that print expressions allow adjacency where there is an embedded token
+// such that  print a$tab(16)b$  (or even atab(16)b)  is okay but not  print a$b$
+// also "xxx"t$ is okay too
+// one way to deal with this is to perhaps ...
+
 
 import java.io.*;
 
@@ -159,11 +165,13 @@ void interpret_string(String passed_line)
     }
     // debugging
     if (false) {
-      if (keepLine.equals("5110")) {
+      if (keepLine.equals("360") || keepLine.equals("361")) {
+        System.out.printf("Found line, switching on debugging\n");
         verbose=true;
+        machine.verbose=true;
         machine.dumpstate();
       } else {
-        verbose=false;
+        //verbose=false;
       }
     }
 
@@ -300,17 +308,19 @@ boolean ProcessPRINTstatement()
   if (verbose) { System.out.printf("Processing PRINT statement\n"); }
   ReadExpression();
   if (verbose) { System.out.printf("MachinePrintEvaluate( %s )\n",keepExpression); }
-  System.out.printf("%s\n",machine.evaluate(keepExpression).print());
+  System.out.printf("%s",machine.evaluate(keepExpression).print());
   // Machine evaluate this expression and PRINT it!
   //System.out.printf("Would evaluate the expression %s\n","not finished coding yet");
   // if we finished with ";", then loop again
   while (pnt<linelength && line.substring(pnt,pnt+1).equals(";")) {
     pnt++;
+    keepExpression=""; // to prepare for Nothing read
     ReadExpression();
     if (verbose) { System.out.printf("MachinePrintEvaluate( %s )\n",keepExpression); }
-    System.out.printf("%s\n",machine.evaluate(keepExpression).print());
+    System.out.printf("%s",machine.evaluate(keepExpression).print());
     //System.out.printf("  also would evaluate the expression %s\n","not finished coding yet");
   }
+  if (!keepExpression.equals("")) { System.out.printf("\n"); }
   ReadColon(); // check
   return true;
 }
@@ -388,6 +398,7 @@ boolean ProcessRETURNstatement()
 
 boolean ProcessNEXTstatement()
 {
+  keepExpression=""; // in case it is nothing!
   ReadExpression(); // not really, should just be a variable!!
   // split up between commas
   int at=0; 
