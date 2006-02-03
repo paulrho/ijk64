@@ -15,6 +15,9 @@ class C64 {
     C64Screen.static_bgtrans=false;
     C64Screen.static_handles=true;
     screen=new C64Screen("C64");
+
+    screen.scale=2;
+
     if (false) {
       screen.println("This is a test");
       screen.println("Mellow word.");
