@@ -25,6 +25,7 @@ class statements {
   boolean verbose=false;
   //boolean verbose=true;
 
+
   String read_a_file() {
 
     String content="";
@@ -143,13 +144,13 @@ void interpret_string(String passed_line)
   //System.out.printf("Got line %s\n",line);
 
   // fix up code
-  line=line.toUpperCase(); // convert to uppercase
+  //try it without now // line=line.toUpperCase(); // convert to uppercase
 
   // instansiate the machine
   machine = new Machine();
-  machine.verbose=verbose;
+  ///machine.verbose=verbose;
   machine.initialise_engines(); // silly, but there is a reason
-  machine.verbose=verbose;
+  //machine.verbose=verbose;
 
   // skip to the chase, and just read the line #s
   precache_all_lines();
@@ -165,7 +166,7 @@ void interpret_string(String passed_line)
     }
     // debugging
     if (false) {
-      if (keepLine.equals("360") || keepLine.equals("361")) {
+      if (keepLine.equals("100")) {
         System.out.printf("Found line, switching on debugging\n");
         verbose=true;
         machine.verbose=true;
@@ -274,7 +275,7 @@ boolean ReadStatementToken() {
     int at=0;
     //System.out.printf("Comparing %s\n",basicTokens[tok]);
     while (pnt+at<linelength && at<basicTokens[tok].length()) {
-      if (!line.substring(pnt+at,pnt+at+1).equals(basicTokens[tok].substring(at,at+1))) {
+      if (!line.substring(pnt+at,pnt+at+1).equalsIgnoreCase(basicTokens[tok].substring(at,at+1))) {
         break;
       }
       at++;
@@ -309,18 +310,21 @@ boolean ProcessPRINTstatement()
   ReadExpression();
   if (verbose) { System.out.printf("MachinePrintEvaluate( %s )\n",keepExpression); }
   System.out.printf("%s",machine.evaluate(keepExpression).print());
+  machine.print(machine.evaluate(keepExpression).print());
   // Machine evaluate this expression and PRINT it!
   //System.out.printf("Would evaluate the expression %s\n","not finished coding yet");
   // if we finished with ";", then loop again
+  keepExpression="dummy"; // this is here to allow for a null print PRINT this means a new line will get issued
   while (pnt<linelength && line.substring(pnt,pnt+1).equals(";")) {
     pnt++;
     keepExpression=""; // to prepare for Nothing read
     ReadExpression();
     if (verbose) { System.out.printf("MachinePrintEvaluate( %s )\n",keepExpression); }
     System.out.printf("%s",machine.evaluate(keepExpression).print());
+    machine.print(machine.evaluate(keepExpression).print());
     //System.out.printf("  also would evaluate the expression %s\n","not finished coding yet");
   }
-  if (!keepExpression.equals("")) { System.out.printf("\n"); }
+  if (!keepExpression.equals("")) { System.out.printf("\n"); machine.printnewline();}
   ReadColon(); // check
   return true;
 }
