@@ -242,13 +242,18 @@ class evaluate {
         stktype[upto-2]=ST_STRING;
         String building="";
         for (int i=0; i<stknum[upto-1]; ++i) {
-          building+=" ";
+          building+="(rght)";
         }
         stkstring[upto-2]=building;
         return;
+      } else if (function.equals("pos")) {
+        // tap into the machine - I think this gives the position on the screen?
+        stktype[upto-2]=ST_NUM;
+        stknum[upto-2]=0.0; // just for now - not implemented
+        return;
       } else if (function.equals("len")) {
         stktype[upto-2]=ST_NUM;
-        stknum[upto-2]=stkstring[upto-2].length();
+        stknum[upto-2]=stkstring[upto-1].length();
         return;
       } else if (function.equals("str$")) {
         if (parameters==1) {
@@ -482,6 +487,8 @@ class evaluate {
 
   void pushOp(String op) {
     stknum[upto]=0.0; // we are skipping the num
+    stktype[upto]=ST_NUM; // needed to make -ve work, (it was keeping the string setting)
+                          // this function is only used by -ve and bracket (which doesnt look at this variable)
     stkop[upto]=op;
     upto++;
     doing=D_NUM; // if you are going to push an op, it is ( and therefore next is num
