@@ -72,7 +72,7 @@ class statements {
 
 int MAXTOKENS=100;
 
-String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","REM","PRINT","END","DIM","GET","POKE","OPEN","INPUT","CLOSE","DATA","RUN","READ","RESTORE"};
+String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","REM","PRINT","END","DIM","GET","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT"};
 static final int ST_FOR=0;
 static final int ST_TO=1;
 static final int ST_STEP=2;
@@ -89,12 +89,13 @@ static final int ST_DIM=12;
 static final int ST_GET=13;
 static final int ST_POKE=14;
 static final int ST_OPEN=15;
-static final int ST_INPUT=16;
+static final int ST_INPUT1=16;
 static final int ST_CLOSE=17;
 static final int ST_DATA=18;
 static final int ST_RUN=19;
 static final int ST_READ=20;
 static final int ST_RESTORE=21;
+static final int ST_INPUT=22;
 
 String line;
 int pnt;
@@ -239,10 +240,13 @@ boolean ReadStatement() {
       case ST_DIM: 
         if (ProcessDIMstatement()) { return true; }
         break;
+      case ST_INPUT: case ST_INPUT1:
+        if (ProcessINPUTstatement()) { return true; }
+        break;
       case ST_GET: 
         if (ProcessIGNOREstatement()) { return true; }
         break;
-      case ST_POKE: case ST_OPEN: case ST_INPUT: case ST_CLOSE:
+      case ST_POKE: case ST_OPEN: case ST_CLOSE:
         if (ProcessIGNOREstatement()) { return true; }
         break;
       case ST_END: 
@@ -396,7 +400,8 @@ boolean ProcessRETURNstatement()
     machine.popReturn();
     pnt=machine.executionpoint; // we should now have a different execution point
   }
-  IgnoreRestofLine();
+  ReadColon(); // because we may have been left with a colon
+  //IgnoreRestofLine(); // no this is wrong, we are back were we came from here!
   return true;
 }
 
@@ -482,6 +487,17 @@ void IgnoreRestofLine()
 boolean ProcessREMstatement() 
 {
   IgnoreRestofLine();
+  return true;
+}
+
+boolean ProcessINPUTstatement()
+{
+  ReadExpression();
+  System.out.printf("inputting to %s\n",keepExpression);
+  String got=machine.getline();
+  System.out.printf("got string \"%s\"\n",got.trim());
+  // it a string so keep it quoted
+  machine.setvariable(machine.parse(keepExpression),machine.evaluate("\""+got.trim().toLowerCase()+"\""));
   return true;
 }
 
