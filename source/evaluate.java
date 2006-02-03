@@ -185,6 +185,9 @@ class evaluate {
     int lefttype=stktype[upto-2]; // the type of variable we are working with
     int righttype=stktype[upto-1]; // the type of variable we are working with
 
+    // for all these convert the function (or array name) to lowercase
+    if (function != null) { function=function.toLowerCase(); } //20060204pgs
+
     double answer=0.0;
     if (oper.equals(OP_OPEN_BRACKET) && function != null && !function.equals("")) { 
       // if it is bracketed and there is a function
@@ -336,6 +339,7 @@ class evaluate {
   }
 
   int prec(String oper) {
+    oper=oper.toLowerCase(); //20060204pgs
          if (oper.equals(",")) { return 1; } // allows me to use setOp without changing code!
     else if (oper.equals("or")) { return 6; }
     else if (oper.equals("xor")) { return 6; }
@@ -371,6 +375,7 @@ class evaluate {
   }
 
   GenericType calc(String leftstr, String oper, String rightstr) {
+    oper=oper.toLowerCase(); //20060204pgs
     // returns a number
          if (oper.equals(">")) { return new GenericType((leftstr.compareTo(rightstr)>0)?-1.0:0.0); }
     else if (oper.equals("<")) { return new GenericType((rightstr.compareTo(leftstr)>0)?-1.0:0.0); }
@@ -397,6 +402,7 @@ class evaluate {
   }
 
   double calc(double left, String oper, double right) {
+    oper=oper.toLowerCase(); //20060204pgs
     double answer=0.0;
     // old boolean like way, lets do a c64 bit like way now
          //if (oper.equals("or")) { answer=(((left!=0.0)?true:false) || ((right!=0.0)?true:false))?-1.0:0.0; }
@@ -434,7 +440,8 @@ class evaluate {
   GenericType get_value(String variablename, int params, double p1, double p2, double p3) {
     if (using_machine!=null) {
       // -
-      return using_machine.getvariable(variablename.toUpperCase(),params,(int)p1,(int)p2,(int)p3); // convert back to uppercase
+      //return using_machine.getvariable(variablename.toUpperCase(),params,(int)p1,(int)p2,(int)p3); // convert back to uppercase
+      return using_machine.getvariable(variablename,params,(int)p1,(int)p2,(int)p3); // convert back to uppercase
     }
     return new GenericType(0.0);
   }
@@ -442,8 +449,10 @@ class evaluate {
   GenericType get_value(String variablename) {
     if (using_machine!=null) {
       // -
-      return using_machine.getvariable(variablename.toUpperCase()); // convert back to uppercase
+      //return using_machine.getvariable(variablename.toUpperCase()); // convert back to uppercase
+      return using_machine.getvariable(variablename); // convert back to uppercase
     }
+    variablename=variablename.toLowerCase(); //20060204pgs
     if (variablename.equals("pi")) {
       return new GenericType(Math.PI);
     } else if (variablename.equals("x")) {
@@ -503,10 +512,10 @@ class evaluate {
           while (ispnt<intstring.length()-1) {
 
             a=intstring.substring(ispnt+1,ispnt+2);
-            if (a.compareTo("0")>=0 && a.compareTo("9")<=0 || a.equals(".") || a.equals("e") 
+            if (a.compareTo("0")>=0 && a.compareTo("9")<=0 || a.equals(".") || a.equalsIgnoreCase("e") 
               || last_e && (a.equals("-") || a.equals("+"))) {
               building=building+a;
-              if (a.equals("e")) last_e=true; else last_e=false;
+              if (a.equalsIgnoreCase("e")) last_e=true; else last_e=false;
             } else { break; }
             ispnt++;
           }
@@ -524,12 +533,12 @@ class evaluate {
             } else { break; }
             ispnt++;
             // if we got or or and, then break out
-            if (building.equals("or") || building.equals("and")) {
+            if (building.equalsIgnoreCase("or") || building.equalsIgnoreCase("and")) {
               break;
             }
           }
           if (verbose) { System.out.printf("%sgot a string %s\n",printprefix,building); }
-          if (building.equals("or") || building.equals("and")) {
+          if (building.equalsIgnoreCase("or") || building.equalsIgnoreCase("and")) {
             //operatortoken=building;
             setOp(building);
             return;
@@ -581,15 +590,16 @@ class evaluate {
           while (ispnt<intstring.length()-1) {
             // expensive - think of a better way! - trying to make it a bit better - dont know if it helps
             a=intstring.substring(ispnt+1,ispnt+2);
-            if (a.equals("o") && ispnt<intstring.length()-2 && intstring.substring(ispnt+1,ispnt+3).equals("or")) {
+            if (a.equalsIgnoreCase("o") && ispnt<intstring.length()-2 && intstring.substring(ispnt+1,ispnt+3).equalsIgnoreCase("or")) {
               //note, if we find an imbedded or or and, we must pop it off, and stop processing!
               break;
             }
-            if (a.equals("a") && ispnt<intstring.length()-3 && intstring.substring(ispnt+1,ispnt+4).equals("and")) {
+            if (a.equalsIgnoreCase("a") && ispnt<intstring.length()-3 && intstring.substring(ispnt+1,ispnt+4).equalsIgnoreCase("and")) {
               //note, if we find an imbedded or or and, we must pop it off, and stop processing!
               break;
             }
-            if (a.compareTo("a")>=0 && a.compareTo("z")<=0 || a.compareTo("0")>=0 && a.compareTo("9")<=0) {
+            // not sure if this ignore case is right
+            if (a.compareToIgnoreCase("a")>=0 && a.compareToIgnoreCase("z")<=0 || a.compareTo("0")>=0 && a.compareTo("9")<=0) {
               building=building+a;
             } else if (a.equals("$") || a.equals("%")) {
               building=building+a;
@@ -637,7 +647,7 @@ class evaluate {
     doing=D_NUM;
 
     intstring=intstring_param; // this may be a dumb way, but it will make code more readable
-    intstring=intstring.toLowerCase(); // opposite of statement.java!
+    // try without // intstring=intstring.toLowerCase(); // opposite of statement.java!
     if (verbose) { System.out.printf("%s>>Interpreting %s\n",printprefix,intstring); }
 
     /* take it a character at a time */
@@ -668,7 +678,8 @@ class evaluate {
           double num=readNum();
           pushNum(num); 
           doing=D_OP;
-        } else if (a.compareTo("a")>=0 && a.compareTo("z")<=0) {
+        // not sure if this ignore case is right
+        } else if (a.compareToIgnoreCase("a")>=0 && a.compareToIgnoreCase("z")<=0) {
           readString();
           if (!is_function) { doing=D_OP; }
         } else if (a.equals("\"")) {
