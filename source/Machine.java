@@ -40,8 +40,8 @@ class Machine {
   int topgosubstack=0;
   int gosubstack[];
 
-  //boolean verbose=false;
-  boolean verbose=true;
+  boolean verbose=false;
+  //boolean verbose=true;
 
   int executionpoint; // ?? where we currently are at
 
@@ -325,9 +325,12 @@ class Machine {
     evaluate_engine = new evaluate(this);  // create engine
 
     //evaluate_engine.verbose=true;
-    //evaluate_engine.verbose=false;
     evaluate_engine.verbose=verbose; // inherit!
+    evaluate_engine.verbose=false;
     evaluate_engine.quiet=true;
+
+    // only for C64Screen
+    machinescreen=C64Screen.out;
   }
 
   void gotoLine(String lineNostr) {
@@ -390,6 +393,18 @@ class Machine {
       }
     }
   }
+
+  C64Screen machinescreen;
+  
+  // only for screen
+  void print(String arg) {
+    machinescreen.print(arg);
+  }
+
+  void printnewline() {
+    machinescreen.println();
+  }
+
 }
 
   /////////////////
