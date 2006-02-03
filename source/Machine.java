@@ -405,6 +405,9 @@ class Machine {
     machinescreen.println();
   }
 
+  String getline() {
+    return machinescreen.screenInput();
+  }
 }
 
   /////////////////
