@@ -25,13 +25,16 @@ class statements {
   boolean verbose=false;
   //boolean verbose=true;
 
-
   String read_a_file() {
+    return read_a_file("test.basic");
+  }
+
+  String read_a_file(String filename) {
 
     String content="";
 
     try {
-      FileInputStream fis = new FileInputStream("test.basic");
+      FileInputStream fis = new FileInputStream(filename);
       int x= fis.available();
       byte b[]= new byte[x];
       fis.read(b);
@@ -42,10 +45,16 @@ class statements {
     return content;
   }
 
-  statements(String[] args)
+  statements(String interpstring, Machine themachine)
   {
-    //evaluate evaluate_engine = new evaluate();  // create engine
+    machine=themachine;
+    interpret_string(interpstring);
+  }
 
+  statements(String[] args, Machine themachine)
+  {
+    machine=themachine;
+    boolean has_parameter=false;
     for (int i=0; i<args.length; ++i) {
       if (args[i].substring(0,1).equals("-")) {
         if (verbose) { System.out.printf("Got a switch\n"); }
@@ -59,20 +68,19 @@ class statements {
         }
       } else {
         // parameter // do it immediately
-        //has_parameter=true;
-        interpret_string(args[i]);
+        has_parameter=true;
+        interpret_string( read_a_file(args[i]));
       }
     }
     // at the moment, spaces are passed onto the "evaluate interpreter" that's okay
     //interpret_string("FORI=1TO1000:PRINTI:NEXT");
-    interpret_string( read_a_file() );
-
+    if (!has_parameter) { interpret_string( read_a_file() ); }
 
   } // end func
 
 int MAXTOKENS=100;
 
-String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","REM","PRINT","END","DIM","GET","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT"};
+String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","REM","PRINT","END","DIM","GET","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE"};
 static final int ST_FOR=0;
 static final int ST_TO=1;
 static final int ST_STEP=2;
@@ -96,6 +104,8 @@ static final int ST_RUN=19;
 static final int ST_READ=20;
 static final int ST_RESTORE=21;
 static final int ST_INPUT=22;
+static final int ST_LIST=23;
+static final int ST_META_VERBOSE=24;
 
 String line;
 int pnt;
@@ -106,7 +116,7 @@ String keepVariable;
 String keepExpression;
 String keepLine;
 
-Machine machine;
+Machine machine; // we now expect to be passed this from machine itself
 
 void precache_all_lines()
 {
@@ -147,23 +157,25 @@ void interpret_string(String passed_line)
   // fix up code
   //try it without now // line=line.toUpperCase(); // convert to uppercase
 
-  // instansiate the machine
-  machine = new Machine();
-  ///machine.verbose=verbose;
-  machine.initialise_engines(); // silly, but there is a reason
-  //machine.verbose=verbose;
+  // nomore // // instansiate the machine
+  // nomore // machine = new Machine();
+  // nomore // ///machine.verbose=verbose;
+  // nomore // machine.initialise_engines(); // silly, but there is a reason
+  // nomore // //machine.verbose=verbose;
 
   // skip to the chase, and just read the line #s
   precache_all_lines();
 
   pnt=0;
   // read the line# first
-  while (true) {
+  while (pnt<line.length()) {
     SkipSpaces();
     if (verbose) { System.out.printf("\n"); }
     if (!ReadLineNo()) {
-      if (verbose) { System.out.printf("No line # -finishing\n"); }
-      break;
+      //if (verbose) { System.out.printf("No line # -finishing\n"); }
+      //break;
+      // what about this - execute that line IMMEDIATE mode
+      if (verbose) { System.out.printf("No line # NOT finishing going direct\n"); }
     }
     // debugging
     if (false) {
@@ -178,10 +190,13 @@ void interpret_string(String passed_line)
     }
 
     SkipSpaces();
-    while(true) {
+    while(pnt<linelength) {
       SkipSpaces();
       if (!ReadStatement()) {
         System.out.printf("?SYNTAX ERROR 101: did not get statement\n");
+        machine.print("?syntax error[CR]");
+        // force it to exit
+        pnt=linelength;
         break;
       }
       if (pnt>=line.length() || line.substring(pnt,pnt+1).equals("\n")) {
@@ -231,26 +246,31 @@ boolean ReadStatement() {
       case ST_READ: 
         if (ProcessIGNOREstatement()) { return true; }
         break;
-      case ST_RUN: 
-        if (ProcessREMstatement()) { return true; }
-        break;
       case ST_DATA: 
         if (ProcessIGNOREstatement()) { return true; }
+        break;
+      case ST_RUN: 
+        if (ProcessREMstatement()) { return true; }
         break;
       case ST_DIM: 
         if (ProcessDIMstatement()) { return true; }
         break;
+      case ST_GET:
+        if (ProcessGETstatement()) { return true; }
+        break;
+      case ST_META_VERBOSE:
+        verbose=true; machine.verbose=true;
+        machine.evaluate_engine.verbose=true;
+        return true;
       case ST_INPUT: case ST_INPUT1:
         if (ProcessINPUTstatement()) { return true; }
-        break;
-      case ST_GET: 
-        if (ProcessIGNOREstatement()) { return true; }
         break;
       case ST_POKE: case ST_OPEN: case ST_CLOSE:
         if (ProcessIGNOREstatement()) { return true; }
         break;
       case ST_END: 
         MachineEND();
+        pnt=line.length();
         return true; // just END!
     }
     return false;
@@ -313,7 +333,7 @@ boolean ProcessPRINTstatement()
   if (verbose) { System.out.printf("Processing PRINT statement\n"); }
   ReadExpression();
   if (verbose) { System.out.printf("MachinePrintEvaluate( %s )\n",keepExpression); }
-  System.out.printf("%s",machine.evaluate(keepExpression).print());
+  if (verbose  ) { System.out.printf("%s",machine.evaluate(keepExpression).print()); }
   machine.print(machine.evaluate(keepExpression).print());
   // Machine evaluate this expression and PRINT it!
   //System.out.printf("Would evaluate the expression %s\n","not finished coding yet");
@@ -324,11 +344,14 @@ boolean ProcessPRINTstatement()
     keepExpression=""; // to prepare for Nothing read
     ReadExpression();
     if (verbose) { System.out.printf("MachinePrintEvaluate( %s )\n",keepExpression); }
-    System.out.printf("%s",machine.evaluate(keepExpression).print());
+    if (verbose  ) { System.out.printf("%s",machine.evaluate(keepExpression).print()); }
     machine.print(machine.evaluate(keepExpression).print());
     //System.out.printf("  also would evaluate the expression %s\n","not finished coding yet");
   }
-  if (!keepExpression.equals("")) { System.out.printf("\n"); machine.printnewline();}
+  if (!keepExpression.equals("")) { 
+    if (verbose  ) { System.out.printf("\n"); }
+    machine.printnewline();
+  }
   ReadColon(); // check
   return true;
 }
@@ -490,6 +513,16 @@ boolean ProcessREMstatement()
   return true;
 }
 
+boolean ProcessGETstatement()
+{
+  ReadExpression();
+  if (verbose) { System.out.printf("getting to %s\n",keepExpression); }
+  String got=machine.getkey();
+  if (verbose) { System.out.printf("got string \"%s\"\n",got); }
+  // it a string so keep it quoted
+  machine.setvariable(machine.parse(keepExpression),machine.evaluate("\""+got.toLowerCase()+"\""));
+  return true;
+}
 boolean ProcessINPUTstatement()
 {
   ReadExpression();
@@ -498,6 +531,7 @@ boolean ProcessINPUTstatement()
   System.out.printf("got string \"%s\"\n",got.trim());
   // it a string so keep it quoted
   machine.setvariable(machine.parse(keepExpression),machine.evaluate("\""+got.trim().toLowerCase()+"\""));
+  if (verbose) { machine.dumpstate(); }
   return true;
 }
 
@@ -658,7 +692,8 @@ boolean MachineEND() {
 
   public static void main(String[] args) {
     if (false) { System.out.printf("Mello Word\n"); }
-    new statements(args);
+    // no longer can run it like this - must run it from machine
+    //new statements(args );
   }
 }
 
