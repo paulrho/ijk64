@@ -1,3 +1,12 @@
+////////////////////////////////////////////////////////////////////
+// 
+// Machine
+// 
+////////////////////////////////////////////////////////////////////
+
+//////////////////
+// VariablePointer
+//////////////////
 class VariablePointer {
   int variableindex;
   static final int VP_SIMPLE=0;
@@ -20,15 +29,27 @@ class VariablePointer {
   }
 }
 
+///////////////
+// Variables
+///////////////
+class Variables {
+
+}
+
+///////////////
+// Machine
+///////////////
 class Machine {
   //
   String code; // here is the code, stored as one big string
+
+  // line cache
   static final int MAXLINES=10000;
   int toplinecache=0;
-  int linecacheline[]; // when we get to them, we store the pointer into the code of each line
-                           // of course we have to read ahead one we get a GOTO or GOSUB
+  int linecacheline[]; // when we get to them, we store the pointer into the code of each line // of course we have to read ahead one we get a GOTO or GOSUB
   int linecachepnt[];
 
+  // for stack
   static final int MAXFORS=30; // make it break faster
   int topforloopstack=0;
   int forloopstack[];
@@ -36,6 +57,7 @@ class Machine {
   double forloopstack_to[];
   double forloopstack_step[];
 
+  // gosub stack
   static final int MAXGOSUBS=300;
   int topgosubstack=0;
   int gosubstack[];
@@ -310,10 +332,11 @@ class Machine {
     // work out the default type:
     if (variable.substring(variable.length()-1,variable.length()).equals("$")) {
       createvariable(variable,new GenericType(""));
+      return new GenericType("");
     } else {
       createvariable(variable,new GenericType(0.0));
+      return new GenericType(0.0);
     }
-    return new GenericType(0.0);
   }
 
   // from within here we execute the evaluate?
@@ -408,6 +431,24 @@ class Machine {
   String getline() {
     return machinescreen.screenInput();
   }
+  String getkey() {
+    if (machinescreen.hasinput()) {
+      return ""+machinescreen.givemekey();
+    } else {
+      return "";
+    }
+  }
+
+  // statements no longer have any meaning unless we are operating on a machine
+   // now for different instansiation order
+  void statements(String[] args) {
+    new statements(args, this); // tell the statements class who I am
+  }
+  
+  void statements(String arg) {
+    new statements(arg, this); // tell the statements class who I am
+  }
+
 }
 
   /////////////////
