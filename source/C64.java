@@ -9,14 +9,40 @@ import java.awt.event.*; // for key events
 
 class C64 {
   C64Screen screen;
+  Machine machine;
 
-  public C64() {
+  public C64(String args[]) {
     System.out.println("Running test harness for C64Screen...");
     C64Screen.static_bgtrans=false;
     C64Screen.static_handles=true;
     screen=new C64Screen("C64");
+    // instansiate the machine
+    machine=new Machine(); // we initialise it once here
+    ///machine.verbose=verbose;
+    machine.initialise_engines(); // silly, but there is a reason
+    //machine.verbose=verbose;
 
     screen.scale=2;
+
+    for (int i=0; i<args.length; ++i) {
+      if (args[i].substring(0,1).equals("-")) {
+        if (false) { System.out.printf("Got a switch\n"); }
+
+        if (args[i].substring(0,2).equals("-v")) {
+          //evaluate_engine.verbose=true;
+        } else if (args[i].substring(0,2).equals("-q")) {
+          //evaluate_engine.verbose=false;
+        } else if (args[i].substring(0,2).equals("-t")) {
+          //do_many=true; // timing test
+        }
+      } else {
+        // parameter // do it immediately
+        //has_parameter=true;
+        //filename=args[i];
+      }
+    }
+
+
 
     if (false) {
       screen.println("This is a test");
@@ -42,28 +68,24 @@ class C64 {
         screen.startupscreen();
         continue;
       } else if ((result.substring(0,3)).equals("RUN")) {
-        //screen.println("mello word");
-        //screen.println("25");
-        String dummy[];
-        dummy=new String[1];
-        dummy[0]="x";
-        new statements(dummy);
+        machine.statements(args); // we now execute the statements upon a machine
         continue;
-      } else if ((result.substring(0,4)).equals("LOAD")) {
-        screen.println("?very sorry - the interpreter is broken");
-        continue;
-      } else if ((result.substring(0,5)).equals("PRINT")) {
-        screen.println("?very sorry - the interpreter is broken");
-        continue;
+      //} else if ((result.substring(0,4)).equals("LOAD")) {
+        //screen.println("?very sorry - the interpreter is broken");
+        //continue;
+      //} else if ((result.substring(0,5)).equals("PRINT")) {
+        //screen.println("?very sorry - the interpreter is broken");
+        //continue;
       }
       //screen.println("Got string = "+result);
       if ((result.substring(0,40)).equals("                                        ")) continue;
-      screen.println("?syntax error");
+      machine.statements(result.trim()); // and again, upon a machine
+      //screen.println("?syntax error");
     }
   } // end th_C64Screen
 
   public static void main(String args[]) {
-    new C64();
+    new C64(args);
   }
 }
 
