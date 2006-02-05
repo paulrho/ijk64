@@ -283,7 +283,19 @@ boolean ReadStatement() {
       ReadExpression();
       if (verbose) { System.out.printf("MachineVariableSet(variable=%s with evaluate( %s ))\n",keepVariable,keepExpression); }
       // parse the keep variable in the machine to turn X(I+1) into X(42)
-      machine.setvariable(machine.parse(keepVariable),machine.evaluate(keepExpression));
+
+      ///System.out.printf("keepVariable=|%s|\n",keepVariable);
+            ///if (keepVariable.equals("a")) { verbose=true; machine.verbose=true; machine.evaluate_engine.verbose=true; }
+            ///if (verbose) { machine.dumpstate(); }
+      //if (verbose) { System.out.printf("Comp        %s\n",machine.evaluate(keepExpression).print()); }
+      machine.assignment(keepVariable+"="+keepExpression);
+            ///if (verbose) { System.out.printf("            %s  for %s=%s\n",machine.evaluate(keepVariable).print(),keepVariable,keepExpression); }
+            ///if (verbose) { machine.dumpstate(); }
+            ///if (keepVariable.equals("a")) { verbose=false; machine.verbose=false; machine.evaluate_engine.verbose=false; }
+
+      //machine.setvariable(machine.parse(keepVariable),machine.evaluate(keepExpression));
+      // just change this one for the moment - try new way
+
       ReadColon();
       return true;
     } else {
@@ -465,7 +477,8 @@ boolean ProcessFORstatement()
 
   if (verbose) { System.out.printf("MachineVariableSet(variable=%s with evaluate( %s ))\n",keepVariable,keepExpression); }
   // parse the keep variable in the machine to turn X(I+1) into X(42)
-  machine.setvariable(machine.parse(keepVariable),machine.evaluate(keepExpression));
+  machine.assignment(keepVariable.toLowerCase()+"="+keepExpression);
+  //machine.setvariable(machine.parse(keepVariable),machine.evaluate(keepExpression));
 
   if (verbose) { System.out.printf("MachineVariableSet(variable=%s with evaluate( %s ))\n",keepVariable,keepExpression); }
   ReadStatementToken(); // note MUST be TO
@@ -520,9 +533,14 @@ boolean ProcessGETstatement()
   String got=machine.getkey();
   if (verbose) { System.out.printf("got string \"%s\"\n",got); }
   // it a string so keep it quoted
-  machine.setvariable(machine.parse(keepExpression),machine.evaluate("\""+got.toLowerCase()+"\""));
+  machine.assignment(keepExpression.toLowerCase()+"="+"\""+got.toLowerCase()+"\"");
+  //machine.setvariable(machine.parse(keepExpression),machine.evaluate("\""+got.toLowerCase()+"\""));
   return true;
 }
+
+// maybe allow assignments like this
+// A$,B$,C$="X","Y","Z"
+// can be used for INPUT and READ
 boolean ProcessINPUTstatement()
 {
   ReadExpression();
@@ -530,7 +548,8 @@ boolean ProcessINPUTstatement()
   String got=machine.getline();
   System.out.printf("got string \"%s\"\n",got.trim());
   // it a string so keep it quoted
-  machine.setvariable(machine.parse(keepExpression),machine.evaluate("\""+got.trim().toLowerCase()+"\""));
+  machine.assignment(keepExpression.toLowerCase()+"="+"\""+got.trim().toLowerCase()+"\"");
+  //machine.setvariable(machine.parse(keepExpression),machine.evaluate("\""+got.trim().toLowerCase()+"\""));
   if (verbose) { machine.dumpstate(); }
   return true;
 }
