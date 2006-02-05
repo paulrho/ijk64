@@ -22,7 +22,8 @@ class ev {
       } else {
         // parameter // do it immediately
         has_parameter=true;
-        evaluate_engine.interpret_string(args[i]);
+        //evaluate_engine.interpret_string(args[i]);
+        evaluate_engine.interpret_string_with_assignment(args[i]);
       }
     }
 
