@@ -92,6 +92,7 @@ class evaluate {
   // constants and enums
   static int D_NUM=0;
   static int D_OP=1;
+  static int D_ASSIGN=2;
   static String OP_OPEN_BRACKET="(";
   static String OP_CLOSE_BRACKET=")";
   static String OP_COMMA=",";
@@ -188,6 +189,12 @@ class evaluate {
     // for all these convert the function (or array name) to lowercase
     if (function != null) { function=function.toLowerCase(); } //20060204pgs
 
+    if (oper.equals("===")) {
+      // we have an assignment
+      // just do it (how)
+      //setvariable
+      if (verbose) { System.out.printf("I want to assign the variable, but dont know how yet\n"); }
+    }
     double answer=0.0;
     if (oper.equals(OP_OPEN_BRACKET) && function != null && !function.equals("")) { 
       // if it is bracketed and there is a function
@@ -235,7 +242,7 @@ class evaluate {
         // takes a string but returns a double
         stktype[upto-2]=ST_NUM;
         try {
-          stknum[upto-2]=Double.parseDouble(stkstring[upto-2]);
+          stknum[upto-2]=Double.parseDouble(stkstring[upto-1]); // this was WRONG! it cost 3 hours!! -finally fixed 2am monday
         } catch (Exception e) { stknum[upto-2]=0.0; }
         return;
       } else if (function.equals("tab") || function.equals("spc")) { // they probably are different
@@ -346,6 +353,7 @@ class evaluate {
   int prec(String oper) {
     oper=oper.toLowerCase(); //20060204pgs
          if (oper.equals(",")) { return 1; } // allows me to use setOp without changing code!
+    else if (oper.equals("===")) { return 2; } // or should this be lower than , ??
     else if (oper.equals("or")) { return 6; }
     else if (oper.equals("xor")) { return 6; }
     else if (oper.equals("and")) { return 7; }
@@ -446,7 +454,7 @@ class evaluate {
     if (using_machine!=null) {
       // -
       //return using_machine.getvariable(variablename.toUpperCase(),params,(int)p1,(int)p2,(int)p3); // convert back to uppercase
-      return using_machine.getvariable(variablename,params,(int)p1,(int)p2,(int)p3); // convert back to uppercase
+      return using_machine.getvariable(variablename.toLowerCase(),params,(int)p1,(int)p2,(int)p3); // convert back to uppercase
     }
     return new GenericType(0.0);
   }
@@ -455,7 +463,8 @@ class evaluate {
     if (using_machine!=null) {
       // -
       //return using_machine.getvariable(variablename.toUpperCase()); // convert back to uppercase
-      return using_machine.getvariable(variablename); // convert back to uppercase
+      // added this here as we get issues when using a and A
+      return using_machine.getvariable(variablename.toLowerCase()); // convert back to uppercase
     }
     variablename=variablename.toLowerCase(); //20060204pgs
     if (variablename.equals("pi")) {
@@ -503,6 +512,9 @@ class evaluate {
     // now come the tricks, as soon as this op has a lower or equal precedence,
     // pop and calc the two above!
     while (upto>1 && prec(op)<=prec(stkop[upto-2])) {
+      if (stkop[upto-2].equals("===")) {
+        break; // go no further that the equals as well, well do it after this!
+      }
       if (stkop[upto-2].equals(OP_OPEN_BRACKET) || stkop[upto-2].equals(OP_COMMA)) {
         break; // go no further that the brackets or the ","
       }
@@ -564,7 +576,12 @@ class evaluate {
             ispnt++;
           }
           if (verbose) { System.out.printf("%sgot a string %s\n",printprefix,building); }
-          if (building.equals("=") || building.equals(">") || building.equals("<") 
+          if (building.equals("=") && doing==D_ASSIGN || building.equals("===")) { // allows special === when not really expecting assignment! special case for me only!
+            // we should have already known this was coming
+            if (verbose) { System.out.printf("%sfound an assignment operator\n",printprefix); }
+            setOp("==="); // special setting for an assignment // doesnt change anything
+            return;
+          } else if (building.equals("=") || building.equals(">") || building.equals("<") 
               || building.equals(">=") || building.equals("<=")
               || building.equals("=>") || building.equals("=<")
               || building.equals("=") || building.equals("<>")
@@ -624,8 +641,21 @@ class evaluate {
             if (verbose) { System.out.printf("%sPre-Setting functionname to %s at stknum[(upto=)%d]\n",printprefix,stkfunc[upto],upto); }
             is_function=true;
             // now, this could be a function, or an array!
+            return; // because we DONT want to set doing=D_OP
           } else {
             if (verbose) { System.out.printf("%sgot a variable %s\n",printprefix,building); }
+              // now, special case, if we are on upto=0 and we have an assignment then DONT calculate
+              // but keep this (somewhere) and get ready to set it
+            if (g_is_assignment && upto==0) {
+               // if it is an assignment AND dont have anything here already, we keep the variable
+               // say, keep it in the stack num=n/a op="===" string=variable name
+               if (verbose) { System.out.printf("Not resolving the variable, keeping it\n"); }
+               stkop[upto]="===";
+               stkfunc[upto]=building; // keep the variable
+               upto++;
+               doing=D_ASSIGN;
+               return;
+            }
             // replace the variable with the value of the variable
               GenericType value=get_value(building);
               if (value.isNum()) {
@@ -638,18 +668,29 @@ class evaluate {
               doing=D_OP;
             //is_function=false; // probably no need to set this as it should normally sit on false!
           }
+          doing=D_OP;  // moved this to here // !is_function
+  }
+
+  GenericType interpret_string_with_assignment(String intstring_param) {
+    return interpret_string(intstring_param, false, 0.0, true);
   }
 
   GenericType interpret_string(String intstring_param) {
-    return interpret_string(intstring_param, false, 0.0);
+    return interpret_string(intstring_param, false, 0.0, false);
   }
 
   GenericType interpret_string(String intstring_param, double expecting) {
-    return interpret_string(intstring_param, true, expecting);
+    return interpret_string(intstring_param, true, expecting, false);
   }
 
-  GenericType interpret_string(String intstring_param, boolean testing, double expecting) {
 
+  // added the is_assignment, if this is true, then it will expect the first OUTER = sign to be the assignment operator
+  // it also means that the FIRST variable be it array or singleton should NOT be evaluated!
+  // note, we could have A(X+5,Y-B=3)=5
+  boolean g_is_assignment;
+  GenericType interpret_string(String intstring_param, boolean testing, double expecting, boolean is_assignment) {
+
+    g_is_assignment=is_assignment;
     upto=0; // nothing is on the stack, upto points past the end of the current array, at the NEXT point
     doing=D_NUM;
 
@@ -688,7 +729,7 @@ class evaluate {
         // not sure if this ignore case is right
         } else if (a.compareToIgnoreCase("a")>=0 && a.compareToIgnoreCase("z")<=0) {
           readString();
-          if (!is_function) { doing=D_OP; }
+          //if (!is_function) { doing=D_OP; } // done in readString now
         } else if (a.equals("\"")) {
           // quoted string
           String qs=readQuotedString();
@@ -716,6 +757,18 @@ class evaluate {
               continue;
             }
             if (stkop[upto-2].equals(OP_OPEN_BRACKET)) {
+              // special case - we are assigning, how do we know? there are no other brackets
+              if (g_is_assignment && upto-2==0) { // maybe a better way?
+                if (verbose) { System.out.printf("I believe this is an array assignment\n"); }
+                // you cannot calculate it, in fact, you must move the stack BACK past all the
+                // parameters / not done yet
+		upto+=parameters-1;
+                // read the operator it SHOULD be an =
+                doing=D_ASSIGN; //special case, the next one SHOULD be an assignment "=" sign
+                //setOp("===");
+		//doing=D_OP; // actually - really looking for the special operator of =
+                break;
+              }
               // pop this too, but end
               calc_and_pop();
               doing=D_OP; // efectively poping the op
@@ -737,20 +790,86 @@ class evaluate {
           System.out.printf("?SYNTAX ERROR 002\n***Not correct syntax\n");
         }
         if (verbose) { show_state(); }
-      } // end D_OP
+        // end D_OP
+      } else if (doing==D_ASSIGN) {
+        if (a.equals("=")) {
+          readStringOp();
+        } else {
+          // we have a problem
+          System.out.printf("?ASSIGNMENT ERROR\n");
+        }
+        if (verbose) { show_state(); }
+      }
     } /* for */
 
     /* final calc */
+    boolean really_has_assignment=false;
     if (verbose) { System.out.printf("%sFINAL CALCS\n",printprefix); }
     while (upto>1) {
       // the only things that will need the function in it will be badly closed brackets, what is the overhead to do this?
       //add func for unclosed brackets
       // notice, if we find an opening bracket, we just calculate through it, like we are closing all the brackets
       // this is not really what we want normally in a program, but in a calculator we do
+      if (stkop[upto-2].equals("===")) {
+        really_has_assignment=true;
+        break; // go no further that the equals as well, well do it after this!
+      }
       if (stkop[upto-2].equals(OP_COMMA)) {
         break; // go no further that the ","
       }
       calc_and_pop();
+    }
+    //
+    if (really_has_assignment) { 
+      if (verbose) { System.out.printf("Yes, we really have an assignment!\n"); }
+      // lets SET the variable, we expect the top of the stack is the num or string, the rest is what we set!
+      //if (stkop[upto-2].equals("===")   // we expect this
+      if (upto<2) { System.out.printf("Not enough on the stack!\n"); }
+      else if (upto==2) {
+        // simple setting
+        if (using_machine!=null) {
+          if (stktype[1]==ST_NUM) {
+            if (verbose) { System.out.printf("Wanting to set %s = %f\n",stkfunc[0],stknum[1]); }
+            using_machine.setvariable(stkfunc[0].toLowerCase(),new GenericType(stknum[1]));
+          } else {
+            if (verbose) { System.out.printf("Wanting to set %s = \"%s\"\n",stkfunc[0],stkstring[1]); }
+            using_machine.setvariable(stkfunc[0].toLowerCase(),new GenericType(stkstring[1]));
+          }
+        }
+      } else {
+         //calc it
+          parameters=1;
+          if (verbose) { System.out.printf("%sFINAL ARRAY SETTING\n",printprefix); }
+           // pop eveything off until we get to an op of ( and then pop that too, but stop there
+          upto--; // we know that this should just be the last index and the === sign
+          int keepresult=upto;
+          while (upto>1) {
+            if (stkop[upto-2].equals(OP_COMMA)) {
+              // if we get a comma, then we have a parameter to use in a function
+              // keep a note of it
+              if (verbose) { System.out.printf("%sFOUND COMMA\n",printprefix); }
+              // this is a wierd one, keep going back, when we do the calc we use all of the other numbers
+              upto--;
+              parameters++;
+              continue;
+            }
+            if (stkop[upto-2].equals(OP_OPEN_BRACKET)) {
+              // this should be IT
+              if (upto-2!=0) { System.out.printf("Somethings wrong upto-2!=0\n"); }
+              if (verbose) { System.out.printf("Wanting to set array %s ( (params=%d.. %f,%f,%f) to value = %f\n",
+                stkfunc[upto-2],parameters,stknum[upto-1],stknum[upto],stknum[upto+1],
+                stknum[keepresult]); }
+              if (using_machine!=null) {
+                if (stktype[0]==ST_NUM) {
+                  using_machine.setvariable(stkfunc[upto-2].toLowerCase()+"(",parameters,(int)stknum[upto-1],(int)stknum[upto],(int)stknum[upto+1],new GenericType(stknum[keepresult]));
+                } else {
+                  using_machine.setvariable(stkfunc[upto-2].toLowerCase()+"(",parameters,(int)stknum[upto-1],(int)stknum[upto],(int)stknum[upto+1],new GenericType(stkstring[keepresult]));
+                }
+              }
+              break;
+            }
+         }
+      }
     }
 
     if (upto==0) {
