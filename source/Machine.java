@@ -33,40 +33,6 @@ class VariablePointer {
 // Variables
 ///////////////
 class Variables {
-
-}
-
-///////////////
-// Machine
-///////////////
-class Machine {
-  //
-  String code; // here is the code, stored as one big string
-
-  // line cache
-  static final int MAXLINES=10000;
-  int toplinecache=0;
-  int linecacheline[]; // when we get to them, we store the pointer into the code of each line // of course we have to read ahead one we get a GOTO or GOSUB
-  int linecachepnt[];
-
-  // for stack
-  static final int MAXFORS=30; // make it break faster
-  int topforloopstack=0;
-  int forloopstack[];
-  String forloopstack_var[];
-  double forloopstack_to[];
-  double forloopstack_step[];
-
-  // gosub stack
-  static final int MAXGOSUBS=300;
-  int topgosubstack=0;
-  int gosubstack[];
-
-  boolean verbose=false;
-  //boolean verbose=true;
-
-  int executionpoint; // ?? where we currently are at
-
   static final int MAXVARIABLES=300;
   static final int V_DOUBLE=0;
   static final int V_STRING=1;
@@ -79,25 +45,15 @@ class Machine {
   double  variablevalue[];
   String  variablestring[]; // not coded for in evaluate yet
   int     variableint[]; // not coded for in evaluate yet
-  evaluate evaluate_engine;
-  boolean enabledmovement=true;  // if this is false, we just parse from top to bottom, good for debugging!
   double  variablearrayvalue1[][]; // single element array
   double  variablearrayvalue2[][][]; // single element array
   String  variablearraystring1[][]; // single element array
 
-  static final int ST_NUM=0;
-  static final int ST_STRING=1;
+  boolean verbose=false;
+  //static final int ST_NUM=0;
+  //static final int ST_STRING=1;
 
-  Machine() {
-    if (verbose) { System.out.printf("Initialising machine\n"); }
-    linecacheline=new int[MAXLINES];
-    linecachepnt=new int[MAXLINES];
-    forloopstack=new int[MAXFORS];
-    forloopstack_var=new String[MAXFORS];
-    forloopstack_to=new double[MAXFORS];
-    forloopstack_step=new double[MAXFORS];
-    gosubstack=new int[MAXGOSUBS];
-
+  Variables() {
     variablename=new String[MAXVARIABLES];
     variablevalue=new double[MAXVARIABLES];
     variablestring=new String[MAXVARIABLES];
@@ -106,62 +62,7 @@ class Machine {
     variablearrayvalue1=new double[MAXVARIABLES][];
     variablearrayvalue2=new double[MAXVARIABLES][][];
     topvariable=0;
-    executionpoint=0;
-    //evaluate_engine = new evaluate(this);  // create engine
-       // if we pass a "Machine" class variable, then we have linked
-       // the two together such that we can set and get variables
-       // is this a good way? I don't know
   }
-
-  void createFORloop(int current, String variable, double forto, double forstep)
-  {
-    // I think that if we use an already used variable, we pop off the rest of the stack
-    // e.g.  FOR I   FOR J   FOR K ......then FOR I again
-    if (verbose) { System.out.printf("processing FOR %s to %f step %f at current=%d\n",variable,forto,forstep,current); }
-    // find current variable
-    for (int i=0; i<topforloopstack; ++i) {
-      if (forloopstack_var[i].equals(variable)) {
-        // use this one and pop the rest off
-        topforloopstack=i;
-        break;
-      }
-    }
-    forloopstack[topforloopstack]=current;
-    forloopstack_var[topforloopstack]=variable;
-    forloopstack_to[topforloopstack]=forto;
-    forloopstack_step[topforloopstack]=forstep;
-    topforloopstack++;
-  }
-
-  boolean processNEXT(int current, String var) {
-    if (verbose) { System.out.printf("processing NEXT %s at current=%d\n",var,current); }
-    // could be multiple steps?, no, this should be dealt with by the statements parser
-    int fl=topforloopstack;
-    executionpoint=current;
-    while(true) {
-      if (fl<=0) { return false; }
-      fl--;
-      if (var.equals("") || forloopstack_var[fl].equals(var)) {
-        // just pop the last one
-        setvariable(forloopstack_var[fl],evaluate(forloopstack_var[fl]+"+"+forloopstack_step[fl]));
-        if (verbose) { System.out.printf("about to add to loop at stack location %d %f>%f\n",fl,getvariable(forloopstack_var[fl]).num(),forloopstack_to[fl]); }
-        if (verbose) { dumpstate(); }
-        if (getvariable(forloopstack_var[fl]).num()>forloopstack_to[fl]) {
-          if (verbose) { System.out.printf("NEXT: At end of stack\n"); }
-          // pop it off, but keep on going, we may be popping off many
-          topforloopstack=fl; // at least one
-          return false; // I think we need to exit now
-        } else {
-          if (verbose) { System.out.printf("NEXT: Looping back\n"); }
-          // goto the end of that for loop
-          executionpoint=forloopstack[fl];
-          return true;
-        }
-      }
-    }
-    //return false;
-  }
-
   private void createvariable(String variable, GenericType contents) {
     variablename[topvariable]=variable;
     if (contents.isNum()) {
@@ -203,6 +104,28 @@ class Machine {
     topvariable++;
     dumpstate();
     return;
+  }
+
+  // used only for evuated parsed assignment
+  void setvariable(String variable, int params, int p1, int p2, int p3, GenericType contents) {
+    if (verbose) { System.out.printf("This is a array parms=%d [%d][%d][%d] for array %s\n",params,p1,p2,p3,variable); }
+    for (int i=0; i<topvariable; ++i) {
+      if (variable.equals(variablename[i])) {
+        // found it, so set it
+        if (variabletype[i]==V_ARRAY_DOUBLE1) {
+          variablearrayvalue1[i][p1]=contents.num();
+          if (verbose) { System.out.printf("Setting variablearrayvalue[%d][%d] to value %f\n",i,p1,variablearrayvalue1[i][p1]); }
+        } else if (variabletype[i]==V_ARRAY_DOUBLE2) {
+          variablearrayvalue2[i][p1][p2]=contents.num();
+          if (verbose) { System.out.printf("Setting variablearrayvalue[%d][%d][%d] to value %f\n",i,p1,p2,variablearrayvalue2[i][p1][p2]); }
+        } else {
+          variabletype[i]=V_STRING;
+          variablearraystring1[i][p1]=contents.str();
+        }
+        return;
+      }
+    }
+    createarray(variable,params,p1,0,0,contents);
   }
 
   void setvariable(VariablePointer var, GenericType contents) {
@@ -255,43 +178,6 @@ class Machine {
     return;
   }
 
-  VariablePointer parse(String thestring) {
-    if (verbose) { System.out.printf("parsing %s\n",thestring); }
-    int at=0;
-    // up here - should we get rid of spaces?
-    int bracketcount=0;
-    boolean isarray=false;
-    int start=0;
-    while (at<thestring.length()) {
-
-      String a=thestring.substring(at,at+1);
-      if (a.equals("(")) {
-        // okay, we have an array
-        if (!isarray && bracketcount==0) {
-          // okay, we mark the start here
-          start=at+1;
-          isarray=true;
-        }
-        bracketcount++;
-      } else if (a.equals(")")) { bracketcount--; }
-
-      at++;
-    }
-
-    if (isarray) {
-      if (verbose) { System.out.printf("MACHINE Found an ARRAY variable %s\n",thestring.substring(0,start)); }
-      // really, should evaluate the bit in the middle
-      // assuming (very big assumption that we end with )= when there is an array assignment)
-      if (verbose) { System.out.printf("MACHINE Found an ARRAY contents= %s\n",thestring.substring(start,at-1)); }
-      // thestring.substring(0,start) contains the variable
-      // machine.evaluate(thestring.substring(start,at-1)) contains the indices
-      return new VariablePointer(thestring.substring(0,start), evaluate(thestring.substring(start,at-1)));
-    } else {
-      // simply thestring contains the variable
-      return new VariablePointer(thestring);
-    }
-  }
-
   GenericType getvariable(String variable, int param, int p1, int p2, int p3) {
     // array
     if (verbose) { System.out.printf("getvariable(%s,param=%d,%d,%d,%d\n",variable,param,p1,p2,p3); }
@@ -339,9 +225,185 @@ class Machine {
     }
   }
 
+  void dumpstate() {
+    for (int i=0; i<topvariable; ++i) {
+      if (variabletype[i]==V_DOUBLE) {
+        System.out.printf("  variable %s = %f\n",variablename[i],variablevalue[i]);
+      } else if (variabletype[i]==V_STRING) {
+        System.out.printf("  variable %s (string) = %s\n",variablename[i],variablestring[i]);
+      } else if (variabletype[i]==V_ARRAY_DOUBLE1) {
+        System.out.printf("  variable %s (array of doubles)\n",variablename[i]);
+      } else {
+        System.out.printf("  unkown type %s\n",variablename[i]);
+      }
+    }
+  }
+} // end Variables
+
+///////////////
+// Machine
+///////////////
+class Machine {
+  //
+  String code; // here is the code, stored as one big string
+  Variables variables=new Variables();
+
+  // line cache
+  static final int MAXLINES=10000;
+  int toplinecache=0;
+  int linecacheline[]; // when we get to them, we store the pointer into the code of each line // of course we have to read ahead one we get a GOTO or GOSUB
+  int linecachepnt[];
+
+  // for stack
+  static final int MAXFORS=30; // make it break faster
+  int topforloopstack=0;
+  int forloopstack[];
+  String forloopstack_var[];
+  double forloopstack_to[];
+  double forloopstack_step[];
+
+  // gosub stack
+  static final int MAXGOSUBS=300;
+  int topgosubstack=0;
+  int gosubstack[];
+
+  evaluate evaluate_engine;
+  int executionpoint; // ?? where we currently are at
+
+  boolean verbose=false;
+  //boolean verbose=true;
+  boolean enabledmovement=true;  // if this is false, we just parse from top to bottom, good for debugging!
+
+
+  Machine() {
+    if (verbose) { System.out.printf("Initialising machine\n"); }
+    linecacheline=new int[MAXLINES];
+    linecachepnt=new int[MAXLINES];
+    forloopstack=new int[MAXFORS];
+    forloopstack_var=new String[MAXFORS];
+    forloopstack_to=new double[MAXFORS];
+    forloopstack_step=new double[MAXFORS];
+    gosubstack=new int[MAXGOSUBS];
+
+    variables.verbose=verbose;
+    executionpoint=0;
+    //evaluate_engine = new evaluate(this);  // create engine
+       // if we pass a "Machine" class variable, then we have linked
+       // the two together such that we can set and get variables
+       // is this a good way? I don't know
+  }
+
+  // access to variables etc
+  // could we do this in a nice way with an "interface?" or something
+  void setvariable(String variable, int params, int p1, int p2, int p3, GenericType contents) {
+    variables.setvariable(variable,params,p1,p2,p3,contents);
+  }
+  void setvariable(VariablePointer variable, GenericType contents) {
+    variables.setvariable(variable,contents);
+  }
+  void setvariable(String variable, GenericType contents) {
+    variables.setvariable(variable, contents);
+  }
+  GenericType getvariable(String variable, int param, int p1, int p2, int p3) {
+    return variables.getvariable(variable,param,p1,p2,p3);
+  }
+  GenericType getvariable(String variable) {
+    return variables.getvariable(variable);
+  }
+
+  // continue...
+  void createFORloop(int current, String variable, double forto, double forstep)
+  {
+    // I think that if we use an already used variable, we pop off the rest of the stack
+    // e.g.  FOR I   FOR J   FOR K ......then FOR I again
+    if (verbose) { System.out.printf("processing FOR %s to %f step %f at current=%d\n",variable,forto,forstep,current); }
+    // find current variable
+    for (int i=0; i<topforloopstack; ++i) {
+      if (forloopstack_var[i].equals(variable)) {
+        // use this one and pop the rest off
+        topforloopstack=i;
+        break;
+      }
+    }
+    forloopstack[topforloopstack]=current;
+    forloopstack_var[topforloopstack]=variable;
+    forloopstack_to[topforloopstack]=forto;
+    forloopstack_step[topforloopstack]=forstep;
+    topforloopstack++;
+  }
+
+  boolean processNEXT(int current, String var) {
+    if (verbose) { System.out.printf("processing NEXT %s at current=%d\n",var,current); }
+    // could be multiple steps?, no, this should be dealt with by the statements parser
+    int fl=topforloopstack;
+    executionpoint=current;
+    while(true) {
+      if (fl<=0) { return false; }
+      fl--;
+      if (var.equals("") || forloopstack_var[fl].equals(var)) {
+        // just pop the last one
+        setvariable(forloopstack_var[fl],evaluate(forloopstack_var[fl]+"+"+forloopstack_step[fl]));
+        if (verbose) { System.out.printf("about to add to loop at stack location %d %f>%f\n",fl,getvariable(forloopstack_var[fl]).num(),forloopstack_to[fl]); }
+        if (verbose) { dumpstate(); }
+        if (getvariable(forloopstack_var[fl]).num()>forloopstack_to[fl]) {
+          if (verbose) { System.out.printf("NEXT: At end of stack\n"); }
+          // pop it off, but keep on going, we may be popping off many
+          topforloopstack=fl; // at least one
+          return false; // I think we need to exit now
+        } else {
+          if (verbose) { System.out.printf("NEXT: Looping back\n"); }
+          // goto the end of that for loop
+          executionpoint=forloopstack[fl];
+          return true;
+        }
+      }
+    }
+    //return false;
+  }
+
+  VariablePointer parse(String thestring) {
+    if (verbose) { System.out.printf("parsing %s\n",thestring); }
+    int at=0;
+    // up here - should we get rid of spaces?
+    int bracketcount=0;
+    boolean isarray=false;
+    int start=0;
+    while (at<thestring.length()) {
+
+      String a=thestring.substring(at,at+1);
+      if (a.equals("(")) {
+        // okay, we have an array
+        if (!isarray && bracketcount==0) {
+          // okay, we mark the start here
+          start=at+1;
+          isarray=true;
+        }
+        bracketcount++;
+      } else if (a.equals(")")) { bracketcount--; }
+
+      at++;
+    }
+
+    if (isarray) {
+      if (verbose) { System.out.printf("MACHINE Found an ARRAY variable %s\n",thestring.substring(0,start)); }
+      // really, should evaluate the bit in the middle
+      // assuming (very big assumption that we end with )= when there is an array assignment)
+      if (verbose) { System.out.printf("MACHINE Found an ARRAY contents= %s\n",thestring.substring(start,at-1)); }
+      // thestring.substring(0,start) contains the variable
+      // machine.evaluate(thestring.substring(start,at-1)) contains the indices
+      return new VariablePointer(thestring.substring(0,start), evaluate(thestring.substring(start,at-1)));
+    } else {
+      // simply thestring contains the variable
+      return new VariablePointer(thestring);
+    }
+  }
+
   // from within here we execute the evaluate?
   GenericType evaluate(String expression) {
     return evaluate_engine.interpret_string(expression);
+  }
+  void assignment(String expression) {
+    evaluate_engine.interpret_string_with_assignment(expression);
   }
 
   void initialise_engines() {
@@ -404,17 +466,7 @@ class Machine {
   }
 
   void dumpstate() {
-    for (int i=0; i<topvariable; ++i) {
-      if (variabletype[i]==V_DOUBLE) {
-        System.out.printf("  variable %s = %f\n",variablename[i],variablevalue[i]);
-      } else if (variabletype[i]==V_STRING) {
-        System.out.printf("  variable %s (string) = %s\n",variablename[i],variablestring[i]);
-      } else if (variabletype[i]==V_ARRAY_DOUBLE1) {
-        System.out.printf("  variable %s (array of doubles)\n",variablename[i]);
-      } else {
-        System.out.printf("  unkown type %s\n",variablename[i]);
-      }
-    }
+    variables.dumpstate();
   }
 
   C64Screen machinescreen;
