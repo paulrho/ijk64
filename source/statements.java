@@ -80,7 +80,7 @@ class statements {
 
 int MAXTOKENS=100;
 
-String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","REM","PRINT","END","DIM","GET","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE","SYS","CLR"};
+String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","REM","PRINT","END","DIM","GET","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE","SYS","CLR","META-SCALE","META-ROWS"};
 static final int ST_FOR=0;
 static final int ST_TO=1;
 static final int ST_STEP=2;
@@ -108,6 +108,8 @@ static final int ST_LIST=23;
 static final int ST_META_VERBOSE=24;
 static final int ST_SYS=25;
 static final int ST_CLR=26;
+static final int ST_META_SCALE=27;
+static final int ST_META_ROWS=28;
 
 String line;
 int pnt;
@@ -269,6 +271,12 @@ boolean ReadStatement() {
         verbose=true; machine.verbose=true;
         machine.evaluate_engine.verbose=true;
         return true;
+      case ST_META_SCALE:
+        if (ProcessMETASCALEstatement()) { return true; }
+        break;
+      case ST_META_ROWS:
+        if (ProcessMETAROWSstatement()) { return true; }
+        break;
       case ST_INPUT: case ST_INPUT1:
         if (ProcessINPUTstatement()) { return true; }
         break;
@@ -514,7 +522,7 @@ boolean ProcessFORstatement()
   // should to be an expression or a evaluated number?
   //machine.processFOR(/*position*/pnt,/*variable*/..,/*to*/..,/*step*/..);
   ReadColon(); // check
-  machine.createFORloop(pnt, keepVariable, machine.evaluate(forto).num(), machine.evaluate(forstep).num());
+  machine.createFORloop(pnt, keepVariable.toLowerCase(), machine.evaluate(forto).num(), machine.evaluate(forstep).num());
   return true;
 }
 
@@ -597,6 +605,22 @@ void verboseOff()
   verbose=false;
   machine.verbose=verbose;
   machine.evaluate_engine.verbose=verbose;
+}
+
+boolean ProcessMETASCALEstatement() 
+{
+  ReadExpression();
+  if (verbose) { machine.dumpstate(); }
+  machine.machinescreen.setScale((int)machine.evaluate(keepExpression).num());
+  return true;
+}
+
+boolean ProcessMETAROWSstatement() 
+{
+  ReadExpression();
+  if (verbose) { machine.dumpstate(); }
+  machine.machinescreen.setRows((int)machine.evaluate(keepExpression).num());
+  return true;
 }
 
 boolean ProcessPOKEstatement() 
