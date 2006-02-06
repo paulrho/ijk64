@@ -33,6 +33,7 @@ class Machine {
   boolean verbose=false;
   //boolean verbose=true;
   boolean enabledmovement=true;  // if this is false, we just parse from top to bottom, good for debugging!
+  String currentLineNo="";
 
 
   Machine() {
