@@ -67,7 +67,7 @@ class Variables {
       // ...
     }
     topvariable++;
-    dumpstate();
+    if (verbose) { dumpstate(); }
     return;
   }
 
