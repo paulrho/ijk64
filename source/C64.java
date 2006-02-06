@@ -22,7 +22,7 @@ class C64 {
     machine.initialise_engines(); // silly, but there is a reason
     //machine.verbose=verbose;
 
-    screen.scale=2;
+    if (false) { screen.scale=2; }
 
     for (int i=0; i<args.length; ++i) {
       if (args[i].substring(0,1).equals("-")) {
@@ -60,10 +60,14 @@ class C64 {
       String result=screen.screenInput();
       if ((result.substring(0,4)).equals("EXIT")) break;
       else if ((result.substring(0,4)).equals("LIST")) {
-        screen.println("10 print\"mello word\"");
-        screen.println("20 a=5*5:print a");
-        screen.println("90 end");
-        continue;
+        if (args.length>0) {
+          // call the static method
+          screen.println(statements.read_a_file(args[0]));
+        }
+        //screen.println("10 print\"mello word\"");
+        //screen.println("20 a=5*5:print a");
+        //screen.println("90 end");
+        //continue;
       } else if ((result.substring(0,3)).equals("SYS")) {
         screen.startupscreen();
         continue;
