@@ -262,6 +262,10 @@ class evaluate {
         stktype[upto-2]=ST_NUM;
         stknum[upto-2]=stkstring[upto-1].length();
         return;
+      } else if (function.equals("chr$")) {
+        stktype[upto-2]=ST_STRING;
+        stkstring[upto-2]=""+(char)stknum[upto-1];
+        return;
       } else if (function.equals("str$")) {
         if (parameters==1) {
           stktype[upto-2]=ST_STRING;
@@ -288,9 +292,10 @@ class evaluate {
         }
       } else if (function.equals("left$")) {
         if (parameters==2) {
-          if (verbose) { System.out.printf("Calculating left$\n"); }
+          if (verbose) { System.out.printf("Calculating left$(\"%s\",%d)\n",stkstring[upto-1],(int)stknum[upto]); }
           stktype[upto-2]=ST_STRING;
-          stkstring[upto-2]=stkstring[upto-1].substring(0,(int)stknum[upto]);
+          if ((int)stknum[upto]>stkstring[upto-1].length()||(int)stknum[upto]<0) { stkstring[upto-2]=stkstring[upto-1]; }
+          else { stkstring[upto-2]=stkstring[upto-1].substring(0,(int)stknum[upto]); }
           return;
         } else {
           System.out.printf("?WRONG NUMBER PARAMETERS\n");
@@ -646,7 +651,16 @@ class evaluate {
             if (verbose) { System.out.printf("%sgot a variable %s\n",printprefix,building); }
               // now, special case, if we are on upto=0 and we have an assignment then DONT calculate
               // but keep this (somewhere) and get ready to set it
-            if (g_is_assignment && upto==0) {
+
+            // we want to be sure that we are at the base level:
+            // that means either upto=0 or EVERY one up is a comma
+            //for (int p=0; p<upto; p++) {
+              //if (!stkop[p].equals(OP_COMMA) && !stkop[p].equals("===")) { is_baselevel=false; }
+            //}
+            boolean is_baselevel=false;
+            if (upto==0 || stkop[upto-1].equals("===,")) { is_baselevel=true; }
+            //if (g_is_assignment && upto==0) {
+            if (g_is_assignment && is_baselevel) {
                // if it is an assignment AND dont have anything here already, we keep the variable
                // say, keep it in the stack num=n/a op="===" string=variable name
                if (verbose) { System.out.printf("Not resolving the variable, keeping it\n"); }
@@ -693,6 +707,8 @@ class evaluate {
     g_is_assignment=is_assignment;
     upto=0; // nothing is on the stack, upto points past the end of the current array, at the NEXT point
     doing=D_NUM;
+    //stkop[0]=""; // this is a special case where we simple return a value, but have passed in is_assigment=true
+    // i.e. 6  instead of X=6
 
     intstring=intstring_param; // this may be a dumb way, but it will make code more readable
     // try without // intstring=intstring.toLowerCase(); // opposite of statement.java!
@@ -758,7 +774,13 @@ class evaluate {
             }
             if (stkop[upto-2].equals(OP_OPEN_BRACKET)) {
               // special case - we are assigning, how do we know? there are no other brackets
-              if (g_is_assignment && upto-2==0) { // maybe a better way?
+              //for (int p=0; p<upto-2; p++) {
+                //if (!stkop[p].equals(OP_COMMA) && !stkop[p].equals("===")) { is_baselevel=false; }
+              //}
+              boolean is_baselevel=false;
+              if (upto==2 || stkop[upto-3].equals("===,")) { is_baselevel=true; }
+              //if (g_is_assignment && upto-2==0) { // maybe a better way?
+              if (g_is_assignment && is_baselevel) { // maybe a better way?
                 if (verbose) { System.out.printf("I believe this is an array assignment\n"); }
                 // you cannot calculate it, in fact, you must move the stack BACK past all the
                 // parameters / not done yet
@@ -794,6 +816,10 @@ class evaluate {
       } else if (doing==D_ASSIGN) {
         if (a.equals("=")) {
           readStringOp();
+        } else if (a.equals(OP_COMMA)) {
+          // we can now list assignment targets
+          setOp("===,"); // note, we now change this to be a series of ===s (to differentiate from index ,s
+                         // yet another which means assignment, with a comma
         } else {
           // we have a problem
           System.out.printf("?ASSIGNMENT ERROR\n");
@@ -810,8 +836,7 @@ class evaluate {
       //add func for unclosed brackets
       // notice, if we find an opening bracket, we just calculate through it, like we are closing all the brackets
       // this is not really what we want normally in a program, but in a calculator we do
-      if (stkop[upto-2].equals("===")) {
-        really_has_assignment=true;
+      if (stkop[upto-2].equals("===") || stkop[upto-2].equals("===,")) {
         break; // go no further that the equals as well, well do it after this!
       }
       if (stkop[upto-2].equals(OP_COMMA)) {
@@ -819,58 +844,20 @@ class evaluate {
       }
       calc_and_pop();
     }
-    //
-    if (really_has_assignment) { 
-      if (verbose) { System.out.printf("Yes, we really have an assignment!\n"); }
-      // lets SET the variable, we expect the top of the stack is the num or string, the rest is what we set!
-      //if (stkop[upto-2].equals("===")   // we expect this
-      if (upto<2) { System.out.printf("Not enough on the stack!\n"); }
-      else if (upto==2) {
-        // simple setting
-        if (using_machine!=null) {
-          if (stktype[1]==ST_NUM) {
-            if (verbose) { System.out.printf("Wanting to set %s = %f\n",stkfunc[0],stknum[1]); }
-            using_machine.setvariable(stkfunc[0].toLowerCase(),new GenericType(stknum[1]));
-          } else {
-            if (verbose) { System.out.printf("Wanting to set %s = \"%s\"\n",stkfunc[0],stkstring[1]); }
-            using_machine.setvariable(stkfunc[0].toLowerCase(),new GenericType(stkstring[1]));
-          }
+    if (g_is_assignment) {
+      // note there is an issue with singleton returns that this would fail without g_is_assignment
+      // add the special little bit to stop looking at a string that is not initialised
+      //for (int p=0; p<upto-((doing==D_OP)?1:0); ++p) {
+      // really, we never need to look at the top one unless we have done: A=  without a result at the end
+      for (int p=0; p<upto-1; ++p) {
+        if (stkop[p].equals("===") || stkop[p].equals("===,")) {
+          really_has_assignment=true;
+          break;
         }
-      } else {
-         //calc it
-          parameters=1;
-          if (verbose) { System.out.printf("%sFINAL ARRAY SETTING\n",printprefix); }
-           // pop eveything off until we get to an op of ( and then pop that too, but stop there
-          upto--; // we know that this should just be the last index and the === sign
-          int keepresult=upto;
-          while (upto>1) {
-            if (stkop[upto-2].equals(OP_COMMA)) {
-              // if we get a comma, then we have a parameter to use in a function
-              // keep a note of it
-              if (verbose) { System.out.printf("%sFOUND COMMA\n",printprefix); }
-              // this is a wierd one, keep going back, when we do the calc we use all of the other numbers
-              upto--;
-              parameters++;
-              continue;
-            }
-            if (stkop[upto-2].equals(OP_OPEN_BRACKET)) {
-              // this should be IT
-              if (upto-2!=0) { System.out.printf("Somethings wrong upto-2!=0\n"); }
-              if (verbose) { System.out.printf("Wanting to set array %s ( (params=%d.. %f,%f,%f) to value = %f\n",
-                stkfunc[upto-2],parameters,stknum[upto-1],stknum[upto],stknum[upto+1],
-                stknum[keepresult]); }
-              if (using_machine!=null) {
-                if (stktype[0]==ST_NUM) {
-                  using_machine.setvariable(stkfunc[upto-2].toLowerCase()+"(",parameters,(int)stknum[upto-1],(int)stknum[upto],(int)stknum[upto+1],new GenericType(stknum[keepresult]));
-                } else {
-                  using_machine.setvariable(stkfunc[upto-2].toLowerCase()+"(",parameters,(int)stknum[upto-1],(int)stknum[upto],(int)stknum[upto+1],new GenericType(stkstring[keepresult]));
-                }
-              }
-              break;
-            }
-         }
       }
+      if (really_has_assignment) { ProcessAssignment(); }
     }
+
 
     if (upto==0) {
       // return empty string
@@ -927,8 +914,84 @@ class evaluate {
     return gt;
     //return stknum[0]; // we cant do this now, we must return maybe a string (even if it is a number)
   }
-}
 
+void ProcessAssignment() { 
+      // try and see if it can be made to go faster for the singleton case
+      //verbose=true;
+      if (verbose) { System.out.printf("Yes, we really have an assignment!\n"); }
+      // lets SET the variable, we expect the top of the stack is the num or string, the rest is what we set!
+      //if (stkop[upto-2].equals("===")   // we expect this
+      // we now have quite a complicated stack of things to assign,
+
+      // go down the stack to find the last assignment operator, and take a note
+      int firstvalue=upto;
+      int p=upto-1-1;
+      while (p>=0) {
+        // it would be good to count the available values but we wont
+        if (stkop[p].equals("===")) {
+          firstvalue=p+1;
+          break;
+        }
+        p--;
+      }
+      if (firstvalue==upto) { 
+         if (verbose) { System.out.printf("?ASSIGNMENTFINALERROR - cant find the last assignment\n"); }
+         return; 
+      }
+
+      if (verbose) { 
+        System.out.printf("upto=%d and firstvalue=%d\n",upto,firstvalue);
+      }
+      // best to go UP the stack and inspect
+      int currentvalue=firstvalue;
+      int parameters=0; // singleton
+      int stackvar=0;
+      for (int stackp=0; stackp<firstvalue; ++stackp) {
+        if (verbose) { System.out.printf("stackp=%d\n",stackp); }
+        if (stkop[stackp].equals("===") || stkop[stackp].equals("===,")) {
+          // we have therefore a variable to assign
+          if (verbose) { System.out.printf("parameters %d\n",parameters); }
+          if (parameters==0) {
+            // simple setting
+            if (using_machine!=null) {
+              if (stktype[stackp+1]==ST_NUM) {
+                if (verbose) { System.out.printf("Wanting to set %s = %f\n",stkfunc[stackp],stknum[stackp+1]); }
+                using_machine.setvariable(stkfunc[stackp].toLowerCase(),new GenericType(stknum[currentvalue++]));
+              } else {
+                if (verbose) { System.out.printf("Wanting to set %s = \"%s\"\n",stkfunc[stackp],stkstring[stackp+1]); }
+                using_machine.setvariable(stkfunc[stackp].toLowerCase(),new GenericType(stkstring[currentvalue++]));
+              }
+            } else {
+              if (verbose) {
+                System.out.printf("stackp=%d Would have set %s to %f\n",stackp,stkfunc[stackp].toLowerCase(),stknum[currentvalue++]);
+              }
+            }
+          } else { 
+            if (verbose) { System.out.printf("array %d\n",parameters); }
+            if (verbose) { System.out.printf("%sFINAL ARRAY SETTING\n",printprefix); }
+              if (verbose) { System.out.printf("Wanting to set array %s ( (params=%d.. %f,%f,%f) to value = %f\n",
+                stkfunc[stackvar],parameters,stknum[stackvar+1],stknum[stackvar+2],stknum[stackvar+3],
+                stknum[currentvalue++]); }
+              if (using_machine!=null) {
+                if (stktype[0]==ST_NUM) {
+                  using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],new GenericType(stknum[currentvalue++]));
+                } else {
+                  using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],new GenericType(stkstring[currentvalue++]));
+                }
+              }
+          }
+          parameters=0;
+        } else if (stkop[stackp].equals(OP_OPEN_BRACKET)) {
+          // we have an array
+          parameters=1;
+          stackvar=stackp;
+        } else if (stkop[stackp].equals(OP_COMMA)) {
+          parameters++;
+        }
+      }
+    }
+
+}
 /////////
 // END //
 /////////
