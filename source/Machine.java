@@ -193,6 +193,41 @@ class Machine {
     variables.dumpstate();
   }
 
+//////////////////////////////////
+// Memory I/O
+//////////////////////////////////
+  void performPOKE(GenericType gt) {
+    // here we should have a list of variables
+    int memloc;
+    int memval;
+    if (gt.gttop==2) {
+      memloc=(int)gt.gtlist[0].num();
+      memval=(int)gt.gtlist[1].num();
+      System.out.printf("Poking memory location %d with variable %d\n",memloc,memval);
+      performPOKE(memloc, memval);
+    } else {
+      System.out.printf("Wrong number of parameters\n");
+    }
+  }
+
+  void performPOKE(int memloc, int memval) {
+    // the background and border may be round the wrong way, cant remember
+    if (memloc==198) {
+      // clear the key buffer if you get this
+    } else if (memloc==53280) {
+      // background
+      machinescreen.backgroundColour = machinescreen.fullcolour[memval];
+      machinescreen.reshapeScreen(); // just to see - this is a dodgy work around!!! when changing background or border colours, mu
+    } else if (memloc==53281) {
+      // border
+      machinescreen.borderColour = machinescreen.fullcolour[memval];
+      machinescreen.reshapeScreen(); // just to see - this is a dodgy work around!!! when changing background or border colours, mu
+    }
+  }
+//////////////////////////////////
+// Screen
+//////////////////////////////////
+
   C64Screen machinescreen;
   
   // only for screen
