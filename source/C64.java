@@ -58,8 +58,8 @@ class C64 {
     while (true) {
       screen.println("[CR]ready.");
       String result=screen.screenInput();
-      if ((result.substring(0,4)).equals("EXIT")) break;
-      else if ((result.substring(0,4)).equals("LIST")) {
+      if (result.length()>=4 && (result.substring(0,4)).equals("EXIT")) break;
+      else if (result.length()>=4 && (result.substring(0,4)).equals("LIST")) {
         if (args.length>0) {
           // call the static method
           screen.println(statements.read_a_file(args[0]));
@@ -68,10 +68,10 @@ class C64 {
         //screen.println("20 a=5*5:print a");
         //screen.println("90 end");
         //continue;
-      } else if ((result.substring(0,3)).equals("SYS")) {
+      } else if (result.length()>=3 && (result.substring(0,3)).equals("SYS")) {
         screen.startupscreen();
         continue;
-      } else if ((result.substring(0,3)).equals("RUN")) {
+      } else if (result.length()>=3 && (result.substring(0,3)).equals("RUN")) {
         machine.statements(args); // we now execute the statements upon a machine
         continue;
       //} else if ((result.substring(0,4)).equals("LOAD")) {
@@ -81,8 +81,9 @@ class C64 {
         //screen.println("?very sorry - the interpreter is broken");
         //continue;
       }
-      //screen.println("Got string = "+result);
-      if ((result.substring(0,40)).equals("                                        ")) continue;
+      System.out.println("Got string = "+result+"\n");
+      if (result.length()>=40 && (result.substring(0,40)).equals("                                        ")) continue;
+      if (result.equals("")) continue;
       machine.statements(result.trim()); // and again, upon a machine
       //screen.println("?syntax error");
     }
