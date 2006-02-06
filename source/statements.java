@@ -80,7 +80,7 @@ class statements {
 
 int MAXTOKENS=100;
 
-String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","REM","PRINT","END","DIM","GET","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE","SYS"};
+String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","REM","PRINT","END","DIM","GET","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE","SYS","CLR"};
 static final int ST_FOR=0;
 static final int ST_TO=1;
 static final int ST_STEP=2;
@@ -107,6 +107,7 @@ static final int ST_INPUT=22;
 static final int ST_LIST=23;
 static final int ST_META_VERBOSE=24;
 static final int ST_SYS=25;
+static final int ST_CLR=26;
 
 String line;
 int pnt;
@@ -247,6 +248,10 @@ boolean ReadStatement() {
         break;
       case ST_READ: 
         if (ProcessIGNOREstatement()) { return true; }
+        // this is tricky, even though I added (and great effor) the
+        // ability to assign to "lists" of variables i.e. A,B=6,7
+        // this doesnt reall work for READ and DATA, as it is not a
+        // fix string of DATA, whereis we have a stream.
         break;
       case ST_DATA: 
         if (ProcessIGNOREstatement()) { return true; }
@@ -267,7 +272,10 @@ boolean ReadStatement() {
       case ST_INPUT: case ST_INPUT1:
         if (ProcessINPUTstatement()) { return true; }
         break;
-      case ST_POKE: case ST_OPEN: case ST_CLOSE:
+      case ST_POKE:
+        if (ProcessPOKEstatement()) { return true; }
+        break;
+      case ST_OPEN: case ST_CLOSE:
         if (ProcessIGNOREstatement()) { return true; }
         break;
       case ST_LIST:
@@ -550,18 +558,32 @@ boolean ProcessGETstatement()
 boolean ProcessINPUTstatement()
 {
   ReadExpression();
-  if (true || verbose) { System.out.printf("inputting to %s\n",keepExpression); }
+  if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
   String got=machine.getline();
-  if (true || verbose) { System.out.printf("got string \"%s\"\n",got.trim()); }
+  if (verbose) { System.out.printf("got string \"%s\"\n",got.trim()); }
   // it a string so keep it quoted
   // still need to separate out the answer to multiple strings!
-  verboseFull();
-  machine.assignment(keepExpression.toLowerCase()+"="+"\""+got.trim().toLowerCase()+"\"");
-  //machine.assignment(keepExpression.toLowerCase()+"="+"\"1\",\"2\"");
-  verboseOff();
-  //machine.setvariable(machine.parse(keepExpression),machine.evaluate("\""+got.trim().toLowerCase()+"\""));
+  // divide up by commas and separate out like this:
+  // TEST,SECOND
+  // "TEST","SECOND"
+  // change all commas to \",\"
+  String processedString = stringQuoteStuff(got.trim().toLowerCase());
+  machine.assignment(keepExpression.toLowerCase()+"="+processedString);
   if (verbose) { machine.dumpstate(); }
   return true;
+}
+
+String stringQuoteStuff(String arg)
+{
+  //take a string and return it as is appart from , surrounded by \",\" and one single \" before and after the string
+  String building="";
+  for (int p=0; p<arg.length(); ++p) { 
+    String a=arg.substring(p,p+1);
+    if (a.equals(",")) {
+      building+="\",\"";
+    } else { building+=a; }
+  }
+  return "\""+building+"\"";
 }
 
 void verboseFull()
@@ -576,6 +598,20 @@ void verboseOff()
   machine.verbose=verbose;
   machine.evaluate_engine.verbose=verbose;
 }
+
+boolean ProcessPOKEstatement() 
+{
+  ReadExpression();
+  if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
+  //verboseFull();
+  // we should have num,num evaluate into a list
+  if (verbose) { System.out.printf("inputting to %s\n",machine.evaluate(keepExpression).print()); }
+  if (verbose) { machine.dumpstate(); }
+  machine.performPOKE(machine.evaluate(keepExpression)); // we assume it is a list of two numbers
+  //verboseOff();
+  return true;
+}
+
 boolean ProcessIGNOREstatement() 
 {
   // read everthing to the colon (should ignore embedded : in a string -b ut doesn;t yet
