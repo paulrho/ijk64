@@ -10,6 +10,7 @@ class Variables {
   static final int V_ARRAY_DOUBLE1=101;
   static final int V_ARRAY_DOUBLE2=102;
   static final int V_ARRAY_STRING1=111;
+  static final int V_ARRAY_STRING2=112;
   int     topvariable=0;
   String  variablename[];
   int     variabletype[];
@@ -19,6 +20,7 @@ class Variables {
   double  variablearrayvalue1[][]; // single element array
   double  variablearrayvalue2[][][]; // single element array
   String  variablearraystring1[][]; // single element array
+  String  variablearraystring2[][][]; // single element array // not quite implemented (for returning)
 
   boolean verbose=false;
 
@@ -30,6 +32,8 @@ class Variables {
     variabletype=new int[MAXVARIABLES];
     variablearrayvalue1=new double[MAXVARIABLES][];
     variablearrayvalue2=new double[MAXVARIABLES][][];
+    variablearraystring1=new String[MAXVARIABLES][];
+    variablearraystring2=new String[MAXVARIABLES][][];
     topvariable=0;
   }
   private void createvariable(String variable, GenericType contents) {
@@ -50,21 +54,35 @@ class Variables {
     if (verbose) { System.out.printf("Dimensioning the array with params=%d [%d,%d,%d]\n",params,p1,p2,p3); }
     if (verbose) { System.out.printf("creating array with %d elements\n",p1+1); }
     if (params==1) {
-      // num
-      variablename[topvariable]=variable;
-      variablearrayvalue1[topvariable]=new double[p1+1];
-      variablearrayvalue1[topvariable][p1]=contents.num();
-      variabletype[topvariable]=V_ARRAY_DOUBLE1;
-      // str
-      // ...
+      
+      if (contents.isNum()) {
+        // num
+        variablename[topvariable]=variable;
+        variablearrayvalue1[topvariable]=new double[p1+1];
+        variablearrayvalue1[topvariable][p1]=contents.num();
+        variabletype[topvariable]=V_ARRAY_DOUBLE1;
+      } else {
+        // str
+        variablename[topvariable]=variable;
+        variablearraystring1[topvariable]=new String[p1+1];
+        variablearraystring1[topvariable][p1]=contents.str();
+        variabletype[topvariable]=V_ARRAY_STRING1;
+      }
     } else if (params==2) {
-      // num
-      variablename[topvariable]=variable;
-      variablearrayvalue2[topvariable]=new double[p1+1][p2+1];
-      variablearrayvalue2[topvariable][p1][p2]=contents.num();
-      variabletype[topvariable]=V_ARRAY_DOUBLE2;
-      // str
-      // ...
+      if (contents.isNum()) {
+        // num
+          variablename[topvariable]=variable;
+        variablearrayvalue2[topvariable]=new double[p1+1][p2+1];
+        variablearrayvalue2[topvariable][p1][p2]=contents.num();
+        variabletype[topvariable]=V_ARRAY_DOUBLE2;
+      } else {
+        // str
+        // ...
+        variablename[topvariable]=variable;
+        variablearraystring2[topvariable]=new String[p1+1][p2+1];
+        variablearraystring2[topvariable][p1][p2]=contents.str();
+        variabletype[topvariable]=V_ARRAY_STRING2;
+      }
     }
     topvariable++;
     if (verbose) { dumpstate(); }
