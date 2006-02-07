@@ -105,9 +105,9 @@ class Machine {
         // just pop the last one
         setvariable(forloopstack_var[fl].toLowerCase(),evaluate(forloopstack_var[fl].toLowerCase()+"+"+forloopstack_step[fl]));
         if (verbose) { System.out.printf("about to add to loop at stack location %d %f>%f\n",fl,getvariable(forloopstack_var[fl]).num(),forloopstack_to[fl]); }
-        if (verbose) { dumpstate(); }
+        //if (verbose) { dumpstate(); }
         if (getvariable(forloopstack_var[fl].toLowerCase()).num()>forloopstack_to[fl]) {
-          if (verbose) { System.out.printf("NEXT: At end of stack\n"); }
+          if (verbose) { System.out.printf("NEXT: At end of stack (%s)\n",forloopstack_var[fl].toLowerCase()); }
           // pop it off, but keep on going, we may be popping off many
           topforloopstack=fl; // at least one
           return false; // I think we need to exit now
@@ -296,6 +296,10 @@ GenericType metareaddatastreamString()
     }
   }
 
+  boolean hasControlC()
+  {
+    return machinescreen.hasControlC();
+  }
   // statements no longer have any meaning unless we are operating on a machine
    // now for different instansiation order
   void statements(String[] args) {
