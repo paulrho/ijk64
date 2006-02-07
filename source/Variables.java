@@ -55,6 +55,9 @@ class Variables {
     if (verbose) { System.out.printf("creating array with %d elements\n",p1+1); }
     if (params==1) {
       
+      // special case again for C64 - minimum of 10 (11) slots for 1 dimensional array only
+      // really should only do this if it is not a DIM statement (but here we dont know the difference)
+      if (p1<11) p1=11;
       if (contents.isNum()) {
         // num
         variablename[topvariable]=variable;
@@ -148,6 +151,7 @@ class Variables {
             return new GenericType(variablearrayvalue1[i][p1]);
           } else if (variabletype[i]==V_ARRAY_STRING1) {
             if (verbose) { System.out.printf("Returning value of array variablearraystring2[%d][%d]=%s\n",i,p1,variablearraystring1[i][p1]); }
+            if (variablearraystring1[i][p1]==null) variablearraystring1[i][p1]=""; // default to empty string!
             return new GenericType(variablearraystring1[i][p1]);
           }
         } else if (param==2) {
