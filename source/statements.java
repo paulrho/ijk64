@@ -80,7 +80,7 @@ class statements {
 
 int MAXTOKENS=100;
 
-String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","REM","PRINT","END","DIM","GET","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE","SYS","CLR","META-SCALE","META-ROWS","FAST"};
+String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","REM","PRINT","END","DIM","GET#5,","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE","SYS","CLR","META-SCALE","META-ROWS","FAST","GET"};
 static final int ST_FOR=0;
 static final int ST_TO=1;
 static final int ST_STEP=2;
@@ -94,7 +94,7 @@ static final int ST_REM=9;
 static final int ST_PRINT=10;
 static final int ST_END=11;
 static final int ST_DIM=12;
-static final int ST_GET=13;
+static final int ST_GEThash=13; // this is just a work around for the moment
 static final int ST_POKE=14;
 static final int ST_OPEN=15;
 static final int ST_INPUT1=16;
@@ -111,6 +111,7 @@ static final int ST_CLR=26;
 static final int ST_META_SCALE=27;
 static final int ST_META_ROWS=28;
 static final int ST_FAST=29;
+static final int ST_GET=30;
 
 String line;
 int pnt;
@@ -229,6 +230,7 @@ void interpret_string(String passed_line)
       // what about this - execute that line IMMEDIATE mode
       if (verbose) { System.out.printf("No line # NOT finishing going direct\n"); }
     }
+    if (verbose) { System.out.printf("On Line %s\n",keepLine); }
     machine.currentLineNo=keepLine; // only added for error tracking - might slow things down
     // debugging
     if (false) {
@@ -245,13 +247,28 @@ void interpret_string(String passed_line)
     SkipSpaces();
     while(pnt<linelength) {
       SkipSpaces();
-      if (!ReadStatement()) {
-        System.out.printf("?SYNTAX ERROR%s%s\n  101:Did not get statement\n",machine.currentLineNo.equals("")?"":" ON LINE ",machine.currentLineNo);
-        machine.print("?syntax error"+(machine.currentLineNo.equals("")?"":" on line ")+machine.currentLineNo+"[CR]");
-        // force it to exit
-        pnt=linelength;
-        break;
+
+      if (verbose) { System.out.printf("At position %d\n",pnt); }
+      if (machine.hasControlC()) {
+        System.out.printf("?BREAK%s%s\n",machine.currentLineNo.equals("")?"":" ON LINE ",machine.currentLineNo);
+        machine.print("?break"+(machine.currentLineNo.equals("")?"":" on line ")+machine.currentLineNo+"[CR]");
+        return;
       }
+      try {
+        if (!ReadStatement()) {
+          System.out.printf("?SYNTAX ERROR%s%s\n  101:Did not get statement\n",machine.currentLineNo.equals("")?"":" ON LINE ",machine.currentLineNo);
+          machine.print("?syntax error"+(machine.currentLineNo.equals("")?"":" on line ")+machine.currentLineNo+"[CR]");
+          // force it to exit
+          pnt=linelength;
+          break;
+        }
+      } catch (ArrayIndexOutOfBoundsException e) { 
+          System.out.printf("?ILLEGAL QUANTITY%s%s\n  201:Got ArrayIndexOutOfBoundsException\n",
+            machine.currentLineNo.equals("")?"":" ON LINE ",machine.currentLineNo);
+          machine.print("?illegal quantity"+(machine.currentLineNo.equals("")?"":" on line ")+machine.currentLineNo+"[CR]");
+          return; 
+      }
+
       if (pnt>=line.length() || line.substring(pnt,pnt+1).equals("\n")) {
         break;
       }
@@ -267,7 +284,9 @@ void interpret_string(String passed_line)
 
 boolean ReadStatement() {
   // read statement should also read the colon at the end, ready for the next statement
+  if (verbose) { System.out.printf("In ReadStatement\n"); }
   if (ReadStatementToken()) {
+    if (verbose) { System.out.printf("Got %d as token\n",gotToken); }
     switch(gotToken) {
       case ST_FOR: 
         if (ProcessFORstatement()) { return true; }
@@ -319,9 +338,12 @@ boolean ReadStatement() {
       case ST_GET:
         if (ProcessGETstatement()) { return true; }
         break;
+      case ST_GEThash:
+        if (ProcessGEThashstatement()) { return true; }
+        break;
       case ST_META_VERBOSE:
         verbose=true; machine.verbose=true;
-        machine.evaluate_engine.verbose=true;
+        //machine.evaluate_engine.verbose=true;
         return true;
       case ST_META_SCALE:
         if (ProcessMETASCALEstatement()) { return true; }
@@ -479,6 +501,7 @@ boolean ProcessGOTOstatement()
   // only with this line will we not do a front to back parse
   if (machine.enabledmovement) {
     machine.gotoLine(keepExpression);
+    if (verbose) { System.out.printf("goto, moving to executionpoint %d\n",machine.executionpoint); }
     pnt=machine.executionpoint; // we should now have a different execution point
   }
   ReadColon();
@@ -490,6 +513,7 @@ boolean ProcessGOSUBstatement()
   ReadExpression(); // not really, should just be a numberic??? maybe an expression is good
   if (machine.enabledmovement) {
     machine.gosubLine(keepExpression,pnt);
+    if (verbose) { System.out.printf("gosub, moving to executionpoint %d\n",machine.executionpoint); }
     pnt=machine.executionpoint; // we should now have a different execution point
   }
   ReadColon();
@@ -530,6 +554,7 @@ boolean ProcessNEXTstatement()
     pnt=machine.executionpoint;
     return true; // we skip the following ones
   }
+  if (verbose) { System.out.printf("Finished the next loops\n"); }
   ReadColon();
   return true;
 }
@@ -601,6 +626,17 @@ boolean ProcessLISTstatement()
 }
 
 boolean ProcessGETstatement()
+{
+  ReadExpression();
+  if (verbose) { System.out.printf("getting to %s\n",keepExpression); }
+  String got=machine.getkey();
+  if (verbose) { System.out.printf("got string \"%s\"\n",got); }
+  // it a string so keep it quoted
+  machine.assignment(keepExpression.toLowerCase()+"="+"\""+got.toLowerCase()+"\"");
+  //machine.setvariable(machine.parse(keepExpression),machine.evaluate("\""+got.toLowerCase()+"\""));
+  return true;
+}
+boolean ProcessGEThashstatement()
 {
   ReadExpression();
   if (verbose) { System.out.printf("getting to %s\n",keepExpression); }
