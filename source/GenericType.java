@@ -48,7 +48,7 @@ class GenericType {
   void add(String thestring) {
     //add a generic type
    if (gttop==1) {
-     gtlist=new GenericType[10]; // empty types
+     gtlist=new GenericType[50]; // empty types // dont forget this one too!
      gtlist[0]=new GenericType(this); // duplicate this generic type and put it on the list
    }
    // add to list

@@ -77,7 +77,6 @@ class Variables {
         variabletype[topvariable]=V_ARRAY_DOUBLE2;
       } else {
         // str
-        // ...
         variablename[topvariable]=variable;
         variablearraystring2[topvariable]=new String[p1+1][p2+1];
         variablearraystring2[topvariable][p1][p2]=contents.str();
@@ -101,13 +100,20 @@ class Variables {
         } else if (variabletype[i]==V_ARRAY_DOUBLE2) {
           variablearrayvalue2[i][p1][p2]=contents.num();
           if (verbose) { System.out.printf("Setting variablearrayvalue[%d][%d][%d] to value %f\n",i,p1,p2,variablearrayvalue2[i][p1][p2]); }
-        } else {
+        } else if (variabletype[i]==V_ARRAY_STRING1) {
+          variablearraystring1[i][p1]=contents.str();
+          if (verbose) { System.out.printf("Setting variablearrayvalue[%d][%d] to value %s\n",i,p1,variablearraystring1[i][p1]); }
+        } else if (variabletype[i]==V_ARRAY_STRING2) {
+          variablearraystring2[i][p1][p2]=contents.str();
+          if (verbose) { System.out.printf("Setting variablearrayvalue[%d][%d][%d] to value %s\n",i,p1,p2,variablearraystring2[i][p1][p2]); }
+        } else { // really, should check this
           variabletype[i]=V_STRING;
           variablearraystring1[i][p1]=contents.str();
         }
         return;
       }
     }
+    if (verbose) { System.out.printf("Creating the array %s via the contents\n",variable); }
     createarray(variable,params,p1,0,0,contents);
   }
 
@@ -136,24 +142,50 @@ class Variables {
     for (int i=0; i<topvariable; ++i) {
       if (variable.equals(variablename[i])) {
         if (param==1) {
+          if (verbose) { System.out.printf("Returning value of array variablearrayvalue1[%d][%d]\n",i,p1); }
           if (variabletype[i]==V_ARRAY_DOUBLE1) {
-            if (verbose) { System.out.printf("Returning value of array variablearrayvalue1[%d][%d]\n",i,p1); }
             if (verbose) { System.out.printf("Returning value of array variablearrayvalue1[%d][%d]=%f\n",i,p1,variablearrayvalue1[i][p1]); }
             return new GenericType(variablearrayvalue1[i][p1]);
+          } else if (variabletype[i]==V_ARRAY_STRING1) {
+            if (verbose) { System.out.printf("Returning value of array variablearraystring2[%d][%d]=%s\n",i,p1,variablearraystring1[i][p1]); }
+            return new GenericType(variablearraystring1[i][p1]);
           }
         } else if (param==2) {
           if (variabletype[i]==V_ARRAY_DOUBLE2) {
             if (verbose) { System.out.printf("Returning value of array variablearrayvalue2[%d][%d][%d]\n",i,p1,p2); }
             if (verbose) { System.out.printf("Returning value of array variablearrayvalue2[%d][%d][%d]=%f\n",i,p1,p2,variablearrayvalue2[i][p1][p2]); }
             return new GenericType(variablearrayvalue2[i][p1][p2]);
-          }
+          } // else if...string2 not implemented yet
         }
       }
     }
     // we did not find the array
-    createarray(variable,param,p1,p2,p3, new GenericType());
-    return new GenericType();
+    // we need to work out what type to create it as
+    // base this on the variable name (did this is evaluate too)
+
+    // work out the default type:
+    if (variable.substring(variable.length()-2,variable.length()).equals("$(")) {
+      if (verbose) { System.out.printf("Creating the array %s via the variable name (string)\n",variable); }
+      createarray(variable,param,p1,p2,p3, new GenericType(""));
+      return new GenericType("");
+    } else {
+      if (verbose) { System.out.printf("Creating the array %s via the variable name (num)\n",variable); }
+      createarray(variable,param,p1,p2,p3, new GenericType(0.0));
+      return new GenericType(0.0);
+    }
   }
+
+  //not used yet//  int determine_type(String variable) 
+  //not used yet// {
+  //not used yet//   int end=variable.length()-1;
+  //not used yet//   String lastchar=variable.substring(end,end+1);
+  //not used yet//   if (lastchar.equals("$")) {
+  //not used yet//     return V_STRING;
+  //not used yet//   else if (lastchar.equals("%")) 
+  //not used yet//     return V_DOUBLE; // for now
+  //not used yet//   else
+  //not used yet//     return V_DOUBLE;
+  //not used yet// }
 
   GenericType getvariable(String variable) {
     // if we try to get a non existant variable, create it and set its value to 0.0
@@ -185,6 +217,12 @@ class Variables {
         System.out.printf("  variable %s (string) = %s\n",variablename[i],variablestring[i]);
       } else if (variabletype[i]==V_ARRAY_DOUBLE1) {
         System.out.printf("  variable %s (array of doubles)\n",variablename[i]);
+      } else if (variabletype[i]==V_ARRAY_DOUBLE2) {
+        System.out.printf("  variable %s (array of doubles 2 dimension)\n",variablename[i]);
+      } else if (variabletype[i]==V_ARRAY_STRING1) {
+        System.out.printf("  variable %s (array of strings)\n",variablename[i]);
+      } else if (variabletype[i]==V_ARRAY_STRING2) {
+        System.out.printf("  variable %s (array of strings 2 dimension)\n",variablename[i]);
       } else {
         System.out.printf("  unkown type %s\n",variablename[i]);
       }
