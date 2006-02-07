@@ -79,6 +79,7 @@ class evaluate {
   static final int ST_NUM=0; // double the default
   static final int ST_STRING=1; // new type
   static final int ST_INT=2; // not implemented
+  static final int ST_DATASTREAM=5;
 
   boolean is_function=false; // flag to indicate that the function name has been pre inserted in the array
   //String functionname="";  // temporarily used until the bracket is confirmed! - no longer required, prestore it!
@@ -262,9 +263,18 @@ class evaluate {
         stktype[upto-2]=ST_NUM;
         stknum[upto-2]=stkstring[upto-1].length();
         return;
+      } else if (function.equals("asc")) {
+        stktype[upto-2]=ST_NUM;
+        stknum[upto-2]=(int)(stkstring[upto-1].charAt(0));
+        return;
       } else if (function.equals("chr$")) {
         stktype[upto-2]=ST_STRING;
         stkstring[upto-2]=""+(char)stknum[upto-1];
+        return;
+      } else if (function.equals("metards")) { // meta read data stream
+        // VERY special function to say, we dont read anything else and we also get our values from a machine function
+        // dummy setting - but we also set a special flag to indicate this??
+        stktype[upto-2]=ST_DATASTREAM;
         return;
       } else if (function.equals("str$")) {
         if (parameters==1) {
@@ -294,8 +304,20 @@ class evaluate {
         if (parameters==2) {
           if (verbose) { System.out.printf("Calculating left$(\"%s\",%d)\n",stkstring[upto-1],(int)stknum[upto]); }
           stktype[upto-2]=ST_STRING;
-          if ((int)stknum[upto]>stkstring[upto-1].length()||(int)stknum[upto]<0) { stkstring[upto-2]=stkstring[upto-1]; }
+          if ((int)stknum[upto]<=0) { stkstring[upto-2]=""; }
+          else if ((int)stknum[upto]>stkstring[upto-1].length()||(int)stknum[upto]<0) { stkstring[upto-2]=stkstring[upto-1]; }
           else { stkstring[upto-2]=stkstring[upto-1].substring(0,(int)stknum[upto]); }
+          return;
+        } else {
+          System.out.printf("?WRONG NUMBER PARAMETERS\n");
+        }
+      } else if (function.equals("right$")) {
+        if (parameters==2) {
+          if (verbose) { System.out.printf("Calculating right$(\"%s\",%d)\n",stkstring[upto-1],(int)stknum[upto]); }
+          stktype[upto-2]=ST_STRING;
+          if ((int)stknum[upto]<=0) { stkstring[upto-2]=""; }
+          else if ((int)stknum[upto]>stkstring[upto-1].length()||(int)stknum[upto]<0) { stkstring[upto-2]=stkstring[upto-1]; }
+          else { stkstring[upto-2]=stkstring[upto-1].substring(stkstring[upto-1].length()-(int)stknum[upto],stkstring[upto-1].length()); }
           return;
         } else {
           System.out.printf("?WRONG NUMBER PARAMETERS\n");
@@ -457,8 +479,6 @@ class evaluate {
 
   GenericType get_value(String variablename, int params, double p1, double p2, double p3) {
     if (using_machine!=null) {
-      // -
-      //return using_machine.getvariable(variablename.toUpperCase(),params,(int)p1,(int)p2,(int)p3); // convert back to uppercase
       return using_machine.getvariable(variablename.toLowerCase(),params,(int)p1,(int)p2,(int)p3); // convert back to uppercase
     }
     return new GenericType(0.0);
@@ -517,7 +537,7 @@ class evaluate {
     // now come the tricks, as soon as this op has a lower or equal precedence,
     // pop and calc the two above!
     while (upto>1 && prec(op)<=prec(stkop[upto-2])) {
-      if (stkop[upto-2].equals("===")) {
+      if (stkop[upto-2].equals("===") || stkop[upto-2].equals("===,") ) {
         break; // go no further that the equals as well, well do it after this!
       }
       if (stkop[upto-2].equals(OP_OPEN_BRACKET) || stkop[upto-2].equals(OP_COMMA)) {
@@ -915,9 +935,76 @@ class evaluate {
     //return stknum[0]; // we cant do this now, we must return maybe a string (even if it is a number)
   }
 
+// there are two ways to get data  from the evaluate stack - or the special case where
+// we get the data from the machine itself
+// this could be from an input string or reading data statements etc
+// one way to do this would be to have a special thing at the top of the stack (or function or whatever)
+// which will then go and get the values from else where (ie. the machine)
+// READ A$,B,C%,D
+// DATAxxx,999,999,999
+// an example would be  A$,B,C%,D=METAREADDATASTREAM()
+// the parser would also have to leave this function on the stack - and not compute it
+// to get the data..another way would be to have the entire data in one string (with CR to separate lines)
+// and a offset to the current reading part
+///   // but only parse the string as required 
+///   int prefill(int index) {
+///     // this is a tricky thing that will read the next variable JUST IN TIME into the stack
+///     // how do we know whether to treat it as a string or a number???
+///     return index;
+///   }
+boolean reads_from_datastream;
+
+GenericType ReadValue(int stypeindex, int index) {
+  if (reads_from_datastream) {
+    // we should NOT return the type in the stack because
+    // we didnt set it! actually we set it to a special type
+    // if ST_NUM, read it as a num, else read it as a string
+    // to continue with the wierd theme below, we could (should?) 
+    // return the value with both a string and num version
+    // and based on the assignment, it will take what it needs
+    // // dodgy work around GET the variable first, then set it
+    // GenericType gt=getvariable(
+    // no - another dodgy work around, preinspect the variable name to determine the type to be returned
+    // we now get returned a pointer to the variable name - so lets look at it
+    int end=stkfunc[stypeindex].length()-1;
+    String lastchar=stkfunc[stypeindex].substring(end,end+1);
+    if (using_machine==null) {
+      if (lastchar.equals("$")) {
+        return new GenericType("TESTONLY");
+      } else { 
+        return new GenericType(10.5); // test only
+      }
+    } else {
+      if (lastchar.equals("$")) {
+        // demanding a GenericType from the machine (we dont care we it gets it from)
+        return using_machine.metareaddatastreamString();
+      } else { 
+        return using_machine.metareaddatastreamNum();
+      }
+    }
+  } else {
+    // we return the type that it is in the stack
+    // ignore stype passed,:
+    int stype=stktype[index]; // i think this was an undected bug! - it was getting given rubbish types, but it seemed to work!
+    // is this because it ignores it anyway and uses the type of the string?
+    if (stype==ST_NUM) {
+      if (verbose) { System.out.printf("%f\n",stknum[index]); }
+      return new GenericType(stknum[index]);
+    } else {
+      if (verbose) { System.out.printf("%s\n",stkstring[index]); }
+      return new GenericType(stkstring[index]);
+    }
+  }
+}
+
 void ProcessAssignment() { 
       // try and see if it can be made to go faster for the singleton case
       //verbose=true;
+      reads_from_datastream=false;
+      if (upto>0 && stktype[upto-1]==ST_DATASTREAM) {
+        if (verbose) { System.out.printf("We need to read from a datastream\n"); }
+        reads_from_datastream=true;
+      }
       if (verbose) { System.out.printf("Yes, we really have an assignment!\n"); }
       // lets SET the variable, we expect the top of the stack is the num or string, the rest is what we set!
       //if (stkop[upto-2].equals("===")   // we expect this
@@ -954,16 +1041,12 @@ void ProcessAssignment() {
           if (parameters==0) {
             // simple setting
             if (using_machine!=null) {
-              if (stktype[stackp+1]==ST_NUM) {
-                if (verbose) { System.out.printf("Wanting to set %s = %f\n",stkfunc[stackp],stknum[stackp+1]); }
-                using_machine.setvariable(stkfunc[stackp].toLowerCase(),new GenericType(stknum[currentvalue++]));
-              } else {
-                if (verbose) { System.out.printf("Wanting to set %s = \"%s\"\n",stkfunc[stackp],stkstring[stackp+1]); }
-                using_machine.setvariable(stkfunc[stackp].toLowerCase(),new GenericType(stkstring[currentvalue++]));
-              }
+              if (verbose) { System.out.printf("Wanting to set %s = ",stkfunc[stackp]); }
+              using_machine.setvariable(stkfunc[stackp].toLowerCase(),ReadValue(stackp,currentvalue++));
+              //using_machine.setvariable(stkfunc[stackp].toLowerCase(),ReadValue(stktype[stackp+1],currentvalue++));
             } else {
               if (verbose) {
-                System.out.printf("stackp=%d Would have set %s to %f\n",stackp,stkfunc[stackp].toLowerCase(),stknum[currentvalue++]);
+                System.out.printf("stackp=%d Would have set %s to ",stackp,stkfunc[stackp].toLowerCase(),ReadValue(stackp,currentvalue++));
               }
             }
           } else { 
@@ -971,13 +1054,10 @@ void ProcessAssignment() {
             if (verbose) { System.out.printf("%sFINAL ARRAY SETTING\n",printprefix); }
               if (verbose) { System.out.printf("Wanting to set array %s ( (params=%d.. %f,%f,%f) to value = %f\n",
                 stkfunc[stackvar],parameters,stknum[stackvar+1],stknum[stackvar+2],stknum[stackvar+3],
-                stknum[currentvalue++]); }
+                stknum[currentvalue]); }
               if (using_machine!=null) {
-                if (stktype[0]==ST_NUM) {
-                  using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],new GenericType(stknum[currentvalue++]));
-                } else {
-                  using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],new GenericType(stkstring[currentvalue++]));
-                }
+                using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],ReadValue(stackvar,currentvalue++));
+                //using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],ReadValue(stktype[0],currentvalue++));
               }
           }
           parameters=0;
