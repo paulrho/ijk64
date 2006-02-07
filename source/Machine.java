@@ -103,10 +103,10 @@ class Machine {
       fl--;
       if (var.equals("") || forloopstack_var[fl].equals(var)) {
         // just pop the last one
-        setvariable(forloopstack_var[fl],evaluate(forloopstack_var[fl]+"+"+forloopstack_step[fl]));
+        setvariable(forloopstack_var[fl].toLowerCase(),evaluate(forloopstack_var[fl].toLowerCase()+"+"+forloopstack_step[fl]));
         if (verbose) { System.out.printf("about to add to loop at stack location %d %f>%f\n",fl,getvariable(forloopstack_var[fl]).num(),forloopstack_to[fl]); }
         if (verbose) { dumpstate(); }
-        if (getvariable(forloopstack_var[fl]).num()>forloopstack_to[fl]) {
+        if (getvariable(forloopstack_var[fl].toLowerCase()).num()>forloopstack_to[fl]) {
           if (verbose) { System.out.printf("NEXT: At end of stack\n"); }
           // pop it off, but keep on going, we may be popping off many
           topforloopstack=fl; // at least one
@@ -192,6 +192,52 @@ class Machine {
   void dumpstate() {
     variables.dumpstate();
   }
+
+//////////////////////////////////
+// DATA staement DATA STREAM
+//////////////////////////////////
+String allDATA="";
+int uptoDATA=0;
+
+void cacheDataAdd(String param) {
+  allDATA+=param;
+}
+
+void cacheAllDATA()
+{
+  // for now, we just simple read in all the DATA statements
+  // also, expecting it to be the first keyword on the line
+  // and wack it into a big string
+}
+
+GenericType metareaddatastreamNum()
+{
+  String str=metareaddatastreamString().str();
+  if (str.equals("")) return new GenericType(0.0);
+  else return new GenericType(Double.parseDouble(str));
+}
+
+GenericType metareaddatastreamString()
+{
+  // from whatever we happen to be reading (say DATA) return a string
+  String building="";
+  boolean quoted=false;
+  for (; uptoDATA<allDATA.length(); ++uptoDATA) {
+    String a=allDATA.substring(uptoDATA,uptoDATA+1);
+    if (a.equals("\n")) {
+      uptoDATA++;
+      break;
+    } else if (!quoted && a.equals(",")) {
+      uptoDATA++;
+      break;
+    } else if (a.equals("\"")) {
+      quoted=!quoted;
+      //building+=a; - no, chew this up!
+    } else { building+=a; }
+  }
+  if (verbose) { System.out.printf("Returning DATA >>>%s<<<\n",building); }
+  return new GenericType(building);
+}
 
 //////////////////////////////////
 // Memory I/O
