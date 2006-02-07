@@ -80,7 +80,7 @@ class statements {
 
 int MAXTOKENS=100;
 
-String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","REM","PRINT","END","DIM","GET","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE","SYS","CLR","META-SCALE","META-ROWS"};
+String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","REM","PRINT","END","DIM","GET","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE","SYS","CLR","META-SCALE","META-ROWS","FAST"};
 static final int ST_FOR=0;
 static final int ST_TO=1;
 static final int ST_STEP=2;
@@ -110,6 +110,7 @@ static final int ST_SYS=25;
 static final int ST_CLR=26;
 static final int ST_META_SCALE=27;
 static final int ST_META_ROWS=28;
+static final int ST_FAST=29;
 
 String line;
 int pnt;
@@ -148,6 +149,51 @@ void precache_all_lines()
 
 }
 
+void precache_all_data()
+{
+  // read_all_lines
+  // read the line# first
+  pnt=0;
+  if (verbose) { System.out.printf("Looking for DATA\n"); }
+  while (true) {
+    SkipSpaces();
+    //System.out.printf("\n");
+    int start=pnt;
+    if (!ReadLineNo()) {
+      if (verbose) { System.out.printf("No line # -finishing\n"); }
+      break;
+    }
+    // got a line # cache it
+    machine.cacheLine(keepLine,pnt); //was start
+
+    SkipSpaces();
+    if (ReadStatementToken()) {
+      if (gotToken==ST_DATA) {
+        if (verbose) { System.out.printf("Found a data line\n"); }
+        // from here to the end of the line is to be cached
+        // read out rest of line
+        String building="";
+        String a;
+        while (pnt<linelength && !(a=line.substring(pnt,pnt+1)).equals("\n")) {
+          building+=a;
+          pnt++;
+        }
+        machine.cacheDataAdd(building+"\n");
+        if (verbose) { System.out.printf("Adding %s\n",building); }
+      }
+    }
+    IgnoreRestofLine();
+
+    if (pnt>=line.length()) {
+      break;
+    }
+    SkipNewLines();
+  }
+
+
+}
+
+
 //boolean newline; // this is a bit of a work around, when we change the execution point to a new line
 //hmm, actually, changing mind, set the line cache to the first statement!
 
@@ -169,6 +215,8 @@ void interpret_string(String passed_line)
 
   // skip to the chase, and just read the line #s
   precache_all_lines();
+  precache_all_data();
+  System.out.printf("DATA is:\n%s\n",machine.allDATA);
 
   pnt=0;
   // read the line# first
@@ -245,11 +293,15 @@ boolean ReadStatement() {
       case ST_REM: 
         if (ProcessREMstatement()) { return true; }
         break;
-      case ST_RESTORE: 
+      case ST_FAST:  // I wish
         if (ProcessIGNOREstatement()) { return true; }
         break;
-      case ST_READ: 
+      case ST_RESTORE: 
+        machine.uptoDATA=0; // revert back again
         if (ProcessIGNOREstatement()) { return true; }
+        return true;
+      case ST_READ: 
+        if (ProcessREADstatement()) { return true; }
         // this is tricky, even though I added (and great effor) the
         // ability to assign to "lists" of variables i.e. A,B=6,7
         // this doesnt reall work for READ and DATA, as it is not a
@@ -464,7 +516,7 @@ boolean ProcessNEXTstatement()
   int start=0;
   while (at<keepExpression.length()) {
     if (keepExpression.substring(at,at+1).equals(",")) {
-      if (machine.processNEXT(pnt,keepExpression.substring(start,at))) {
+      if (machine.processNEXT(pnt,keepExpression.substring(start,at).toLowerCase())) {
         // we did loop
         pnt=machine.executionpoint;
         return true; // we skip the following ones
@@ -473,7 +525,7 @@ boolean ProcessNEXTstatement()
     }
     at++;
   }
-  if (machine.processNEXT(pnt,keepExpression.substring(start,keepExpression.length()))) {
+  if (machine.processNEXT(pnt,keepExpression.substring(start,keepExpression.length()).toLowerCase())) {
     // we did loop
     pnt=machine.executionpoint;
     return true; // we skip the following ones
@@ -557,6 +609,16 @@ boolean ProcessGETstatement()
   // it a string so keep it quoted
   machine.assignment(keepExpression.toLowerCase()+"="+"\""+got.toLowerCase()+"\"");
   //machine.setvariable(machine.parse(keepExpression),machine.evaluate("\""+got.toLowerCase()+"\""));
+  return true;
+}
+
+boolean ProcessREADstatement()
+{
+  // here we use the special feature of evaluate
+  ReadExpression();
+  if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
+  machine.assignment(keepExpression.toLowerCase()+"=metards(1)");
+  if (verbose) { machine.dumpstate(); }
   return true;
 }
 
@@ -688,6 +750,7 @@ boolean ReadAssignment()
     int bracketcount=0;
     boolean isarray=false;
     int start=pnt;
+    boolean quoted=false;
     while (pnt+at<linelength) {
       
       String a=line.substring(pnt+at,pnt+at+1);
@@ -698,9 +761,19 @@ boolean ReadAssignment()
           isarray=true; 
         }
         bracketcount++; 
-      } else if (a.equals(")")) { bracketcount--; }
+      } else if (a.equals(")")) { 
+        bracketcount--; 
         // okay, we have an array
-      else if (a.equals("=")) {
+      } else if (a.equals("\"")) {
+        quoted=!quoted;
+      } else if (!quoted && a.equals(":")) { // end of statement
+        // bring the colon too?
+        // but we didn't find it so return false
+        //at++;
+        //break;
+        keepVariable="";
+        return false;
+      } else if (a.equals("=")) {
         // should only allow variables
         // if (at==0) start allowed
         // else internal allowed
@@ -710,17 +783,6 @@ boolean ReadAssignment()
     }
     if (pnt+at<linelength) {
       // we have got variable =
-      if (false) {
-        if (isarray) {
-          if (verbose) { System.out.printf("Found an ARRAY variable %s\n",line.substring(pnt,pnt+at)); }
-          // really, should evaluate the bit in the middle
-          // assuming (very big assumption that we end with )= when there is an array assignment)
-          if (verbose) { System.out.printf("Found an ARRAY contents= %s\n",line.substring(start,pnt+at-1)); }
-     
-          keepVariable=line.substring(pnt,start)+machine.evaluate(line.substring(start,pnt+at-1)).print()+")"; // the contents of the array evaluated
-          if (verbose) { System.out.printf("Found an ARRAY variable %s\n",keepVariable); }
-        }
-      }
       if (verbose) { System.out.printf("Found variable %s\n",line.substring(pnt,pnt+at)); }
       keepVariable=line.substring(pnt,pnt+at); // keep it
       pnt+=at+1; // read out the variable and the "=" sign
