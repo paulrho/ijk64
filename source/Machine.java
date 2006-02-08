@@ -220,13 +220,28 @@ GenericType metareaddatastreamNum()
 GenericType metareaddatastreamString()
 {
   // from whatever we happen to be reading (say DATA) return a string
+  // added possibility of continuation marks in DATA strings
   String building="";
   boolean quoted=false;
+  boolean cont=false;
   for (; uptoDATA<allDATA.length(); ++uptoDATA) {
     String a=allDATA.substring(uptoDATA,uptoDATA+1);
-    if (a.equals("\n")) {
+    if (cont) {
+      // will read up quote cr quote
+      if (a.equals("\n") || a.equals("\"")) {
+        // not exactly, but it will do
+        // ignore
+      } else {
+        building+=a;
+        cont=false;
+      }
+    } else if (a.equals("\n")) {
       uptoDATA++;
       break;
+    } else if (quoted && a.equals(""+(char)127)) {
+      // it looks like a continuation character
+      // really must be followed by close quote and end of line!
+      cont=true;
     } else if (!quoted && a.equals(",")) {
       uptoDATA++;
       break;
