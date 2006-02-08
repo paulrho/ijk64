@@ -249,7 +249,7 @@ class evaluate {
       } else if (function.equals("tab") || function.equals("spc")) { // they probably are different
         stktype[upto-2]=ST_STRING;
         String building="";
-        for (int i=0; i<stknum[upto-1]; ++i) {
+        for (int i=0; i<(int)stknum[upto-1]; ++i) {
           building+="(rght)";
         }
         stkstring[upto-2]=building;
