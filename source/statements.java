@@ -80,7 +80,7 @@ class statements {
 
 int MAXTOKENS=100;
 
-String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","REM","PRINT","END","DIM","GET#5,","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE","SYS","CLR","META-SCALE","META-ROWS","FAST","GET"};
+String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","PRINT#","PRINT","END","DIM","GET#5,","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE","SYS","CLR","META-SCALE","META-ROWS","FAST","GET","REM"};
 static final int ST_FOR=0;
 static final int ST_TO=1;
 static final int ST_STEP=2;
@@ -90,7 +90,7 @@ static final int ST_THEN=5;
 static final int ST_GOTO=6;
 static final int ST_GOSUB=7;
 static final int ST_RETURN=8;
-static final int ST_REM=9;
+static final int ST_PRINThash=9;
 static final int ST_PRINT=10;
 static final int ST_END=11;
 static final int ST_DIM=12;
@@ -112,6 +112,7 @@ static final int ST_META_SCALE=27;
 static final int ST_META_ROWS=28;
 static final int ST_FAST=29;
 static final int ST_GET=30;
+static final int ST_REM=31;
 
 String line;
 int pnt;
@@ -312,6 +313,9 @@ boolean ReadStatement() {
       case ST_REM: 
         if (ProcessREMstatement()) { return true; }
         break;
+      case ST_PRINThash: // because it would have gone elsewhere
+        if (ProcessIGNOREstatement()) { return true; }
+        break;
       case ST_FAST:  // I wish
         if (ProcessIGNOREstatement()) { return true; }
         break;
@@ -325,6 +329,10 @@ boolean ReadStatement() {
         // ability to assign to "lists" of variables i.e. A,B=6,7
         // this doesnt reall work for READ and DATA, as it is not a
         // fix string of DATA, whereis we have a stream.
+        break;
+      case ST_CLR: 
+        // should really do something
+        if (ProcessIGNOREstatement()) { return true; }
         break;
       case ST_DATA: 
         if (ProcessIGNOREstatement()) { return true; }
