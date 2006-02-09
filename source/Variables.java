@@ -57,18 +57,19 @@ class Variables {
       
       // special case again for C64 - minimum of 10 (11) slots for 1 dimensional array only
       // really should only do this if it is not a DIM statement (but here we dont know the difference)
+      int pset=p1;
       if (p1<11) p1=11;
       if (contents.isNum()) {
         // num
         variablename[topvariable]=variable;
         variablearrayvalue1[topvariable]=new double[p1+1];
-        variablearrayvalue1[topvariable][p1]=contents.num();
+        variablearrayvalue1[topvariable][pset]=contents.num();
         variabletype[topvariable]=V_ARRAY_DOUBLE1;
       } else {
         // str
         variablename[topvariable]=variable;
         variablearraystring1[topvariable]=new String[p1+1];
-        variablearraystring1[topvariable][p1]=contents.str();
+        variablearraystring1[topvariable][pset]=contents.str();
         variabletype[topvariable]=V_ARRAY_STRING1;
       }
     } else if (params==2) {
