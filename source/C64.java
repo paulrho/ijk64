@@ -22,7 +22,7 @@ class C64 {
     machine.initialise_engines(); // silly, but there is a reason
     //machine.verbose=verbose;
 
-    if (false) { screen.scale=2; }
+    if (true) { screen.scale=3; }
     //if (true) { screen.setRows(50); }
 
     for (int i=0; i<args.length; ++i) {
