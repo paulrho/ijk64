@@ -226,6 +226,7 @@ GenericType metareaddatastreamString()
   boolean cont=false;
   for (; uptoDATA<allDATA.length(); ++uptoDATA) {
     String a=allDATA.substring(uptoDATA,uptoDATA+1);
+    // this continuation code was a mistake, it was actually implemented in a basic program!
     if (cont) {
       // will read up quote cr quote
       if (a.equals("\n") || a.equals("\"")) {
@@ -242,6 +243,16 @@ GenericType metareaddatastreamString()
       // it looks like a continuation character
       // really must be followed by close quote and end of line!
       cont=true;
+    } else if (!quoted && a.equals(":")) {
+      // chew up rest of line
+      for (; uptoDATA<allDATA.length(); ++uptoDATA) {
+        String b=allDATA.substring(uptoDATA,uptoDATA+1);
+        if (b.equals("\n")) {
+          uptoDATA++;
+          break;
+        }
+      }
+      break;
     } else if (!quoted && a.equals(",")) {
       uptoDATA++;
       break;
@@ -257,6 +268,10 @@ GenericType metareaddatastreamString()
 //////////////////////////////////
 // Memory I/O
 //////////////////////////////////
+  int peek(int val) {
+    return 0;
+  }
+
   void performPOKE(GenericType gt) {
     // here we should have a list of variables
     int memloc;
@@ -264,7 +279,7 @@ GenericType metareaddatastreamString()
     if (gt.gttop==2) {
       memloc=(int)gt.gtlist[0].num();
       memval=(int)gt.gtlist[1].num();
-      System.out.printf("Poking memory location %d with variable %d\n",memloc,memval);
+      if (verbose) { System.out.printf("Poking memory location %d with variable %d\n",memloc,memval); }
       performPOKE(memloc, memval);
     } else {
       System.out.printf("Wrong number of parameters\n");
@@ -275,14 +290,19 @@ GenericType metareaddatastreamString()
     // the background and border may be round the wrong way, cant remember
     if (memloc==198) {
       // clear the key buffer if you get this
-    } else if (memloc==53280) {
-      // background
-      machinescreen.backgroundColour = machinescreen.fullcolour[memval];
-      machinescreen.reshapeScreen(); // just to see - this is a dodgy work around!!! when changing background or border colours, mu
     } else if (memloc==53281) {
+      // background
+      // if it is already set - dont do it again (expensive!)
+      if (machinescreen.backgroundColour!=machinescreen.fullcolour[memval]) {
+        machinescreen.backgroundColour = machinescreen.fullcolour[memval];
+        machinescreen.reshapeScreen(); // just to see - this is a dodgy work around!!! when changing background or border colours, mu
+      }
+    } else if (memloc==53280) {
       // border
-      machinescreen.borderColour = machinescreen.fullcolour[memval];
-      machinescreen.reshapeScreen(); // just to see - this is a dodgy work around!!! when changing background or border colours, mu
+      if (machinescreen.borderColour!=machinescreen.fullcolour[memval]) {
+        machinescreen.borderColour = machinescreen.fullcolour[memval];
+        machinescreen.reshapeScreen(); // just to see - this is a dodgy work around!!! when changing background or border colours, mu
+      }
     }
   }
 //////////////////////////////////
