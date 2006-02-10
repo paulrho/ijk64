@@ -48,12 +48,14 @@ class statements {
   statements(String interpstring, Machine themachine)
   {
     machine=themachine;
+    verbose=machine.verbose; // inherit this now
     interpret_string(interpstring);
   }
 
   statements(String[] args, Machine themachine)
   {
     machine=themachine;
+    verbose=machine.verbose; // inherit this now
     boolean has_parameter=false;
     for (int i=0; i<args.length; ++i) {
       if (args[i].substring(0,1).equals("-")) {
@@ -80,7 +82,7 @@ class statements {
 
 int MAXTOKENS=100;
 
-String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","PRINT#","PRINT","END","DIM","GET#5,","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE","SYS","CLR","META-SCALE","META-ROWS","FAST","GET","REM"};
+String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","PRINT#","PRINT","END","DIM","GET#5,","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE","SYS","CLR","META-SCALE","META-ROWS","FAST","GET","REM","META-CHARSET","LOAD","META-DUMPSTATE"};
 static final int ST_FOR=0;
 static final int ST_TO=1;
 static final int ST_STEP=2;
@@ -113,6 +115,9 @@ static final int ST_META_ROWS=28;
 static final int ST_FAST=29;
 static final int ST_GET=30;
 static final int ST_REM=31;
+static final int ST_META_CHARSET=32;
+static final int ST_LOAD=33;
+static final int ST_META_DUMPSTATE=34;
 
 String line;
 int pnt;
@@ -218,7 +223,7 @@ void interpret_string(String passed_line)
   // skip to the chase, and just read the line #s
   precache_all_lines();
   precache_all_data();
-  System.out.printf("DATA is:\n%s\n",machine.allDATA);
+  if (verbose) { System.out.printf("DATA is:\n%s\n",machine.allDATA); }
 
   pnt=0;
   // read the line# first
@@ -349,12 +354,21 @@ boolean ReadStatement() {
       case ST_GEThash:
         if (ProcessGEThashstatement()) { return true; }
         break;
+      case ST_META_DUMPSTATE:
+        machine.dumpstate();
+        return true;
       case ST_META_VERBOSE:
         verbose=true; machine.verbose=true;
-        //machine.evaluate_engine.verbose=true;
+        machine.evaluate_engine.verbose=true;
         return true;
+      case ST_META_CHARSET:
+        if (ProcessMETACHARSETstatement()) { return true; }
+        break;
       case ST_META_SCALE:
         if (ProcessMETASCALEstatement()) { return true; }
+        break;
+      case ST_LOAD:
+        if (ProcessLOADstatement()) { return true; }
         break;
       case ST_META_ROWS:
         if (ProcessMETAROWSstatement()) { return true; }
@@ -711,6 +725,22 @@ void verboseOff()
   verbose=false;
   machine.verbose=verbose;
   machine.evaluate_engine.verbose=verbose;
+}
+
+boolean ProcessLOADstatement() 
+{
+  ReadExpression();
+  if (verbose) { machine.dumpstate(); }
+  machine.print("loading filename "+machine.evaluate(keepExpression).str().toLowerCase());
+  //machine....(machine.evaluate(keepExpression).str());
+  return true;
+}
+boolean ProcessMETACHARSETstatement() 
+{
+  ReadExpression();
+  if (verbose) { machine.dumpstate(); }
+  machine.machinescreen.changeCharSet((int)machine.evaluate(keepExpression).num());
+  return true;
 }
 
 boolean ProcessMETASCALEstatement() 
