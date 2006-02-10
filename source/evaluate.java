@@ -235,7 +235,7 @@ class evaluate {
         answer=Math.tan(right);
       } else if (function.equals("sqrt")) {
         answer=Math.sqrt(right);
-      } else if (function.equals("sqt")) { // for basic
+      } else if (function.equals("sqr")) { // for basic (had sqt)
         answer=Math.sqrt(right);
 
       // string functions
@@ -258,6 +258,15 @@ class evaluate {
         // tap into the machine - I think this gives the position on the screen?
         stktype[upto-2]=ST_NUM;
         stknum[upto-2]=0.0; // just for now - not implemented
+        return;
+      } else if (function.equals("peek")) {
+        if (using_machine!=null) {
+          stktype[upto-2]=ST_NUM;
+          stknum[upto-2]=using_machine.peek((int)stknum[upto-1]);
+        } else {
+          stktype[upto-2]=ST_NUM;
+          stknum[upto-2]=0.0;
+        }
         return;
       } else if (function.equals("len")) {
         stktype[upto-2]=ST_NUM;
@@ -296,6 +305,21 @@ class evaluate {
           if (verbose) { System.out.printf("Calculating mid$\n"); }
           stktype[upto-2]=ST_STRING;
           stkstring[upto-2]=stkstring[upto-1].substring((int)stknum[upto]-1,stkstring[upto-1].length());
+          return;
+        } else {
+          System.out.printf("?WRONG NUMBER PARAMETERS\n");
+        }
+      } else if (function.equals("instr")) {
+        if (parameters==2) {
+          if (verbose) { System.out.printf("Calculating instr(\"%s\",\"%s\")\n",stkstring[upto-1],stkstring[upto]); }
+          stktype[upto-2]=ST_NUM;
+          stknum[upto-2]=0;
+          for (int i=0; i<=stkstring[upto-1].length()-stkstring[upto].length(); ++i) {
+            if (stkstring[upto-1].substring(i,i+stkstring[upto].length()).equals(stkstring[upto])) {
+              stknum[upto-2]=i+1;
+              break;
+            }
+          }
           return;
         } else {
           System.out.printf("?WRONG NUMBER PARAMETERS\n");
