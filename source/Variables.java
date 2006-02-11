@@ -160,7 +160,10 @@ class Variables {
             if (verbose) { System.out.printf("Returning value of array variablearrayvalue2[%d][%d][%d]\n",i,p1,p2); }
             if (verbose) { System.out.printf("Returning value of array variablearrayvalue2[%d][%d][%d]=%f\n",i,p1,p2,variablearrayvalue2[i][p1][p2]); }
             return new GenericType(variablearrayvalue2[i][p1][p2]);
-          } // else if...string2 not implemented yet
+          } else if (variabletype[i]==V_ARRAY_STRING2) {
+            if (verbose) { System.out.printf("Returning value of array variablestringvalue2[%d][%d][%d]=%s\n",i,p1,p2,variablearraystring2[i][p1][p2]); }
+            return new GenericType(variablearraystring2[i][p1][p2]);
+          }
         }
       }
     }
