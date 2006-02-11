@@ -68,9 +68,28 @@ class GenericType {
     return astring;
   }
 
+  // interesting puzzle here -
+  // this is GenericType and printing it could be any format so desired
+  // but as I want this in a C64 format, we will use that
+  // perhaps there should be multiple output formats available?
   String print() {
     if (isNum()) {
-      return new Double(aval).toString();
+      // if it is an interger, return no trailing decimal
+      //return new Double(aval).toString();
+      if (aval-(int)aval==0) {
+        if (aval>=0.0) {
+          return " "+new Integer((int)aval).toString()+" ";
+        } else {
+          return new Integer((int)aval).toString()+" ";
+        }
+
+      } else {
+        if (aval>=0.0) {
+          return " "+new Double(aval).toString()+" ";
+        } else {
+          return new Double(aval).toString()+" ";
+        }
+      }
     } else if (type==ST_STRING) {
       if (false) { System.out.printf("Returning a String\n"); }
       return astring;
