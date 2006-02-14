@@ -596,7 +596,7 @@ class evaluate {
           String building=a;
           while (ispnt<intstring.length()-1) {
             a=intstring.substring(ispnt+1,ispnt+2);
-            if (a.compareTo("a")>=0 && a.compareTo("z")<=0) {
+            if (a.compareToIgnoreCase("a")>=0 && a.compareToIgnoreCase("z")<=0) {
               building=building+a;
             } else { break; }
             ispnt++;
@@ -848,7 +848,7 @@ class evaluate {
           // brackets, note, I'm using setOp to do this and if prec of , is lower than all else it will do what I want
           setOp(OP_COMMA);
         // allow also multi charactor operators OR and AND
-        } else if (a.compareTo("a")>=0 && a.compareTo("z")<=0) {
+        } else if (a.compareToIgnoreCase("a")>=0 && a.compareToIgnoreCase("z")<=0) {
           readStringOpAlpha();
         } else if (a.equals("=") || a.equals("<") || a.equals(">")) {
           readStringOp();
