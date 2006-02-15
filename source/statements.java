@@ -1,3 +1,11 @@
+/////////////////////////////////////////////////////////////////////////////////
+//
+// $Id$
+//
+// $Log$
+//
+/////////////////////////////////////////////////////////////////////////////////
+
 // here we go on a new venture - basic interpreting
 //   
 
@@ -16,7 +24,6 @@
 // such that  print a$tab(16)b$  (or even atab(16)b)  is okay but not  print a$b$
 // also "xxx"t$ is okay too
 // one way to deal with this is to perhaps ...
-
 
 import java.io.*;
 
