@@ -1,8 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Machine.java,v 1.19 2006/02/15 01:54:46 pgs Exp pgs $
+// $Id: Machine.java,v 1.20 2006/02/15 21:27:44 pgs Exp pgs $
 //
 // $Log: Machine.java,v $
+// Revision 1.20  2006/02/15 21:27:44  pgs
+// Add a evaluate_partial which simply calls
+// evaluate.interpret_string_partial
+//
 // Revision 1.19  2006/02/15 01:54:46  pgs
 // Standard header
 //
@@ -278,7 +282,13 @@ GenericType metareaddatastreamString()
 // Memory I/O
 //////////////////////////////////
   int peek(int val) {
-    return 0;
+    if (val==197) {
+      if (machinescreen.hasinput()) 
+        return 22; // made up number just to make it NOT 64
+      else
+        return 64;
+    } else
+      return 0;
   }
 
   void performPOKE(GenericType gt) {
