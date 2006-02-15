@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id$
+// $Id: evaluate.java,v 1.20 2006/02/15 01:52:47 pgs Exp pgs $
 //
-// $Log$
+// $Log: evaluate.java,v $
+// Revision 1.20  2006/02/15 01:52:47  pgs
+// Standard header
+//
 //
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -110,6 +113,8 @@ class evaluate {
   String printprefix="";
   boolean verbose=true;
   boolean quiet=false;
+  int parse_restart=0;
+  boolean partialmatching=false;
 
   Machine using_machine=null;
 
@@ -254,7 +259,22 @@ class evaluate {
           stknum[upto-2]=Double.parseDouble(stkstring[upto-1]); // this was WRONG! it cost 3 hours!! -finally fixed 2am monday
         } catch (Exception e) { stknum[upto-2]=0.0; }
         return;
-      } else if (function.equals("tab") || function.equals("spc")) { // they probably are different
+      } else if (function.equals("tab")) { // they ARE different
+        // we need to talk to the machine to get the current cursor setting
+        int cursx=0;
+        if (using_machine!=null) {
+          cursx=using_machine.machinescreen.cursX;
+        }
+        stktype[upto-2]=ST_STRING;
+        String building="";
+        int moveto=(int)stknum[upto-1]-cursx;
+        if (moveto<0) moveto=0;
+        for (int i=0; i<moveto; ++i) {
+          building+="(rght)";
+        }
+        stkstring[upto-2]=building;
+        return;
+      } else if (function.equals("spc")) { // they probably are different
         stktype[upto-2]=ST_STRING;
         String building="";
         for (int i=0; i<(int)stknum[upto-1]; ++i) {
@@ -600,7 +620,7 @@ class evaluate {
     return value;
   }
 
-  void readStringOpAlpha() {
+  boolean readStringOpAlpha() {
           String building=a;
           while (ispnt<intstring.length()-1) {
             a=intstring.substring(ispnt+1,ispnt+2);
@@ -617,13 +637,13 @@ class evaluate {
           if (building.equalsIgnoreCase("or") || building.equalsIgnoreCase("and")) {
             //operatortoken=building;
             setOp(building);
-            return;
+            return true;
           } else {
-            System.out.printf("?SYNTAX ERROR *** not a valid operator %s\n",building);
-            return;
+            if (!partialmatching) { System.out.printf("?SYNTAX ERROR *** not a valid operator %s\n",building); }
+            return false;
           }
   }
-  void readStringOp() {
+  boolean readStringOp() {
           String building=a;
           while (ispnt<intstring.length()-1) {
             a=intstring.substring(ispnt+1,ispnt+2);
@@ -637,17 +657,17 @@ class evaluate {
             // we should have already known this was coming
             if (verbose) { System.out.printf("%sfound an assignment operator\n",printprefix); }
             setOp("==="); // special setting for an assignment // doesnt change anything
-            return;
+            return true;
           } else if (building.equals("=") || building.equals(">") || building.equals("<") 
               || building.equals(">=") || building.equals("<=")
               || building.equals("=>") || building.equals("=<")
               || building.equals("=") || building.equals("<>")
           ) {
             setOp(building);
-            return;
+            return true;
           } else {
-            System.out.printf("?SYNTAX ERROR *** not a valid operator %s\n",building);
-            return;
+            if (!partialmatching) { System.out.printf("?SYNTAX ERROR *** not a valid operator %s\n",building); }
+            return false;
           }
   }
 
@@ -737,15 +757,23 @@ class evaluate {
           doing=D_OP;  // moved this to here // !is_function
   }
 
+  GenericType interpret_string_partial(String intstring_param) {
+    partialmatching=true;
+    return interpret_string(intstring_param, false, 0.0, false);
+  }
+
   GenericType interpret_string_with_assignment(String intstring_param) {
+    partialmatching=false;
     return interpret_string(intstring_param, false, 0.0, true);
   }
 
   GenericType interpret_string(String intstring_param) {
+    partialmatching=false;
     return interpret_string(intstring_param, false, 0.0, false);
   }
 
   GenericType interpret_string(String intstring_param, double expecting) {
+    partialmatching=true; //for now???
     return interpret_string(intstring_param, true, expecting, false);
   }
 
@@ -756,6 +784,7 @@ class evaluate {
   boolean g_is_assignment;
   GenericType interpret_string(String intstring_param, boolean testing, double expecting, boolean is_assignment) {
 
+    parse_restart=(-1); // means no restart required // really could be zero too!
     g_is_assignment=is_assignment;
     upto=0; // nothing is on the stack, upto points past the end of the current array, at the NEXT point
     doing=D_NUM;
@@ -804,7 +833,13 @@ class evaluate {
           pushString(qs); // we push, not a number, but a string
           doing=D_OP;
         } else {
-          System.out.printf("?SYNTAX ERROR 001\n***Not correct syntax\n");
+          if (!partialmatching) {
+            System.out.printf("?SYNTAX ERROR 001\n***Not correct syntax\n");
+            // new - stop parsing the expression
+          }
+          if (verbose) { System.out.printf("Parsed up to %d at char %s\n",ispnt,a); }
+          parse_restart=ispnt; // because we are currently on the next invalid char
+          break;
         }
         if (verbose) { show_state(); }
       } else if (doing==D_OP) {
@@ -857,11 +892,35 @@ class evaluate {
           setOp(OP_COMMA);
         // allow also multi charactor operators OR and AND
         } else if (a.compareToIgnoreCase("a")>=0 && a.compareToIgnoreCase("z")<=0) {
-          readStringOpAlpha();
+          int save_ispnt=ispnt;
+          if (!readStringOpAlpha()) {
+            // new - stop parsing the expression
+            if (!partialmatching) {
+              System.out.printf("?SYNTAX ERROR 010\n***Not correct syntax\n");
+            }
+            if (verbose) { System.out.printf("Parsed up to %d at char %s\n",save_ispnt,a); }
+            parse_restart=save_ispnt; // rewinding back to the save point
+            break;
+          }
         } else if (a.equals("=") || a.equals("<") || a.equals(">")) {
-          readStringOp();
+          int save_ispnt=ispnt;
+          if (!readStringOp()) {
+            // new - stop parsing the expression
+            if (!partialmatching) {
+              System.out.printf("?SYNTAX ERROR 011\n***Not correct syntax\n");
+            }
+            if (verbose) { System.out.printf("Parsed up to %d at char %s\n",save_ispnt,a); }
+            parse_restart=save_ispnt; // rewinding back to the save point
+            break;
+          }
         } else {
-          System.out.printf("?SYNTAX ERROR 002\n***Not correct syntax\n");
+          if (!partialmatching) {
+            System.out.printf("?SYNTAX ERROR 002\n***Not correct syntax\n");
+          }
+          // new - stop parsing the expression
+          if (verbose) { System.out.printf("Parsed up to %d at char %s\n",ispnt,a); }
+          parse_restart=ispnt;
+          break;
         }
         if (verbose) { show_state(); }
         // end D_OP
