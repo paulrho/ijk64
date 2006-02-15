@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id$
+// $Id: Machine.java,v 1.19 2006/02/15 01:54:46 pgs Exp pgs $
 //
-// $Log$
+// $Log: Machine.java,v $
+// Revision 1.19  2006/02/15 01:54:46  pgs
+// Standard header
+//
 //
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -128,6 +131,9 @@ class Machine {
   // from within here we execute the evaluate?
   GenericType evaluate(String expression) {
     return evaluate_engine.interpret_string(expression);
+  }
+  GenericType evaluate_partial(String expression) {
+    return evaluate_engine.interpret_string_partial(expression);
   }
   void assignment(String expression) {
     evaluate_engine.interpret_string_with_assignment(expression);
