@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id$
+// $Id: statements.java,v 1.18 2006/02/15 01:55:18 pgs Exp pgs $
 //
-// $Log$
+// $Log: statements.java,v $
+// Revision 1.18  2006/02/15 01:55:18  pgs
+// Standard header
+//
 //
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -458,7 +461,7 @@ boolean ProcessDIMstatement()
   return true;
 }
 
-boolean ProcessPRINTstatement()
+boolean ProcessPRINTstatement_original()
 {
   if (verbose) { System.out.printf("Processing PRINT statement\n"); }
   ReadExpression();
@@ -479,6 +482,40 @@ boolean ProcessPRINTstatement()
     //System.out.printf("  also would evaluate the expression %s\n","not finished coding yet");
   }
   if (!keepExpression.equals("")) { 
+    if (verbose  ) { System.out.printf("\n"); }
+    machine.printnewline();
+  }
+  ReadColon(); // check
+  return true;
+}
+
+boolean ProcessPRINTstatement()
+{
+  if (verbose) { System.out.printf("Processing PRINT statement\n"); }
+  ReadExpression();
+  if (verbose) { System.out.printf("MachinePrintEvaluate( %s )\n",keepExpression); }
+  if (verbose  ) { System.out.printf("%s",machine.evaluate_partial(keepExpression).print()); }
+  machine.print(machine.evaluate_partial(keepExpression).print());
+  // this should probably be nicer
+  int x;
+  String separator="";
+  while ((x=machine.evaluate_engine.parse_restart)>0) {
+    if (verbose) { System.out.printf("More to evaluate!!!! - should resubmit with the remaining string after %d...\n",machine.evaluate_engine.parse_restart); }
+    // there is more to evaluate
+    String temp=new String(keepExpression);  // do I need to do this?
+    keepExpression=temp.substring(x,temp.length());
+
+    x=0; // now we are at the start of it again
+    while (x<keepExpression.length() && keepExpression.substring(x,x+1).equals(";")) { x++; separator=";"; } // chew them up // need to include blanks and , too!
+    temp=new String(keepExpression);  // do I need to do this?
+    keepExpression=temp.substring(x,temp.length());
+    if (keepExpression.equals("")) { break; }
+
+    if (verbose) { System.out.printf("should resubmit with the remaining string after %d will do so with:%s\n",machine.evaluate_engine.parse_restart,keepExpression); }
+    machine.print(machine.evaluate_partial(keepExpression).print());
+    separator="";
+  }
+  if (!separator.equals(";")) {
     if (verbose  ) { System.out.printf("\n"); }
     machine.printnewline();
   }
@@ -616,7 +653,7 @@ boolean ProcessFORstatement()
       ReadExpression();
       forstep=keepExpression;
       // do we need to read the colon?
-      return true;
+      /// - no dont return -- all is okay !! - return true;
     } else {
       System.out.printf("?SYNTAX ERROR 105: did not get STEP token\n");
       return false;
@@ -807,8 +844,10 @@ boolean ReadExpression()
       if (!quoted && a.equals(":")) {
         break;
       }
-      if (!quoted && a.equals(";")) {
-        break;
+      if (false) {  // for new print method
+        if (!quoted && a.equals(";")) {
+          break;
+        }
       }
       if (!quoted && ReadStatementToken()) {
         break;
@@ -827,7 +866,15 @@ boolean ReadExpression()
 boolean ReadAssignment()
 {
     int at=0;
+
     // up here - should we get rid of spaces?
+    // yes - chew up spaces - to make for loops keep correct variable
+    while (pnt+at<linelength) {
+      String a=line.substring(pnt+at,pnt+at+1);
+      if (!a.equals(" ")) { break; }
+      pnt++; //! note - moving pnt along!
+    }
+
     int bracketcount=0;
     boolean isarray=false;
     int start=pnt;
