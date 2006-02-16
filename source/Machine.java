@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Machine.java,v 1.20 2006/02/15 21:27:44 pgs Exp pgs $
+// $Id: Machine.java,v 1.21 2006/02/15 22:49:09 pgs Exp pgs $
 //
 // $Log: Machine.java,v $
+// Revision 1.21  2006/02/15 22:49:09  pgs
+// Allow peeking of 197 in a simplistic fashion
+//
 // Revision 1.20  2006/02/15 21:27:44  pgs
 // Add a evaluate_partial which simply calls
 // evaluate.interpret_string_partial
@@ -116,7 +119,8 @@ class Machine {
         setvariable(forloopstack_var[fl].toLowerCase(),evaluate(forloopstack_var[fl].toLowerCase()+"+"+forloopstack_step[fl]));
         if (verbose) { System.out.printf("about to add to loop at stack location %d %f>%f\n",fl,getvariable(forloopstack_var[fl]).num(),forloopstack_to[fl]); }
         //if (verbose) { dumpstate(); }
-        if (getvariable(forloopstack_var[fl].toLowerCase()).num()>forloopstack_to[fl]) {
+        if (forloopstack_step[fl]<0 && getvariable(forloopstack_var[fl].toLowerCase()).num()<forloopstack_to[fl]  
+            || forloopstack_step[fl]>0 && getvariable(forloopstack_var[fl].toLowerCase()).num()>forloopstack_to[fl]) {
           if (verbose) { System.out.printf("NEXT: At end of stack (%s)\n",forloopstack_var[fl].toLowerCase()); }
           // pop it off, but keep on going, we may be popping off many
           topforloopstack=fl; // at least one
