@@ -1,8 +1,16 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: evaluate.java,v 1.20 2006/02/15 01:52:47 pgs Exp pgs $
+// $Id: evaluate.java,v 1.21 2006/02/15 21:19:34 pgs Exp pgs $
 //
 // $Log: evaluate.java,v $
+// Revision 1.21  2006/02/15 21:19:34  pgs
+// Fix TAB( to do the correct thing:
+// It will create enough spaces to move the cursor to that column
+// Note, this will only work as the start of an expression,
+// but then this may be the same as the real thing???
+// Also, allow partial matches of expressions when flagged
+// and stop parsing at that point (setting the position of the next bit in an accessible variable)
+//
 // Revision 1.20  2006/02/15 01:52:47  pgs
 // Standard header
 //
@@ -91,6 +99,7 @@ class evaluate {
   static final int ST_STRING=1; // new type
   static final int ST_INT=2; // not implemented
   static final int ST_DATASTREAM=5;
+  static final int ST_PARAM=10; // the current variables name is in func - there is no actual value
 
   boolean is_function=false; // flag to indicate that the function name has been pre inserted in the array
   //String functionname="";  // temporarily used until the bracket is confirmed! - no longer required, prestore it!
@@ -100,6 +109,7 @@ class evaluate {
   String intstring;
   int ispnt; // pointer into intstring
   String a; // temp string variable containing current pointed to char
+  boolean is_defining_function;
 
   // constants and enums
   static int D_NUM=0;
@@ -220,6 +230,25 @@ class evaluate {
       // these functions take 1 numeric parameter:
       //if (righttype!=ST_NUM) { System.out.printf("?INCORRECT TYPE\n"); }
 
+      if (function.length()>=2 && function.substring(0,2).equals("fn")) {
+        if (verbose) { System.out.printf("Wanting to use predefined function %s with parameter %f\n",function,right); }
+        if (using_machine!=null) {
+          // do we need toLower?
+          String param=using_machine.getvariable("fn_"+function.toLowerCase()+"_param").str();
+          String form=using_machine.getvariable("fn_"+function.toLowerCase()+"_function").str();
+          if (verbose) { System.out.printf("About to set %s to %f\n",param.toLowerCase(),right); }
+          using_machine.setvariable(param.toLowerCase(),new GenericType(right));
+          if (verbose) { System.out.printf("form:%s\n",form); }
+          evaluate evaluate_engine = new evaluate(using_machine); //probably very cpu expensive
+          evaluate_engine.verbose=verbose;
+          evaluate_engine.quiet=true;
+          answer=evaluate_engine.interpret_string(form).num();
+          if (verbose) { System.out.printf("Returned from evaluate\n"); }
+          if (verbose) { show_state(); }
+        } else {
+          answer=100.0; // evaulate it (recurse)
+        }
+      } else 
       if (function.equals("sin")) {
         answer=Math.sin(right);
       } else if (function.equals("silly")) {
@@ -302,7 +331,8 @@ class evaluate {
         return;
       } else if (function.equals("asc")) {
         stktype[upto-2]=ST_NUM;
-        stknum[upto-2]=(int)(stkstring[upto-1].charAt(0));
+        stknum[upto-2]=(int)(stkstring[upto-1].charAt(0)+1-'A');  // need to convert from PET!
+        if (verbose) { System.out.printf("calculating the ascii of %s to be %f\n",stkstring[upto-1],stknum[upto-2]); }
         return;
       } else if (function.equals("chr$")) {
         stktype[upto-2]=ST_STRING;
@@ -687,10 +717,37 @@ class evaluate {
   }
 
   void readString() {
+          boolean using_defined_function=false;
           String building=a;
           while (ispnt<intstring.length()-1) {
             // expensive - think of a better way! - trying to make it a bit better - dont know if it helps
             a=intstring.substring(ispnt+1,ispnt+2);
+
+            // here we must ALSO look for the "fn" keyword
+            // if we get this keyword, flag it, chew up the spaces and keep going!
+            // if this is a define (and assignment) we must NOT expand the parameters
+            // e.g. 'DEF' FN F(X)=2*X^2+5*X
+            //            ^^   ^
+            // should try and make this better, this would exclude fn from appearing in a variable
+            // although we wont use it for defining, we will however for :
+            //  A=FNF(77.0)+2
+            //
+            if (a.equalsIgnoreCase("n") && ispnt<intstring.length()-1 && intstring.substring(ispnt,ispnt+2).equalsIgnoreCase("fn")) {
+              if (verbose) { System.out.printf("Got function use\n"); }
+              ispnt++; // skip n
+              // chew spaces ( we are in look ahead by 1  mode here)
+              while (ispnt<intstring.length()-1) {
+                a=intstring.substring(ispnt+1,ispnt+2);
+                if (!a.equals(" ")) {
+                  break;
+                }
+                ispnt++;
+              }
+              building=""; // clear this
+              //if (verbose) { System.out.printf("Next character = %s\n",a); }
+              using_defined_function=true;
+            }
+
             if (a.equalsIgnoreCase("o") && ispnt<intstring.length()-2 && intstring.substring(ispnt+1,ispnt+3).equalsIgnoreCase("or")) {
               //note, if we find an imbedded or or and, we must pop it off, and stop processing!
               break;
@@ -714,7 +771,13 @@ class evaluate {
           if (ispnt<intstring.length()-1 && (intstring.substring(ispnt+1,ispnt+2)).equals(OP_OPEN_BRACKET)) {
             if (verbose) { System.out.printf("%sgot a function %s\n",printprefix,building); }
             //functionname=building; // we KNOW that the bracket is coming, so we can be tricky and place it there already
-            stkfunc[upto]=building; // note, we are writing passed the end of the reference at the moment
+            if (using_defined_function) {
+              if (verbose) { System.out.printf("It is a defined function (prefixing fn)\n"); }
+              stkfunc[upto]="fn"+building; // note, we are writing passed the end of the reference at the moment
+              is_defining_function=true;
+            } else {
+              stkfunc[upto]=building; // note, we are writing passed the end of the reference at the moment
+            }
             if (verbose) { System.out.printf("%sPre-Setting functionname to %s at stknum[(upto=)%d]\n",printprefix,stkfunc[upto],upto); }
             is_function=true;
             // now, this could be a function, or an array!
@@ -741,7 +804,25 @@ class evaluate {
                upto++;
                doing=D_ASSIGN;
                return;
+
+            } 
+              else if (g_is_assignment && upto==1 && stkop[upto-1].equals(OP_OPEN_BRACKET) && is_defining_function) { // we are in a defining function
+    
+              // special case where we find that we are defining a function AND we are within the brackets               if (verbose) { System.out.printf("Not resolving the variable, keeping it BECAUSE we are going to use it as a parameter in a function definition\n"); }
+               stkop[upto]="=f=";  // what should this be?
+               stkfunc[upto]=building; // keep the variable
+               stktype[upto]=ST_PARAM; // because we leave this as OP, we mark it as a special param
+               upto++;
+               doing=D_OP;
+               // as soon as we close bracket (and get =) - the rest of the string is kept verbatim
+               // as a special string which is usable as a function resolution
+               // variable strings
+               // fnFFF_param="A"
+               // fnFFF_function="2*A+1"
+               return;
             }
+            is_defining_function=false; // turn it off
+
             // replace the variable with the value of the variable
               GenericType value=get_value(building);
               if (value.isNum()) {
@@ -784,6 +865,7 @@ class evaluate {
   boolean g_is_assignment;
   GenericType interpret_string(String intstring_param, boolean testing, double expecting, boolean is_assignment) {
 
+    is_defining_function=false;
     parse_restart=(-1); // means no restart required // really could be zero too!
     g_is_assignment=is_assignment;
     upto=0; // nothing is on the stack, upto points past the end of the current array, at the NEXT point
@@ -927,6 +1009,23 @@ class evaluate {
       } else if (doing==D_ASSIGN) {
         if (a.equals("=")) {
           readStringOp();
+          /* special case */
+          // if we are defining a function - the rest of this goes into a storage location in the machine and we finish up - not processing anything else
+          if (is_defining_function) {
+            if (verbose) { System.out.printf("We are going to ignore the rest of the string and finish\n"); }
+            if (upto==2) { // in time, well add all parameters and join them together like this A,B,C,D
+              if (verbose) { System.out.printf("Rest of string:%s\n", intstring.substring(ispnt+1,intstring.length())); }
+              if (verbose) { System.out.printf("Should set fn_%s_param=%s\n",stkfunc[0],stkfunc[1]); }
+              if (verbose) { System.out.printf("Should set fn_%s_function=%s\n",stkfunc[0],intstring.substring(ispnt+1,intstring.length())); }
+              if (using_machine!=null) {
+                using_machine.setvariable("fn_"+stkfunc[0].toLowerCase()+"_param",new GenericType(stkfunc[1]));
+                using_machine.setvariable("fn_"+stkfunc[0].toLowerCase()+"_function",new GenericType(intstring.substring(ispnt+1,intstring.length())));
+              }
+            } else {
+              System.out.printf("?SYNTAX ERROR in defined function - stack has incorrect number of params\n");
+            }
+            return new GenericType();
+          }
         } else if (a.equals(OP_COMMA)) {
           // we can now list assignment targets
           setOp("===,"); // note, we now change this to be a series of ===s (to differentiate from index ,s
