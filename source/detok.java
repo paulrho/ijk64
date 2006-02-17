@@ -1,7 +1,10 @@
 ////////////////////////////////////////////////////////////////////////
-// $Id: detok.java,v 1.2 2006/02/13 00:55:04 pgs Exp pgs $
+// $Id: detok.java,v 1.3 2006/02/13 00:56:24 pgs Exp pgs $
 //
 // $Log: detok.java,v $
+// Revision 1.3  2006/02/13 00:56:24  pgs
+// RCS...
+//
 // Revision 1.2  2006/02/13 00:55:04  pgs
 // Setting up RCS
 //
@@ -27,7 +30,7 @@ class detok
     /*180*/ ,"sgn", "int", "abs", "usr", "fre", "pos", "sqr", "rnd", "log", "exp"
     /*190*/ ,"cos", "sin", "tan", "atn", "peek", "len", "str$", "val", "asc", "chr$"
     /*200*/ ,"left$", "right$", "mid$", "go","","","","","",""
-    /*210*/ ,"", "err$", "instr"
+    /*210*/ ,"", "err$", "instr", "", "resume", "trap"
   };
 
   String tokens1quoted[] = { "", "(orng)" // starting at 128
