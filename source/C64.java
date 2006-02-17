@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id$
+// $Id: C64.java,v 1.14 2006/02/15 01:50:33 pgs Exp pgs $
 //
-// $Log$
+// $Log: C64.java,v $
+// Revision 1.14  2006/02/15 01:50:33  pgs
+// Standard header
+//
 //
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -21,8 +24,13 @@ class C64 {
 
   public C64(String args[]) {
     System.out.println("Running test harness for C64Screen...");
-    C64Screen.static_bgtrans=false;
-    C64Screen.static_handles=true;
+    if (false) {
+      C64Screen.static_bgtrans=false; // false = normal background
+      C64Screen.static_handles=true; // true = has a frame around it
+    } else {
+      C64Screen.static_bgtrans=true; // true = picture background
+      C64Screen.static_handles=false; // false = has NO frame around it
+    }
     screen=new C64Screen("C64");
     // instansiate the machine
     machine=new Machine(); // we initialise it once here
