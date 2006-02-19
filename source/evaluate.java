@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: evaluate.java,v 1.21 2006/02/15 21:19:34 pgs Exp pgs $
+// $Id: evaluate.java,v 1.22 2006/02/17 07:03:10 pgs Exp pgs $
 //
 // $Log: evaluate.java,v $
+// Revision 1.22  2006/02/17 07:03:10  pgs
+// Add the ability to define functions and use defined functions
+//
 // Revision 1.21  2006/02/15 21:19:34  pgs
 // Fix TAB( to do the correct thing:
 // It will create enough spaces to move the cursor to that column
@@ -273,6 +276,8 @@ class evaluate {
         answer=Math.exp(right);
       } else if (function.equals("cos")) {
         answer=Math.cos(right);
+      } else if (function.equals("atn")) {
+        answer=Math.atan(right);
       } else if (function.equals("tan")) {
         answer=Math.tan(right);
       } else if (function.equals("sqrt")) {
@@ -916,7 +921,7 @@ class evaluate {
           doing=D_OP;
         } else {
           if (!partialmatching) {
-            System.out.printf("?SYNTAX ERROR 001\n***Not correct syntax\n");
+            System.out.printf("?SYNTAX ERROR 001\n***Not correct syntax interpreting:%s\n",intstring);
             // new - stop parsing the expression
           }
           if (verbose) { System.out.printf("Parsed up to %d at char %s\n",ispnt,a); }
@@ -997,7 +1002,7 @@ class evaluate {
           }
         } else {
           if (!partialmatching) {
-            System.out.printf("?SYNTAX ERROR 002\n***Not correct syntax\n");
+            System.out.printf("?SYNTAX ERROR 002\n***Not correct syntax interpreting:%s\n",intstring);
           }
           // new - stop parsing the expression
           if (verbose) { System.out.printf("Parsed up to %d at char %s\n",ispnt,a); }
