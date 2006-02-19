@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Machine.java,v 1.21 2006/02/15 22:49:09 pgs Exp pgs $
+// $Id: Machine.java,v 1.22 2006/02/16 05:53:51 pgs Exp $
 //
 // $Log: Machine.java,v $
+// Revision 1.22  2006/02/16 05:53:51  pgs
+// Correctly check the loop finish test depending on whether +ve or -ve step value
+//
 // Revision 1.21  2006/02/15 22:49:09  pgs
 // Allow peeking of 197 in a simplistic fashion
 //
@@ -85,20 +88,42 @@ class Machine {
     return variables.getvariable(variable);
   }
 
+  void forloopdumpstate() {
+    System.out.printf("For loop stack:\n");
+    for (int i=0; i<topforloopstack; ++i) {
+      System.out.printf("%d) %s to %f step %f at position in code %d\n",
+        i,forloopstack_var[i],forloopstack_to[i],forloopstack_step[i],forloopstack[i]);
+    }
+  }
   // continue...
   void createFORloop(int current, String variable, double forto, double forstep)
   {
     // I think that if we use an already used variable, we pop off the rest of the stack
     // e.g.  FOR I   FOR J   FOR K ......then FOR I again
-    if (verbose) { System.out.printf("processing FOR %s to %f step %f at current=%d\n",variable,forto,forstep,current); }
     // find current variable
+    //for (int i=0; i<topforloopstack; ++i) {
+    // should this be a circular stack, where once something is reused, all older ones are purged?
+    // i.e. for i, j, k, i (again)
     for (int i=0; i<topforloopstack; ++i) {
       if (forloopstack_var[i].equals(variable)) {
-        // use this one and pop the rest off
-        topforloopstack=i;
+        // use this one and pop the rest off -- NO WRONG
+        //topforloopstack=i;
+
+        // no we should compress the stack at this point - supressing the old for, and adding
+        // the new one to the end!
+        if (topforloopstack-i>1) { // check this
+          for (int j=i; j<topforloopstack-1; ++j) {
+            forloopstack[j]=forloopstack[j+1];
+            forloopstack_var[j]=forloopstack_var[j+1];
+            forloopstack_to[j]=forloopstack_to[j+1];
+            forloopstack_step[j]=forloopstack_step[j+1];
+          }
+        }
+        topforloopstack--;
         break;
       }
     }
+    if (verbose) { System.out.printf("processing FOR %s to %f step %f at current=%d at FORSTACK=%d\n",variable,forto,forstep,current,topforloopstack); }
     forloopstack[topforloopstack]=current;
     forloopstack_var[topforloopstack]=variable;
     forloopstack_to[topforloopstack]=forto;
@@ -112,7 +137,13 @@ class Machine {
     int fl=topforloopstack;
     executionpoint=current;
     while(true) {
-      if (fl<=0) { return false; }
+      if (fl<=0) { 
+        if (verbose) { System.out.printf("No more for loops to match!\n"); }
+
+        topforloopstack=0; // new!!!
+
+        return false; 
+      }
       fl--;
       if (var.equals("") || forloopstack_var[fl].equals(var)) {
         // just pop the last one
@@ -129,6 +160,9 @@ class Machine {
           if (verbose) { System.out.printf("NEXT: Looping back\n"); }
           // goto the end of that for loop
           executionpoint=forloopstack[fl];
+ 
+          topforloopstack=fl+1; // new!!!
+
           return true;
         }
       }
@@ -208,6 +242,7 @@ class Machine {
 
   void dumpstate() {
     variables.dumpstate();
+    forloopdumpstate();
   }
 
 //////////////////////////////////
