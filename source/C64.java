@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.14 2006/02/15 01:50:33 pgs Exp pgs $
+// $Id: C64.java,v 1.15 2006/02/17 14:05:51 pgs Exp pgs $
 //
 // $Log: C64.java,v $
+// Revision 1.15  2006/02/17 14:05:51  pgs
+// Quick change of transparency and frame
+//
 // Revision 1.14  2006/02/15 01:50:33  pgs
 // Standard header
 //
@@ -41,6 +44,7 @@ class C64 {
     if (false) { screen.scale=3; }
     if (false) { screen.changeCharSet(1); }
     //if (true) { screen.setRows(50); }
+    //screen.setCols(80);
 
     for (int i=0; i<args.length; ++i) {
       if (args[i].substring(0,1).equals("-")) {
