@@ -1,8 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: statements.java,v 1.18 2006/02/15 01:55:18 pgs Exp pgs $
+// $Id: statements.java,v 1.19 2006/02/15 21:25:13 pgs Exp pgs $
 //
 // $Log: statements.java,v $
+// Revision 1.19  2006/02/15 21:25:13  pgs
+// Fixed for loop, chew up spaces before variable.
+// New print method that allows partial evaluation of expressions.
+//
 // Revision 1.18  2006/02/15 01:55:18  pgs
 // Standard header
 //
@@ -92,7 +96,7 @@ class statements {
 
 int MAXTOKENS=100;
 
-String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","PRINT#","PRINT","END","DIM","GET#5,","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE","SYS","CLR","META-SCALE","META-ROWS","FAST","GET","REM","META-CHARSET","LOAD","META-DUMPSTATE"};
+String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","PRINT#","PRINT","END","DIM","GET#5,","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE","SYS","CLR","META-SCALE","META-ROWS","FAST","GET","REM","META-CHARSET","LOAD","META-DUMPSTATE","META-COLS"};
 static final int ST_FOR=0;
 static final int ST_TO=1;
 static final int ST_STEP=2;
@@ -128,6 +132,7 @@ static final int ST_REM=31;
 static final int ST_META_CHARSET=32;
 static final int ST_LOAD=33;
 static final int ST_META_DUMPSTATE=34;
+static final int ST_META_COLS=35;
 
 String line;
 int pnt;
@@ -382,6 +387,9 @@ boolean ReadStatement() {
         break;
       case ST_META_ROWS:
         if (ProcessMETAROWSstatement()) { return true; }
+        break;
+      case ST_META_COLS:
+        if (ProcessMETACOLSstatement()) { return true; }
         break;
       case ST_INPUT: case ST_INPUT1:
         if (ProcessINPUTstatement()) { return true; }
@@ -800,6 +808,14 @@ boolean ProcessMETAROWSstatement()
   ReadExpression();
   if (verbose) { machine.dumpstate(); }
   machine.machinescreen.setRows((int)machine.evaluate(keepExpression).num());
+  return true;
+}
+
+boolean ProcessMETACOLSstatement() 
+{
+  ReadExpression();
+  if (verbose) { machine.dumpstate(); }
+  machine.machinescreen.setCols((int)machine.evaluate(keepExpression).num());
   return true;
 }
 
