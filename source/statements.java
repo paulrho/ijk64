@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: statements.java,v 1.19 2006/02/15 21:25:13 pgs Exp pgs $
+// $Id: statements.java,v 1.20 2006/02/19 22:33:35 pgs Exp pgs $
 //
 // $Log: statements.java,v $
+// Revision 1.20  2006/02/19 22:33:35  pgs
+// Add META-COLS statements
+//
 // Revision 1.19  2006/02/15 21:25:13  pgs
 // Fixed for loop, chew up spaces before variable.
 // New print method that allows partial evaluation of expressions.
@@ -96,7 +99,7 @@ class statements {
 
 int MAXTOKENS=100;
 
-String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","PRINT#","PRINT","END","DIM","GET#5,","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE","SYS","CLR","META-SCALE","META-ROWS","FAST","GET","REM","META-CHARSET","LOAD","META-DUMPSTATE","META-COLS"};
+String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","PRINT#","PRINT","END","DIM","GET#5,","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE","SYS","CLR","META-SCALEY","META-ROWS","FAST","GET","REM","META-CHARSET","LOAD","META-DUMPSTATE","META-COLS","META-BGTRANS","META-SCALE"};
 static final int ST_FOR=0;
 static final int ST_TO=1;
 static final int ST_STEP=2;
@@ -124,7 +127,7 @@ static final int ST_LIST=23;
 static final int ST_META_VERBOSE=24;
 static final int ST_SYS=25;
 static final int ST_CLR=26;
-static final int ST_META_SCALE=27;
+static final int ST_META_SCALEY=27;
 static final int ST_META_ROWS=28;
 static final int ST_FAST=29;
 static final int ST_GET=30;
@@ -133,6 +136,8 @@ static final int ST_META_CHARSET=32;
 static final int ST_LOAD=33;
 static final int ST_META_DUMPSTATE=34;
 static final int ST_META_COLS=35;
+static final int ST_META_BGTRANS=36;
+static final int ST_META_SCALE=37;
 
 String line;
 int pnt;
@@ -382,6 +387,9 @@ boolean ReadStatement() {
       case ST_META_SCALE:
         if (ProcessMETASCALEstatement()) { return true; }
         break;
+      case ST_META_SCALEY:
+        if (ProcessMETASCALEYstatement()) { return true; }
+        break;
       case ST_LOAD:
         if (ProcessLOADstatement()) { return true; }
         break;
@@ -390,6 +398,9 @@ boolean ReadStatement() {
         break;
       case ST_META_COLS:
         if (ProcessMETACOLSstatement()) { return true; }
+        break;
+      case ST_META_BGTRANS:
+        if (ProcessMETABGTRANSstatement()) { return true; }
         break;
       case ST_INPUT: case ST_INPUT1:
         if (ProcessINPUTstatement()) { return true; }
@@ -803,6 +814,14 @@ boolean ProcessMETASCALEstatement()
   return true;
 }
 
+boolean ProcessMETASCALEYstatement() 
+{
+  ReadExpression();
+  if (verbose) { machine.dumpstate(); }
+  machine.machinescreen.setScaleY((int)machine.evaluate(keepExpression).num());
+  return true;
+}
+
 boolean ProcessMETAROWSstatement() 
 {
   ReadExpression();
@@ -816,6 +835,15 @@ boolean ProcessMETACOLSstatement()
   ReadExpression();
   if (verbose) { machine.dumpstate(); }
   machine.machinescreen.setCols((int)machine.evaluate(keepExpression).num());
+  return true;
+}
+
+boolean ProcessMETABGTRANSstatement() 
+{
+  ReadExpression();
+  if (verbose) { machine.dumpstate(); }
+  machine.machinescreen.setBackgroundTransparent(
+    ((int)(machine.evaluate(keepExpression).num())==1) ?true:false);
   return true;
 }
 
