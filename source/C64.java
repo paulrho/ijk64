@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.15 2006/02/17 14:05:51 pgs Exp pgs $
+// $Id: C64.java,v 1.16 2006/02/19 22:26:19 pgs Exp pgs $
 //
 // $Log: C64.java,v $
+// Revision 1.16  2006/02/19 22:26:19  pgs
+// Now longer force 80 columns (this is done with a META-COLS 80) directive in the basic program
+//
 // Revision 1.15  2006/02/17 14:05:51  pgs
 // Quick change of transparency and frame
 //
@@ -28,9 +31,11 @@ class C64 {
   public C64(String args[]) {
     System.out.println("Running test harness for C64Screen...");
     if (false) {
+      // standard background
       C64Screen.static_bgtrans=false; // false = normal background
       C64Screen.static_handles=true; // true = has a frame around it
     } else {
+      // transparent background
       C64Screen.static_bgtrans=true; // true = picture background
       C64Screen.static_handles=false; // false = has NO frame around it
     }
