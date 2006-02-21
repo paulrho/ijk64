@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.16 2006/02/19 22:26:19 pgs Exp pgs $
+// $Id: C64.java,v 1.17 2006/02/20 07:36:02 pgs Exp pgs $
 //
 // $Log: C64.java,v $
+// Revision 1.17  2006/02/20 07:36:02  pgs
+// Comment on background only
+//
 // Revision 1.16  2006/02/19 22:26:19  pgs
 // Now longer force 80 columns (this is done with a META-COLS 80) directive in the basic program
 //
@@ -89,7 +92,7 @@ class C64 {
       else if (result.length()>=4 && (result.substring(0,4)).equals("LIST")) {
         if (args.length>0) {
           // call the static method
-          screen.println(statements.read_a_file(args[0]));
+          screen.print(statements.read_a_file(args[0]));
         }
         //screen.println("10 print\"mello word\"");
         //screen.println("20 a=5*5:print a");
