@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: statements.java,v 1.20 2006/02/19 22:33:35 pgs Exp pgs $
+// $Id: statements.java,v 1.21 2006/02/20 07:38:31 pgs Exp pgs $
 //
 // $Log: statements.java,v $
+// Revision 1.21  2006/02/20 07:38:31  pgs
+// Add META-SCALEY and META-BGTRANS keywords
+//
 // Revision 1.20  2006/02/19 22:33:35  pgs
 // Add META-COLS statements
 //
@@ -874,19 +877,80 @@ boolean ProcessIGNOREstatement()
   return true;
 }
 
+char metaCode=' ';
+
+boolean checkMetaCode()
+{
+  // we assume that we have a pointer at pnt, which we wont move
+  // and we have just read a bracket
+  int at=1; // we already know the first one is a ( or [
+  while (pnt+at<linelength) {
+    String a=line.substring(pnt+at,pnt+at+1);
+    if (a.equals("\n") || a.equals("\"")) return false; // quoted string ends or new line
+    if (a.equals(")") || a.equals("]")) {
+      // we have the seemingly end of a code
+      // from pnt to (before)pnt+at
+      String metatest=line.substring(pnt+1,pnt+at); // skip the first one
+      if (verbose) { System.out.printf("Testing for meta code %s\n",metatest); }
+   
+      if (metatest.equals("home")) metaCode=(char)(19);
+      else if (metatest.equals("up")) metaCode=(char)(145);
+      else if (metatest.equals("down")) metaCode=(char)(17);
+      else if (metatest.equals("left")) metaCode=(char)(157);
+      else if (metatest.equals("rght")) metaCode=(char)(29);
+      else if (metatest.equals("clr")) metaCode=(char)(147);
+      else if (metatest.equals("rvon")) metaCode=(char)(18);
+      else if (metatest.equals("rvof")) metaCode=(char)(146);
+
+      else if (metatest.equals("blk")) metaCode=(char)(144);
+      else if (metatest.equals("wht")) metaCode=(char)(5);
+      else if (metatest.equals("red")) metaCode=(char)(28);
+      else if (metatest.equals("cyn")) metaCode=(char)(159);
+      else if (metatest.equals("pur")) metaCode=(char)(156);
+      else if (metatest.equals("grn")) metaCode=(char)(30);
+      else if (metatest.equals("blu")) metaCode=(char)(31);
+      else if (metatest.equals("yel")) metaCode=(char)(158);
+      else if (metatest.equals("orng")) metaCode=(char)(129);
+      else if (metatest.equals("brn")) metaCode=(char)(149);
+      else if (metatest.equals("lred")) metaCode=(char)(150);
+      else if (metatest.equals("gry1")) metaCode=(char)(151);
+      else if (metatest.equals("gry2")) metaCode=(char)(152);
+      else if (metatest.equals("lgrn")) metaCode=(char)(153);
+      else if (metatest.equals("lblu")) metaCode=(char)(154);
+      else if (metatest.equals("gry3")) metaCode=(char)(155);
+      else return false;
+      pnt+=at+1;
+      return true; // if any matched
+    }
+    at++;
+  }
+  return false;
+}
+
 boolean ReadExpression()
 {
     int start=pnt;
     int previous;
     previous=pnt;
     boolean quoted=false;
-    //keepExpression="";
+    keepExpression=""; // because we are going to build it up
     while (pnt<linelength) {
       String a=line.substring(pnt,pnt+1);
       previous=pnt;
       if (a.equals("\n")) { break; }
       if (!quoted && a.equals(":")) {
         break;
+      }
+      // add a bit to to change the meta codes e.g. (home) to 1 char
+      if (quoted && (a.equals("(") || a.equals("["))) {
+        // we may have a meta code, lets check it out
+        if (checkMetaCode()) {
+          // the code is set in a global metaCode
+          if (verbose) { System.out.printf("Got a metacode match\n"); }
+          keepExpression=keepExpression+line.substring(start,previous)+metaCode;
+          start=pnt; // resetting it
+          continue;
+        }
       }
       if (false) {  // for new print method
         if (!quoted && a.equals(";")) {
@@ -903,7 +967,8 @@ boolean ReadExpression()
     }
   if (pnt==linelength) previous=pnt; // special case when we read to end of line
   if (verbose) { System.out.printf("Interpreting \"%s\" as an expression\n",line.substring(start,previous)); }
-  keepExpression=line.substring(start,previous);
+  //keepExpression=line.substring(start,previous);
+  keepExpression=keepExpression+line.substring(start,previous);
   return true;
 }
 
