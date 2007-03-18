@@ -197,6 +197,11 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         menuItem = new JMenuItem("CTRL set",icon);
         PCsubmenu_ctrl.add(menuItem);
 
+        JMenu C64submenu = new JMenu("C64 keyboard");
+        submenu.add(C64submenu);
+        icon = createImageIcon("c64c.jpg");
+        menuItem = new JMenuItem("Original",icon);
+        C64submenu.add(menuItem);
 
 	//------------------------------------------------------------
         submenu = new JMenu("Preset Modes");
