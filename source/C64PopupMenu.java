@@ -15,6 +15,12 @@ import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 import javax.swing.JFrame;
 
+import javax.swing.*;
+import javax.swing.filechooser.*;
+
+// for Files
+ import java.io.*;
+
 /* PopupMenuDemo.java requires images/middle.gif. */
 
 /*
@@ -24,6 +30,10 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 
     String newline = "\n";
     JCheckBoxMenuItem cbMenuItem_bgtrans;
+    Machine machine;
+    String arg;
+    String command;
+    boolean forcedcompletion=false;
 
     public void createPopupMenu() {
         JMenuItem menuItem;
@@ -38,17 +48,57 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 
         //Create the popup menu.
         JPopupMenu popup = new JPopupMenu();
-        menuItem = new JMenuItem("JEBI");
+
+        ImageIcon icon = createImageIcon("run.png");
+        menuItem = new JMenuItem("JEBI",icon);
 	menuItem.setEnabled(false);
-        menuItem.addActionListener(this);
-        popup.add(menuItem);
-        menuItem = new JMenuItem("Help");
         menuItem.addActionListener(this);
         popup.add(menuItem);
 
         popup.addSeparator();
 
-        ImageIcon icon = createImageIcon("run.png");
+        //-------------------------------------------------
+        //icon = createImageIcon("player_play.png");
+        submenu = new JMenu("File");
+        submenu.setMnemonic(KeyEvent.VK_F);
+        submenu.addActionListener(this);
+        popup.add(submenu);
+
+        icon = createImageIcon("filenew.png");
+        menuItem = new JMenuItem("New",icon);
+        submenu.setMnemonic(KeyEvent.VK_N);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_N, ActionEvent.CTRL_MASK));
+        menuItem.addActionListener(this);
+        submenu.add(menuItem);
+
+        icon = createImageIcon("fileopen.png");
+        menuItem = new JMenuItem("Open (and run)...",icon);
+        submenu.setMnemonic(KeyEvent.VK_O);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_O, ActionEvent.CTRL_MASK));
+        menuItem.addActionListener(this);
+        submenu.add(menuItem);
+
+        submenu.addSeparator();
+        icon = createImageIcon("filesave.png");
+        menuItem = new JMenuItem("Save",icon);
+        submenu.setMnemonic(KeyEvent.VK_S);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+        menuItem.addActionListener(this);
+        submenu.add(menuItem);
+
+        submenu.addSeparator();
+        icon = createImageIcon("exit.png");
+        menuItem = new JMenuItem("Exit",icon);
+        submenu.setMnemonic(KeyEvent.VK_X);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_X, ActionEvent.CTRL_MASK));
+        menuItem.addActionListener(this);
+        submenu.add(menuItem);
+
+        icon = createImageIcon("run.png");
         menuItem = new JMenuItem("Run program",icon);
         menuItem.addActionListener(this);
         popup.add(menuItem);
@@ -82,6 +132,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         popup.add(cbMenuItem);
 
         cbMenuItem = new JCheckBoxMenuItem("Uppercase");
+        cbMenuItem.setSelected(true);
         cbMenuItem.addItemListener(this);
         popup.add(cbMenuItem);
 
@@ -245,7 +296,13 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 	//------------------------------------------------------------
         popup.addSeparator();
 
-        menuItem = new JMenuItem("About");
+        icon = createImageIcon("help.png");
+        menuItem = new JMenuItem("Help",icon);
+        menuItem.addActionListener(this);
+        popup.add(menuItem);
+
+        icon = createImageIcon("editpaste.png");
+        menuItem = new JMenuItem("About",icon);
         menuItem.addActionListener(this);
         popup.add(menuItem);
 
@@ -283,6 +340,39 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 	} else if (source.getText().equals("25 rows")) {
 		System.out.print("Setting 25 rows...\n");
         	C64Screen.out.setRows(25);
+	} else if (source.getText().equals("About")) {
+            aboutBox();
+	} else if (source.getText().equals("Run program")) {
+	  String []  args = new String [2];
+            
+          args[0]="/dvd/Source/JTests/JEBI/basic/g20-redo-detok.basic";
+          args[1]="";
+          System.out.print("Running...\n");
+          //machine.verbose=true;
+          //machine.statements(args);
+          //machine.statements("x=7:print x:for i=1to1000:printi;:nexti");
+          // running this AND input at the same time freezes screen output until end
+          addString("run");
+          addkey((char)10);
+
+	} else if (source.getText().equals("Open (and run)...")) {
+		System.out.print("Opening file...\n");
+                //Create a file chooser
+               // final JFileChooser fc = new JFileChooser();
+                //In response to a button click:
+                //JFrame jf=new JFrame("Open File");
+                //int returnVal = fc.showOpenDialog(jf);
+                openFile();
+		if (false) {
+                addString("load\""+fFile.getAbsolutePath().toLowerCase()+"\",8");
+                addkey((char)10);
+		} else {
+		arg=fFile.getAbsolutePath().toLowerCase();
+                //addString("poprun");
+                forcedcompletion=true;
+		command="fileopen";
+                addkey((char)10);
+		}
 	} else if (source.getText().equals("40 rows")) {
 		System.out.print("Setting 40 rows...\n");
         	C64Screen.out.setRows(40);
@@ -311,6 +401,10 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 		C64Screen.out.bgtrans = (e.getStateChange() == ItemEvent.SELECTED) ? true:false;
         	C64Screen.out.setBackgroundTransparent(C64Screen.out.bgtrans);
 	}
+	if (source.getText().equals("Uppercase")) {
+		System.out.print("Setting charset ...\n");
+                C64Screen.out.changeCharSet( (e.getStateChange() == ItemEvent.SELECTED) ? 0:1);
+	}
 
 
     }
@@ -333,8 +427,9 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         }
     }
 
-    public C64PopupMenu() {
+    public C64PopupMenu(Machine machine) {
 		createPopupMenu();
+	this.machine=machine;
     }
 
     class PopupListener extends MouseAdapter {
@@ -364,4 +459,104 @@ public class C64PopupMenu implements ActionListener, ItemListener {
             }
         }
     }
+
+///
+void addString(String str) {
+  for (int i = 0; i < str.length(); ++i) {
+      addkey(str.charAt(i));
+  }
 }
+
+void addkey(char key)
+{
+          C64Screen.out.keybuf[C64Screen.out.keybuftop] = key;
+          C64Screen.out.keybuftop++; if (C64Screen.out.keybuftop >= C64Screen.out.keybufmax) { C64Screen.out.keybuftop = 0; }
+}
+
+ File fFile = new File ("default.java");
+
+boolean openFile () {
+
+      JFileChooser fc = new JFileChooser ();
+      fc.setDialogTitle ("Open File");
+
+      // Choose only files, not directories
+      fc.setFileSelectionMode ( JFileChooser.FILES_ONLY);
+
+      // Start in current directory
+      fc.setCurrentDirectory (new File ("."));
+
+      // Set filter for Java source files.
+      //fc.setFileFilter (fJavaFilter);
+
+      // Now open chooser
+      int result = fc.showOpenDialog ((JFrame)C64Screen.out);
+
+      if (result == JFileChooser.CANCEL_OPTION) {
+          return true;
+      } else if (result == JFileChooser.APPROVE_OPTION) {
+
+          fFile = fc.getSelectedFile ();
+          // Invoke the readFile method in this class
+          //String file_string = readFile (fFile);
+
+          //if (file_string != null)
+              //fTextArea.setText (file_string);
+          //else
+              //return false;
+         System.out.printf("File is %s\n",fFile);
+      } else {
+          return false;
+      }
+      return true;
+   } // openFile
+
+    public void aboutBox() {
+        String version =
+            "JEBI/C64 version 3.0.48\n"
+            + "Paul Salanitri, Futex\n"
+            + "Copyright (c) 2001-2007 P. Salanitri";
+        String licence =
+            "Redistribution and use in source and binary forms, with or\n"
+            + "without modification, are permitted provided that the\n"
+            + "following conditions are met:\n\n"
+            + "1. Redistributions of source code must retain the above\n"
+            + "   copyright notice, this list of conditions and the\n"
+            + "   following disclaimer.\n"
+            + "2. Redistributions in binary form must reproduce the above\n"
+            + "   copyright notice, this list of conditions and the\n"
+            + "   following disclaimer in the documentation and/or other\n"
+            + "   materials provided with the distribution.\n"
+            + "3. The name of the author may not be used to endorse or\n"
+            + "   promote products derived from this software without\n"
+            + "   specific prior written permission.\n\n"
+            + "THIS SOFTWARE IS PROVIDED BY THE AUTHOR \"AS IS\" AND\n"
+            + "ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT \n"
+            + "LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY\n"
+            + "AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.\n"
+            + "IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,\n"
+            + "INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL\n"
+            + "DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF\n"
+            + "SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR\n"
+            + "PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND\n"
+            + "ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT\n"
+            + "LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)\n"
+            + "ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN\n"
+            + "IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.";
+        JTextArea licenceArea = new JTextArea(licence);
+        licenceArea.setEditable(false);
+        String javaVersion = System.getProperty("java.version");
+        Object contents[] = new Object[] { version, licenceArea, 
+        	"Java version " + javaVersion };
+        //JOptionPane.showMessageDialog(parent, contents, "About GeomLab",
+        JOptionPane.showMessageDialog( C64Screen.out, contents, "About JEBI/C64",
+        	JOptionPane.INFORMATION_MESSAGE);
+    }
+
+
+
+
+
+}
+//end///
+
