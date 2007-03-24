@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.17 2006/02/20 07:36:02 pgs Exp pgs $
+// $Id: C64.java,v 1.18 2006/02/21 06:05:18 pgs Exp pgs $
 //
 // $Log: C64.java,v $
+// Revision 1.18  2006/02/21 06:05:18  pgs
+// Use a print instead of a println in list
+//
 // Revision 1.17  2006/02/20 07:36:02  pgs
 // Comment on background only
 //
@@ -17,6 +20,7 @@
 //
 //
 /////////////////////////////////////////////////////////////////////////////////
+// when ready // package au.com.futex.jebi;
 
 import javax.swing.*;
 import java.util.*;
@@ -43,6 +47,10 @@ class C64 {
       C64Screen.static_handles=false; // false = has NO frame around it
     }
     screen=new C64Screen("C64");
+
+    // now add the popup
+    new C64PopupMenu();
+
     // instansiate the machine
     machine=new Machine(); // we initialise it once here
     ///machine.verbose=verbose;
