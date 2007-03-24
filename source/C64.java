@@ -20,7 +20,6 @@
 //
 //
 /////////////////////////////////////////////////////////////////////////////////
-// when ready // package au.com.futex.jebi;
 
 import javax.swing.*;
 import java.util.*;
@@ -48,14 +47,16 @@ class C64 {
     }
     screen=new C64Screen("C64");
 
-    // now add the popup
-    new C64PopupMenu();
 
     // instansiate the machine
     machine=new Machine(); // we initialise it once here
     ///machine.verbose=verbose;
     machine.initialise_engines(); // silly, but there is a reason
     //machine.verbose=verbose;
+
+    // now add the popup
+    C64PopupMenu pop=new C64PopupMenu(machine); // good idea???
+    // keep a reference to it for returning things
 
     if (false) { screen.scale=3; }
     if (false) { screen.changeCharSet(1); }
@@ -96,6 +97,18 @@ class C64 {
     while (true) {
       screen.println("[CR]ready.");
       String result=screen.screenInput();
+      if (pop.forcedcompletion) {
+        pop.forcedcompletion=false;
+        // this is true if a special command was called from the popup
+        if (pop.command.equals("fileopen")) {
+          String [] str = new String[1];
+          str[0]=pop.arg;
+          machine.statements(str); // we now execute the statements upon a machine
+        } else if (pop.command.equals("run")) {
+        }
+        System.out.printf("Forced completion triggered\n");
+        continue;
+      }
       if (result.length()>=4 && (result.substring(0,4)).equals("EXIT")) break;
       else if (result.length()>=4 && (result.substring(0,4)).equals("LIST")) {
         if (args.length>0) {
@@ -108,6 +121,11 @@ class C64 {
         //continue;
       } else if (result.length()>=3 && (result.substring(0,3)).equals("SYS")) {
         screen.startupscreen();
+        continue;
+      } else if (result.length()>=6 && (result.substring(0,6)).equals("POPRUN")) {
+        String [] str = new String[1];
+        str[0]=pop.arg;
+        machine.statements(str); // we now execute the statements upon a machine
         continue;
       } else if (result.length()>=3 && (result.substring(0,3)).equals("RUN")) {
         machine.statements(args); // we now execute the statements upon a machine
