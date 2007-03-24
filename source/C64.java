@@ -1,8 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.18 2006/02/21 06:05:18 pgs Exp pgs $
+// $Id: C64.java,v 1.20 2007/03/24 01:09:18 pgs Exp pgs $
 //
 // $Log: C64.java,v $
+// Revision 1.20  2007/03/24 01:09:18  pgs
+// more power to the popup
+//
+// revision 1.19
+// date: 2007/03/24 01:07:51;  author: pgs;  state: Exp;  lines: +9 -1
+// Modifications for popup menu
+
 // Revision 1.18  2006/02/21 06:05:18  pgs
 // Use a print instead of a println in list
 //
