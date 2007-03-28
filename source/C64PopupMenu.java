@@ -49,7 +49,9 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         //Create the popup menu.
         JPopupMenu popup = new JPopupMenu();
 
-        ImageIcon icon = createImageIcon("run.png");
+        //popup.setLabel("JEBI"); // doesnt work
+
+        ImageIcon icon = createImageIcon("images/run.png");
         menuItem = new JMenuItem("JEBI",icon);
 	menuItem.setEnabled(false);
         menuItem.addActionListener(this);
@@ -64,7 +66,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         submenu.addActionListener(this);
         popup.add(submenu);
 
-        icon = createImageIcon("filenew.png");
+        icon = createImageIcon("images/filenew.png");
         menuItem = new JMenuItem("New",icon);
         submenu.setMnemonic(KeyEvent.VK_N);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(
@@ -72,7 +74,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         menuItem.addActionListener(this);
         submenu.add(menuItem);
 
-        icon = createImageIcon("fileopen.png");
+        icon = createImageIcon("images/fileopen.png");
         menuItem = new JMenuItem("Open (and run)...",icon);
         submenu.setMnemonic(KeyEvent.VK_O);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(
@@ -81,8 +83,9 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         submenu.add(menuItem);
 
         submenu.addSeparator();
-        icon = createImageIcon("filesave.png");
+        icon = createImageIcon("images/filesave.png");
         menuItem = new JMenuItem("Save",icon);
+	menuItem.setEnabled(false);
         submenu.setMnemonic(KeyEvent.VK_S);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_S, ActionEvent.CTRL_MASK));
@@ -90,7 +93,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         submenu.add(menuItem);
 
         submenu.addSeparator();
-        icon = createImageIcon("exit.png");
+        icon = createImageIcon("images/exit.png");
         menuItem = new JMenuItem("Exit",icon);
         submenu.setMnemonic(KeyEvent.VK_X);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(
@@ -98,12 +101,12 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         menuItem.addActionListener(this);
         submenu.add(menuItem);
 
-        icon = createImageIcon("run.png");
+        icon = createImageIcon("images/run.png");
         menuItem = new JMenuItem("Run program",icon);
         menuItem.addActionListener(this);
         popup.add(menuItem);
 
-        icon = createImageIcon("applet-critical-blank.png");
+        icon = createImageIcon("images/applet-critical-blank.png");
         menuItem = new JMenuItem("Reset machine",icon);
         menuItem.addActionListener(this);
         popup.add(menuItem);
@@ -136,10 +139,54 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         cbMenuItem.addItemListener(this);
         popup.add(cbMenuItem);
 
+        cbMenuItem = new JCheckBoxMenuItem("Frames");
+        cbMenuItem.setSelected(false);
+        cbMenuItem.addItemListener(this);
+        popup.add(cbMenuItem);
+
+        cbMenuItem = new JCheckBoxMenuItem("SendToBack");
+        cbMenuItem.setSelected(false);
+        cbMenuItem.addItemListener(this);
+        popup.add(cbMenuItem);
+
+
         cbMenuItem = new JCheckBoxMenuItem("Paint slowdown");
         cbMenuItem.setMnemonic(KeyEvent.VK_S);
         cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_S, ActionEvent.ALT_MASK));
+        cbMenuItem.addItemListener(this);
+        popup.add(cbMenuItem);
+
+        popup.addSeparator(); // internal mechanics
+
+        cbMenuItem = new JCheckBoxMenuItem("Verbose");
+        cbMenuItem.setMnemonic(KeyEvent.VK_V);
+        cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_V, ActionEvent.ALT_MASK));
+        cbMenuItem.addItemListener(this);
+        popup.add(cbMenuItem);
+
+        cbMenuItem = new JCheckBoxMenuItem("Evaluate engine verbose");
+	cbMenuItem.setEnabled(false);
+        cbMenuItem.setMnemonic(KeyEvent.VK_V);
+        cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_V, ActionEvent.ALT_MASK));
+        cbMenuItem.addItemListener(this);
+        popup.add(cbMenuItem);
+
+        cbMenuItem = new JCheckBoxMenuItem("Verbose Keycodes");
+	cbMenuItem.setEnabled(false);
+        cbMenuItem.setMnemonic(KeyEvent.VK_V);
+        cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_V, ActionEvent.ALT_MASK));
+        cbMenuItem.addItemListener(this);
+        popup.add(cbMenuItem);
+
+        cbMenuItem = new JCheckBoxMenuItem("Paint Timings");
+	cbMenuItem.setEnabled(false);
+        cbMenuItem.setMnemonic(KeyEvent.VK_V);
+        cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_V, ActionEvent.ALT_MASK));
         cbMenuItem.addItemListener(this);
         popup.add(cbMenuItem);
 
@@ -226,31 +273,31 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 
         JMenu PCsubmenu_plain= new JMenu("Plain set");
         PCsubmenu.add(PCsubmenu_plain);
-        icon = createImageIcon("psd.jpg");
+        icon = createImageIcon("images/psd.jpg");
         menuItem = new JMenuItem("Plain set",icon);
         PCsubmenu_plain.add(menuItem);
 
         JMenu PCsubmenu_shift= new JMenu("Shifted set");
         PCsubmenu.add(PCsubmenu_shift);
-        icon = createImageIcon("psd.jpg");
+        icon = createImageIcon("images/psd.jpg");
         menuItem = new JMenuItem("Shifted set",icon);
         PCsubmenu_shift.add(menuItem);
 
         JMenu PCsubmenu_comm= new JMenu("C= set");
         PCsubmenu.add(PCsubmenu_comm);
-        icon = createImageIcon("psd.jpg");
+        icon = createImageIcon("images/psd.jpg");
         menuItem = new JMenuItem("C= set",icon);
         PCsubmenu_comm.add(menuItem);
 
         JMenu PCsubmenu_ctrl= new JMenu("CTRL= set");
         PCsubmenu.add(PCsubmenu_ctrl);
-        icon = createImageIcon("psd.jpg");
+        icon = createImageIcon("images/psd.jpg");
         menuItem = new JMenuItem("CTRL set",icon);
         PCsubmenu_ctrl.add(menuItem);
 
         JMenu C64submenu = new JMenu("C64 keyboard");
         submenu.add(C64submenu);
-        icon = createImageIcon("c64c.jpg");
+        icon = createImageIcon("images/c64c.jpg");
         menuItem = new JMenuItem("Original",icon);
         C64submenu.add(menuItem);
 
@@ -286,7 +333,16 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         popup.add(submenu);
         menuItem = new JMenuItem("META-CHARSET [0|1]"); submenu.add(menuItem);
         menuItem = new JMenuItem("META-SCALE [0|1|2]"); submenu.add(menuItem);
-        menuItem = new JMenuItem("META-SCALEY [?]"); submenu.add(menuItem);
+        menuItem = new JMenuItem("META-SCALEY [1|2]"); submenu.add(menuItem);
+        menuItem = new JMenuItem("META-ROWS n"); submenu.add(menuItem);
+        menuItem = new JMenuItem("META-COLS n"); submenu.add(menuItem);
+        menuItem = new JMenuItem("META-BGTRANS [0|1]"); submenu.add(menuItem);
+        menuItem = new JMenuItem("META-VERBOSE"); submenu.add(menuItem);
+        menuItem = new JMenuItem("META-DUMPSTATE"); submenu.add(menuItem); menuItem.addActionListener(this);
+        menuItem = new JMenuItem("LIST"); submenu.add(menuItem);
+        menuItem = new JMenuItem("RUN"); submenu.add(menuItem);
+        menuItem = new JMenuItem("SYS n"); submenu.add(menuItem);
+        menuItem = new JMenuItem("EXIT"); submenu.add(menuItem);
 
 	//------------------------------------------------------------
         submenu = new JMenu("Command Line parameters");
@@ -296,12 +352,12 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 	//------------------------------------------------------------
         popup.addSeparator();
 
-        icon = createImageIcon("help.png");
+        icon = createImageIcon("images/help.png");
         menuItem = new JMenuItem("Help",icon);
         menuItem.addActionListener(this);
         popup.add(menuItem);
 
-        icon = createImageIcon("editpaste.png");
+        icon = createImageIcon("images/editpaste.png");
         menuItem = new JMenuItem("About",icon);
         menuItem.addActionListener(this);
         popup.add(menuItem);
@@ -342,17 +398,26 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         	C64Screen.out.setRows(25);
 	} else if (source.getText().equals("About")) {
             aboutBox();
+	} else if (source.getText().equals("New")) {
+          //oldway//System.out.print("New (sys)...\n");
+          //oldway//addString("sys0");
+          //oldway//addkey((char)10);
+          forcedcompletion=true;
+	  command="new";
+          addkey((char)10);
+	} else if (source.getText().equals("Exit")) {
+          //oldway// System.out.print("Exiting...\n");
+          //oldway// addString("exit");
+          //oldway// addkey((char)10);
+          forcedcompletion=true;
+	  command="exit";
+          addkey((char)10);
 	} else if (source.getText().equals("Run program")) {
-	  String []  args = new String [2];
-            
-          args[0]="/dvd/Source/JTests/JEBI/basic/g20-redo-detok.basic";
-          args[1]="";
-          System.out.print("Running...\n");
-          //machine.verbose=true;
-          //machine.statements(args);
-          //machine.statements("x=7:print x:for i=1to1000:printi;:nexti");
-          // running this AND input at the same time freezes screen output until end
-          addString("run");
+          //oldway//System.out.print("Running...\n");
+          //oldway//addString("run");
+          //oldway//addkey((char)10);
+          forcedcompletion=true;
+	  command="run";
           addkey((char)10);
 
 	} else if (source.getText().equals("Open (and run)...")) {
@@ -364,15 +429,19 @@ public class C64PopupMenu implements ActionListener, ItemListener {
                 //int returnVal = fc.showOpenDialog(jf);
                 openFile();
 		if (false) {
-                addString("load\""+fFile.getAbsolutePath().toLowerCase()+"\",8");
-                addkey((char)10);
+                  addString("load\""+fFile.getAbsolutePath().toLowerCase()+"\",8");
+                  addkey((char)10);
 		} else {
-		arg=fFile.getAbsolutePath().toLowerCase();
-                //addString("poprun");
-                forcedcompletion=true;
-		command="fileopen";
-                addkey((char)10);
+		  arg=fFile.getAbsolutePath().toLowerCase();
+                  //addString("poprun");
+                  forcedcompletion=true;
+		  command="fileopen";
+                  addkey((char)10);
 		}
+	} else if (source.getText().equals("META-DUMPSTATE")) {
+		System.out.print("dump state (reentrant?)\n");
+                C64Screen.out.printstats();
+		machine.dumpstate();
 	} else if (source.getText().equals("40 rows")) {
 		System.out.print("Setting 40 rows...\n");
         	C64Screen.out.setRows(40);
@@ -404,6 +473,43 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 	if (source.getText().equals("Uppercase")) {
 		System.out.print("Setting charset ...\n");
                 C64Screen.out.changeCharSet( (e.getStateChange() == ItemEvent.SELECTED) ? 0:1);
+	}
+	if (source.getText().equals("Verbose")) {
+                // not quiet right yet
+		System.out.print("Setting verbosity not quite right yet...\n");
+		machine.verbose=( (e.getStateChange() == ItemEvent.SELECTED) ? true:false);
+		machine.evaluate_engine.verbose=( (e.getStateChange() == ItemEvent.SELECTED) ? true:false);
+		C64Screen.out.verbose=( (e.getStateChange() == ItemEvent.SELECTED) ? true:false);
+	}
+	if (source.getText().equals("SendToBack")) {
+		System.out.print("Setting sendtoback ...\n");
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                  C64Screen.out.sendToBack=true;
+                } else {
+                  C64Screen.out.sendToBack=false;
+                }
+        }
+	if (source.getText().equals("Frames")) {
+		System.out.print("Setting frames ...\n");
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+		//C64Screen.out.setVisible(false);
+		//C64Screen.out.hide();
+		//C64Screen.out.setUndecorated(false);
+		//C64Screen.out.setVisible(true);
+                        // decorated - framed
+                        C64Screen.out.dispose();
+			C64Screen.out.setUndecorated(false);
+			C64Screen.out.setResizable(true);
+			//device.setFullScreenWindow(null); // comment this line if you want only undecorated frame
+			C64Screen.out.setVisible(true);
+                } else {
+                        // undecorated
+                        C64Screen.out.dispose();
+			C64Screen.out.setUndecorated(true);
+			C64Screen.out.setResizable(true);
+			//device.setFullScreenWindow(C64Screen.out); // comment this line if you want only undecorated frame
+			C64Screen.out.setVisible(true);
+                }
 	}
 
 
