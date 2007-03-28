@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.20 2007/03/24 01:09:18 pgs Exp pgs $
+// $Id: C64.java,v 1.21 2007/03/24 02:11:08 pgs Exp pgs $
 //
 // $Log: C64.java,v $
+// Revision 1.21  2007/03/24 02:11:08  pgs
+// reinclude log entries
+//
 // Revision 1.20  2007/03/24 01:09:18  pgs
 // more power to the popup
 //
@@ -65,6 +68,14 @@ class C64 {
     C64PopupMenu pop=new C64PopupMenu(machine); // good idea???
     // keep a reference to it for returning things
 
+    // when you close the window - stop the program
+    // addWindowListener(new WindowAdapter() {
+      // public void windowClosing(WindowEvent we) {
+        // System.exit(0);
+      // }
+    // });
+
+
     if (false) { screen.scale=3; }
     if (false) { screen.changeCharSet(1); }
     //if (true) { screen.setRows(50); }
@@ -99,7 +110,6 @@ class C64 {
       }
     }
 
-    screen.setcursColour("LIGHT BLUE");
     screen.startupscreen();
     while (true) {
       screen.println("[CR]ready.");
@@ -110,8 +120,21 @@ class C64 {
         if (pop.command.equals("fileopen")) {
           String [] str = new String[1];
           str[0]=pop.arg;
+          // and keep it too
+          args=new String[1];  // renew it
+          args[0]=pop.arg; // will this work
+          machine.variables_clr();
           machine.statements(str); // we now execute the statements upon a machine
         } else if (pop.command.equals("run")) {
+          // clear the variables first!
+          machine.variables_clr();
+          machine.statements(args); // we now execute the statements upon a machine
+          continue;
+        } else if (pop.command.equals("new")) {
+          screen.startupscreen();
+          continue;
+        } else if (pop.command.equals("exit")) {
+          break;
         }
         System.out.printf("Forced completion triggered\n");
         continue;
@@ -130,11 +153,14 @@ class C64 {
         screen.startupscreen();
         continue;
       } else if (result.length()>=6 && (result.substring(0,6)).equals("POPRUN")) {
+        // no longer used
         String [] str = new String[1];
         str[0]=pop.arg;
         machine.statements(str); // we now execute the statements upon a machine
         continue;
       } else if (result.length()>=3 && (result.substring(0,3)).equals("RUN")) {
+        // clear the variables first!
+        machine.variables_clr();
         machine.statements(args); // we now execute the statements upon a machine
         continue;
       //} else if ((result.substring(0,4)).equals("LOAD")) {
@@ -150,6 +176,8 @@ class C64 {
       machine.statements(result.trim()); // and again, upon a machine
       //screen.println("?syntax error");
     }
+    // actually exit
+    System.exit(0);
   } // end th_C64Screen
 
   public static void main(String args[]) {
