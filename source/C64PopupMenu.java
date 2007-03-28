@@ -339,10 +339,11 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         menuItem = new JMenuItem("META-BGTRANS [0|1]"); submenu.add(menuItem);
         menuItem = new JMenuItem("META-VERBOSE"); submenu.add(menuItem);
         menuItem = new JMenuItem("META-DUMPSTATE"); submenu.add(menuItem); menuItem.addActionListener(this);
+        menuItem = new JMenuItem("EXIT"); submenu.add(menuItem);
+        submenu.addSeparator();
         menuItem = new JMenuItem("LIST"); submenu.add(menuItem);
         menuItem = new JMenuItem("RUN"); submenu.add(menuItem);
-        menuItem = new JMenuItem("SYS n"); submenu.add(menuItem);
-        menuItem = new JMenuItem("EXIT"); submenu.add(menuItem);
+        menuItem = new JMenuItem("SYS nnnnn"); submenu.add(menuItem);
 
 	//------------------------------------------------------------
         submenu = new JMenu("Command Line parameters");
