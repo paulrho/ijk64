@@ -237,6 +237,12 @@ class Machine {
     }
   }
 
+  void clearMachineState() {
+    toplinecache=0; // optimisation only
+    topforloopstack=0;
+    topgosubstack=0;
+  }
+
   void cacheLine(String lineNostr, int pnt) {
     int value=Integer.parseInt(lineNostr);
     if (verbose) { System.out.printf("Caching line %d pointer at %d\n",value,pnt); }
@@ -248,6 +254,7 @@ class Machine {
   void dumpstate() {
     variables.dumpstate();
     forloopdumpstate();
+    System.out.printf("Current Line No = %s\n",currentLineNo);
   }
 
 //////////////////////////////////
