@@ -1,8 +1,13 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Machine.java,v 1.22 2006/02/16 05:53:51 pgs Exp $
+// $Id: Machine.java,v 1.23 2006/02/19 22:32:02 pgs Exp $
 //
 // $Log: Machine.java,v $
+// Revision 1.23  2006/02/19 22:32:02  pgs
+// Fix for loop algorith, repeated variables clear the stack before and including that
+// variable and the stack is squished up.
+// this allows for un-nexted fori forj fork fori nexti nextk nextj to work properly
+//
 // Revision 1.22  2006/02/16 05:53:51  pgs
 // Correctly check the loop finish test depending on whether +ve or -ve step value
 //
@@ -403,6 +408,13 @@ GenericType metareaddatastreamString()
     new statements(arg, this); // tell the statements class who I am
   }
 
+  void variables_clr() {
+    // reset all variables, by creating new ones (are the old ones garbage collected properly?
+    boolean verbosekeep=variables.verbose;
+    variables=new Variables();
+    variables.verbose=verbosekeep;
+    //variables.verbose=verbose;
+  }
 }
 
   /////////////////
