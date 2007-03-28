@@ -113,11 +113,19 @@ class C64 {
     screen.startupscreen();
     while (true) {
       screen.println("[CR]ready.");
-      String result=screen.screenInput();
+      String result;
+      do {
+        result=screen.screenInput();
+        if (pop.forcedcompletion) break;
+      } while (result.equals("")
+               || result.length()>=40 
+                  && (result.substring(0,40)).equals("                                        ")
+               );
       if (pop.forcedcompletion) {
         pop.forcedcompletion=false;
         // this is true if a special command was called from the popup
         if (pop.command.equals("fileopen")) {
+          // System.out.printf("got fileopen pop command\n");
           String [] str = new String[1];
           str[0]=pop.arg;
           // and keep it too
@@ -127,6 +135,7 @@ class C64 {
           machine.statements(str); // we now execute the statements upon a machine
         } else if (pop.command.equals("run")) {
           // clear the variables first!
+          // System.out.printf("got run pop command\n");
           machine.variables_clr();
           machine.statements(args); // we now execute the statements upon a machine
           continue;
