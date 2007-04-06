@@ -1,10 +1,17 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id$
+// $Id: ev.java,v 1.5 2006/02/15 01:53:25 pgs Exp pgs $
 //
-// $Log$
+// $Log: ev.java,v $
+// Revision 1.5  2006/02/15 01:53:25  pgs
+// Standard header
+//
 //
 /////////////////////////////////////////////////////////////////////////////////
+
+/**
+     evaluate test harness
+ **/
 
 class ev {
 
@@ -13,6 +20,7 @@ class ev {
     evaluate evaluate_engine = new evaluate();  // create engine
     boolean has_parameter=false;
     boolean do_many=false;
+    boolean is_assignment=false;
 
     for (int i=0; i<args.length; ++i) {
       if (args[i].substring(0,1).equals("-")) {
@@ -22,20 +30,34 @@ class ev {
           evaluate_engine.verbose=true;
         } else if (args[i].substring(0,2).equals("-q")) {
           evaluate_engine.verbose=false;
+        } else if (args[i].substring(0,2).equals("-a")) {
+          is_assignment=true;
         } else if (args[i].substring(0,2).equals("-t")) {
           do_many=true; // timing test
+        } else if (args[i].substring(0,2).equals("-h")) {
+          System.out.printf("evaluate test harness : ev : version $Id$\n");
+          System.out.printf("  -a : assignment\n");
+          System.out.printf("  -h : help\n");
+          System.out.printf("  -q : quiet\n");
+          System.out.printf("  -t : timing tests\n");
+          System.out.printf("  -v : verbose (default)\n");
+          System.exit(0);
         }
       } else {
-        // parameter // do it immediately
         has_parameter=true;
-        //evaluate_engine.interpret_string(args[i]);
-        evaluate_engine.interpret_string_with_assignment(args[i]);
+        // parameter // do it immediately
+        if (is_assignment) {
+          evaluate_engine.interpret_string_with_assignment(args[i]);
+        } else {
+          evaluate_engine.interpret_string(args[i]);
+        }
       }
     }
 
     if (!has_parameter) {
     // 100 x  82 equations = about 40 seconds, is : 205 equations per second on yoink
     // 100 x  72 equations  non verbose = about 2.0 seconds, is : 3600 equations per second on sirius
+    // 101 x  84 equations  non verbose = about 3.79 seconds, is : 2238 equations per second on sirius
     for (int i=0; i<=(do_many?100:1); ++i) {
     evaluate_engine.interpret_string("a>mxorb<3",-1.0);
     evaluate_engine.interpret_string("-3/-4",0.75);
