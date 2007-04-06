@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: ev.java,v 1.7 2007/04/06 23:29:31 pgs Exp pgs $
+// $Id: ev.java,v 1.8 2007/04/06 23:30:18 pgs Exp pgs $
 //
 // $Log: ev.java,v $
+// Revision 1.8  2007/04/06 23:30:18  pgs
+// help comment
+//
 // Revision 1.7  2007/04/06 23:29:31  pgs
 // Fix iterations (it was actually doing it twice for single and 101 for 100)
 //
@@ -44,7 +47,7 @@ class ev {
         } else if (args[i].substring(0,2).equals("-t")) {
           iterations=100;
         } else if (args[i].substring(0,2).equals("-h")) {
-          System.out.printf("evaluate test harness : ev : version $Id: ev.java,v 1.7 2007/04/06 23:29:31 pgs Exp pgs $\n");
+          System.out.printf("evaluate test harness : ev : version $Id: ev.java,v 1.8 2007/04/06 23:30:18 pgs Exp pgs $\n");
           System.out.printf("  -a : assignment\n");
           System.out.printf("  -h : help\n");
           System.out.printf("  -q : quiet\n");
@@ -65,9 +68,16 @@ class ev {
     }
 
     if (!has_parameter) {
-    // 100 x  82 equations = about 40 seconds, is : 205 equations per second on yoink
-    // 100 x  72 equations  non verbose = about 2.0 seconds, is : 3600 equations per second on sirius
-    // 101 x  84 equations  non verbose = about 3.79 seconds, is : 2238 equations per second on sirius
+    /**
+       // 100 x  82 equations = about 40 seconds, is : 205 equations per second on yoink
+       // 100 x  72 equations  non verbose = about 2.0 seconds, is : 3600 equations per second on sirius
+       // 101 x  84 equations  non verbose = about 3.79 seconds, is : 2238 equations per second on sirius
+       1000 x 84 on sirius 20070407
+         real    0m29.499s
+         user    0m17.571s
+         sys     0m7.324s
+    **/
+
     for (int i=0; i<iterations; ++i) {
     evaluate_engine.interpret_string("a>mxorb<3",-1.0);
     evaluate_engine.interpret_string("-3/-4",0.75);
