@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: ev.java,v 1.6 2007/04/06 23:25:07 pgs Exp pgs $
+// $Id: ev.java,v 1.7 2007/04/06 23:29:31 pgs Exp pgs $
 //
 // $Log: ev.java,v $
+// Revision 1.7  2007/04/06 23:29:31  pgs
+// Fix iterations (it was actually doing it twice for single and 101 for 100)
+//
 // Revision 1.6  2007/04/06 23:25:07  pgs
 // More options and help listing
 //
@@ -36,16 +39,17 @@ class ev {
           evaluate_engine.verbose=false;
         } else if (args[i].substring(0,2).equals("-a")) {
           is_assignment=true;
-        } else if (args[i].substring(0,2).equals("-tt")) {
+        } else if (args[i].substring(0,3).equals("-tt")) {
           iterations=1000;
         } else if (args[i].substring(0,2).equals("-t")) {
           iterations=100;
         } else if (args[i].substring(0,2).equals("-h")) {
-          System.out.printf("evaluate test harness : ev : version $Id: ev.java,v 1.6 2007/04/06 23:25:07 pgs Exp pgs $\n");
+          System.out.printf("evaluate test harness : ev : version $Id: ev.java,v 1.7 2007/04/06 23:29:31 pgs Exp pgs $\n");
           System.out.printf("  -a : assignment\n");
           System.out.printf("  -h : help\n");
           System.out.printf("  -q : quiet\n");
-          System.out.printf("  -t : timing tests\n");
+          System.out.printf("  -t : timing tests (100 iterations)\n");
+          System.out.printf("  -tt : timing test with 1000 iterations\n");
           System.out.printf("  -v : verbose (default)\n");
           System.exit(0);
         }
