@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.21 2007/03/24 02:11:08 pgs Exp pgs $
+// $Id: C64.java,v 1.23 2007/03/28 21:23:23 pgs Exp pgs $
 //
 // $Log: C64.java,v $
+// Revision 1.23  2007/03/28 21:23:23  pgs
+// No READY prompt on empty CR line
+//
 // Revision 1.21  2007/03/24 02:11:08  pgs
 // reinclude log entries
 //
@@ -39,6 +42,14 @@ import java.awt.event.*; // for key events
 //import java.awt.Toolkit.*; // for image loading
 //import java.awt.image.*;
 
+/**
+ * The main shell of C64
+ * Does not do much in itself
+ * <p>
+ * Uses many classes to do its work.
+ *
+ * @see C64Screen
+ */
 
 class C64 {
   C64Screen screen;
@@ -87,6 +98,9 @@ class C64 {
 
         if (args[i].substring(0,2).equals("-v")) {
           //evaluate_engine.verbose=true;
+          //System.out.println("version : " +
+            //C64.class.getPackage().getImplementationVersion() );
+          System.out.printf("Version = %s\n", version.programVersion);
         } else if (args[i].substring(0,2).equals("-q")) {
           //evaluate_engine.verbose=false;
         } else if (args[i].substring(0,2).equals("-t")) {
