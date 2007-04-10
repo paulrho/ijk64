@@ -619,8 +619,9 @@ boolean openFile () {
    } // openFile
 
     public void aboutBox() {
-        String version =
-            "JEBI/C64 version 3.0.48\n"
+        String myversion =
+            "JEBI/C64 version "
+            + version.programVersion + "\n"  // was 3.0.48
             + "Paul Salanitri, Futex\n"
             + "Copyright (c) 2001-2007 P. Salanitri";
         String licence =
@@ -653,7 +654,7 @@ boolean openFile () {
         JTextArea licenceArea = new JTextArea(licence);
         licenceArea.setEditable(false);
         String javaVersion = System.getProperty("java.version");
-        Object contents[] = new Object[] { version, licenceArea, 
+        Object contents[] = new Object[] { myversion, licenceArea, 
         	"Java version " + javaVersion };
         //JOptionPane.showMessageDialog(parent, contents, "About GeomLab",
         JOptionPane.showMessageDialog( C64Screen.out, contents, "About JEBI/C64",
