@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: ev.java,v 1.10 2007/04/06 23:34:20 pgs Exp pgs $
+// $Id: ev.java,v 1.12 2007/04/11 17:57:58 pgs Exp pgs $
 //
 // $Log: ev.java,v $
+// Revision 1.12  2007/04/11 17:57:58  pgs
+// clearing verbose stack display (to the same as comment in code)
+//
 // Revision 1.10  2007/04/06 23:34:20  pgs
 // move comment
 //
@@ -46,7 +49,23 @@ class ev {
 
   ev(String[] args)
   {
-    evaluate evaluate_engine = new evaluate();  // create engine
+    evaluate evaluate_engine;
+    boolean use_machine=false;
+
+    for (int i=0; i<args.length; ++i) {
+      if (args[i].substring(0,1).equals("-")) {
+        if (args[i].length()>=2 && args[i].substring(0,2).equals("-m")) {
+          use_machine=true;
+        }
+      }
+    }
+    if (!use_machine) {
+      evaluate_engine = new evaluate();  // create engine
+    } else {
+      Machine machine=new Machine();
+      evaluate_engine = new evaluate(machine);  // create engine
+      machine.initialise_engines(); // silly, but there is a reason (what is it?)
+    }
     boolean has_parameter=false;
     boolean do_many=false;
     boolean is_assignment=false;
@@ -67,7 +86,7 @@ class ev {
         } else if (args[i].substring(0,2).equals("-t")) {
           iterations=100;
         } else if (args[i].substring(0,2).equals("-h")) {
-          System.out.printf("evaluate test harness : ev : version $Id: ev.java,v 1.10 2007/04/06 23:34:20 pgs Exp pgs $\n");
+          System.out.printf("evaluate test harness : ev : version $Id: ev.java,v 1.12 2007/04/11 17:57:58 pgs Exp pgs $\n");
           System.out.printf("  -a : assignment\n");
           System.out.printf("  -h : help\n");
           System.out.printf("  -q : quiet\n");
