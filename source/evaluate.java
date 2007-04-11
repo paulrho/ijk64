@@ -167,7 +167,78 @@ class evaluate {
     // all setup ready
   } // end func
 
+   /** show_state displays the state of the machine stack.
+    * It is only printed in verbose mode
+    * <PRE>
+    * 
+    *              D_NUM   D_OP
+    *            +-------+------+-------+
+    *            |  num  |  op  |  func |
+    *            +-------+------+-------+
+    *           0|  5.3  |  +   |  N/A  |
+    *           1|  1.6  |  /   |  N/A  |
+    *           2|  N/A  |  (   |  sin  |
+    * upto=4 -> 3|  0.3  | N/A  |  N/A  |
+    *            +-------+------+-------+
+    *              doing=D_OP^
+    *  state of machine is defined by
+    *    upto
+    *    doing
+    *    is_function
+    *    [stack] num op func
+    * 
+    * </PRE>
+    ****************************************************************************/
   void show_state() {
+    System.out.printf("%s                D_NUM          D_OP\n",printprefix);
+    System.out.printf("%s              +---------------+-----+------------------------------+\n",printprefix);
+    System.out.printf("%s              | num           | op  | func                         |\n",printprefix);
+    System.out.printf("%s              +---------------+-----+------------------------------+\n",printprefix);
+    //System.out.printf("%s |STATE:  upto=%d doing=%d\n",printprefix,upto,doing);
+    // necessarily there it is the case when doing==D_OP that we DON'T know what stkop[upto-1] is - therefore, don't show it!
+    for (int levelx=0; levelx<upto+((doing==D_NUM)?1:0); levelx++) {
+      System.out.printf("%s ",printprefix);
+      if (levelx==upto-1+((doing==D_NUM)?1:0)) {
+        System.out.printf("upto=%2d -> ",upto);
+      } else {
+        System.out.printf("           ");
+      }
+      System.out.printf("%2d|",levelx);
+      String haveop=(levelx<upto-1 || levelx==upto-1 && doing==D_NUM)?stkop[levelx]:""; // it is blank as we are going to write to it
+      if (stktype[levelx]==ST_STRING) {
+        System.out.printf(" %-13s |", stkstring[levelx]);
+      } else {
+        if (levelx==upto || haveop.equals("(") || haveop.equals("-ve")) {
+          System.out.printf(" %-13s |", "");
+        } else {
+          System.out.printf(" %-13f |", stknum[levelx]);
+        }
+      }
+      System.out.printf(" %-3s |", haveop);
+          //(levelx!=upto-1 || doing!=D_OP)?stkop[levelx]:"N/A");
+      System.out.printf(" %-28s |\n", 
+        (stkfunc[levelx]!=null && !stkfunc[levelx].equals("")
+          && ((haveop.equals("(") || (levelx==upto) && is_function))
+        )?stkfunc[levelx]+((is_function && levelx==upto)?" (preset:is_function)":""):"");
+
+        // (stkfunc[levelx]!=null && !stkfunc[levelx].equals("")
+          // && (haveop.equals("")||haveop.equals("("))
+        // )?stkfunc[levelx]+(haveop.equals("(")?"":" (possible)"):"");
+
+        //(stkfunc[levelx]!=null)?" stkfunc[]="+stkfunc[levelx]:"");
+        // I think it is only valid if it is D_OP??
+
+      //System.out.printf("%s |upto=%d stknum[]=%f stkop[]=%s%s%s type=%d %s\n",
+        //printprefix,levelx,stknum[levelx],(levelx!=upto-1 || doing!=D_OP)?stkop[levelx]:"N/A",(stkfunc[levelx]!=null)?" stkfunc[]=":"",(stkfunc[levelx]!=null)?stkfunc[levelx]:"",
+        //stktype[levelx],stktype[levelx]==ST_STRING?stkstring[levelx]:"");
+    }
+    System.out.printf("%s              +---------------+-----+------------------------------+\n",printprefix);
+    System.out.printf("%s   %s  doing=%s\n",printprefix,
+      (doing==D_OP)?"                 ":"",(doing==D_OP)?"D_OP^":"D_NUM^");
+    System.out.printf("%s\n",printprefix);
+  }
+
+  void show_state_oldway() {
     System.out.printf("%s |STATE:  upto=%d doing=%d\n",printprefix,upto,doing);
     // necessarily there it is the case when doing==D_OP that we DON'T know what stkop[upto-1] is - therefore, don't show it!
     for (int levelx=0; levelx<upto; levelx++) {

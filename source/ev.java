@@ -62,7 +62,7 @@ class ev {
           evaluate_engine.verbose=false;
         } else if (args[i].substring(0,2).equals("-a")) {
           is_assignment=true;
-        } else if (args[i].substring(0,3).equals("-tt")) {
+        } else if (args[i].length()>=3 && args[i].substring(0,3).equals("-tt")) {
           iterations=1000;
         } else if (args[i].substring(0,2).equals("-t")) {
           iterations=100;
