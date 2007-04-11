@@ -1,8 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: evaluate.java,v 1.22 2006/02/17 07:03:10 pgs Exp pgs $
+// $Id: evaluate.java,v 1.23 2006/02/19 22:27:29 pgs Exp pgs $
 //
 // $Log: evaluate.java,v $
+// Revision 1.23  2006/02/19 22:27:29  pgs
+// Add atn() as a the function atan.
+// Add the string trying to interpret to the syntax error 001 & 002 lines
+//
 // Revision 1.22  2006/02/17 07:03:10  pgs
 // Add the ability to define functions and use defined functions
 //
@@ -1102,11 +1106,26 @@ class evaluate {
         }
       }
     } else {
-      if (stktype[0]==ST_NUM) {
-        if (!quiet) { System.out.printf("Evaluated %-20s = %f\n",intstring,stknum[0]); }
+      if (!testing) {
+        if (stktype[0]==ST_NUM) {
+          if (!quiet) { System.out.printf("Evaluated %-20s = %f\n",intstring,stknum[0]); }
+        } else {
+          // add the quotes in too
+          if (!quiet) { System.out.printf("Evaluated %-20s = \"%s\"\n",intstring,stkstring[0]); }
+        }
       } else {
-        // add the quotes in too
-        if (!quiet) { System.out.printf("Evaluated %-20s = \"%s\"\n",intstring,stkstring[0]); }
+        if (stktype[0]==ST_NUM) {
+          if (stknum[0]-expecting>0.00001 || stknum[0]-expecting<-0.00001) {
+            System.out.printf("Evaluated %-20s = \"%s\"",intstring,stkstring[0]);
+            System.out.printf(" !!**BAD**!!\n");
+            System.out.printf("   ***************DISCREPENCY***************\n");
+          } else {
+            //System.out.printf(" OKAY\n");
+          }
+        } else {
+          // add the quotes in too
+          if (!quiet) { System.out.printf("Evaluated %-20s = \"%s\"\n",intstring,stkstring[0]); }
+        }
       }
     }
 

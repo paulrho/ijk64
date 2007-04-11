@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Machine.java,v 1.23 2006/02/19 22:32:02 pgs Exp $
+// $Id: Machine.java,v 1.25 2007/03/28 21:25:59 pgs Exp pgs $
 //
 // $Log: Machine.java,v $
+// Revision 1.25  2007/03/28 21:25:59  pgs
+// clear line cache and forloop/gosub stacks before running new program
+//
 // Revision 1.23  2006/02/19 22:32:02  pgs
 // Fix for loop algorith, repeated variables clear the stack before and including that
 // variable and the stack is squished up.
@@ -241,6 +244,9 @@ class Machine {
     toplinecache=0; // optimisation only
     topforloopstack=0;
     topgosubstack=0;
+    // also clear data
+    allDATA="";
+    uptoDATA=0;
   }
 
   void cacheLine(String lineNostr, int pnt) {

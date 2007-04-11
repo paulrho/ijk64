@@ -56,6 +56,9 @@ class C64 {
   Machine machine;
 
   public C64(String args[]) {
+    boolean runImmediate=false;
+    boolean exitImmediate=false;
+
     System.out.println("Running test harness for C64Screen...");
     if (false) {
       // standard background
@@ -103,6 +106,10 @@ class C64 {
           System.out.printf("Version = %s\n", version.programVersion);
         } else if (args[i].substring(0,2).equals("-q")) {
           //evaluate_engine.verbose=false;
+        } else if (args[i].substring(0,2).equals("-r")) {
+          runImmediate=true;
+        } else if (args[i].substring(0,2).equals("-x")) {
+          exitImmediate=true;
         } else if (args[i].substring(0,2).equals("-t")) {
           //do_many=true; // timing test
         }
@@ -125,7 +132,11 @@ class C64 {
     }
 
     screen.startupscreen();
-    while (true) {
+    if (runImmediate) {
+      machine.statements(args); // we now execute the statements upon a machine
+    }
+
+    while (!exitImmediate) {
       screen.println("[CR]ready.");
       String result;
       do {

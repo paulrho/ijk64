@@ -121,6 +121,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         popup.add(cbMenuItem_bgtrans);
 
         cbMenuItem = new JCheckBoxMenuItem("Hidden (faint) text");
+        cbMenuItem.setSelected(C64Screen.out.faint);
         cbMenuItem.setMnemonic(KeyEvent.VK_H);
         cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_H, ActionEvent.ALT_MASK));
@@ -128,6 +129,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         popup.add(cbMenuItem);
 
         cbMenuItem = new JCheckBoxMenuItem("Drop shadow");
+        cbMenuItem.setSelected(C64Screen.out.bgshadow);
         cbMenuItem.setMnemonic(KeyEvent.VK_D);
         cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_D, ActionEvent.ALT_MASK));
@@ -470,27 +472,35 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 		System.out.print("Setting transparent state to ...\n");
 		C64Screen.out.bgtrans = (e.getStateChange() == ItemEvent.SELECTED) ? true:false;
         	C64Screen.out.setBackgroundTransparent(C64Screen.out.bgtrans);
-	}
-	if (source.getText().equals("Uppercase")) {
+	} else if (source.getText().equals("Drop shadow")) {
+		System.out.print("Setting drop shadow ...\n");
+                C64Screen.out.bgshadow = (e.getStateChange() == ItemEvent.SELECTED) ? true:false;
+        	//C64Screen.out.setBackgroundTransparent(C64Screen.out.bgtrans);
+                C64Screen.out.redrawScreen();
+                C64Screen.out.forcedrepaint();
+	} else if (source.getText().equals("Hidden (faint) text")) {
+		System.out.print("Setting hidden ...\n");
+                C64Screen.out.faint = (e.getStateChange() == ItemEvent.SELECTED) ? true:false;
+        	//C64Screen.out.setBackgroundTransparent(C64Screen.out.bgtrans);
+                C64Screen.out.redrawScreen();
+                C64Screen.out.forcedrepaint();
+	} else if (source.getText().equals("Uppercase")) {
 		System.out.print("Setting charset ...\n");
                 C64Screen.out.changeCharSet( (e.getStateChange() == ItemEvent.SELECTED) ? 0:1);
-	}
-	if (source.getText().equals("Verbose")) {
+	} else if (source.getText().equals("Verbose")) {
                 // not quiet right yet
 		System.out.print("Setting verbosity not quite right yet...\n");
 		machine.verbose=( (e.getStateChange() == ItemEvent.SELECTED) ? true:false);
 		machine.evaluate_engine.verbose=( (e.getStateChange() == ItemEvent.SELECTED) ? true:false);
 		C64Screen.out.verbose=( (e.getStateChange() == ItemEvent.SELECTED) ? true:false);
-	}
-	if (source.getText().equals("SendToBack")) {
+	} else if (source.getText().equals("SendToBack")) {
 		System.out.print("Setting sendtoback ...\n");
                 if (e.getStateChange() == ItemEvent.SELECTED) {
                   C64Screen.out.sendToBack=true;
                 } else {
                   C64Screen.out.sendToBack=false;
                 }
-        }
-	if (source.getText().equals("Frames")) {
+        } else if (source.getText().equals("Frames")) {
 		System.out.print("Setting frames ...\n");
                 if (e.getStateChange() == ItemEvent.SELECTED) {
 		//C64Screen.out.setVisible(false);
