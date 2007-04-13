@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Machine.java,v 1.25 2007/03/28 21:25:59 pgs Exp pgs $
+// $Id: Machine.java,v 1.26 2007/04/11 17:45:38 pgs Exp $
 //
 // $Log: Machine.java,v $
+// Revision 1.26  2007/04/11 17:45:38  pgs
+// snapshot 20070411
+//
 // Revision 1.25  2007/03/28 21:25:59  pgs
 // clear line cache and forloop/gosub stacks before running new program
 //
@@ -26,6 +29,9 @@
 //
 //
 /////////////////////////////////////////////////////////////////////////////////
+
+// for reading a file
+import java.io.*;
 
 class Machine {
   //
@@ -407,6 +413,27 @@ GenericType metareaddatastreamString()
     }
   }
 
+/** was (still is really) in statement, it doesnt belong there - the machine
+    reads the file 
+**/
+  static String read_a_file(String filename) {
+
+    String content="";
+
+    try {
+      FileInputStream fis = new FileInputStream(filename);
+      int x= fis.available();
+      byte b[]= new byte[x];
+      fis.read(b);
+      content = new String(b);
+      //System.out.println(content);
+    } catch (Exception e) { }
+
+    return content;
+  }
+
+
+
   boolean hasControlC()
   {
     return machinescreen.hasControlC();
@@ -428,7 +455,189 @@ GenericType metareaddatastreamString()
     variables.verbose=verbosekeep;
     //variables.verbose=verbose;
   }
-}
+
+  String programText="";
+
+  ///
+  /// new additions for keeping the program text in the machine
+  ///
+  String listProgram()
+  {
+    return programText;
+  }
+  
+  boolean loadProgram(String filename)
+  {
+    programText=read_a_file(filename);
+    return true;
+  }
+  
+  boolean runProgram()
+  {
+    new statements(programText, this); // passing along the machine too
+    return true;
+  }
+
+  /** inserts a line if new, or replaces a line of the same number (first one it finds)
+  **/
+  boolean insertLine(String line) // throws Exception
+  {
+    // do this until it is really implemented
+    //throw ( new Exception("Not implemented\n") );
+    // we are now in a position to enter a real line of the program
+    // we will replace an existing line with the same number, or insert it
+    // in the first "higher" location
+    // with some of the test programs this will not work as they are either
+    // missing numbers or repeated, or out of order numbers
+
+    // read in this line number (can we use parts of statement??)
+    String lineno=machineReadLineNo(line);
+    if (lineno!=null) {
+      if (verbose) { System.out.printf("Inserting line number %s\n",lineno); }
+    
+    // find a line with the same number in the program text
+      // if found, record its start, find the next line and record its start
+      //   replace programText with:
+      //     programText before start + lineToInsert + programText from start of next line
+      // else
+      //   find the next line and record its start
+      //   replace program Text with:
+      //     programText before start of next line + lineToInsert + programText from start of next line
+      // quick and dirty testing only
+      int startpos[] = { 0 };
+      int endpos[] = { 0 };
+      int ret=findLine(lineno,true,startpos);
+      if (ret==0) {
+        // replace it
+        if (verbose) { System.out.printf("replace line -startpos=%d\n",startpos[0]); }
+        ret=findLine(lineno,false,endpos);
+        if (verbose) {System.out.printf("got %d from findLine (2nd time)\n",ret); }
+        if (ret<0) { // last line of program
+          programText = 
+            programText.substring(0,startpos[0]) + line + "\n";
+        } else {
+          programText = 
+            programText.substring(0,startpos[0]) + line + "\n" + programText.substring(endpos[0]);
+        }
+      } else if (ret==1) {
+        // insert it
+        if (verbose) { System.out.printf("insert line\n"); }
+        programText = 
+          programText.substring(0,startpos[0]) + line + "\n" + programText.substring(startpos[0]);
+      } else {
+        // add it
+        if (verbose) { System.out.printf("add line\n"); }
+        programText = 
+          programText + line + "\n";
+      }
+      return true;
+    } else
+      return false;
+  }
+
+  String machineReadLineNo(String line) {
+    int at=0;
+    boolean hasdigits=false;
+
+    while (at<line.length()) {
+      String a=line.substring(at,at+1);
+      if (!hasdigits) {
+        if (a.equals("\n") || a.equals(" ")) { // chew these up
+        } else if (a.compareTo("0")>=0 && a.compareTo("9")<=0)
+          hasdigits=true;
+        else 
+          // didnt have a line number!
+          return null;
+      } else {
+        if (!(a.compareTo("0")>=0 && a.compareTo("9")<=0)) {
+          break;
+        }
+      }
+      at++;
+    }
+    // read at spaces (do we need to)
+    if (hasdigits) {
+      // we have got number
+      if (verbose) { System.out.printf("Line number %s\n",line.substring(0,at)); }
+      // we want to keep the line
+      return line.substring(0,at);
+    } else {
+      return null;
+    }
+  }
+
+
+  // if same==true
+  // will return -1 for no lines found
+  //             0 for line find exact
+  //             1 for next higher line found
+  // if same==false
+  // will return -1 for no lines found
+  //             1 for next higher line found
+  //     
+  int findLine(String lineno, boolean same, int pos[])
+  {
+    int at=0;
+    boolean hasdigits=false;
+    int start=0;
+    int numstart=0;
+  
+    while (at<programText.length()) {
+      hasdigits=false;
+      while (at<programText.length()) {
+        String a=programText.substring(at,at+1);
+        if (!hasdigits) {
+          if (a.equals("\n") || a.equals(" ")) { // chew these up
+          } else if (a.compareTo("0")>=0 && a.compareTo("9")<=0) {
+            numstart=at; // recording the actual start of the number
+            hasdigits=true;
+          } else {
+            // didnt have a line number!
+            hasdigits=false;
+            break;
+          }
+        } else {
+          if (!(a.compareTo("0")>=0 && a.compareTo("9")<=0)) {
+            break;
+          }
+        }
+        at++;
+      } // end while finding line
+      // read at spaces (do we need to)
+      if (hasdigits) {
+        // we have got number
+        if (verbose) { System.out.printf(">> Line number %d to %d : %s\n",
+          start,at,
+          programText.substring(start,at)); }
+        // we want to check the line #
+        if (same && programText.substring(numstart,at).equals(lineno)) {
+          if (verbose) System.out.printf("Exact match\n");
+          pos[0]=start;
+          return 0;
+
+        // must be a numeric compare!! (or equivalent)
+        } else if (programText.substring(numstart,at).length()>lineno.length() ||
+                     programText.substring(numstart,at).length()==lineno.length() 
+                   && programText.substring(numstart,at).compareTo(lineno)>0) {
+
+          if (verbose) System.out.printf("Next higher match\n");
+          pos[0]=start;
+          return 1;
+        }
+      } 
+   
+      // read up until new line
+      while (at<programText.length()) {
+        String a=programText.substring(at,at+1);
+        at++;
+        if (a.equals("\n")) { start=at; break; }
+      }
+    }
+    return -1;
+  }
+
+
+} // end of class Machine
 
   /////////////////
  // end Machine //

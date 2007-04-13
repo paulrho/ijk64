@@ -137,12 +137,18 @@ class C64 {
     }
 
     screen.startupscreen();
+    if (args.length>=1) machine.loadProgram(args[0]); // load it in
     if (runImmediate) {
-      machine.statements(args); // we now execute the statements upon a machine
+      //machine.statements(args); // we now execute the statements upon a machine
+      machine.runProgram(); // we now execute the statements upon a machine // loaded program text
     }
 
+    boolean displayReady=true;
     while (!exitImmediate) {
-      screen.println("[CR]ready.");
+      if (displayReady) {
+        screen.println("[CR]ready.");
+      } else displayReady=true;
+
       String result;
       do {
         result=screen.screenInput();
@@ -161,13 +167,17 @@ class C64 {
           // and keep it too
           args=new String[1];  // renew it
           args[0]=pop.arg; // will this work
+          //machine.statements(str); // we now execute the statements upon a machine
+          machine.loadProgram(str[0]);
           machine.variables_clr();
-          machine.statements(str); // we now execute the statements upon a machine
+          machine.runProgram(); // we now execute the statements upon a machine
         } else if (pop.command.equals("run")) {
           // clear the variables first!
           // System.out.printf("got run pop command\n");
+          //machine.statements(args); // we now execute the statements upon a machine
+          machine.loadProgram(args[0]);
           machine.variables_clr();
-          machine.statements(args); // we now execute the statements upon a machine
+          machine.runProgram(); // we now execute the statements upon a machine
           continue;
         } else if (pop.command.equals("new")) {
           screen.startupscreen();
@@ -178,29 +188,23 @@ class C64 {
         System.out.printf("Forced completion triggered\n");
         continue;
       }
-      if (result.length()>=4 && (result.substring(0,4)).equals("EXIT")) break;
-      else if (result.length()>=4 && (result.substring(0,4)).equals("LIST")) {
-        if (args.length>0) {
-          // call the static method
-          screen.print(statements.read_a_file(args[0]));
-        }
-        //screen.println("10 print\"mello word\"");
-        //screen.println("20 a=5*5:print a");
-        //screen.println("90 end");
-        //continue;
-      } else if (result.length()>=3 && (result.substring(0,3)).equals("SYS")) {
+      if (result.length()>=4 && (result.substring(0,4)).equals("exit")) break;
+      else if (result.length()>=4 && (result.substring(0,4)).equals("list")) {
+        screen.print(machine.listProgram()); // just prints the program text
+      } else if (result.length()>=3 && (result.substring(0,3)).equals("sys")) {
         screen.startupscreen();
         continue;
       } else if (result.length()>=6 && (result.substring(0,6)).equals("POPRUN")) {
         // no longer used
-        String [] str = new String[1];
-        str[0]=pop.arg;
-        machine.statements(str); // we now execute the statements upon a machine
+        // String [] str = new String[1];
+        // str[0]=pop.arg;
+        // machine.statements(str); // we now execute the statements upon a machine
         continue;
-      } else if (result.length()>=3 && (result.substring(0,3)).equals("RUN")) {
+      } else if (result.length()>=3 && (result.substring(0,3)).equals("run")) {
         // clear the variables first!
         machine.variables_clr();
-        machine.statements(args); // we now execute the statements upon a machine
+        //machine.statements(args); // we now execute the statements upon a machine
+        machine.runProgram(); // we now execute the statements upon a machine
         continue;
       //} else if ((result.substring(0,4)).equals("LOAD")) {
         //screen.println("?very sorry - the interpreter is broken");
@@ -209,11 +213,15 @@ class C64 {
         //screen.println("?very sorry - the interpreter is broken");
         //continue;
       }
-      System.out.println("Got string = "+result+"\n");
+      if (false) System.out.println("Got string = "+result+"\n");
       if (result.length()>=40 && (result.substring(0,40)).equals("                                        ")) continue;
       if (result.equals("")) continue;
-      machine.statements(result.trim()); // and again, upon a machine
-      //screen.println("?syntax error");
+      // execute immediate!
+      if (machine.insertLine(result.trim())) {
+        displayReady=false;
+      } else {
+        machine.statements(result.trim()); // and again, upon a machine
+       }
     }
     // actually exit
     System.exit(0);

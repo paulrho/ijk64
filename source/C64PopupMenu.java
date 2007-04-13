@@ -61,7 +61,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 
         //-------------------------------------------------
         //icon = createImageIcon("player_play.png");
-        submenu = new JMenu("File");
+        submenu = new JMenu("File...");
         submenu.setMnemonic(KeyEvent.VK_F);
         submenu.addActionListener(this);
         popup.add(submenu);
@@ -152,45 +152,18 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         popup.add(cbMenuItem);
 
 
-        cbMenuItem = new JCheckBoxMenuItem("Paint slowdown");
-        cbMenuItem.setMnemonic(KeyEvent.VK_S);
-        cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_S, ActionEvent.ALT_MASK));
-        cbMenuItem.addItemListener(this);
-        popup.add(cbMenuItem);
-
-        popup.addSeparator(); // internal mechanics
-
-        cbMenuItem = new JCheckBoxMenuItem("Verbose");
-        cbMenuItem.setMnemonic(KeyEvent.VK_V);
-        cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_V, ActionEvent.ALT_MASK));
-        cbMenuItem.addItemListener(this);
-        popup.add(cbMenuItem);
-
-        cbMenuItem = new JCheckBoxMenuItem("Evaluate engine verbose");
-	cbMenuItem.setEnabled(false);
-        cbMenuItem.setMnemonic(KeyEvent.VK_V);
-        cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_V, ActionEvent.ALT_MASK));
-        cbMenuItem.addItemListener(this);
-        popup.add(cbMenuItem);
-
-        cbMenuItem = new JCheckBoxMenuItem("Verbose Keycodes");
-	cbMenuItem.setEnabled(false);
-        cbMenuItem.setMnemonic(KeyEvent.VK_V);
-        cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_V, ActionEvent.ALT_MASK));
-        cbMenuItem.addItemListener(this);
-        popup.add(cbMenuItem);
-
-        cbMenuItem = new JCheckBoxMenuItem("Paint Timings");
-	cbMenuItem.setEnabled(false);
-        cbMenuItem.setMnemonic(KeyEvent.VK_V);
-        cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_V, ActionEvent.ALT_MASK));
-        cbMenuItem.addItemListener(this);
-        popup.add(cbMenuItem);
+	//------------------------------------------------------------
+        popup.addSeparator();
+        submenu = new JMenu("Preset Modes");
+        submenu.setMnemonic(KeyEvent.VK_S);
+        menuItem.addActionListener(this);
+        popup.add(submenu);
+        menuItem = new JMenuItem("Commodore 128 80x25 monitor mode (double height pixels)");
+        submenu.add(menuItem);
+        menuItem = new JMenuItem("Commodore 64 default mode");
+        submenu.add(menuItem);
+        menuItem = new JMenuItem("Commodore 64 BIG screen");
+        submenu.add(menuItem);
 
         //-------------------------------------------------------------
         //a group of radio button menu items
@@ -267,6 +240,52 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         //-------------------------------------------------------------
         //a group of check box menu items
         popup.addSeparator();
+
+        submenu = new JMenu("Debugging...");
+        popup.add(submenu);
+        // submenu
+
+        cbMenuItem = new JCheckBoxMenuItem("Paint slowdown");
+        cbMenuItem.setMnemonic(KeyEvent.VK_S);
+        cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_S, ActionEvent.ALT_MASK));
+        cbMenuItem.addItemListener(this);
+        submenu.add(cbMenuItem);
+
+          cbMenuItem = new JCheckBoxMenuItem("Verbose");
+          cbMenuItem.setMnemonic(KeyEvent.VK_V);
+          cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
+                  KeyEvent.VK_V, ActionEvent.ALT_MASK));
+          cbMenuItem.addItemListener(this);
+          submenu.add(cbMenuItem);
+  
+          cbMenuItem = new JCheckBoxMenuItem("Evaluate engine verbose");
+	  cbMenuItem.setEnabled(false);
+          cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
+                  KeyEvent.VK_V, ActionEvent.ALT_MASK));
+          cbMenuItem.addItemListener(this);
+          submenu.add(cbMenuItem);
+  
+          cbMenuItem = new JCheckBoxMenuItem("Verbose Keycodes");
+	  cbMenuItem.setEnabled(false);
+          cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
+                  KeyEvent.VK_V, ActionEvent.ALT_MASK));
+          cbMenuItem.addItemListener(this);
+          submenu.add(cbMenuItem);
+  
+          cbMenuItem = new JCheckBoxMenuItem("Paint Timings");
+	  cbMenuItem.setEnabled(false);
+          cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
+                  KeyEvent.VK_V, ActionEvent.ALT_MASK));
+          cbMenuItem.addItemListener(this);
+          submenu.add(cbMenuItem);
+  
+          menuItem = new JMenuItem("Dumpstate now");
+          menuItem.addActionListener(this);
+          submenu.add(menuItem);
+
+        popup.addSeparator(); // internal mechanics
+
 	//------------------------------------------------------------
         submenu = new JMenu("Show keyboard translations");
         popup.add(submenu);
@@ -303,35 +322,29 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         menuItem = new JMenuItem("Original",icon);
         C64submenu.add(menuItem);
 
-	//------------------------------------------------------------
-        submenu = new JMenu("Preset Modes");
-        submenu.setMnemonic(KeyEvent.VK_S);
-        menuItem.addActionListener(this);
-        popup.add(submenu);
-        menuItem = new JMenuItem("Commodore 128 80x25 monitor mode (double height pixels)");
-        submenu.add(menuItem);
-        menuItem = new JMenuItem("Commodore 64 default mode");
-        submenu.add(menuItem);
-        menuItem = new JMenuItem("Commodore 64 BIG screen");
-        submenu.add(menuItem);
-
-	//------------------------------------------------------------
         submenu = new JMenu("Show character sets");
         submenu.setMnemonic(KeyEvent.VK_S);
-        menuItem.addActionListener(this);
         popup.add(submenu);
-        menuItem = new JMenuItem("Uppercase set");
-        submenu.add(menuItem);
-        menuItem = new JMenuItem("Lowercase set");
-        menuItem.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_2, ActionEvent.ALT_MASK));
-        menuItem.addActionListener(this);
-        submenu.add(menuItem);
+
+        JMenu setmenu = new JMenu("Uppercase set");
+        submenu.add(setmenu);
+          icon = createImageIcon("images/c64_upp.gif");
+          JMenuItem cset= new JMenuItem("Uppercase Set",icon);
+          setmenu.add(cset);
+        setmenu = new JMenu("Lowercase set");
+        submenu.add(setmenu);
+          icon = createImageIcon("images/c64_low.gif");
+          cset= new JMenuItem("Lowercase Set",icon);
+          setmenu.add(cset);
+
+        //menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                //KeyEvent.VK_2, ActionEvent.ALT_MASK));
+        //menuItem.addActionListener(this);
+        //submenu.add(menuItem);
 
 	//------------------------------------------------------------
         submenu = new JMenu("Show commands");
         submenu.setMnemonic(KeyEvent.VK_S);
-        menuItem.addActionListener(this);
         popup.add(submenu);
         menuItem = new JMenuItem("META-CHARSET [0|1]"); submenu.add(menuItem);
         menuItem = new JMenuItem("META-SCALE [0|1|2]"); submenu.add(menuItem);
@@ -441,6 +454,10 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 		  command="fileopen";
                   addkey((char)10);
 		}
+	} else if (source.getText().equals("Dumpstate now")) {
+		System.out.print("dump state (reentrant?)\n");
+                C64Screen.out.printstats();
+		machine.dumpstate();
 	} else if (source.getText().equals("META-DUMPSTATE")) {
 		System.out.print("dump state (reentrant?)\n");
                 C64Screen.out.printstats();
