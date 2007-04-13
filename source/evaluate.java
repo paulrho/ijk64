@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: evaluate.java,v 1.23 2006/02/19 22:27:29 pgs Exp pgs $
+// $Id: evaluate.java,v 1.25 2007/04/11 17:57:58 pgs Exp pgs $
 //
 // $Log: evaluate.java,v $
+// Revision 1.25  2007/04/11 17:57:58  pgs
+// clearing verbose stack display (to the same as comment in code)
+//
 // Revision 1.23  2006/02/19 22:27:29  pgs
 // Add atn() as a the function atan.
 // Add the string trying to interpret to the syntax error 001 & 002 lines
@@ -208,7 +211,7 @@ class evaluate {
       if (stktype[levelx]==ST_STRING) {
         System.out.printf(" %-13s |", stkstring[levelx]);
       } else {
-        if (levelx==upto || haveop.equals("(") || haveop.equals("-ve")) {
+        if (levelx==upto || haveop.equals("(") || haveop.equals("===") || haveop.equals("-ve") || levelx==upto-1 && doing==D_ASSIGN) {
           System.out.printf(" %-13s |", "");
         } else {
           System.out.printf(" %-13f |", stknum[levelx]);
@@ -218,8 +221,13 @@ class evaluate {
           //(levelx!=upto-1 || doing!=D_OP)?stkop[levelx]:"N/A");
       System.out.printf(" %-28s |\n", 
         (stkfunc[levelx]!=null && !stkfunc[levelx].equals("")
-          && ((haveop.equals("(") || (levelx==upto) && is_function))
-        )?stkfunc[levelx]+((is_function && levelx==upto)?" (preset:is_function)":""):"");
+          && ((haveop.equals("(") || haveop.equals("===") 
+               || levelx==upto && is_function || levelx==upto-1 && doing==D_ASSIGN))
+        )?stkfunc[levelx]+
+             ((is_function && levelx==upto)?" (preset:is_function)":
+              (doing==D_ASSIGN)?" (assignment)":""
+             )
+          :"");
 
         // (stkfunc[levelx]!=null && !stkfunc[levelx].equals("")
           // && (haveop.equals("")||haveop.equals("("))
@@ -234,7 +242,7 @@ class evaluate {
     }
     System.out.printf("%s              +---------------+-----+------------------------------+\n",printprefix);
     System.out.printf("%s   %s  doing=%s\n",printprefix,
-      (doing==D_OP)?"                 ":"",(doing==D_OP)?"D_OP^":"D_NUM^");
+      (doing==D_OP)?"                 ":"",(doing==D_OP)?"D_OP^":((doing==D_NUM)?"D_NUM^":"D_ASSIGN"));
     System.out.printf("%s\n",printprefix);
   }
 
@@ -324,6 +332,7 @@ class evaluate {
           if (verbose) { System.out.printf("Returned from evaluate\n"); }
           if (verbose) { show_state(); }
         } else {
+          // this is just a made up value as we dont have a machine
           answer=100.0; // evaulate it (recurse)
         }
       } else 
@@ -1326,12 +1335,16 @@ void ProcessAssignment() {
           if (parameters==0) {
             // simple setting
             if (using_machine!=null) {
-              if (verbose) { System.out.printf("Wanting to set %s = ",stkfunc[stackp]); }
+              if (verbose) { 
+                System.out.printf("Wanting to set %s = %s\n",stkfunc[stackp],
+                  ReadValue(stackp,currentvalue).print()
+                );
+              }
               using_machine.setvariable(stkfunc[stackp].toLowerCase(),ReadValue(stackp,currentvalue++));
               //using_machine.setvariable(stkfunc[stackp].toLowerCase(),ReadValue(stktype[stackp+1],currentvalue++));
             } else {
               if (verbose) {
-                System.out.printf("stackp=%d Would have set %s to ",stackp,stkfunc[stackp].toLowerCase(),ReadValue(stackp,currentvalue++));
+                System.out.printf("stackp=%d Would have set %s to %s\n",stackp,stkfunc[stackp].toLowerCase(),ReadValue(stackp,currentvalue++).print());
               }
             }
           } else { 

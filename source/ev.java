@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: ev.java,v 1.12 2007/04/11 17:57:58 pgs Exp pgs $
+// $Id: ev.java,v 1.13 2007/04/11 20:12:33 pgs Exp pgs $
 //
 // $Log: ev.java,v $
+// Revision 1.13  2007/04/11 20:12:33  pgs
+// Added the option of running a Machine attached (stored variables etc)
+//
 // Revision 1.12  2007/04/11 17:57:58  pgs
 // clearing verbose stack display (to the same as comment in code)
 //
@@ -71,24 +74,27 @@ class ev {
     boolean is_assignment=false;
     int iterations=1;
 
+    // switch or negative number???
     for (int i=0; i<args.length; ++i) {
-      if (args[i].substring(0,1).equals("-")) {
-        if (false) { System.out.printf("Got a switch\n"); }
-
+      if (args[i].length()>=2 && args[i].substring(0,1).equals("-")) {
         if (args[i].substring(0,2).equals("-v")) {
           evaluate_engine.verbose=true;
         } else if (args[i].substring(0,2).equals("-q")) {
           evaluate_engine.verbose=false;
         } else if (args[i].substring(0,2).equals("-a")) {
           is_assignment=true;
+        } else if (args[i].substring(0,2).equals("-e")) {
+          is_assignment=false;
         } else if (args[i].length()>=3 && args[i].substring(0,3).equals("-tt")) {
           iterations=1000;
         } else if (args[i].substring(0,2).equals("-t")) {
           iterations=100;
         } else if (args[i].substring(0,2).equals("-h")) {
-          System.out.printf("evaluate test harness : ev : version $Id: ev.java,v 1.12 2007/04/11 17:57:58 pgs Exp pgs $\n");
+          System.out.printf("evaluate test harness : ev : version $Id: ev.java,v 1.13 2007/04/11 20:12:33 pgs Exp pgs $\n");
           System.out.printf("  -a : assignment\n");
+          System.out.printf("  -e : evaluate only - no assignment (default)\n");
           System.out.printf("  -h : help\n");
+          System.out.printf("  -m : machine attached (to store variables) - dont run test with this\n");
           System.out.printf("  -q : quiet\n");
           System.out.printf("  -t : timing tests (100 iterations)\n");
           System.out.printf("  -tt : timing test with 1000 iterations\n");
