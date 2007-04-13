@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.23 2007/03/28 21:23:23 pgs Exp pgs $
+// $Id: C64.java,v 1.25 2007/04/11 17:45:38 pgs Exp $
 //
 // $Log: C64.java,v $
+// Revision 1.25  2007/04/11 17:45:38  pgs
+// snapshot 20070411
+//
 // Revision 1.23  2007/03/28 21:23:23  pgs
 // No READY prompt on empty CR line
 //
@@ -59,7 +62,9 @@ class C64 {
     boolean runImmediate=false;
     boolean exitImmediate=false;
 
-    System.out.println("Running test harness for C64Screen...");
+    //System.out.println("Running test harness for C64Screen...");
+    System.out.println("JEBI/C64 version " + version.programVersion + " Running...\n");
+
     if (false) {
       // standard background
       C64Screen.static_bgtrans=false; // false = normal background
