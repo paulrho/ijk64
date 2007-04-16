@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: evaluate.java,v 1.25 2007/04/11 17:57:58 pgs Exp pgs $
+// $Id: evaluate.java,v 1.26 2007/04/13 08:59:01 pgs Exp $
 //
 // $Log: evaluate.java,v $
+// Revision 1.26  2007/04/13 08:59:01  pgs
+// fix verbose display for assign too
+//
 // Revision 1.25  2007/04/11 17:57:58  pgs
 // clearing verbose stack display (to the same as comment in code)
 //
@@ -264,7 +267,7 @@ class evaluate {
   //
   ////////////////////////////////////////////////////
   // just a bit of shorthard to improve readability
-  void calc_and_pop() {
+  void calc_and_pop() throws EvaluateException {
     if (verbose) { System.out.printf("%sPerforming a calculation on %f %s %f\n",printprefix,stknum[upto-2],stkop[upto-2],stknum[upto-1]); }
     //stknum[upto-2]=calc(stknum[upto-2],stkop[upto-2],stknum[upto-1],stkfunc[upto-2]);
 
@@ -287,7 +290,7 @@ class evaluate {
   //
   ////////////////////////////////////////////////////
   // now does not return - perhaps should be a boolean
-  void calc() {
+  void calc() throws EvaluateException {
 
     double left=stknum[upto-2];
     String oper=stkop[upto-2];
@@ -345,6 +348,7 @@ class evaluate {
         } else {
           System.out.printf("?SYNTAX ERROR 005 - wrong number of parameters - had %d params wanting %d\n",parameters,3);
           answer=0.0;
+          throw new EvaluateException("?SYNTAX ERROR 005 - wrong number of parameters - had "+parameters+" params wanting "+3);
         }
       } else if (function.equals("sgn")) {
         if (right<0.0) { answer=-1.0; }
@@ -455,6 +459,7 @@ class evaluate {
           return;
         } else {
           System.out.printf("?WRONG NUMBER PARAMETERS\n");
+          throw new EvaluateException("WRONG NUMBER PARAMETERS");
         }
       } else if (function.equals("instr")) {
         if (parameters==2) {
@@ -470,6 +475,7 @@ class evaluate {
           return;
         } else {
           System.out.printf("?WRONG NUMBER PARAMETERS\n");
+          throw new EvaluateException("WRONG NUMBER PARAMETERS");
         }
       } else if (function.equals("left$")) {
         if (parameters==2) {
@@ -481,6 +487,7 @@ class evaluate {
           return;
         } else {
           System.out.printf("?WRONG NUMBER PARAMETERS\n");
+          throw new EvaluateException("WRONG NUMBER PARAMETERS");
         }
       } else if (function.equals("right$")) {
         if (parameters==2) {
@@ -492,6 +499,7 @@ class evaluate {
           return;
         } else {
           System.out.printf("?WRONG NUMBER PARAMETERS\n");
+          throw new EvaluateException("WRONG NUMBER PARAMETERS");
         }
       } else {
         // have to assume that it is an array
@@ -585,7 +593,7 @@ class evaluate {
     return rightstr;
   }
 
-  GenericType calc(String leftstr, String oper, String rightstr) {
+  GenericType calc(String leftstr, String oper, String rightstr) throws EvaluateException {
     oper=oper.toLowerCase(); //20060204pgs
     // returns a number
          if (oper.equals(">")) { return new GenericType((leftstr.compareTo(rightstr)>0)?-1.0:0.0); }
@@ -609,10 +617,11 @@ class evaluate {
     //else if (oper.equals("(")) { answer=right; }
     //else if (oper.equals("")) { answer=left; }
     System.out.printf("?ILLEGAL OPERATION : %s %s %s\n",leftstr,oper,rightstr);
-    return new GenericType(); // this is actually an error
+    throw new EvaluateException("?ILLEGAL OPERATION : "+leftstr+" "+oper+" "+rightstr);
+    //return new GenericType(); // this is actually an error
   }
 
-  double calc(double left, String oper, double right) {
+  double calc(double left, String oper, double right) throws EvaluateException {
     oper=oper.toLowerCase(); //20060204pgs
     double answer=0.0;
     // old boolean like way, lets do a c64 bit like way now
@@ -642,6 +651,7 @@ class evaluate {
       System.out.printf("?SYNTAX ERROR 003o\n***Unsupported oper \"%s\"\n",oper);
       //answer=NaN;
       answer=0.0;
+      throw new EvaluateException("?SYNTAX ERROR 003o ***Unsupported oper \""+oper+"\"");
     }
     if (verbose) { System.out.printf("%sCalculating %f %s %f, Answer = %f\n",printprefix,left,oper,right,answer); }
     if (verbose) { show_state(); }
@@ -699,11 +709,13 @@ class evaluate {
     doing=D_NUM; // if you are going to push an op, it is ( and therefore next is num
   }
 
-  void setOp(String op) {
+  void setOp(String op) throws EvaluateException {
     if (verbose) { System.out.printf("%sGot %s oper\n",printprefix,op); }
     if (upto==0) {
       System.out.printf("?STACK ERROR  ** tried to set current operator stack when empty\n");
-      return; // cant do this
+      // would this ever happen?
+      throw new EvaluateException("?STACK ERROR  ** tried to set current operator stack when empty");
+      //return; // cant do this
     }
     // now come the tricks, as soon as this op has a lower or equal precedence,
     // pop and calc the two above!
@@ -739,7 +751,7 @@ class evaluate {
     return value;
   }
 
-  boolean readStringOpAlpha() {
+  boolean readStringOpAlpha() throws EvaluateException {
           String building=a;
           while (ispnt<intstring.length()-1) {
             a=intstring.substring(ispnt+1,ispnt+2);
@@ -758,11 +770,14 @@ class evaluate {
             setOp(building);
             return true;
           } else {
-            if (!partialmatching) { System.out.printf("?SYNTAX ERROR *** not a valid operator %s\n",building); }
+            if (!partialmatching) { 
+              System.out.printf("?SYNTAX ERROR *** not a valid operator %s\n",building);
+              throw new EvaluateException("?SYNTAX ERROR *** not a valid operator "+building);
+            }
             return false;
           }
   }
-  boolean readStringOp() {
+  boolean readStringOp() throws EvaluateException {
           String building=a;
           while (ispnt<intstring.length()-1) {
             a=intstring.substring(ispnt+1,ispnt+2);
@@ -785,7 +800,10 @@ class evaluate {
             setOp(building);
             return true;
           } else {
-            if (!partialmatching) { System.out.printf("?SYNTAX ERROR *** not a valid operator %s\n",building); }
+            if (!partialmatching) { 
+              System.out.printf("?SYNTAX ERROR *** not a valid operator %s\n",building); 
+              throw new EvaluateException("?SYNTAX ERROR *** not a valid operator "+building);
+            }
             return false;
           }
   }
@@ -927,22 +945,22 @@ class evaluate {
           doing=D_OP;  // moved this to here // !is_function
   }
 
-  GenericType interpret_string_partial(String intstring_param) {
+  GenericType interpret_string_partial(String intstring_param) throws EvaluateException {
     partialmatching=true;
     return interpret_string(intstring_param, false, 0.0, false);
   }
 
-  GenericType interpret_string_with_assignment(String intstring_param) {
+  GenericType interpret_string_with_assignment(String intstring_param) throws EvaluateException {
     partialmatching=false;
     return interpret_string(intstring_param, false, 0.0, true);
   }
 
-  GenericType interpret_string(String intstring_param) {
+  GenericType interpret_string(String intstring_param) throws EvaluateException {
     partialmatching=false;
     return interpret_string(intstring_param, false, 0.0, false);
   }
 
-  GenericType interpret_string(String intstring_param, double expecting) {
+  GenericType interpret_string(String intstring_param, double expecting) throws EvaluateException {
     partialmatching=true; //for now???
     return interpret_string(intstring_param, true, expecting, false);
   }
@@ -952,7 +970,9 @@ class evaluate {
   // it also means that the FIRST variable be it array or singleton should NOT be evaluated!
   // note, we could have A(X+5,Y-B=3)=5
   boolean g_is_assignment;
-  GenericType interpret_string(String intstring_param, boolean testing, double expecting, boolean is_assignment) {
+  GenericType interpret_string(String intstring_param, boolean testing, double expecting, boolean is_assignment) 
+    throws EvaluateException
+  {
 
     is_defining_function=false;
     parse_restart=(-1); // means no restart required // really could be zero too!
@@ -966,6 +986,7 @@ class evaluate {
     // try without // intstring=intstring.toLowerCase(); // opposite of statement.java!
     if (verbose) { System.out.printf("%s>>Interpreting %s\n",printprefix,intstring); }
 
+  try {
     /* take it a character at a time */
     for (ispnt=0; ispnt<intstring.length() ;++ispnt) {
       if (verbose) { 
@@ -1007,6 +1028,7 @@ class evaluate {
           if (!partialmatching) {
             System.out.printf("?SYNTAX ERROR 001\n***Not correct syntax interpreting:%s\n",intstring);
             // new - stop parsing the expression
+            throw new EvaluateException("?SYNTAX ERROR 001 ***Not correct syntax interpreting: "+intstring);
           }
           if (verbose) { System.out.printf("Parsed up to %d at char %s\n",ispnt,a); }
           parse_restart=ispnt; // because we are currently on the next invalid char
@@ -1068,6 +1090,7 @@ class evaluate {
             // new - stop parsing the expression
             if (!partialmatching) {
               System.out.printf("?SYNTAX ERROR 010\n***Not correct syntax\n");
+              throw new EvaluateException("?SYNTAX ERROR 010 *** Not correct syntax");
             }
             if (verbose) { System.out.printf("Parsed up to %d at char %s\n",save_ispnt,a); }
             parse_restart=save_ispnt; // rewinding back to the save point
@@ -1079,6 +1102,7 @@ class evaluate {
             // new - stop parsing the expression
             if (!partialmatching) {
               System.out.printf("?SYNTAX ERROR 011\n***Not correct syntax\n");
+              throw new EvaluateException("?SYNTAX ERROR 011 *** Not correct syntax");
             }
             if (verbose) { System.out.printf("Parsed up to %d at char %s\n",save_ispnt,a); }
             parse_restart=save_ispnt; // rewinding back to the save point
@@ -1087,6 +1111,7 @@ class evaluate {
         } else {
           if (!partialmatching) {
             System.out.printf("?SYNTAX ERROR 002\n***Not correct syntax interpreting:%s\n",intstring);
+            throw new EvaluateException("?SYNTAX ERROR 002 *** Not correct syntax");
           }
           // new - stop parsing the expression
           if (verbose) { System.out.printf("Parsed up to %d at char %s\n",ispnt,a); }
@@ -1112,6 +1137,7 @@ class evaluate {
               }
             } else {
               System.out.printf("?SYNTAX ERROR in defined function - stack has incorrect number of params\n");
+              throw new EvaluateException("?SYNTAX ERROR in defined function - stack has incorrect number of params");
             }
             return new GenericType();
           }
@@ -1122,6 +1148,7 @@ class evaluate {
         } else {
           // we have a problem
           System.out.printf("?ASSIGNMENT ERROR\n");
+          throw new EvaluateException("ASSIGNMENT ERROR");
         }
         if (verbose) { show_state(); }
       }
@@ -1157,6 +1184,14 @@ class evaluate {
       if (really_has_assignment) { ProcessAssignment(); }
     }
 
+  } catch (EvaluateException evalerror) {
+     System.out.printf("Caught Evaluate Error: %s\n",evalerror.getMessage());
+     // should do more from below
+     // show throw an error up to what called it
+     //throw new EvaluateException(evalerror.getMessage());
+     throw new EvaluateException(evalerror.getMessage());
+     //return null;
+  }
 
     if (upto==0) {
       // return empty string
@@ -1291,7 +1326,7 @@ GenericType ReadValue(int stypeindex, int index) {
   }
 }
 
-void ProcessAssignment() { 
+void ProcessAssignment() throws EvaluateException { 
       // try and see if it can be made to go faster for the singleton case
       //verbose=true;
       reads_from_datastream=false;
@@ -1317,7 +1352,7 @@ void ProcessAssignment() {
       }
       if (firstvalue==upto) { 
          if (verbose) { System.out.printf("?ASSIGNMENTFINALERROR - cant find the last assignment\n"); }
-         return; 
+         throw new EvaluateException("ASSIGNMENT FINAL ERROR");
       }
 
       if (verbose) { 
@@ -1370,6 +1405,14 @@ void ProcessAssignment() {
     }
 
 }
+  class EvaluateException extends Exception {
+    EvaluateException() {
+    }
+    EvaluateException(String msg) {
+        super(msg);
+    }
+  }
+
 /////////
 // END //
 /////////

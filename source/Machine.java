@@ -1,8 +1,13 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Machine.java,v 1.26 2007/04/11 17:45:38 pgs Exp $
+// $Id: Machine.java,v 1.27 2007/04/13 09:32:43 pgs Exp pgs $
 //
 // $Log: Machine.java,v $
+// Revision 1.27  2007/04/13 09:32:43  pgs
+// programText now in Machine - and used this way from C64
+// in preparation for C64 online editting of program
+// Added ability to enter line numbers and change program
+//
 // Revision 1.26  2007/04/11 17:45:38  pgs
 // snapshot 20070411
 //
@@ -32,6 +37,7 @@
 
 // for reading a file
 import java.io.*;
+//import java.lang.Throwable;
 
 class Machine {
   //
@@ -145,7 +151,7 @@ class Machine {
     topforloopstack++;
   }
 
-  boolean processNEXT(int current, String var) {
+  boolean processNEXT(int current, String var) throws BasicException {
     if (verbose) { System.out.printf("processing NEXT %s at current=%d\n",var,current); }
     // could be multiple steps?, no, this should be dealt with by the statements parser
     int fl=topforloopstack;
@@ -185,14 +191,29 @@ class Machine {
   }
 
   // from within here we execute the evaluate?
-  GenericType evaluate(String expression) {
-    return evaluate_engine.interpret_string(expression);
+  GenericType evaluate(String expression) throws BasicException {
+    try {
+      return evaluate_engine.interpret_string(expression);
+    } catch (EvaluateException ee) {
+      throw new BasicException(ee.getMessage());
+    }
   }
-  GenericType evaluate_partial(String expression) {
-    return evaluate_engine.interpret_string_partial(expression);
+  GenericType evaluate_partial(String expression) throws BasicException {
+    try {
+      return evaluate_engine.interpret_string_partial(expression);
+    } catch (EvaluateException ee) {
+      throw new BasicException(ee.getMessage());
+    }
   }
-  void assignment(String expression) {
-    evaluate_engine.interpret_string_with_assignment(expression);
+  void assignment(String expression) throws BasicException {
+    try {
+      if (evaluate_engine.interpret_string_with_assignment(expression)!=null)
+        return;// true;
+      else
+        return;// false;
+    } catch (EvaluateException ee) {
+      throw new BasicException(ee.getMessage());
+    }
   }
 
   void initialise_engines() {
@@ -207,12 +228,12 @@ class Machine {
     machinescreen=C64Screen.out;
   }
 
-  void gotoLine(String lineNostr) {
+  void gotoLine(String lineNostr) throws BasicException {
     int value=Integer.parseInt(lineNostr);
     gotoLine(value);
   }
 
-  void gotoLine(int lineNo) {
+  void gotoLine(int lineNo) throws BasicException {
     // put code in here
     // look up line in cache and set pnt to correct place and return
     for (int i=0; i<toplinecache; ++i) {
@@ -221,28 +242,31 @@ class Machine {
         return;
       }
     }
-    System.out.printf("?LINE NOT FOUND\n");
-    return; // should fail
+    System.out.printf("?LINE %d NOT FOUND\n",lineNo);
+    throw new BasicLineNotFoundError("LINE "+lineNo+" NOT FOUND");
+    //return; // should fail
   }
 
-  void gosubLine(String lineNostr, int pnt) {
+  void gosubLine(String lineNostr, int pnt) throws BasicException {
     int value=Integer.parseInt(lineNostr);
     gosubLine(value,pnt);
   }
 
-  void gosubLine(int lineNo, int pnt) {
+  void gosubLine(int lineNo, int pnt) throws BasicException {
     // push on the stack where we are
     gosubstack[topgosubstack]=pnt;
     topgosubstack++;
     gotoLine(lineNo);
   }
 
-  void popReturn() {
+  void popReturn() throws BasicException {
     if (topgosubstack>0) {
       topgosubstack--;
       executionpoint=gosubstack[topgosubstack];
     } else {
       System.out.printf("?TOO MANY RETURNS\n");
+      // must throw an error here
+      throw new BasicException("TOO MANY RETURNS");
     }
   }
 
@@ -432,6 +456,27 @@ GenericType metareaddatastreamString()
     return content;
   }
 
+  boolean save_a_file(String filename) {
+	FileOutputStream out; // declare a file output object
+	PrintStream p; // declare a print stream object
+	try
+	{
+		// Create a new file output stream
+		// connected to "myfile.txt"
+		out = new FileOutputStream(filename);
+		// Connect print stream to the output stream
+		p = new PrintStream( out );
+		p.print (programText);
+		p.close();
+	}
+	catch (Exception e)
+	{
+		System.err.println ("Error writing to file");
+                return false;
+	}
+    return true;
+  }
+
 
 
   boolean hasControlC()
@@ -471,6 +516,11 @@ GenericType metareaddatastreamString()
     programText=read_a_file(filename);
     return true;
   }
+
+  boolean saveProgram(String filename)
+  {
+    return save_a_file(filename);
+  }
   
   boolean runProgram()
   {
@@ -507,6 +557,11 @@ GenericType metareaddatastreamString()
       int startpos[] = { 0 };
       int endpos[] = { 0 };
       int ret=findLine(lineno,true,startpos);
+      if (line.trim().length() == lineno.length()) {
+        // we are deleting the line, so remove all trace!
+        // issue here if the line begins with leading spaces
+        line="";
+      } else line=line+"\n";
       if (ret==0) {
         // replace it
         if (verbose) { System.out.printf("replace line -startpos=%d\n",startpos[0]); }
@@ -514,21 +569,21 @@ GenericType metareaddatastreamString()
         if (verbose) {System.out.printf("got %d from findLine (2nd time)\n",ret); }
         if (ret<0) { // last line of program
           programText = 
-            programText.substring(0,startpos[0]) + line + "\n";
+            programText.substring(0,startpos[0]) + line;
         } else {
           programText = 
-            programText.substring(0,startpos[0]) + line + "\n" + programText.substring(endpos[0]);
+            programText.substring(0,startpos[0]) + line + programText.substring(endpos[0]);
         }
       } else if (ret==1) {
         // insert it
         if (verbose) { System.out.printf("insert line\n"); }
         programText = 
-          programText.substring(0,startpos[0]) + line + "\n" + programText.substring(startpos[0]);
+          programText.substring(0,startpos[0]) + line + programText.substring(startpos[0]);
       } else {
         // add it
         if (verbose) { System.out.printf("add line\n"); }
         programText = 
-          programText + line + "\n";
+          programText + line;
       }
       return true;
     } else
@@ -636,8 +691,29 @@ GenericType metareaddatastreamString()
     return -1;
   }
 
+void newProgramText()
+{
+  programText=""; // NEW program
+};
 
 } // end of class Machine
+
+
+class BasicException extends Exception {
+    BasicException() {
+    }
+    BasicException(String msg) {
+        super(msg);
+    }
+}
+
+class BasicLineNotFoundError extends BasicException {
+    BasicLineNotFoundError() {
+    }
+    BasicLineNotFoundError(String msg) {
+        super(msg);
+    }
+}
 
   /////////////////
  // end Machine //

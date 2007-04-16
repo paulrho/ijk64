@@ -75,6 +75,14 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         submenu.add(menuItem);
 
         icon = createImageIcon("images/fileopen.png");
+        menuItem = new JMenuItem("Open...",icon);
+        submenu.setMnemonic(KeyEvent.VK_O);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_O, ActionEvent.CTRL_MASK));
+        menuItem.addActionListener(this);
+        submenu.add(menuItem);
+
+        icon = createImageIcon("images/fileopen.png");
         menuItem = new JMenuItem("Open (and run)...",icon);
         submenu.setMnemonic(KeyEvent.VK_O);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(
@@ -85,7 +93,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         submenu.addSeparator();
         icon = createImageIcon("images/filesave.png");
         menuItem = new JMenuItem("Save",icon);
-	menuItem.setEnabled(false);
+	//menuItem.setEnabled(false);
         submenu.setMnemonic(KeyEvent.VK_S);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_S, ActionEvent.CTRL_MASK));
@@ -436,6 +444,25 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 	  command="run";
           addkey((char)10);
 
+	} else if (source.getText().equals("Save")) {
+		System.out.print("Saving file...\n");
+                //openFile();
+	        arg="mysave.basic"; // hard coded for now
+                forcedcompletion=true;
+		command="save";
+                addkey((char)10);
+	} else if (source.getText().equals("Open...")) {
+		System.out.print("Opening file...\n");
+                //Create a file chooser
+               // final JFileChooser fc = new JFileChooser();
+                //In response to a button click:
+                //JFrame jf=new JFrame("Open File");
+                //int returnVal = fc.showOpenDialog(jf);
+                openFile();
+	        arg=fFile.getAbsolutePath().toLowerCase();
+                forcedcompletion=true;
+		command="fileopen";
+                addkey((char)10);
 	} else if (source.getText().equals("Open (and run)...")) {
 		System.out.print("Opening file...\n");
                 //Create a file chooser
@@ -451,7 +478,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 		  arg=fFile.getAbsolutePath().toLowerCase();
                   //addString("poprun");
                   forcedcompletion=true;
-		  command="fileopen";
+		  command="fileopenrun";
                   addkey((char)10);
 		}
 	} else if (source.getText().equals("Dumpstate now")) {

@@ -1,8 +1,13 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.25 2007/04/11 17:45:38 pgs Exp $
+// $Id: C64.java,v 1.27 2007/04/13 09:32:43 pgs Exp pgs $
 //
 // $Log: C64.java,v $
+// Revision 1.27  2007/04/13 09:32:43  pgs
+// programText now in Machine - and used this way from C64
+// in preparation for C64 online editting of program
+// Added ability to enter line numbers and change program
+//
 // Revision 1.25  2007/04/11 17:45:38  pgs
 // snapshot 20070411
 //
@@ -160,7 +165,12 @@ class C64 {
       if (pop.forcedcompletion) {
         pop.forcedcompletion=false;
         // this is true if a special command was called from the popup
-        if (pop.command.equals("fileopen")) {
+        if (pop.command.equals("save")) {
+          machine.saveProgram(pop.arg);
+        } else if (pop.command.equals("fileopen")) {
+          machine.loadProgram(pop.arg);
+          machine.variables_clr();
+        } else if (pop.command.equals("fileopenrun")) {
           // System.out.printf("got fileopen pop command\n");
           String [] str = new String[1];
           str[0]=pop.arg;
