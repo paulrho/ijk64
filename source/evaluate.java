@@ -348,7 +348,7 @@ class evaluate {
         } else {
           System.out.printf("?SYNTAX ERROR 005 - wrong number of parameters - had %d params wanting %d\n",parameters,3);
           answer=0.0;
-          throw new EvaluateException("?SYNTAX ERROR 005 - wrong number of parameters - had "+parameters+" params wanting "+3);
+          throw new EvaluateException("WRONG NUMBER PARAMETERS IN SILLY : "+parameters+" WANTED : "+3);
         }
       } else if (function.equals("sgn")) {
         if (right<0.0) { answer=-1.0; }
@@ -617,7 +617,7 @@ class evaluate {
     //else if (oper.equals("(")) { answer=right; }
     //else if (oper.equals("")) { answer=left; }
     System.out.printf("?ILLEGAL OPERATION : %s %s %s\n",leftstr,oper,rightstr);
-    throw new EvaluateException("?ILLEGAL OPERATION : "+leftstr+" "+oper+" "+rightstr);
+    throw new EvaluateException("ILLEGAL OPERATION : "+leftstr+" "+oper+" "+rightstr);
     //return new GenericType(); // this is actually an error
   }
 
@@ -651,7 +651,7 @@ class evaluate {
       System.out.printf("?SYNTAX ERROR 003o\n***Unsupported oper \"%s\"\n",oper);
       //answer=NaN;
       answer=0.0;
-      throw new EvaluateException("?SYNTAX ERROR 003o ***Unsupported oper \""+oper+"\"");
+      throw new EvaluateException("SYNTAX ERROR : UNSUPPORTED OPERATOR : \""+oper+"\"");
     }
     if (verbose) { System.out.printf("%sCalculating %f %s %f, Answer = %f\n",printprefix,left,oper,right,answer); }
     if (verbose) { show_state(); }
@@ -714,7 +714,7 @@ class evaluate {
     if (upto==0) {
       System.out.printf("?STACK ERROR  ** tried to set current operator stack when empty\n");
       // would this ever happen?
-      throw new EvaluateException("?STACK ERROR  ** tried to set current operator stack when empty");
+      throw new EvaluateException("STACK ERROR");
       //return; // cant do this
     }
     // now come the tricks, as soon as this op has a lower or equal precedence,
@@ -772,7 +772,7 @@ class evaluate {
           } else {
             if (!partialmatching) { 
               System.out.printf("?SYNTAX ERROR *** not a valid operator %s\n",building);
-              throw new EvaluateException("?SYNTAX ERROR *** not a valid operator "+building);
+              throw new EvaluateException("SYNTAX ERROR : NOT A VALID OPERATOR : "+building);
             }
             return false;
           }
@@ -802,7 +802,7 @@ class evaluate {
           } else {
             if (!partialmatching) { 
               System.out.printf("?SYNTAX ERROR *** not a valid operator %s\n",building); 
-              throw new EvaluateException("?SYNTAX ERROR *** not a valid operator "+building);
+              throw new EvaluateException("SYNTAX ERROR : NOT A VALID STRING OPERATOR : "+building);
             }
             return false;
           }
@@ -1028,7 +1028,7 @@ class evaluate {
           if (!partialmatching) {
             System.out.printf("?SYNTAX ERROR 001\n***Not correct syntax interpreting:%s\n",intstring);
             // new - stop parsing the expression
-            throw new EvaluateException("?SYNTAX ERROR 001 ***Not correct syntax interpreting: "+intstring);
+            throw new EvaluateException("SYNTAX ERROR AT "+intstring);
           }
           if (verbose) { System.out.printf("Parsed up to %d at char %s\n",ispnt,a); }
           parse_restart=ispnt; // because we are currently on the next invalid char
@@ -1077,7 +1077,17 @@ class evaluate {
               break;
             }
             calc_and_pop(); //overhead of func passed too
-          }
+
+boolean dontallowextraclosingbrackets=true; // here for now
+            if (dontallowextraclosingbrackets && upto<=1) { // then we are about to exit - but never got a brack
+              // may not deal with the commas properly
+              System.out.printf("?INCORRECT NUMBER OF BRACKETS - could not find openning bracket - extra close\n");
+              throw new EvaluateException("INCORRECT NUMBER OF BRACKETS - EXTRA CLOSE");
+            }
+
+          } // end while
+          // should check that we really finished on an open bracket and didnt have an extra one
+
           // allow also multi charactor operators OR and AND
         } else if (a.equals(OP_COMMA)) {
           // comma separators allowed within brackets, when you hit a comma, calculate everything back to the
@@ -1088,9 +1098,9 @@ class evaluate {
           int save_ispnt=ispnt;
           if (!readStringOpAlpha()) {
             // new - stop parsing the expression
-            if (!partialmatching) {
+            if (!partialmatching) { // this may never get here now because an error is thrown
               System.out.printf("?SYNTAX ERROR 010\n***Not correct syntax\n");
-              throw new EvaluateException("?SYNTAX ERROR 010 *** Not correct syntax");
+              throw new EvaluateException("SYNTAX ERROR 010 *** Not correct syntax");
             }
             if (verbose) { System.out.printf("Parsed up to %d at char %s\n",save_ispnt,a); }
             parse_restart=save_ispnt; // rewinding back to the save point
@@ -1100,9 +1110,9 @@ class evaluate {
           int save_ispnt=ispnt;
           if (!readStringOp()) {
             // new - stop parsing the expression
-            if (!partialmatching) {
+            if (!partialmatching) { // this may never get here now because an error is thrown
               System.out.printf("?SYNTAX ERROR 011\n***Not correct syntax\n");
-              throw new EvaluateException("?SYNTAX ERROR 011 *** Not correct syntax");
+              throw new EvaluateException("SYNTAX ERROR 011 *** Not correct syntax");
             }
             if (verbose) { System.out.printf("Parsed up to %d at char %s\n",save_ispnt,a); }
             parse_restart=save_ispnt; // rewinding back to the save point
@@ -1111,7 +1121,7 @@ class evaluate {
         } else {
           if (!partialmatching) {
             System.out.printf("?SYNTAX ERROR 002\n***Not correct syntax interpreting:%s\n",intstring);
-            throw new EvaluateException("?SYNTAX ERROR 002 *** Not correct syntax");
+            throw new EvaluateException("SYNTAX ERROR : INVALID CHARACTER");
           }
           // new - stop parsing the expression
           if (verbose) { System.out.printf("Parsed up to %d at char %s\n",ispnt,a); }
@@ -1136,8 +1146,9 @@ class evaluate {
                 using_machine.setvariable("fn_"+stkfunc[0].toLowerCase()+"_function",new GenericType(intstring.substring(ispnt+1,intstring.length())));
               }
             } else {
+              // dont know how to trigger this error!
               System.out.printf("?SYNTAX ERROR in defined function - stack has incorrect number of params\n");
-              throw new EvaluateException("?SYNTAX ERROR in defined function - stack has incorrect number of params");
+              throw new EvaluateException("INCORRECT PARAMETERS IN DEFINED FUNCTION");
             }
             return new GenericType();
           }
@@ -1168,6 +1179,11 @@ class evaluate {
       if (stkop[upto-2].equals(OP_COMMA)) {
         break; // go no further that the ","
       }
+boolean dontallowunbalancedopeningbracket=true; // here for now
+      if (dontallowunbalancedopeningbracket && stkop[upto-2].equals(OP_OPEN_BRACKET)) {
+        System.out.printf("?UNBLANANCED BRACKETS - too many open brackets - not closed\n");
+        throw new EvaluateException("UNBLANANCED BRACKETS - NOT CLOSED");
+      }
       calc_and_pop();
     }
     if (g_is_assignment) {
@@ -1186,11 +1202,7 @@ class evaluate {
 
   } catch (EvaluateException evalerror) {
      System.out.printf("Caught Evaluate Error: %s\n",evalerror.getMessage());
-     // should do more from below
-     // show throw an error up to what called it
-     //throw new EvaluateException(evalerror.getMessage());
      throw new EvaluateException(evalerror.getMessage());
-     //return null;
   }
 
     if (upto==0) {

@@ -84,9 +84,7 @@ class C64 {
 
     // instansiate the machine
     machine=new Machine(); // we initialise it once here
-    ///machine.verbose=verbose;
     machine.initialise_engines(); // silly, but there is a reason
-    //machine.verbose=verbose;
 
     // now add the popup
     C64PopupMenu pop=new C64PopupMenu(machine); // good idea???
@@ -98,12 +96,6 @@ class C64 {
         // System.exit(0);
       // }
     // });
-
-
-    if (false) { screen.scale=3; }
-    if (false) { screen.changeCharSet(1); }
-    //if (true) { screen.setRows(50); }
-    //screen.setCols(80);
 
     for (int i=0; i<args.length; ++i) {
       if (args[i].substring(0,1).equals("-")) {
@@ -130,22 +122,10 @@ class C64 {
       }
     }
 
-
-
-    if (false) {
-      screen.println("This is a test");
-      screen.println("Mellow word.");
-      int i;
-      for (i=0; i<1000; ++i) {
-        screen.println("Printing line " +i);
-      }
-    }
-
     screen.startupscreen();
     if (args.length>=1) machine.loadProgram(args[0]); // load it in
     if (runImmediate) {
-      //machine.statements(args); // we now execute the statements upon a machine
-      machine.runProgram(); // we now execute the statements upon a machine // loaded program text
+      machine.runProgram(); // we now execute the statements upon a machine
     }
 
     boolean displayReady=true;
@@ -171,21 +151,10 @@ class C64 {
           machine.loadProgram(pop.arg);
           machine.variables_clr();
         } else if (pop.command.equals("fileopenrun")) {
-          // System.out.printf("got fileopen pop command\n");
-          String [] str = new String[1];
-          str[0]=pop.arg;
-          // and keep it too
-          args=new String[1];  // renew it
-          args[0]=pop.arg; // will this work
-          //machine.statements(str); // we now execute the statements upon a machine
-          machine.loadProgram(str[0]);
+          machine.loadProgram(pop.arg);
           machine.variables_clr();
           machine.runProgram(); // we now execute the statements upon a machine
         } else if (pop.command.equals("run")) {
-          // clear the variables first!
-          // System.out.printf("got run pop command\n");
-          //machine.statements(args); // we now execute the statements upon a machine
-          machine.loadProgram(args[0]);
           machine.variables_clr();
           machine.runProgram(); // we now execute the statements upon a machine
           continue;
@@ -198,32 +167,13 @@ class C64 {
         System.out.printf("Forced completion triggered\n");
         continue;
       }
-      if (result.length()>=4 && (result.substring(0,4)).equals("exit")) break;
-      else if (result.length()>=4 && (result.substring(0,4)).equals("list")) {
-        screen.print(machine.listProgram()); // just prints the program text
-      } else if (result.length()>=3 && (result.substring(0,3)).equals("sys")) {
-        screen.startupscreen();
-        continue;
-      } else if (result.length()>=6 && (result.substring(0,6)).equals("POPRUN")) {
-        // no longer used
-        // String [] str = new String[1];
-        // str[0]=pop.arg;
-        // machine.statements(str); // we now execute the statements upon a machine
-        continue;
+      if (result.length()>=4 && (result.substring(0,4)).equals("exit")) {
+        break;
       } else if (result.length()>=3 && (result.substring(0,3)).equals("run")) {
-        // clear the variables first!
         machine.variables_clr();
-        //machine.statements(args); // we now execute the statements upon a machine
         machine.runProgram(); // we now execute the statements upon a machine
         continue;
-      //} else if ((result.substring(0,4)).equals("LOAD")) {
-        //screen.println("?very sorry - the interpreter is broken");
-        //continue;
-      //} else if ((result.substring(0,5)).equals("PRINT")) {
-        //screen.println("?very sorry - the interpreter is broken");
-        //continue;
       }
-      if (false) System.out.println("Got string = "+result+"\n");
       if (result.length()>=40 && (result.substring(0,40)).equals("                                        ")) continue;
       if (result.equals("")) continue;
       // execute immediate!
@@ -235,7 +185,7 @@ class C64 {
     }
     // actually exit
     System.exit(0);
-  } // end th_C64Screen
+  } // end C64S
 
   public static void main(String args[]) {
     new C64(args);

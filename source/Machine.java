@@ -104,7 +104,21 @@ class Machine {
   GenericType getvariable(String variable, int param, int p1, int p2, int p3) {
     return variables.getvariable(variable,param,p1,p2,p3);
   }
+
+boolean builtinvariables=true;
+
   GenericType getvariable(String variable) {
+    if (builtinvariables) {
+      if (variable.equals("ti$")) {
+        return new GenericType((double)(int)(System.currentTimeMillis()/1000.0));
+      } else if (variable.equals("ti")) {
+        return new GenericType((double)(int)((System.currentTimeMillis()/16.66666666)%1073741824));
+      } else if (variable.equals("st")) {
+        return new GenericType(0.0);
+      } else if (variable.equals("mathpi")) {
+        return new GenericType(Math.PI);
+      }
+    }
     return variables.getvariable(variable);
   }
 
@@ -162,7 +176,8 @@ class Machine {
 
         topforloopstack=0; // new!!!
 
-        return false; 
+        throw new BasicLineNotFoundError("NEXT WITHOUT FOR ERROR");
+        //return false; 
       }
       fl--;
       if (var.equals("") || forloopstack_var[fl].equals(var)) {
@@ -229,7 +244,12 @@ class Machine {
   }
 
   void gotoLine(String lineNostr) throws BasicException {
-    int value=Integer.parseInt(lineNostr);
+    int value;
+    try {
+      value=Integer.parseInt(lineNostr);
+    } catch(Exception e) {
+      throw new BasicException("NOT NUMERIC ERROR");
+    }
     gotoLine(value);
   }
 
@@ -248,7 +268,12 @@ class Machine {
   }
 
   void gosubLine(String lineNostr, int pnt) throws BasicException {
-    int value=Integer.parseInt(lineNostr);
+    int value;
+    try {
+      value=Integer.parseInt(lineNostr);
+    } catch(Exception e) {
+      throw new BasicException("NOT NUMERIC ERROR");
+    }
     gosubLine(value,pnt);
   }
 
@@ -264,9 +289,9 @@ class Machine {
       topgosubstack--;
       executionpoint=gosubstack[topgosubstack];
     } else {
-      System.out.printf("?TOO MANY RETURNS\n");
+      System.out.printf("?RETURN WITHOUT GOSUB\n");
       // must throw an error here
-      throw new BasicException("TOO MANY RETURNS");
+      throw new BasicException("RETURN WITHOUT GOSUB");
     }
   }
 
@@ -280,11 +305,30 @@ class Machine {
   }
 
   void cacheLine(String lineNostr, int pnt) {
-    int value=Integer.parseInt(lineNostr);
+    int value=Integer.parseInt(lineNostr); // this could fail?
     if (verbose) { System.out.printf("Caching line %d pointer at %d\n",value,pnt); }
     linecacheline[toplinecache]=value;
     linecachepnt[toplinecache]=pnt;
     toplinecache++;
+  }
+
+  void setCurrentLine(int pointinprogram) {
+    //executionpoint=pnt; ??
+    currentLineNo = getCurrentLine(pointinprogram);
+  }
+
+  String getCurrentLine(int pointinprogram) {
+    // finds which line we are at by looking at the cache and comparing to the executionpoint
+    // we assume we are on the first line (start from index 1)
+    if (verbose) System.out.printf("At execution point %d\n",executionpoint);
+    if (verbose) System.out.printf("At pointinprogram point %d\n",pointinprogram);
+    for (int i=toplinecache-1; i>=0; --i) {
+      if (pointinprogram>=linecachepnt[i]) {
+        // assuming that the lines are cache in order, then we are here!
+        return ""+linecacheline[i];
+      }
+    }
+    return ""; // just return negative otherwise
   }
 
   void dumpstate() {
@@ -378,7 +422,24 @@ GenericType metareaddatastreamString()
       return 0;
   }
 
-  void performPOKE(GenericType gt) {
+  void performSYS(GenericType gt) throws BasicException {
+    // here we should have a list of variables
+    int memloc;
+    if (gt.gttop==1) {
+      memloc=(int)gt.num();
+      if (verbose) { System.out.printf("Sysing to memory location %d\n",memloc); }
+      performSYS(memloc);
+    } else {
+      System.out.printf("Wrong number of parameters\n");
+      throw new BasicException("WRONG NUMBER OF PARAMETERS");
+    }
+  }
+
+  void performSYS(int memloc) {
+    return;
+  }
+
+  void performPOKE(GenericType gt) throws BasicException {
     // here we should have a list of variables
     int memloc;
     int memval;
@@ -389,6 +450,7 @@ GenericType metareaddatastreamString()
       performPOKE(memloc, memval);
     } else {
       System.out.printf("Wrong number of parameters\n");
+      throw new BasicException("WRONG NUMBER OF PARAMETERS");
     }
   }
 
@@ -409,6 +471,14 @@ GenericType metareaddatastreamString()
         machinescreen.borderColour = machinescreen.fullcolour[memval];
         machinescreen.reshapeScreen(); // just to see - this is a dodgy work around!!! when changing background or border colours, mu
       }
+    } else if (memloc>=1024 && memloc<1024+1000) {
+      int x=(memloc-1024)%40;
+      int y=(memloc-1024)/40;
+      machinescreen.setChar(x,y,(char)memval);
+    } else if (memloc>=55296 && memloc<55296+1000) {
+      int x=(memloc-55296)%40;
+      int y=(memloc-55296)/40;
+      machinescreen.setCharColour(x,y,(char)memval);
     }
   }
 //////////////////////////////////
@@ -440,7 +510,7 @@ GenericType metareaddatastreamString()
 /** was (still is really) in statement, it doesnt belong there - the machine
     reads the file 
 **/
-  static String read_a_file(String filename) {
+  static String read_a_file(String filename) throws BasicException {
 
     String content="";
 
@@ -451,7 +521,10 @@ GenericType metareaddatastreamString()
       fis.read(b);
       content = new String(b);
       //System.out.println(content);
-    } catch (Exception e) { }
+    } catch (Exception e) { 
+      throw new BasicException("FILE NOT FOUND");
+      // return null; 
+    }
 
     return content;
   }
@@ -513,7 +586,13 @@ GenericType metareaddatastreamString()
   
   boolean loadProgram(String filename)
   {
-    programText=read_a_file(filename);
+    try {
+      programText=read_a_file(filename);
+    } catch (BasicException basicerror) {
+       System.out.printf("Basic Error: %s\n",basicerror.getMessage());
+       print("\n?"+basicerror.getMessage().toLowerCase()); // took off "[CR]"
+       return false;
+    }
     return true;
   }
 

@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: ev.java,v 1.13 2007/04/11 20:12:33 pgs Exp pgs $
+// $Id: ev.java,v 1.14 2007/04/13 08:59:01 pgs Exp $
 //
 // $Log: ev.java,v $
+// Revision 1.14  2007/04/13 08:59:01  pgs
+// fix verbose display for assign too
+//
 // Revision 1.13  2007/04/11 20:12:33  pgs
 // Added the option of running a Machine attached (stored variables etc)
 //
@@ -50,7 +53,7 @@
 
 class ev {
 
-  ev(String[] args)
+  ev(String[] args) throws EvaluateException
   {
     evaluate evaluate_engine;
     boolean use_machine=false;
@@ -90,7 +93,7 @@ class ev {
         } else if (args[i].substring(0,2).equals("-t")) {
           iterations=100;
         } else if (args[i].substring(0,2).equals("-h")) {
-          System.out.printf("evaluate test harness : ev : version $Id: ev.java,v 1.13 2007/04/11 20:12:33 pgs Exp pgs $\n");
+          System.out.printf("evaluate test harness : ev : version $Id: ev.java,v 1.14 2007/04/13 08:59:01 pgs Exp $\n");
           System.out.printf("  -a : assignment\n");
           System.out.printf("  -e : evaluate only - no assignment (default)\n");
           System.out.printf("  -h : help\n");
@@ -127,9 +130,14 @@ class ev {
     evaluate_engine.interpret_string("1and0",0.0);
     evaluate_engine.interpret_string("1or0",1.0);
 
-    // errors on purpose
-    evaluate_engine.interpret_string("1+2)*3+1",10.0); //syntax wrong, but calculator wise definable
-    evaluate_engine.interpret_string("1+2*(3+1",9.0); //syntax wrong, but calculator wise definable
+    if (false) { // these now fail on purpose
+      // errors on purpose
+      evaluate_engine.interpret_string("1+2)*3+1",10.0); //syntax wrong, but calculator wise definable
+      evaluate_engine.interpret_string("1+2*(3+1",9.0); //syntax wrong, but calculator wise definable
+    } else {
+      evaluate_engine.interpret_string("(1+2)*3+1",10.0); //syntax corrected
+      evaluate_engine.interpret_string("1+2*(3+1)",9.0); //syntax corrected
+    }
 
     // should work
     //interpret_string("exp(10)",0.0);
@@ -215,7 +223,7 @@ class ev {
     }
   } // end func
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws EvaluateException {
     if (false) { System.out.printf("Mello Word\n"); }
     new ev(args);
   }
