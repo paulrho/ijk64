@@ -1,8 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.29 2007/04/16 21:31:00 pgs Exp pgs $
+// $Id: C64.java,v 1.30 2007/04/17 09:22:33 pgs Exp pgs $
 //
 // $Log: C64.java,v $
+// Revision 1.30  2007/04/17 09:22:33  pgs
+// Adding ability to restart with CONT
+// moved all statments into statements/Machine engine
+//
 // Revision 1.29  2007/04/16 21:31:00  pgs
 // Complete exception creation, ratify error messages, refactor code
 // to use exceptions (makes code clearer)
@@ -176,7 +180,8 @@ class C64 {
       if (machine.insertLine(result.trim())) {
         displayReady=false;
       } else {
-        machine.statements(result.trim()); // and again, upon a machine
+        //machine.statements(result.trim()); // and again, upon a machine
+        machine.runImmediate(result.trim()); // and again, upon a machine
        }
     } // end while
 

@@ -1,8 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Machine.java,v 1.29 2007/04/16 21:31:00 pgs Exp pgs $
+// $Id: Machine.java,v 1.30 2007/04/17 09:22:33 pgs Exp pgs $
 //
 // $Log: Machine.java,v $
+// Revision 1.30  2007/04/17 09:22:33  pgs
+// Adding ability to restart with CONT
+// moved all statments into statements/Machine engine
+//
 // Revision 1.29  2007/04/16 21:31:00  pgs
 // Complete exception creation, ratify error messages, refactor code
 // to use exceptions (makes code clearer)
@@ -623,6 +627,13 @@ GenericType metareaddatastreamString()
   {
     new statements(programText, this); // passing along the machine too
     program_saved_executionpoint=save_executionpoint; // only done on running a program
+    return true;
+  }
+
+  boolean runImmediate(String arg)
+  {
+    // by giving 0, it will not clear the Machine state
+    new statements(arg, this, 0); // tell the statements class who I am
     return true;
   }
 
