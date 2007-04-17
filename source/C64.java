@@ -1,8 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.27 2007/04/13 09:32:43 pgs Exp pgs $
+// $Id: C64.java,v 1.29 2007/04/16 21:31:00 pgs Exp pgs $
 //
 // $Log: C64.java,v $
+// Revision 1.29  2007/04/16 21:31:00  pgs
+// Complete exception creation, ratify error messages, refactor code
+// to use exceptions (makes code clearer)
+//
 // Revision 1.27  2007/04/13 09:32:43  pgs
 // programText now in Machine - and used this way from C64
 // in preparation for C64 online editting of program
@@ -67,67 +71,63 @@ class C64 {
     boolean runImmediate=false;
     boolean exitImmediate=false;
 
+    // transparent background
+    // C64Screen.static_bgtrans=true; // true = picture background
+    // C64Screen.static_handles=false; // false = has NO frame around it
+
+    // standard background
+    C64Screen.static_bgtrans=false; // default normal background
+    C64Screen.static_handles=true;  // default frames
+
     //System.out.println("Running test harness for C64Screen...");
     System.out.println("JEBI/C64 version " + version.programVersion + " Running...\n");
 
-    if (false) {
-      // standard background
-      C64Screen.static_bgtrans=false; // false = normal background
-      C64Screen.static_handles=true; // true = has a frame around it
-    } else {
-      // transparent background
-      C64Screen.static_bgtrans=true; // true = picture background
-      C64Screen.static_handles=false; // false = has NO frame around it
-    }
-    screen=new C64Screen("C64");
-
-
-    // instansiate the machine
-    machine=new Machine(); // we initialise it once here
-    machine.initialise_engines(); // silly, but there is a reason
-
-    // now add the popup
-    C64PopupMenu pop=new C64PopupMenu(machine); // good idea???
-    // keep a reference to it for returning things
-
-    // when you close the window - stop the program
-    // addWindowListener(new WindowAdapter() {
-      // public void windowClosing(WindowEvent we) {
-        // System.exit(0);
-      // }
-    // });
+    boolean blankscreen=true;
+    String filename="";
 
     for (int i=0; i<args.length; ++i) {
-      if (args[i].substring(0,1).equals("-")) {
-        if (false) { System.out.printf("Got a switch\n"); }
-
+      if (args[i].length()>=2 && args[i].substring(0,1).equals("-")) {
         if (args[i].substring(0,2).equals("-v")) {
-          //evaluate_engine.verbose=true;
           //System.out.println("version : " +
             //C64.class.getPackage().getImplementationVersion() );
           System.out.printf("Version = %s\n", version.programVersion);
-        } else if (args[i].substring(0,2).equals("-q")) {
-          //evaluate_engine.verbose=false;
         } else if (args[i].substring(0,2).equals("-r")) {
           runImmediate=true;
+        } else if (args[i].substring(0,2).equals("-h")) {
+          System.out.printf("program [options] [filename]\n");
+          System.out.printf("  -h : help\n");
+          System.out.printf("  -n : no frame\n");
+          System.out.printf("  -b : blank screen - no banner\n");
+          System.out.printf("  -r : run immediately\n");
+          System.out.printf("  -t : transparent background\n");
+          System.out.printf("  -x : exit immediately\n");
+        } else if (args[i].substring(0,2).equals("-b")) {
+          blankscreen=true;
+        } else if (args[i].substring(0,2).equals("-n")) {
+          C64Screen.static_handles=false;
+        } else if (args[i].substring(0,2).equals("-t")) {
+          C64Screen.static_bgtrans=true;
         } else if (args[i].substring(0,2).equals("-x")) {
           exitImmediate=true;
-        } else if (args[i].substring(0,2).equals("-t")) {
-          //do_many=true; // timing test
         }
       } else {
-        // parameter // do it immediately
-        //has_parameter=true;
-        //filename=args[i];
+        if (args[i].length()>=1 && !args[i].substring(0,1).equals("-")) {
+          if (filename.equals("")) filename=args[i];
+        }
       }
     }
 
-    screen.startupscreen();
-    if (args.length>=1) machine.loadProgram(args[0]); // load it in
+    screen=new C64Screen("C64");
+    machine=new Machine();
+    C64PopupMenu pop=new C64PopupMenu(machine); // keep a reference to it for returning things
+
+    if (!blankscreen) screen.startupscreen(); else screen.startupscreen_blank();
+    if (filename.length()>=1) machine.loadProgram(filename); // load it in
     if (runImmediate) {
       machine.runProgram(); // we now execute the statements upon a machine
     }
 
+    // this has now become the IMMEDIATE interpreter
     boolean displayReady=true;
     while (!exitImmediate) {
       if (displayReady) {
@@ -138,10 +138,7 @@ class C64 {
       do {
         result=screen.screenInput();
         if (pop.forcedcompletion) break;
-      } while (result.equals("")
-               || result.length()>=40 
-                  && (result.substring(0,40)).equals("                                        ")
-               );
+      } while (result.trim().equals(""));
       if (pop.forcedcompletion) {
         pop.forcedcompletion=false;
         // this is true if a special command was called from the popup
@@ -167,25 +164,25 @@ class C64 {
         System.out.printf("Forced completion triggered\n");
         continue;
       }
+
+      // special case command
       if (result.length()>=4 && (result.substring(0,4)).equals("exit")) {
         break;
-      } else if (result.length()>=3 && (result.substring(0,3)).equals("run")) {
-        machine.variables_clr();
-        machine.runProgram(); // we now execute the statements upon a machine
-        continue;
       }
-      if (result.length()>=40 && (result.substring(0,40)).equals("                                        ")) continue;
-      if (result.equals("")) continue;
+
+      if (result.trim().equals("")) continue; // just a blank line
+
       // execute immediate!
       if (machine.insertLine(result.trim())) {
         displayReady=false;
       } else {
         machine.statements(result.trim()); // and again, upon a machine
        }
-    }
+    } // end while
+
     // actually exit
     System.exit(0);
-  } // end C64S
+  } // end C64
 
   public static void main(String args[]) {
     new C64(args);

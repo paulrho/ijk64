@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id$
+// $Id: Variables.java,v 1.8 2006/02/15 01:56:07 pgs Exp $
 //
-// $Log$
+// $Log: Variables.java,v $
+// Revision 1.8  2006/02/15 01:56:07  pgs
+// Standard header
+//
 //
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -227,15 +230,17 @@ class Variables {
       } else if (variabletype[i]==V_STRING) {
         System.out.printf("  variable %s (string) = %s\n",variablename[i],variablestring[i]);
       } else if (variabletype[i]==V_ARRAY_DOUBLE1) {
-        System.out.printf("  variable %s (array of doubles)\n",variablename[i]);
+        System.out.printf("  variable %s (array of doubles) size = %d\n",variablename[i],variablearrayvalue1[i].length);
       } else if (variabletype[i]==V_ARRAY_DOUBLE2) {
-        System.out.printf("  variable %s (array of doubles 2 dimension)\n",variablename[i]);
+        System.out.printf("  variable %s (array of doubles 2 dimension) size = %d,%d\n",variablename[i],variablearrayvalue2[i].length,variablearrayvalue2[i][0].length);
       } else if (variabletype[i]==V_ARRAY_STRING1) {
-        System.out.printf("  variable %s (array of strings)\n",variablename[i]);
+        System.out.printf("  variable %s (array of strings) size = %d\n",variablename[i],
+          variablearraystring1[i].length);
       } else if (variabletype[i]==V_ARRAY_STRING2) {
-        System.out.printf("  variable %s (array of strings 2 dimension)\n",variablename[i]);
+        System.out.printf("  variable %s (array of strings 2 dimension) size = %d,%d\n",variablename[i],
+        variablearraystring2[i][0].length);
       } else {
-        System.out.printf("  unkown type %s\n",variablename[i]);
+        System.out.printf("  unknown type %s\n",variablename[i]);
       }
     }
   }

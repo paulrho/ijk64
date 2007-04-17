@@ -1,8 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Machine.java,v 1.27 2007/04/13 09:32:43 pgs Exp pgs $
+// $Id: Machine.java,v 1.29 2007/04/16 21:31:00 pgs Exp pgs $
 //
 // $Log: Machine.java,v $
+// Revision 1.29  2007/04/16 21:31:00  pgs
+// Complete exception creation, ratify error messages, refactor code
+// to use exceptions (makes code clearer)
+//
 // Revision 1.27  2007/04/13 09:32:43  pgs
 // programText now in Machine - and used this way from C64
 // in preparation for C64 online editting of program
@@ -65,6 +69,8 @@ class Machine {
 
   evaluate evaluate_engine;
   int executionpoint; // ?? where we currently are at
+  int save_executionpoint;
+  int program_saved_executionpoint=(-1);
 
   boolean verbose=false;
   //boolean verbose=true;
@@ -88,6 +94,7 @@ class Machine {
        // if we pass a "Machine" class variable, then we have linked
        // the two together such that we can set and get variables
        // is this a good way? I don't know
+    initialise_engines(); // try this here
   }
 
   // access to variables etc
@@ -556,11 +563,6 @@ GenericType metareaddatastreamString()
   {
     return machinescreen.hasControlC();
   }
-  // statements no longer have any meaning unless we are operating on a machine
-   // now for different instansiation order
-  void statements(String[] args) {
-    new statements(args, this); // tell the statements class who I am
-  }
   
   void statements(String arg) {
     new statements(arg, this); // tell the statements class who I am
@@ -572,6 +574,7 @@ GenericType metareaddatastreamString()
     variables=new Variables();
     variables.verbose=verbosekeep;
     //variables.verbose=verbose;
+    program_saved_executionpoint=(-1); // cant continue any more
   }
 
   String programText="";
@@ -593,6 +596,7 @@ GenericType metareaddatastreamString()
        print("\n?"+basicerror.getMessage().toLowerCase()); // took off "[CR]"
        return false;
     }
+    program_saved_executionpoint=(-1);
     return true;
   }
 
@@ -601,9 +605,24 @@ GenericType metareaddatastreamString()
     return save_a_file(filename);
   }
   
+  boolean contProgram() throws BasicException
+  {
+    if (verbose) {
+      System.out.printf("wanting to continue program : program_saved_executionpoint=%d\n",program_saved_executionpoint);
+    }
+    if (program_saved_executionpoint<0) {
+      throw new BasicException("CANT CONTINUE ERROR");
+    }
+    // not the interpretted immediate line!
+    new statements(programText, this, program_saved_executionpoint); // passing along the machine too
+    program_saved_executionpoint=save_executionpoint; // only done on running a program
+    return true;
+  }
+
   boolean runProgram()
   {
     new statements(programText, this); // passing along the machine too
+    program_saved_executionpoint=save_executionpoint; // only done on running a program
     return true;
   }
 
@@ -622,6 +641,7 @@ GenericType metareaddatastreamString()
     // read in this line number (can we use parts of statement??)
     String lineno=machineReadLineNo(line);
     if (lineno!=null) {
+      program_saved_executionpoint=(-1);
       if (verbose) { System.out.printf("Inserting line number %s\n",lineno); }
     
     // find a line with the same number in the program text
@@ -790,6 +810,30 @@ class BasicLineNotFoundError extends BasicException {
     BasicLineNotFoundError() {
     }
     BasicLineNotFoundError(String msg) {
+        super(msg);
+    }
+}
+
+class BasicBREAK extends BasicException {
+    BasicBREAK() {
+    }
+    BasicBREAK(String msg) {
+        super(msg);
+    }
+}
+
+class BasicRUNrestart extends BasicException {
+    BasicRUNrestart() {
+    }
+    BasicRUNrestart(String msg) {
+        super(msg);
+    }
+}
+
+class BasicCONTrestart extends BasicException {
+    BasicCONTrestart() {
+    }
+    BasicCONTrestart(String msg) {
         super(msg);
     }
 }

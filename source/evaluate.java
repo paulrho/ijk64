@@ -1,8 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: evaluate.java,v 1.26 2007/04/13 08:59:01 pgs Exp $
+// $Id: evaluate.java,v 1.28 2007/04/16 21:31:00 pgs Exp pgs $
 //
 // $Log: evaluate.java,v $
+// Revision 1.28  2007/04/16 21:31:00  pgs
+// Complete exception creation, ratify error messages, refactor code
+// to use exceptions (makes code clearer)
+//
 // Revision 1.26  2007/04/13 08:59:01  pgs
 // fix verbose display for assign too
 //
@@ -746,7 +750,10 @@ class evaluate {
             } else { break; }
             ispnt++;
           }
-          double value=Double.parseDouble(building);
+          double value;
+          if (building.equals(".")) { // allow just a dot for a number (C64 like)
+            value=0.0;
+          } else value=Double.parseDouble(building);
           if (verbose) { System.out.printf("%sGot value %f\n",printprefix,value); }
     return value;
   }
@@ -1031,6 +1038,11 @@ class evaluate {
             throw new EvaluateException("SYNTAX ERROR AT "+intstring);
           }
           if (verbose) { System.out.printf("Parsed up to %d at char %s\n",ispnt,a); }
+          if (ispnt==0) {
+            // I believe we have a special case of a non-evaluatable expression right
+            // from the start - lets error out!
+            throw new EvaluateException("SYNTAX ERROR AT "+intstring);
+          }
           parse_restart=ispnt; // because we are currently on the next invalid char
           break;
         }
@@ -1243,11 +1255,12 @@ boolean dontallowunbalancedopeningbracket=true; // here for now
       } else {
         if (stktype[0]==ST_NUM) {
           if (stknum[0]-expecting>0.00001 || stknum[0]-expecting<-0.00001) {
-            System.out.printf("Evaluated %-20s = \"%s\"",intstring,stkstring[0]);
+            //System.out.printf("Evaluated %-20s = \"%s\"",intstring,stkstring[0]);
+            System.out.printf("%sanswer=%22.20f  expecting=%12f  difference=%12f",printprefix,stknum[0],expecting,stknum[0]-expecting);
             System.out.printf(" !!**BAD**!!\n");
             System.out.printf("   ***************DISCREPENCY***************\n");
           } else {
-            //System.out.printf(" OKAY\n");
+            System.out.printf(" OKAY\n"); // keep this
           }
         } else {
           // add the quotes in too
