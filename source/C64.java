@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.31 2007/04/17 21:46:14 pgs Exp pgs $
+// $Id: C64.java,v 1.32 2007/04/18 09:37:19 pgs Exp pgs $
 //
 // $Log: C64.java,v $
+// Revision 1.32  2007/04/18 09:37:19  pgs
+// More refactoring with regards to creating program/immediate modes
+//
 // Revision 1.31  2007/04/17 21:46:14  pgs
 // Modifications to get CONT to work properly
 //
@@ -89,7 +92,7 @@ class C64 {
     //System.out.println("Running test harness for C64Screen...");
     System.out.println("JEBI/C64 version " + version.programVersion + " Running...\n");
 
-    boolean blankscreen=true;
+    boolean blankscreen=false;
     String filename="";
 
     for (int i=0; i<args.length; ++i) {
