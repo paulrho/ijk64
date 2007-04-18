@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.30 2007/04/17 09:22:33 pgs Exp pgs $
+// $Id: C64.java,v 1.31 2007/04/17 21:46:14 pgs Exp pgs $
 //
 // $Log: C64.java,v $
+// Revision 1.31  2007/04/17 21:46:14  pgs
+// Modifications to get CONT to work properly
+//
 // Revision 1.30  2007/04/17 09:22:33  pgs
 // Adding ability to restart with CONT
 // moved all statments into statements/Machine engine
@@ -180,7 +183,6 @@ class C64 {
       if (machine.insertLine(result.trim())) {
         displayReady=false;
       } else {
-        //machine.statements(result.trim()); // and again, upon a machine
         machine.runImmediate(result.trim()); // and again, upon a machine
        }
     } // end while

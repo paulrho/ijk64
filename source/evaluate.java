@@ -1,8 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: evaluate.java,v 1.28 2007/04/16 21:31:00 pgs Exp pgs $
+// $Id: evaluate.java,v 1.29 2007/04/17 09:22:33 pgs Exp $
 //
 // $Log: evaluate.java,v $
+// Revision 1.29  2007/04/17 09:22:33  pgs
+// Adding ability to restart with CONT
+// moved all statments into statements/Machine engine
+//
 // Revision 1.28  2007/04/16 21:31:00  pgs
 // Complete exception creation, ratify error messages, refactor code
 // to use exceptions (makes code clearer)
@@ -83,6 +87,8 @@
 //   A(I+2)=5124   in this case A(I+2) is evaluated to A(99) only and used to assign 
 //   will allow ,s too
 
+//package au.com.futex.jebi;
+
 import java.util.*; // for Random
 
 class evaluate {
@@ -117,6 +123,7 @@ class evaluate {
   static final int ST_INT=2; // not implemented
   static final int ST_DATASTREAM=5;
   static final int ST_PARAM=10; // the current variables name is in func - there is no actual value
+                                // need to use ST_PARAM and ST_DATASTREAM in debugging output
 
   boolean is_function=false; // flag to indicate that the function name has been pre inserted in the array
   //String functionname="";  // temporarily used until the bracket is confirmed! - no longer required, prestore it!
@@ -150,8 +157,6 @@ class evaluate {
   evaluate(Machine machine)
   {
     using_machine=machine;
-    //evaluate(); // this is repeated 
-    if (false) { System.out.printf("Running evaluate\n"); }
     stknum=new double[100];
     stkop=new String[100];
     stkfunc=new String[100];
@@ -200,10 +205,10 @@ class evaluate {
     * </PRE>
     ****************************************************************************/
   void show_state() {
-    System.out.printf("%s                D_NUM          D_OP\n",printprefix);
-    System.out.printf("%s              +---------------+-----+------------------------------+\n",printprefix);
-    System.out.printf("%s              | num           | op  | func                         |\n",printprefix);
-    System.out.printf("%s              +---------------+-----+------------------------------+\n",printprefix);
+    System.out.printf("%s                D_NUM                 D_OP\n",printprefix);
+    System.out.printf("%s              +---------------+------+-----+------------------------------+\n",printprefix);
+    System.out.printf("%s              | num           | type | op  | func                         |\n",printprefix);
+    System.out.printf("%s              +---------------+------+-----+------------------------------+\n",printprefix);
     //System.out.printf("%s |STATE:  upto=%d doing=%d\n",printprefix,upto,doing);
     // necessarily there it is the case when doing==D_OP that we DON'T know what stkop[upto-1] is - therefore, don't show it!
     for (int levelx=0; levelx<upto+((doing==D_NUM)?1:0); levelx++) {
@@ -214,6 +219,7 @@ class evaluate {
         System.out.printf("           ");
       }
       System.out.printf("%2d|",levelx);
+      // print num column
       String haveop=(levelx<upto-1 || levelx==upto-1 && doing==D_NUM)?stkop[levelx]:""; // it is blank as we are going to write to it
       if (stktype[levelx]==ST_STRING) {
         System.out.printf(" %-13s |", stkstring[levelx]);
@@ -224,6 +230,18 @@ class evaluate {
           System.out.printf(" %-13f |", stknum[levelx]);
         }
       }
+
+      // print type column
+      String havetype="";
+      if (levelx==upto || haveop.equals("(") || haveop.equals("===")) havetype="";
+      else if (stktype[levelx]==ST_NUM) havetype=" num";
+      else if (stktype[levelx]==ST_STRING) havetype="string";
+      else if (stktype[levelx]==ST_PARAM) havetype="param";
+      else if (stktype[levelx]==ST_INT) havetype=" int";
+      else if (stktype[levelx]==ST_DATASTREAM) havetype="datast";
+      System.out.printf("%-6s|",havetype);
+
+      // print op column
       System.out.printf(" %-3s |", haveop);
           //(levelx!=upto-1 || doing!=D_OP)?stkop[levelx]:"N/A");
       System.out.printf(" %-28s |\n", 
@@ -247,9 +265,9 @@ class evaluate {
         //printprefix,levelx,stknum[levelx],(levelx!=upto-1 || doing!=D_OP)?stkop[levelx]:"N/A",(stkfunc[levelx]!=null)?" stkfunc[]=":"",(stkfunc[levelx]!=null)?stkfunc[levelx]:"",
         //stktype[levelx],stktype[levelx]==ST_STRING?stkstring[levelx]:"");
     }
-    System.out.printf("%s              +---------------+-----+------------------------------+\n",printprefix);
+    System.out.printf("%s              +---------------+------+-----+------------------------------+\n",printprefix);
     System.out.printf("%s   %s  doing=%s\n",printprefix,
-      (doing==D_OP)?"                 ":"",(doing==D_OP)?"D_OP^":((doing==D_NUM)?"D_NUM^":"D_ASSIGN"));
+      (doing==D_OP)?"                        ":"",(doing==D_OP)?"D_OP^":((doing==D_NUM)?"D_NUM^":"D_ASSIGN"));
     System.out.printf("%s\n",printprefix);
   }
 
@@ -273,27 +291,15 @@ class evaluate {
   // just a bit of shorthard to improve readability
   void calc_and_pop() throws EvaluateException {
     if (verbose) { System.out.printf("%sPerforming a calculation on %f %s %f\n",printprefix,stknum[upto-2],stkop[upto-2],stknum[upto-1]); }
-    //stknum[upto-2]=calc(stknum[upto-2],stkop[upto-2],stknum[upto-1],stkfunc[upto-2]);
-
-    //stknum[upto-2]=calc();
-    //upto--;
     calc();
     upto--;
-
-    // where ( - tried stknum[upto-2]=calc(stknum[upto-2],stkop[upto-2],stknum[upto-1]); //efficiency only - but no better - I think
-
     if (verbose) { show_state(); }
     return;
   }
 
-  //double calc(double left, String oper, double right, String function) {
-  // because we always call this with one and only one set (from calc_and_pop), we should make this only need the upto parameter
-    //called by stknum[upto-2]=calc(stknum[upto-2],stkop[upto-2],stknum[upto-1],stkfunc[upto-2]);
-    // upto is also implicit
   ////////////////////////////////////////////////////
   //
   ////////////////////////////////////////////////////
-  // now does not return - perhaps should be a boolean
   void calc() throws EvaluateException {
 
     double left=stknum[upto-2];
@@ -333,6 +339,8 @@ class evaluate {
           using_machine.setvariable(param.toLowerCase(),new GenericType(right));
           if (verbose) { System.out.printf("form:%s\n",form); }
           evaluate evaluate_engine = new evaluate(using_machine); //probably very cpu expensive
+          // it is very important that we use the same random generator!!!
+          evaluate_engine.generator=generator;
           evaluate_engine.verbose=verbose;
           evaluate_engine.quiet=true;
           answer=evaluate_engine.interpret_string(form).num();
@@ -363,6 +371,7 @@ class evaluate {
       } else if (function.equals("abs")) {
         answer=Math.abs(right);
       } else if (function.equals("rnd")) {
+        if (right<0) { generator = new Random((long)-right); } // added this in for seeds
         answer=generator.nextDouble();
       } else if (function.equals("exp")) {
         answer=Math.exp(right);
@@ -383,7 +392,11 @@ class evaluate {
         stktype[upto-2]=ST_NUM;
         try {
           stknum[upto-2]=Double.parseDouble(stkstring[upto-1]); // this was WRONG! it cost 3 hours!! -finally fixed 2am monday
-        } catch (Exception e) { stknum[upto-2]=0.0; }
+        } catch (Exception e) { 
+          // maybe just a "." should be coverted to 0 or a ""???
+          // throw new EvaluateException("NON NUMERIC STRING"); // look at what the C64 really does
+          stknum[upto-2]=0.0; 
+        }
         return;
       } else if (function.equals("tab")) { // they ARE different
         // we need to talk to the machine to get the current cursor setting
@@ -559,6 +572,8 @@ class evaluate {
     stknum[upto-2]=answer;
     return;         //return answer; 
   }
+
+/** precedence order of operators **/
 
   int prec(String oper) {
     oper=oper.toLowerCase(); //20060204pgs
@@ -758,6 +773,9 @@ class evaluate {
     return value;
   }
 
+// before returning true - if we are at the end - we should error out (as it should not end in an operator
+// for the next to functions
+
   boolean readStringOpAlpha() throws EvaluateException {
           String building=a;
           while (ispnt<intstring.length()-1) {
@@ -773,7 +791,6 @@ class evaluate {
           }
           if (verbose) { System.out.printf("%sgot a string %s\n",printprefix,building); }
           if (building.equalsIgnoreCase("or") || building.equalsIgnoreCase("and")) {
-            //operatortoken=building;
             setOp(building);
             return true;
           } else {
@@ -991,6 +1008,9 @@ class evaluate {
 
     intstring=intstring_param; // this may be a dumb way, but it will make code more readable
     // try without // intstring=intstring.toLowerCase(); // opposite of statement.java!
+
+    if (verbose && using_machine!=null) { System.out.printf("Running evaluate with a machine attached\n"); }
+
     if (verbose) { System.out.printf("%s>>Interpreting %s\n",printprefix,intstring); }
 
   try {
@@ -1178,8 +1198,16 @@ boolean dontallowextraclosingbrackets=true; // here for now
     } /* for */
 
     /* final calc */
-    boolean really_has_assignment=false;
     if (verbose) { System.out.printf("%sFINAL CALCS\n",printprefix); }
+
+    // I *think* if we get here and we are on D_NUM with upto>0 then we have ended on an operator (or function) - and are therefore
+    // in error???
+    if (doing==D_NUM && upto>0) {
+      System.out.printf("?SYNTAX ERROR : ENDS IN OPERATOR\n");
+      throw new EvaluateException("SYNTAX ERROR : ENDS IN OPERATOR");
+    }
+
+    boolean really_has_assignment=false;
     while (upto>1) {
       // the only things that will need the function in it will be badly closed brackets, what is the overhead to do this?
       //add func for unclosed brackets

@@ -1,8 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: ev.java,v 1.15 2007/04/16 21:31:00 pgs Exp pgs $
+// $Id: ev.java,v 1.16 2007/04/17 09:22:33 pgs Exp $
 //
 // $Log: ev.java,v $
+// Revision 1.16  2007/04/17 09:22:33  pgs
+// Adding ability to restart with CONT
+// moved all statments into statements/Machine engine
+//
 // Revision 1.15  2007/04/16 21:31:00  pgs
 // Complete exception creation, ratify error messages, refactor code
 // to use exceptions (makes code clearer)
@@ -73,9 +77,7 @@ class ev {
       evaluate_engine = new evaluate();  // create engine
     } else {
       Machine machine=new Machine();
-      // evaluate_engine = new evaluate(machine);  // create engine
-     evaluate_engine = machine.evaluate_engine; // done inside initialise_engines - which is done now on creation of the machine
-      // machine.initialise_engines(); // silly, but there is a reason (what is it?) // no done on creation now
+      evaluate_engine = machine.evaluate_engine; // done inside initialise_engines - which is done now on creation of the machine
      
       // to make equivalent to stand alone
       evaluate_engine.interpret_string_with_assignment("x=7");
@@ -103,7 +105,7 @@ class ev {
         } else if (args[i].substring(0,2).equals("-t")) {
           iterations=100;
         } else if (args[i].substring(0,2).equals("-h")) {
-          System.out.printf("evaluate test harness : ev : version $Id: ev.java,v 1.15 2007/04/16 21:31:00 pgs Exp pgs $\n");
+          System.out.printf("evaluate test harness : ev : version $Id: ev.java,v 1.16 2007/04/17 09:22:33 pgs Exp $\n");
           System.out.printf("  -a : assignment\n");
           System.out.printf("  -e : evaluate only - no assignment (default)\n");
           System.out.printf("  -h : help\n");

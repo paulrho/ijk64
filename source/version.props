@@ -1,9 +1,9 @@
 #build number and date
-#Tue Apr 17 19:27:57 EST 2007
-build-date=20070417-1927
+#Wed Apr 18 17:02:47 EST 2007
+build-date=20070418-1702
 rev=4
-build.user.name=pgs
+build.computer=yoink
 major=3
-build.computer=sirius
+build.user.name=pgs
 minor=2
-build-number=0527
+build-number=0564

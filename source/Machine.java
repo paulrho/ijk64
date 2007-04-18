@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Machine.java,v 1.30 2007/04/17 09:22:33 pgs Exp pgs $
+// $Id: Machine.java,v 1.31 2007/04/17 21:46:14 pgs Exp pgs $
 //
 // $Log: Machine.java,v $
+// Revision 1.31  2007/04/17 21:46:14  pgs
+// Modifications to get CONT to work properly
+//
 // Revision 1.30  2007/04/17 09:22:33  pgs
 // Adding ability to restart with CONT
 // moved all statments into statements/Machine engine
@@ -43,9 +46,61 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+// package au.com.futex.jebi
+
 // for reading a file
 import java.io.*;
-//import java.lang.Throwable;
+
+/** Machine modules :
+<PRE>
+    +-------------------------
+    | VStore : Variable Store
+    +-------------------------
+    | FStack : FOR/NEXT Stack
+    | GStack : Gosub Stack
+    +-------------------------
+    | PText  : Program/Direct text and exection/data points
+    |   ProgramText                  : The program BASIC code itself
+    |   DirectText                   : The line being executed in immediate (direct) mode [notionally exists]
+    |   ---------------------
+    |   executionpoint               : The point in the program we are actually parsing/executing
+    |                                  not always kept up to date (pnt in statements is up to date)
+    |   program_saved_executionpoint : Saved for use in CONT
+    |   uptoDATA                     : The point in the program we are upto with DATA READ
+    +-------------------------
+    | LCache : Line Cache
+    | DCache : Data Cache
+    +-------------------------
+</PRE>
+  <BR>
+<PRE>
+   Object interdependance :
+
+                  ,<--> C64PopupMenu         (precreated)               {<->links back to machine}
+                 / ,--> C64Screen            (precreated)
+                / /
+   C64-> Machine 
+                 -> FStack                   {internal}
+                 -> GStack                   {internal}
+                 -> PText                    {internal, including execution/data/save points}
+                 -> LCache                   {internal}
+                 -> DCache                   {internal}
+           -> Variables                      (Variable Store (VStore))
+           <-> evaluate                      (evaluate engine)          [ could be renamed : ExpressionEvaluator ]
+                 interpret_string ( string )                            {<->links back to machine}
+           <-> statements ( string )         (parse the program/direct) [ could be renamed : CxxParser ]
+               [instansiated each time]                                 {<->links back to machine}
+  
+   Passing datatype : GenericType
+   Exceptions       : BasicException and EvaluateException
+</PRE>
+  <BR>
+  Notes:
+  In immediate (direct) mode, we cannot push onto GStack, but we can push onto FStack
+  Pulling off either (by doing RETURN or NEXT) doesnt really make sense, but will do
+  wierd things (*need to re-architect to fix).
+
+**/
 
 class Machine {
   //
@@ -94,11 +149,7 @@ class Machine {
 
     variables.verbose=verbose;
     executionpoint=0;
-    //evaluate_engine = new evaluate(this);  // create engine
-       // if we pass a "Machine" class variable, then we have linked
-       // the two together such that we can set and get variables
-       // is this a good way? I don't know
-    initialise_engines(); // try this here
+    initialise_engines();
   }
 
   // access to variables etc
@@ -244,9 +295,7 @@ boolean builtinvariables=true;
 
   void initialise_engines() {
     evaluate_engine = new evaluate(this);  // create engine
-
-    //evaluate_engine.verbose=true;
-    evaluate_engine.verbose=verbose; // inherit!
+    //evaluate_engine.verbose=verbose; // inherit!
     evaluate_engine.verbose=false;
     evaluate_engine.quiet=true;
 
@@ -324,7 +373,6 @@ boolean builtinvariables=true;
   }
 
   void setCurrentLine(int pointinprogram) {
-    //executionpoint=pnt; ??
     currentLineNo = getCurrentLine(pointinprogram);
   }
 
@@ -563,15 +611,14 @@ GenericType metareaddatastreamString()
 
 
 
+  /** checks whether the ControlC flag has been set **/
   boolean hasControlC()
   {
     return machinescreen.hasControlC();
   }
   
-  void statements(String arg) {
-    new statements(arg, this); // tell the statements class who I am
-  }
-
+  /** CLeaRs all machine state variables
+   **/
   void variables_clr() {
     // reset all variables, by creating new ones (are the old ones garbage collected properly?
     boolean verbosekeep=variables.verbose;
@@ -615,7 +662,7 @@ GenericType metareaddatastreamString()
       System.out.printf("wanting to continue program : program_saved_executionpoint=%d\n",program_saved_executionpoint);
     }
     if (program_saved_executionpoint<0) {
-      throw new BasicException("CANT CONTINUE ERROR");
+      throw new BasicException("CAN'T CONTINUE ERROR");
     }
     // not the interpretted immediate line!
     new statements(programText, this, program_saved_executionpoint); // passing along the machine too
@@ -630,7 +677,7 @@ GenericType metareaddatastreamString()
     return true;
   }
 
-  boolean runImmediate(String arg)
+  boolean runImmediate(String arg) //runDirect mode
   {
     // by giving 0, it will not clear the Machine state
     new statements(arg, this, 0); // tell the statements class who I am
