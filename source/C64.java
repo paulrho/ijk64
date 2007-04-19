@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.32 2007/04/18 09:37:19 pgs Exp pgs $
+// $Id: C64.java,v 1.33 2007/04/18 22:11:16 pgs Exp pgs $
 //
 // $Log: C64.java,v $
+// Revision 1.33  2007/04/18 22:11:16  pgs
+// Fix to be default banner screen
+//
 // Revision 1.32  2007/04/18 09:37:19  pgs
 // More refactoring with regards to creating program/immediate modes
 //
@@ -127,9 +130,10 @@ class C64 {
       }
     }
 
-    screen=new C64Screen("C64");
-    machine=new Machine();
-    C64PopupMenu pop=new C64PopupMenu(machine); // keep a reference to it for returning things
+    machine=new Machine(screen=new C64Screen("C64")); // new way of attaching screen
+    C64PopupMenu pop=new C64PopupMenu(machine,screen); // keep a reference to it for returning things
+  
+    //machine.runOS // gets a line and executes it (including running program)
 
     if (!blankscreen) screen.startupscreen(); else screen.startupscreen_blank();
     if (filename.length()>=1) machine.loadProgram(filename); // load it in

@@ -1,7 +1,10 @@
 ////////////////////////////////////////////////////////////////////////
-// $Id: detok.java,v 1.3 2006/02/13 00:56:24 pgs Exp pgs $
+// $Id: detok.java,v 1.4 2006/02/17 01:35:57 pgs Exp $
 //
 // $Log: detok.java,v $
+// Revision 1.4  2006/02/17 01:35:57  pgs
+// Added trap and resume (guessed it is resume)
+//
 // Revision 1.3  2006/02/13 00:56:24  pgs
 // RCS...
 //
@@ -123,7 +126,7 @@ class detok
       if (a>='A' && a<='Z') {
         System.out.printf("%c",a-'A'+'a');
       } else if (quoted && (int)(a&0xff)>=192 && (int)(a&0xff)<=192+26) {
-        System.out.printf("%c",(char)(((int)(a&0xff)-192-1)+'A'));
+        System.out.printf("{rev-%c}",(char)(((int)(a&0xff)-192-1)+'A'));
       } else if (quoted && (int)(a&0xff)>=128 && (int)(a&0xff)<=223) {
         int tok=(int)(a&0xff)-128;
         if (tokens1quoted[tok].equals("")) {

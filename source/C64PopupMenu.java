@@ -31,6 +31,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
     String newline = "\n";
     JCheckBoxMenuItem cbMenuItem_bgtrans;
     Machine machine;
+    C64Screen screen;
     String arg;
     String command;
     boolean forcedcompletion=false;
@@ -129,7 +130,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         popup.add(cbMenuItem_bgtrans);
 
         cbMenuItem = new JCheckBoxMenuItem("Hidden (faint) text");
-        cbMenuItem.setSelected(C64Screen.out.faint);
+        cbMenuItem.setSelected(screen.faint);
         cbMenuItem.setMnemonic(KeyEvent.VK_H);
         cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_H, ActionEvent.ALT_MASK));
@@ -137,7 +138,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         popup.add(cbMenuItem);
 
         cbMenuItem = new JCheckBoxMenuItem("Drop shadow");
-        cbMenuItem.setSelected(C64Screen.out.bgshadow);
+        cbMenuItem.setSelected(screen.bgshadow);
         cbMenuItem.setMnemonic(KeyEvent.VK_D);
         cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_D, ActionEvent.ALT_MASK));
@@ -389,7 +390,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         //Add listener to the text area so the popup menu can come up.
         MouseListener popupListener = new PopupListener(popup);
 	// attach to screen
-        ((JFrame)C64Screen.out).addMouseListener(popupListener);
+        ((JFrame)screen).addMouseListener(popupListener);
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -401,25 +402,25 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         System.out.print(s + newline);
 	if (source.getText().equals("80 columns")) {
 		System.out.print("Setting to 80 columns...\n");
-        	C64Screen.out.setCols(80);
+        	screen.setCols(80);
 	} else if (source.getText().equals("40 columns")) {
 		System.out.print("Setting to 40 columns...\n");
-        	C64Screen.out.setCols(40);
+        	screen.setCols(40);
 	} else if (source.getText().equals("Single pixel ( * 1 )")) {
 		System.out.print("Setting single pixel...\n");
-        	C64Screen.out.setScale(1);
+        	screen.setScale(1);
 	} else if (source.getText().equals("Double pixel ( * 2 )")) {
 		System.out.print("Setting double pixel...\n");
-        	C64Screen.out.setScale(2);
+        	screen.setScale(2);
 	} else if (source.getText().equals("Triple pixel ( * 3 )")) {
 		System.out.print("Setting triple pixel...\n");
-        	C64Screen.out.setScale(3);
+        	screen.setScale(3);
 	} else if (source.getText().equals("Double height ( Y*2 )")) {
 		System.out.print("Setting double height pixel...\n");
-        	C64Screen.out.setScaleY(2);
+        	screen.setScaleY(2);
 	} else if (source.getText().equals("25 rows")) {
 		System.out.print("Setting 25 rows...\n");
-        	C64Screen.out.setRows(25);
+        	screen.setRows(25);
 	} else if (source.getText().equals("About")) {
             aboutBox();
 	} else if (source.getText().equals("New")) {
@@ -483,18 +484,18 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 		}
 	} else if (source.getText().equals("Dumpstate now")) {
 		System.out.print("dump state (reentrant?)\n");
-                C64Screen.out.printstats();
+                screen.printstats();
 		machine.dumpstate();
 	} else if (source.getText().equals("META-DUMPSTATE")) {
 		System.out.print("dump state (reentrant?)\n");
-                C64Screen.out.printstats();
+                screen.printstats();
 		machine.dumpstate();
 	} else if (source.getText().equals("40 rows")) {
 		System.out.print("Setting 40 rows...\n");
-        	C64Screen.out.setRows(40);
+        	screen.setRows(40);
 	} else if (source.getText().equals("90 rows")) {
 		System.out.print("Setting 90 rows...\n");
-        	C64Screen.out.setRows(90);
+        	screen.setRows(90);
 	}
     }
 
@@ -514,56 +515,56 @@ public class C64PopupMenu implements ActionListener, ItemListener {
     //New state: selected
 	if (source.getText().equals("Transparent background")) {
 		System.out.print("Setting transparent state to ...\n");
-		C64Screen.out.bgtrans = (e.getStateChange() == ItemEvent.SELECTED) ? true:false;
-        	C64Screen.out.setBackgroundTransparent(C64Screen.out.bgtrans);
+		screen.bgtrans = (e.getStateChange() == ItemEvent.SELECTED) ? true:false;
+        	screen.setBackgroundTransparent(screen.bgtrans);
 	} else if (source.getText().equals("Drop shadow")) {
 		System.out.print("Setting drop shadow ...\n");
-                C64Screen.out.bgshadow = (e.getStateChange() == ItemEvent.SELECTED) ? true:false;
-        	//C64Screen.out.setBackgroundTransparent(C64Screen.out.bgtrans);
-                C64Screen.out.redrawScreen();
-                C64Screen.out.forcedrepaint();
+                screen.bgshadow = (e.getStateChange() == ItemEvent.SELECTED) ? true:false;
+        	//screen.setBackgroundTransparent(screen.bgtrans);
+                screen.redrawScreen();
+                screen.forcedrepaint();
 	} else if (source.getText().equals("Hidden (faint) text")) {
 		System.out.print("Setting hidden ...\n");
-                C64Screen.out.faint = (e.getStateChange() == ItemEvent.SELECTED) ? true:false;
-        	//C64Screen.out.setBackgroundTransparent(C64Screen.out.bgtrans);
-                C64Screen.out.redrawScreen();
-                C64Screen.out.forcedrepaint();
+                screen.faint = (e.getStateChange() == ItemEvent.SELECTED) ? true:false;
+        	//screen.setBackgroundTransparent(screen.bgtrans);
+                screen.redrawScreen();
+                screen.forcedrepaint();
 	} else if (source.getText().equals("Uppercase")) {
 		System.out.print("Setting charset ...\n");
-                C64Screen.out.changeCharSet( (e.getStateChange() == ItemEvent.SELECTED) ? 0:1);
+                screen.changeCharSet( (e.getStateChange() == ItemEvent.SELECTED) ? 0:1);
 	} else if (source.getText().equals("Verbose")) {
                 // not quiet right yet
 		System.out.print("Setting verbosity not quite right yet...\n");
 		machine.verbose=( (e.getStateChange() == ItemEvent.SELECTED) ? true:false);
 		machine.evaluate_engine.verbose=( (e.getStateChange() == ItemEvent.SELECTED) ? true:false);
-		C64Screen.out.verbose=( (e.getStateChange() == ItemEvent.SELECTED) ? true:false);
+		screen.verbose=( (e.getStateChange() == ItemEvent.SELECTED) ? true:false);
 	} else if (source.getText().equals("SendToBack")) {
 		System.out.print("Setting sendtoback ...\n");
                 if (e.getStateChange() == ItemEvent.SELECTED) {
-                  C64Screen.out.sendToBack=true;
+                  screen.sendToBack=true;
                 } else {
-                  C64Screen.out.sendToBack=false;
+                  screen.sendToBack=false;
                 }
         } else if (source.getText().equals("Frames")) {
 		System.out.print("Setting frames ...\n");
                 if (e.getStateChange() == ItemEvent.SELECTED) {
-		//C64Screen.out.setVisible(false);
-		//C64Screen.out.hide();
-		//C64Screen.out.setUndecorated(false);
-		//C64Screen.out.setVisible(true);
+		//screen.setVisible(false);
+		//screen.hide();
+		//screen.setUndecorated(false);
+		//screen.setVisible(true);
                         // decorated - framed
-                        C64Screen.out.dispose();
-			C64Screen.out.setUndecorated(false);
-			C64Screen.out.setResizable(true);
+                        screen.dispose();
+			screen.setUndecorated(false);
+			screen.setResizable(true);
 			//device.setFullScreenWindow(null); // comment this line if you want only undecorated frame
-			C64Screen.out.setVisible(true);
+			screen.setVisible(true);
                 } else {
                         // undecorated
-                        C64Screen.out.dispose();
-			C64Screen.out.setUndecorated(true);
-			C64Screen.out.setResizable(true);
-			//device.setFullScreenWindow(C64Screen.out); // comment this line if you want only undecorated frame
-			C64Screen.out.setVisible(true);
+                        screen.dispose();
+			screen.setUndecorated(true);
+			screen.setResizable(true);
+			//device.setFullScreenWindow(screen); // comment this line if you want only undecorated frame
+			screen.setVisible(true);
                 }
 	}
 
@@ -588,9 +589,10 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         }
     }
 
-    public C64PopupMenu(Machine machine) {
-		createPopupMenu();
+    public C64PopupMenu(Machine machine, C64Screen screen) {
 	this.machine=machine;
+        this.screen=screen;
+	createPopupMenu();
     }
 
     class PopupListener extends MouseAdapter {
@@ -613,7 +615,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         private void maybeShowPopup(MouseEvent e) {
             if (e.isPopupTrigger()) {
 		// perhaps - read current settings here?
-		cbMenuItem_bgtrans.setSelected(C64Screen.out.bgtrans);
+		cbMenuItem_bgtrans.setSelected(screen.bgtrans);
 
                 popup.show(e.getComponent(),
                            e.getX(), e.getY());
@@ -630,8 +632,8 @@ void addString(String str) {
 
 void addkey(char key)
 {
-          C64Screen.out.keybuf[C64Screen.out.keybuftop] = key;
-          C64Screen.out.keybuftop++; if (C64Screen.out.keybuftop >= C64Screen.out.keybufmax) { C64Screen.out.keybuftop = 0; }
+          screen.keybuf[screen.keybuftop] = key;
+          screen.keybuftop++; if (screen.keybuftop >= screen.keybufmax) { screen.keybuftop = 0; }
 }
 
  File fFile = new File ("default.java");
@@ -651,7 +653,7 @@ boolean openFile () {
       //fc.setFileFilter (fJavaFilter);
 
       // Now open chooser
-      int result = fc.showOpenDialog ((JFrame)C64Screen.out);
+      int result = fc.showOpenDialog ((JFrame)screen);
 
       if (result == JFileChooser.CANCEL_OPTION) {
           return true;
@@ -711,7 +713,7 @@ boolean openFile () {
         Object contents[] = new Object[] { myversion, licenceArea, 
         	"Java version " + javaVersion };
         //JOptionPane.showMessageDialog(parent, contents, "About GeomLab",
-        JOptionPane.showMessageDialog( C64Screen.out, contents, "About JEBI/C64",
+        JOptionPane.showMessageDialog( screen, contents, "About JEBI/C64",
         	JOptionPane.INFORMATION_MESSAGE);
     }
 

@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: evaluate.java,v 1.29 2007/04/17 09:22:33 pgs Exp $
+// $Id: evaluate.java,v 1.30 2007/04/18 09:37:19 pgs Exp $
 //
 // $Log: evaluate.java,v $
+// Revision 1.30  2007/04/18 09:37:19  pgs
+// More refactoring with regards to creating program/immediate modes
+//
 // Revision 1.29  2007/04/17 09:22:33  pgs
 // Adding ability to restart with CONT
 // moved all statments into statements/Machine engine
@@ -227,7 +230,7 @@ class evaluate {
         if (levelx==upto || haveop.equals("(") || haveop.equals("===") || haveop.equals("-ve") || levelx==upto-1 && doing==D_ASSIGN) {
           System.out.printf(" %-13s |", "");
         } else {
-          System.out.printf(" %-13f |", stknum[levelx]);
+          System.out.printf(" %13f |", stknum[levelx]);
         }
       }
 

@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Machine.java,v 1.31 2007/04/17 21:46:14 pgs Exp pgs $
+// $Id: Machine.java,v 1.32 2007/04/18 09:37:19 pgs Exp $
 //
 // $Log: Machine.java,v $
+// Revision 1.32  2007/04/18 09:37:19  pgs
+// More refactoring with regards to creating program/immediate modes
+//
 // Revision 1.31  2007/04/17 21:46:14  pgs
 // Modifications to get CONT to work properly
 //
@@ -68,16 +71,20 @@ import java.io.*;
     |   program_saved_executionpoint : Saved for use in CONT
     |   uptoDATA                     : The point in the program we are upto with DATA READ
     +-------------------------
+    | MemoryIO                       : Pokes/peeks/sys
+    +-------------------------
     | LCache : Line Cache
     | DCache : Data Cache
+    +-------------------------
+    | ScreenIO                       : Hooks to C64Screen (if exists)
     +-------------------------
 </PRE>
   <BR>
 <PRE>
    Object interdependance :
 
-                  ,<--> C64PopupMenu         (precreated)               {<->links back to machine}
-                 / ,--> C64Screen            (precreated)
+                  ,----> C64Screen           (precreated)
+                 / ,<--> C64PopupMenu        (precreated)               {<->links back to machine}
                 / /
    C64-> Machine 
                  -> FStack                   {internal}
@@ -102,55 +109,75 @@ import java.io.*;
 
 **/
 
-class Machine {
-  //
-  String code; // here is the code, stored as one big string
-  Variables variables=new Variables();
+public class Machine {
 
-  // line cache
-  static final int MAXLINES=10000;
-  int toplinecache=0;
-  int linecacheline[]; // when we get to them, we store the pointer into the code of each line // of course we have to read ahead one we get a GOTO or GOSUB
-  int linecachepnt[];
+  /*************************
+    Create the machine
+   *************************/
+  public Machine() {
+    initialise_machine();
+  }
 
-  // for stack
-  static final int MAXFORS=30; // make it break faster
-  int topforloopstack=0;
-  int forloopstack[];
-  String forloopstack_var[];
-  double forloopstack_to[];
-  double forloopstack_step[];
+  public Machine(C64Screen screen) {
+    initialise_machine();
+    attachScreen(screen);
+  }
 
-  // gosub stack
-  static final int MAXGOSUBS=300;
-  int topgosubstack=0;
-  int gosubstack[];
+  public void initialise_machine() {
+    if (verbose) { System.out.printf("Initialising machine\n"); }
+    variables.verbose=verbose;
+    executionpoint=0;
+    evaluate_engine = new evaluate(this);  // create engine
+    evaluate_engine.verbose=false;
+    evaluate_engine.quiet=true;
+  }
+  //////////////////////////////////
+  // Machine configuration
+  //////////////////////////////////
+  public boolean verbose=false;
+  boolean enabledmovement=true;  // if this is false, we just parse from top to bottom, good for debugging!
 
-  evaluate evaluate_engine;
+  //////////////////////////////////
+  // Machine State
+  //////////////////////////////////
   int executionpoint; // ?? where we currently are at
   int save_executionpoint;
   int program_saved_executionpoint=(-1);
+  String currentLineNo=""; // info only?
 
-  boolean verbose=false;
-  //boolean verbose=true;
-  boolean enabledmovement=true;  // if this is false, we just parse from top to bottom, good for debugging!
-  String currentLineNo="";
-
-
-  Machine() {
-    if (verbose) { System.out.printf("Initialising machine\n"); }
-    linecacheline=new int[MAXLINES];
-    linecachepnt=new int[MAXLINES];
-    forloopstack=new int[MAXFORS];
-    forloopstack_var=new String[MAXFORS];
-    forloopstack_to=new double[MAXFORS];
-    forloopstack_step=new double[MAXFORS];
-    gosubstack=new int[MAXGOSUBS];
-
-    variables.verbose=verbose;
-    executionpoint=0;
-    initialise_engines();
+  /** clear the machine state
+      Empty LCache
+      Empty FStack
+      Empty GStack
+      Empty DCache
+  **/
+  void clearMachineState() {
+    toplinecache=0; // optimisation only & goto/gosub lookup & findcurrentline
+    topforloopstack=0;
+    topgosubstack=0;
+    // also clear data
+    allDATA="";
+    uptoDATA=0;
   }
+
+  /** CLeaRs all machine state variables
+      Delete all variables
+      Reset the ability to CONTinue the program
+   **/
+  void variables_clr() {
+    // reset all variables, by creating new ones (are the old ones garbage collected properly?
+    boolean verbosekeep=variables.verbose;
+    variables=new Variables();
+    variables.verbose=verbosekeep;
+    program_saved_executionpoint=(-1); // cant continue any more
+  }
+
+  //////////////////////////////////
+  // VStore : Variable (&fn) Store
+  //////////////////////////////////
+  boolean builtinvariables=true;
+
+  Variables variables=new Variables();
 
   // access to variables etc
   // could we do this in a nice way with an "interface?" or something
@@ -167,8 +194,6 @@ class Machine {
     return variables.getvariable(variable,param,p1,p2,p3);
   }
 
-boolean builtinvariables=true;
-
   GenericType getvariable(String variable) {
     if (builtinvariables) {
       if (variable.equals("ti$")) {
@@ -183,6 +208,16 @@ boolean builtinvariables=true;
     }
     return variables.getvariable(variable);
   }
+
+  //////////////////////////////////
+  // FStack : for loop stack
+  //////////////////////////////////
+  static final int MAXFORS=30; // make it break faster
+  int topforloopstack=0;
+  int forloopstack[]=new int[MAXFORS];
+  String forloopstack_var[]=new String[MAXFORS];
+  double forloopstack_to[]=new double[MAXFORS];
+  double forloopstack_step[]=new double[MAXFORS];
 
   void forloopdumpstate() {
     System.out.printf("For loop stack:\n");
@@ -267,6 +302,11 @@ boolean builtinvariables=true;
     //return false;
   }
 
+  //////////////////////////////////
+  // Evaluate engine
+  //////////////////////////////////
+  evaluate evaluate_engine;
+
   // from within here we execute the evaluate?
   GenericType evaluate(String expression) throws BasicException {
     try {
@@ -293,15 +333,12 @@ boolean builtinvariables=true;
     }
   }
 
-  void initialise_engines() {
-    evaluate_engine = new evaluate(this);  // create engine
-    //evaluate_engine.verbose=verbose; // inherit!
-    evaluate_engine.verbose=false;
-    evaluate_engine.quiet=true;
-
-    // only for C64Screen
-    machinescreen=C64Screen.out;
-  }
+  //////////////////////////////////
+  // GStack : Gosub stack
+  //////////////////////////////////
+  static final int MAXGOSUBS=300;
+  int topgosubstack=0;
+  int gosubstack[]=new int[MAXGOSUBS];
 
   void gotoLine(String lineNostr) throws BasicException {
     int value;
@@ -355,14 +392,14 @@ boolean builtinvariables=true;
     }
   }
 
-  void clearMachineState() {
-    toplinecache=0; // optimisation only
-    topforloopstack=0;
-    topgosubstack=0;
-    // also clear data
-    allDATA="";
-    uptoDATA=0;
-  }
+
+  //////////////////////////////////
+  // LCache : Line cache
+  //////////////////////////////////
+  static final int MAXLINES=10000;
+  int toplinecache=0;
+  int linecacheline[]=new int[MAXLINES]; // when we get to them, we store the pointer into the code of each line // of course we have to read ahead one we get a GOTO or GOSUB
+  int linecachepnt[]=new int[MAXLINES];
 
   void cacheLine(String lineNostr, int pnt) {
     int value=Integer.parseInt(lineNostr); // this could fail?
@@ -396,81 +433,83 @@ boolean builtinvariables=true;
     System.out.printf("Current Line No = %s\n",currentLineNo);
   }
 
-//////////////////////////////////
-// DATA staement DATA STREAM
-//////////////////////////////////
-String allDATA="";
-int uptoDATA=0;
-
-void cacheDataAdd(String param) {
-  allDATA+=param;
-}
-
-void cacheAllDATA()
-{
-  // for now, we just simple read in all the DATA statements
-  // also, expecting it to be the first keyword on the line
-  // and wack it into a big string
-}
-
-GenericType metareaddatastreamNum()
-{
-  String str=metareaddatastreamString().str();
-  if (str.equals("")) return new GenericType(0.0);
-  else return new GenericType(Double.parseDouble(str));
-}
-
-GenericType metareaddatastreamString()
-{
-  // from whatever we happen to be reading (say DATA) return a string
-  // added possibility of continuation marks in DATA strings
-  String building="";
-  boolean quoted=false;
-  boolean cont=false;
-  for (; uptoDATA<allDATA.length(); ++uptoDATA) {
-    String a=allDATA.substring(uptoDATA,uptoDATA+1);
-    // this continuation code was a mistake, it was actually implemented in a basic program!
-    if (cont) {
-      // will read up quote cr quote
-      if (a.equals("\n") || a.equals("\"")) {
-        // not exactly, but it will do
-        // ignore
-      } else {
-        building+=a;
-        cont=false;
-      }
-    } else if (a.equals("\n")) {
-      uptoDATA++;
-      break;
-    } else if (quoted && a.equals(""+(char)127)) {
-      // it looks like a continuation character
-      // really must be followed by close quote and end of line!
-      cont=true;
-    } else if (!quoted && a.equals(":")) {
-      // chew up rest of line
-      for (; uptoDATA<allDATA.length(); ++uptoDATA) {
-        String b=allDATA.substring(uptoDATA,uptoDATA+1);
-        if (b.equals("\n")) {
-          uptoDATA++;
-          break;
-        }
-      }
-      break;
-    } else if (!quoted && a.equals(",")) {
-      uptoDATA++;
-      break;
-    } else if (a.equals("\"")) {
-      quoted=!quoted;
-      //building+=a; - no, chew this up!
-    } else { building+=a; }
+  //////////////////////////////////
+  // DATA staement DATA STREAM
+  //////////////////////////////////
+  String allDATA="";
+  int uptoDATA=0;
+  
+  void cacheDataAdd(String param) {
+    allDATA+=param;
   }
-  if (verbose) { System.out.printf("Returning DATA >>>%s<<<\n",building); }
-  return new GenericType(building);
-}
+  
+  void cacheAllDATA()
+  {
+    // for now, we just simple read in all the DATA statements
+    // also, expecting it to be the first keyword on the line
+    // and wack it into a big string
+  }
+  
+  GenericType metareaddatastreamNum()
+  {
+    String str=metareaddatastreamString().str();
+    if (str.equals("")) return new GenericType(0.0);
+    else return new GenericType(Double.parseDouble(str));
+  }
+  
+  GenericType metareaddatastreamString()
+  {
+    // from whatever we happen to be reading (say DATA) return a string
+    // added possibility of continuation marks in DATA strings
+    String building="";
+    boolean quoted=false;
+    boolean cont=false;
+    for (; uptoDATA<allDATA.length(); ++uptoDATA) {
+      String a=allDATA.substring(uptoDATA,uptoDATA+1);
+      // this continuation code was a mistake, it was actually implemented in a basic program!
+      if (cont) {
+        // will read up quote cr quote
+        if (a.equals("\n") || a.equals("\"")) {
+          // not exactly, but it will do
+          // ignore
+        } else {
+          building+=a;
+          cont=false;
+        }
+      } else if (a.equals("\n")) {
+        uptoDATA++;
+        break;
+      } else if (quoted && a.equals(""+(char)127)) {
+        // it looks like a continuation character
+        // really must be followed by close quote and end of line!
+        cont=true;
+      } else if (!quoted && a.equals(":")) {
+        // chew up rest of line
+        for (; uptoDATA<allDATA.length(); ++uptoDATA) {
+          String b=allDATA.substring(uptoDATA,uptoDATA+1);
+          if (b.equals("\n")) {
+            uptoDATA++;
+            break;
+          }
+        }
+        break;
+      } else if (!quoted && a.equals(",")) {
+        uptoDATA++;
+        break;
+      } else if (a.equals("\"")) {
+        quoted=!quoted;
+        //building+=a; - no, chew this up!
+      } else { building+=a; }
+    }
+    if (verbose) { System.out.printf("Returning DATA >>>%s<<<\n",building); }
+    return new GenericType(building);
+  }
+  
 
-//////////////////////////////////
-// Memory I/O
-//////////////////////////////////
+  //////////////////////////////////
+  // Memory I/O
+  //////////////////////////////////
+
   int peek(int val) {
     if (val==197) {
       if (machinescreen.hasinput()) 
@@ -540,12 +579,18 @@ GenericType metareaddatastreamString()
       machinescreen.setCharColour(x,y,(char)memval);
     }
   }
-//////////////////////////////////
-// Screen
-//////////////////////////////////
+  
+  
+  //////////////////////////////////
+  // Screen
+  //////////////////////////////////
 
   C64Screen machinescreen;
   
+  public void attachScreen(C64Screen ascreen) {
+    machinescreen=ascreen;
+  }
+
   // only for screen
   void print(String arg) {
     machinescreen.print(arg);
@@ -566,11 +611,27 @@ GenericType metareaddatastreamString()
     }
   }
 
-/** was (still is really) in statement, it doesnt belong there - the machine
-    reads the file 
-**/
-  static String read_a_file(String filename) throws BasicException {
+  /** checks whether the ControlC flag has been set **/
+  boolean hasControlC()
+  {
+    return machinescreen.hasControlC();
+  }
+  
 
+  //////////////////////////////////
+  // PText : Program Text & editting
+  //////////////////////////////////
+
+  String programText="";          //String code; // here is the code, stored as one big string // not used
+
+  void newProgramText()
+  {
+    programText=""; // NEW program
+  };
+
+  /** reads the program basic text file 
+  **/
+  static String read_a_file(String filename) throws BasicException {
     String content="";
 
     try {
@@ -609,27 +670,6 @@ GenericType metareaddatastreamString()
     return true;
   }
 
-
-
-  /** checks whether the ControlC flag has been set **/
-  boolean hasControlC()
-  {
-    return machinescreen.hasControlC();
-  }
-  
-  /** CLeaRs all machine state variables
-   **/
-  void variables_clr() {
-    // reset all variables, by creating new ones (are the old ones garbage collected properly?
-    boolean verbosekeep=variables.verbose;
-    variables=new Variables();
-    variables.verbose=verbosekeep;
-    //variables.verbose=verbose;
-    program_saved_executionpoint=(-1); // cant continue any more
-  }
-
-  String programText="";
-
   ///
   /// new additions for keeping the program text in the machine
   ///
@@ -666,6 +706,21 @@ GenericType metareaddatastreamString()
     }
     // not the interpretted immediate line!
     new statements(programText, this, program_saved_executionpoint); // passing along the machine too
+    program_saved_executionpoint=save_executionpoint; // only done on running a program
+    return true;
+  }
+
+  /** this function not used yet **/
+  boolean contProgram(int restartat) throws BasicException
+  {
+    if (verbose) {
+      System.out.printf("wanting to continue program : restartat=%d\n",restartat);
+    }
+    if (restartat<0) {
+      throw new BasicException("CAN'T CONTINUE ERROR");
+    }
+    // not the interpretted immediate line!
+    new statements(programText, this, restartat); // passing along the machine too
     program_saved_executionpoint=save_executionpoint; // only done on running a program
     return true;
   }
@@ -848,13 +903,12 @@ GenericType metareaddatastreamString()
     return -1;
   }
 
-void newProgramText()
-{
-  programText=""; // NEW program
-};
-
 } // end of class Machine
 
+
+//////////////////////////////////
+// Exceptions, out of class
+//////////////////////////////////
 
 class BasicException extends Exception {
     BasicException() {
