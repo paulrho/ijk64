@@ -150,6 +150,16 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         cbMenuItem.addItemListener(this);
         popup.add(cbMenuItem);
 
+        cbMenuItem = new JCheckBoxMenuItem("Sync background image");
+        cbMenuItem.setSelected(true);
+        cbMenuItem.addItemListener(this);
+        popup.add(cbMenuItem);
+
+        cbMenuItem = new JCheckBoxMenuItem("50% duty cycle");
+        //cbMenuItem.setSelected(true);
+        cbMenuItem.addItemListener(this);
+        popup.add(cbMenuItem);
+
         cbMenuItem = new JCheckBoxMenuItem("Frames");
         cbMenuItem.setSelected(false);
         cbMenuItem.addItemListener(this);
@@ -538,6 +548,15 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 		machine.verbose=( (e.getStateChange() == ItemEvent.SELECTED) ? true:false);
 		machine.evaluate_engine.verbose=( (e.getStateChange() == ItemEvent.SELECTED) ? true:false);
 		screen.verbose=( (e.getStateChange() == ItemEvent.SELECTED) ? true:false);
+	} else if (source.getText().equals("50% duty cycle")) {
+                if (e.getStateChange() == ItemEvent.SELECTED) machine.partialDutyCycle=1;
+                else machine.partialDutyCycle=0;
+	} else if (source.getText().equals("Sync background image")) {
+		System.out.print("Setting sendtoback ...\n");
+                if (e.getStateChange() == ItemEvent.SELECTED) screen.shiftbgimage=true;
+                else screen.shiftbgimage=false;
+                screen.redrawScreen();
+                screen.forcedrepaint();
 	} else if (source.getText().equals("SendToBack")) {
 		System.out.print("Setting sendtoback ...\n");
                 if (e.getStateChange() == ItemEvent.SELECTED) {

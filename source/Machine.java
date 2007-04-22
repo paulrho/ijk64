@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Machine.java,v 1.32 2007/04/18 09:37:19 pgs Exp $
+// $Id: Machine.java,v 1.33 2007/04/19 08:28:24 pgs Exp pgs $
 //
 // $Log: Machine.java,v $
+// Revision 1.33  2007/04/19 08:28:24  pgs
+// Refactoring and simplifying/formatting code especially in Machine
+//
 // Revision 1.32  2007/04/18 09:37:19  pgs
 // More refactoring with regards to creating program/immediate modes
 //
@@ -136,6 +139,7 @@ public class Machine {
   //////////////////////////////////
   public boolean verbose=false;
   boolean enabledmovement=true;  // if this is false, we just parse from top to bottom, good for debugging!
+  int partialDutyCycle=0;
 
   //////////////////////////////////
   // Machine State
