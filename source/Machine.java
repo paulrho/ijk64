@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Machine.java,v 1.33 2007/04/19 08:28:24 pgs Exp pgs $
+// $Id: Machine.java,v 1.34 2007/04/22 22:37:01 pgs Exp pgs $
 //
 // $Log: Machine.java,v $
+// Revision 1.34  2007/04/22 22:37:01  pgs
+// Add duty cycle
+//
 // Revision 1.33  2007/04/19 08:28:24  pgs
 // Refactoring and simplifying/formatting code especially in Machine
 //
@@ -607,7 +610,9 @@ public class Machine {
   String getline() {
     return machinescreen.screenInput();
   }
+/* for now -slow down a geta$ - will do a givemekey which has a sleep in it*/
   String getkey() {
+    machinescreen.slowinput();
     if (machinescreen.hasinput()) {
       return ""+machinescreen.givemekey();
     } else {
@@ -680,6 +685,32 @@ public class Machine {
   String listProgram()
   {
     return programText;
+  }
+
+  String listProgram(int from, int to)
+  {
+    boolean printing;
+    /* need some inspection to split to lines now! */
+    /* and to simplify - need to return it as a string! */
+    String subset="";
+    System.out.printf("Listing from %d to %d\n",from,to);
+    String lines[] = programText.split("\\r?\\n");
+    printing=false; if (from==-1) printing=true;
+    for (int i=0; i<lines.length; ++i) {
+      int lineno=0;
+      String thisline=machineReadLineNo(lines[i]);
+      if (thisline==null) continue;
+      try {
+        lineno=Integer.parseInt(thisline.trim());
+      } catch (NumberFormatException e) {
+        continue;
+      }
+      if (!printing && lineno>=from) printing=true;
+      if (printing && (lineno>to && to!=-1)) { printing=false; from=999999; }
+      if (printing) subset+=lines[i]+"\n"; 
+      //System.out.printf("this line %d\n",lineno);
+    }
+    return subset;
   }
   
   boolean loadProgram(String filename)

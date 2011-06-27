@@ -469,11 +469,13 @@ public class C64PopupMenu implements ActionListener, ItemListener {
                 //In response to a button click:
                 //JFrame jf=new JFrame("Open File");
                 //int returnVal = fc.showOpenDialog(jf);
-                openFile();
-	        arg=fFile.getAbsolutePath().toLowerCase();
-                forcedcompletion=true;
-		command="fileopen";
-                addkey((char)10);
+                if (openFile()) {
+	          //arg=fFile.getAbsolutePath().toLowerCase(); // why?
+	          arg=fFile.getAbsolutePath();
+                  forcedcompletion=true;
+		  command="fileopen";
+                  addkey((char)10);
+                }
 	} else if (source.getText().equals("Open (and run)...")) {
 		System.out.print("Opening file...\n");
                 //Create a file chooser
@@ -481,17 +483,19 @@ public class C64PopupMenu implements ActionListener, ItemListener {
                 //In response to a button click:
                 //JFrame jf=new JFrame("Open File");
                 //int returnVal = fc.showOpenDialog(jf);
-                openFile();
-		if (false) {
-                  addString("load\""+fFile.getAbsolutePath().toLowerCase()+"\",8");
-                  addkey((char)10);
-		} else {
-		  arg=fFile.getAbsolutePath().toLowerCase();
-                  //addString("poprun");
-                  forcedcompletion=true;
-		  command="fileopenrun";
-                  addkey((char)10);
-		}
+                if (openFile()) {
+		  if (false) {
+                    addString("load\""+fFile.getAbsolutePath().toLowerCase()+"\",8");
+                    addkey((char)10);
+		  } else {
+		    //arg=fFile.getAbsolutePath().toLowerCase(); // why?
+		    arg=fFile.getAbsolutePath();
+                    //addString("poprun");
+                    forcedcompletion=true;
+		    command="fileopenrun";
+                    addkey((char)10);
+		  }
+                }
 	} else if (source.getText().equals("Dumpstate now")) {
 		System.out.print("dump state (reentrant?)\n");
                 screen.printstats();
@@ -675,7 +679,7 @@ boolean openFile () {
       int result = fc.showOpenDialog ((JFrame)screen);
 
       if (result == JFileChooser.CANCEL_OPTION) {
-          return true;
+          return false;
       } else if (result == JFileChooser.APPROVE_OPTION) {
 
           fFile = fc.getSelectedFile ();
