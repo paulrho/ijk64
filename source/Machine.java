@@ -658,7 +658,7 @@ public class Machine {
     return content;
   }
 
-  boolean save_a_file(String filename) {
+  boolean save_a_file(String filename) throws BasicException {
 	FileOutputStream out; // declare a file output object
 	PrintStream p; // declare a print stream object
 	try
@@ -674,7 +674,8 @@ public class Machine {
 	catch (Exception e)
 	{
 		System.err.println ("Error writing to file");
-                return false;
+                throw new BasicException("ERROR SAVING FILE");
+                //return false;
 	}
     return true;
   }
@@ -693,7 +694,7 @@ public class Machine {
     /* need some inspection to split to lines now! */
     /* and to simplify - need to return it as a string! */
     String subset="";
-    System.out.printf("Listing from %d to %d\n",from,to);
+    if (verbose) System.out.printf("Listing from %d to %d\n",from,to);
     String lines[] = programText.split("\\r?\\n");
     printing=false; if (from==-1) printing=true;
     for (int i=0; i<lines.length; ++i) {
@@ -716,7 +717,12 @@ public class Machine {
   boolean loadProgram(String filename)
   {
     try {
-      programText=read_a_file(filename);
+      // if it ends in jpg or png or bmp - read the background image
+      if (filename.toLowerCase().contains(".png") || filename.toLowerCase().contains(".jpg") || filename.toLowerCase().contains(".bmp")) {
+        machinescreen.load_bgimage(filename);
+      } else {
+        programText=read_a_file(filename);
+      }
     } catch (BasicException basicerror) {
        System.out.printf("Basic Error: %s\n",basicerror.getMessage());
        print("\n?"+basicerror.getMessage().toLowerCase()); // took off "[CR]"
@@ -728,7 +734,13 @@ public class Machine {
 
   boolean saveProgram(String filename)
   {
-    return save_a_file(filename);
+    try {
+      return save_a_file(filename);
+    } catch (BasicException basicerror) {
+       System.out.printf("Basic Error: %s\n",basicerror.getMessage());
+       print("\n?"+basicerror.getMessage().toLowerCase()); // took off "[CR]"
+       return false;
+    }
   }
   
   boolean contProgram() throws BasicException
