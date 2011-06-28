@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: evaluate.java,v 1.30 2007/04/18 09:37:19 pgs Exp $
+// $Id: evaluate.java,v 1.31 2007/04/19 08:28:24 pgs Exp $
 //
 // $Log: evaluate.java,v $
+// Revision 1.31  2007/04/19 08:28:24  pgs
+// Refactoring and simplifying/formatting code especially in Machine
+//
 // Revision 1.30  2007/04/18 09:37:19  pgs
 // More refactoring with regards to creating program/immediate modes
 //
@@ -380,6 +383,10 @@ class evaluate {
         answer=Math.exp(right);
       } else if (function.equals("cos")) {
         answer=Math.cos(right);
+      } else if (function.equals("acos")) { // extension
+        answer=Math.acos(right);
+      } else if (function.equals("asin")) { // extension
+        answer=Math.asin(right);
       } else if (function.equals("atn")) {
         answer=Math.atan(right);
       } else if (function.equals("tan")) {

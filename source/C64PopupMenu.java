@@ -42,6 +42,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         JRadioButtonMenuItem rbMenuItem;
         JMenu submenu;
 
+  
 	// try this
 	// this does fix the problem of the menu dissappearing when completely within the bounds of the window
 	javax.swing.JPopupMenu.setDefaultLightWeightPopupEnabled(false);
@@ -403,6 +404,8 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         ((JFrame)screen).addMouseListener(popupListener);
     }
 
+   final static char PETSCII_ENTER = 13;
+
     public void actionPerformed(ActionEvent e) {
         JMenuItem source = (JMenuItem)(e.getSource());
         String s = "Action event detected."
@@ -436,24 +439,24 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 	} else if (source.getText().equals("New")) {
           //oldway//System.out.print("New (sys)...\n");
           //oldway//addString("sys0");
-          //oldway//addkey((char)10);
+          //oldway//addkey(PETSCII_ENTER);
           forcedcompletion=true;
 	  command="new";
-          addkey((char)10);
+          addkey(PETSCII_ENTER);
 	} else if (source.getText().equals("Exit")) {
           //oldway// System.out.print("Exiting...\n");
           //oldway// addString("exit");
-          //oldway// addkey((char)10);
+          //oldway// addkey(PETSCII_ENTER);
           forcedcompletion=true;
 	  command="exit";
-          addkey((char)10);
+          addkey(PETSCII_ENTER);
 	} else if (source.getText().equals("Run program")) {
           //oldway//System.out.print("Running...\n");
           //oldway//addString("run");
-          //oldway//addkey((char)10);
+          //oldway//addkey(PETSCII_ENTER);
           forcedcompletion=true;
 	  command="run";
-          addkey((char)10);
+          addkey(PETSCII_ENTER);
 
 	} else if (source.getText().equals("Save")) {
 		System.out.print("Saving file...\n");
@@ -461,7 +464,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 	        arg="mysave.basic"; // hard coded for now
                 forcedcompletion=true;
 		command="save";
-                addkey((char)10);
+                addkey(PETSCII_ENTER);
 	} else if (source.getText().equals("Open...")) {
 		System.out.print("Opening file...\n");
                 //Create a file chooser
@@ -474,7 +477,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 	          arg=fFile.getAbsolutePath();
                   forcedcompletion=true;
 		  command="fileopen";
-                  addkey((char)10);
+                  addkey(PETSCII_ENTER);
                 }
 	} else if (source.getText().equals("Open (and run)...")) {
 		System.out.print("Opening file...\n");
@@ -486,14 +489,14 @@ public class C64PopupMenu implements ActionListener, ItemListener {
                 if (openFile()) {
 		  if (false) {
                     addString("load\""+fFile.getAbsolutePath().toLowerCase()+"\",8");
-                    addkey((char)10);
+                    addkey(PETSCII_ENTER);
 		  } else {
 		    //arg=fFile.getAbsolutePath().toLowerCase(); // why?
 		    arg=fFile.getAbsolutePath();
                     //addString("poprun");
                     forcedcompletion=true;
 		    command="fileopenrun";
-                    addkey((char)10);
+                    addkey(PETSCII_ENTER);
 		  }
                 }
 	} else if (source.getText().equals("Dumpstate now")) {
