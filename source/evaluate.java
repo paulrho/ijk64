@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: evaluate.java,v 1.31 2007/04/19 08:28:24 pgs Exp $
+// $Id: evaluate.java,v 1.32 2011/06/28 23:40:14 pgs Exp pgs $
 //
 // $Log: evaluate.java,v $
+// Revision 1.32  2011/06/28 23:40:14  pgs
+// Standardising keycodes - now use PETSCII
+//
 // Revision 1.31  2007/04/19 08:28:24  pgs
 // Refactoring and simplifying/formatting code especially in Machine
 //
@@ -451,7 +454,7 @@ class evaluate {
         return;
       } else if (function.equals("asc")) {
         stktype[upto-2]=ST_NUM;
-        stknum[upto-2]=(int)(stkstring[upto-1].charAt(0)+1-'A');  // need to convert from PET!
+        stknum[upto-2]=(int)((stkstring[upto-1].charAt(0)+1-'A')&0xFF);  // need to convert from PET!
         if (verbose) { System.out.printf("calculating the ascii of %s to be %f\n",stkstring[upto-1],stknum[upto-2]); }
         return;
       } else if (function.equals("chr$")) {
