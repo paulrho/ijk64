@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id$
+// $Id: GenericType.java,v 1.7 2006/02/15 01:54:04 pgs Exp $
 //
-// $Log$
+// $Log: GenericType.java,v $
+// Revision 1.7  2006/02/15 01:54:04  pgs
+// Standard header
+//
 //
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -92,10 +95,11 @@ class GenericType {
         }
 
       } else {
+        // just for now - put it in lower case (e)
         if (aval>=0.0) {
-          return " "+new Double(aval).toString()+" ";
+          return " "+new Double(aval).toString().toLowerCase()+" ";
         } else {
-          return new Double(aval).toString()+" ";
+          return new Double(aval).toString().toLowerCase()+" ";
         }
       }
     } else if (type==ST_STRING) {

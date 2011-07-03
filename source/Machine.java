@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Machine.java,v 1.34 2007/04/22 22:37:01 pgs Exp pgs $
+// $Id: Machine.java,v 1.36 2011/06/27 23:33:55 pgs Exp $
 //
 // $Log: Machine.java,v $
+// Revision 1.36  2011/06/27 23:33:55  pgs
+// More changes for 325 cut/paste, insertchar mode, List params
+//
 // Revision 1.34  2007/04/22 22:37:01  pgs
 // Add duty cycle
 //
@@ -620,6 +623,12 @@ public class Machine {
     }
   }
 
+  boolean getconfirmation() {
+    String ans=""+machinescreen.givemekey();
+    if (ans.equals("y") ||ans.equals("Y")) return true;
+    return false;
+  }
+
   /** checks whether the ControlC flag has been set **/
   boolean hasControlC()
   {
@@ -632,10 +641,22 @@ public class Machine {
   //////////////////////////////////
 
   String programText="";          //String code; // here is the code, stored as one big string // not used
-
-  void newProgramText()
+  
+  String program_name="";         // this is to keep a reference to what we save/loaded this program as
+  boolean program_modified=false;
+  
+  void newProgramText() throws BasicException
   {
+    if (program_modified) {
+      print("program not saved, continue? ");
+      if (!getconfirmation()) {
+        printnewline();
+        throw new BasicException("PROGRAM NOT SAVED");        
+      }
+      printnewline();
+    }
     programText=""; // NEW program
+    program_modified=false;
   };
 
   /** reads the program basic text file 
@@ -695,6 +716,9 @@ public class Machine {
     /* and to simplify - need to return it as a string! */
     String subset="";
     if (verbose) System.out.printf("Listing from %d to %d\n",from,to);
+    if (from==-1 && program_name!="") {
+      subset+="rem program = "+program_name.toLowerCase()+(program_modified?"*":"")+"\n";
+    }
     String lines[] = programText.split("\\r?\\n");
     printing=false; if (from==-1) printing=true;
     for (int i=0; i<lines.length; ++i) {
@@ -714,8 +738,19 @@ public class Machine {
     return subset;
   }
   
-  boolean loadProgram(String filename)
+  boolean loadProgram(String filename) //throws BasicException
   {
+    if (program_modified) {
+      print("program not saved, continue? ");
+      if (!getconfirmation()) {
+         print("\n?program not saved"); // took off "[CR]"
+         return false;
+         //printnewline()
+        //throw new BasicException("PROGRAM NOT SAVED");        
+      }
+      printnewline();
+    }
+
     try {
       // if it ends in jpg or png or bmp - read the background image
       if (filename.toLowerCase().contains(".png") || filename.toLowerCase().contains(".jpg") || filename.toLowerCase().contains(".bmp")) {
@@ -729,18 +764,26 @@ public class Machine {
        return false;
     }
     program_saved_executionpoint=(-1);
+    program_name=filename; // keep a copy of what we loaded
+    program_modified=false;
     return true;
   }
 
   boolean saveProgram(String filename)
   {
+    boolean ret;
     try {
-      return save_a_file(filename);
+      ret=save_a_file(filename);
     } catch (BasicException basicerror) {
        System.out.printf("Basic Error: %s\n",basicerror.getMessage());
        print("\n?"+basicerror.getMessage().toLowerCase()); // took off "[CR]"
        return false;
     }
+    if (ret) {
+      program_name=filename; // keep a copy of what we last saved
+      program_modified=false;
+    }      
+    return ret;
   }
   
   boolean contProgram() throws BasicException
@@ -844,6 +887,7 @@ public class Machine {
         programText = 
           programText + line;
       }
+      program_modified=true;
       return true;
     } else
       return false;

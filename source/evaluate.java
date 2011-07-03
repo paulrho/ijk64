@@ -1,8 +1,13 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: evaluate.java,v 1.32 2011/06/28 23:40:14 pgs Exp pgs $
+// $Id: evaluate.java,v 1.33 2011/06/29 21:36:51 pgs Exp $
 //
 // $Log: evaluate.java,v $
+// Revision 1.33  2011/06/29 21:36:51  pgs
+// more changes - no space required after line number
+// shift return no-op
+// using PETSCII
+//
 // Revision 1.32  2011/06/28 23:40:14  pgs
 // Standardising keycodes - now use PETSCII
 //
@@ -390,6 +395,8 @@ class evaluate {
         answer=Math.acos(right);
       } else if (function.equals("asin")) { // extension
         answer=Math.asin(right);
+      } else if (function.equals("log")) { // didnt have this before
+        answer=Math.log(right);
       } else if (function.equals("atn")) {
         answer=Math.atan(right);
       } else if (function.equals("tan")) {
@@ -434,6 +441,42 @@ class evaluate {
         }
         stkstring[upto-2]=building;
         return;
+
+      } else if (function.equals("eval$")) { // recursive!! - will this work?
+        evaluate evaluate_engine = new evaluate(using_machine); //probably very cpu expensive
+
+
+          // it is very important that we use the same random generator!!!
+          evaluate_engine.generator=generator;
+          evaluate_engine.verbose=verbose;
+          evaluate_engine.quiet=true;
+
+          stktype[upto-2]=ST_STRING;        
+          // stkstring[upto-2]=machine.evaluate(stknum[upto-1]).print();
+          //answer=evaluate_engine.interpret_string(stkstring[upto-1]).print();
+
+          using_machine.setvariable("everr$",new GenericType(""));
+          try {
+
+            // if we have an xxx= this is an assigment...                      
+            if (stkstring[upto-1].matches("[ ]*[a-zA-Z]+[ ]*=.*")) {
+              System.out.printf("assigment\n");
+              stkstring[upto-2]="";
+              // I think we throw away answer
+              evaluate_engine.interpret_string_with_assignment(stkstring[upto-1]);
+            } else {
+              stkstring[upto-2]=evaluate_engine.interpret_string(stkstring[upto-1]).print();
+            }
+
+          } catch (EvaluateException evalerror) {
+             System.out.printf("Caught Evaluate Error: %s\n",evalerror.getMessage());
+             using_machine.setvariable("everr$",new GenericType(evalerror.getMessage().toLowerCase()));
+             // put this into error message
+             //throw new EvaluateException(evalerror.getMessage());
+          }
+
+        return;
+        
       } else if (function.equals("pos")) {
         // tap into the machine - I think this gives the position on the screen?
         stktype[upto-2]=ST_NUM;
@@ -764,7 +807,7 @@ class evaluate {
     doing=D_NUM;
   }
 
-  double readNum() {
+  double readNum() throws EvaluateException {
           // look ahead, this will look ahead one more character to see if it is NOT part of the number
           String building=a;
           boolean last_e=false;
@@ -781,7 +824,15 @@ class evaluate {
           double value;
           if (building.equals(".")) { // allow just a dot for a number (C64 like)
             value=0.0;
-          } else value=Double.parseDouble(building);
+          } else {
+            /* for example, double decimal point might break it */
+            try {          
+              value=Double.parseDouble(building);
+            } catch(Exception e) {
+              throw new EvaluateException("BAD FORMAT FLOAT");              
+            }
+          
+          }
           if (verbose) { System.out.printf("%sGot value %f\n",printprefix,value); }
     return value;
   }

@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.33 2007/04/18 22:11:16 pgs Exp pgs $
+// $Id: C64.java,v 1.34 2007/04/19 08:28:24 pgs Exp $
 //
 // $Log: C64.java,v $
+// Revision 1.34  2007/04/19 08:28:24  pgs
+// Refactoring and simplifying/formatting code especially in Machine
+//
 // Revision 1.33  2007/04/18 22:11:16  pgs
 // Fix to be default banner screen
 //
@@ -181,7 +184,11 @@ class C64 {
 
       // special case command
       if (result.length()>=4 && (result.substring(0,4)).equals("exit")) {
-        break;
+        if (machine.program_modified) {
+          screen.print("?program modified");
+          continue;
+        } else
+          break;
       }
 
       if (result.trim().equals("")) continue; // just a blank line
