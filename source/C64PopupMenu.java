@@ -41,6 +41,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         JCheckBoxMenuItem cbMenuItem;
         JRadioButtonMenuItem rbMenuItem;
         JMenu submenu;
+        JMenu submenu2;
 
   
 	// try this
@@ -123,12 +124,17 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 
         popup.addSeparator();
 
+        submenu2 = new JMenu("Screen...");
+        submenu2.setMnemonic(KeyEvent.VK_F);
+        submenu2.addActionListener(this);
+        popup.add(submenu2);
+
         cbMenuItem_bgtrans = new JCheckBoxMenuItem("Transparent background");
         cbMenuItem_bgtrans.setMnemonic(KeyEvent.VK_B);
         cbMenuItem_bgtrans.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_B, ActionEvent.ALT_MASK));
         cbMenuItem_bgtrans.addItemListener(this);
-        popup.add(cbMenuItem_bgtrans);
+        submenu2.add(cbMenuItem_bgtrans);
 
         cbMenuItem = new JCheckBoxMenuItem("Hidden (faint) text");
         cbMenuItem.setSelected(screen.faint);
@@ -136,7 +142,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_H, ActionEvent.ALT_MASK));
         cbMenuItem.addItemListener(this);
-        popup.add(cbMenuItem);
+        submenu2.add(cbMenuItem);
 
         cbMenuItem = new JCheckBoxMenuItem("Drop shadow");
         cbMenuItem.setSelected(screen.bgshadow);
@@ -144,40 +150,40 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_D, ActionEvent.ALT_MASK));
         cbMenuItem.addItemListener(this);
-        popup.add(cbMenuItem);
+        submenu2.add(cbMenuItem);
 
         cbMenuItem = new JCheckBoxMenuItem("Uppercase");
         cbMenuItem.setSelected(true);
         cbMenuItem.addItemListener(this);
-        popup.add(cbMenuItem);
+        submenu2.add(cbMenuItem);
 
         cbMenuItem = new JCheckBoxMenuItem("Sync background image");
         cbMenuItem.setSelected(true);
         cbMenuItem.addItemListener(this);
-        popup.add(cbMenuItem);
+        submenu2.add(cbMenuItem);
 
         cbMenuItem = new JCheckBoxMenuItem("50% duty cycle");
         //cbMenuItem.setSelected(true);
         cbMenuItem.addItemListener(this);
-        popup.add(cbMenuItem);
+        submenu2.add(cbMenuItem);
 
         cbMenuItem = new JCheckBoxMenuItem("Frames");
         cbMenuItem.setSelected(false);
         cbMenuItem.addItemListener(this);
-        popup.add(cbMenuItem);
+        submenu2.add(cbMenuItem);
 
         cbMenuItem = new JCheckBoxMenuItem("SendToBack");
         cbMenuItem.setSelected(false);
         cbMenuItem.addItemListener(this);
-        popup.add(cbMenuItem);
+        submenu2.add(cbMenuItem);
 
 
 	//------------------------------------------------------------
-        popup.addSeparator();
+        submenu2.addSeparator();
         submenu = new JMenu("Preset Modes");
         submenu.setMnemonic(KeyEvent.VK_S);
         menuItem.addActionListener(this);
-        popup.add(submenu);
+        submenu2.add(submenu);
         menuItem = new JMenuItem("Commodore 128 80x25 monitor mode (double height pixels)");
         submenu.add(menuItem);
         menuItem = new JMenuItem("Commodore 64 default mode");
@@ -187,7 +193,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 
         //-------------------------------------------------------------
         //a group of radio button menu items
-        popup.addSeparator();
+        submenu2.addSeparator();
         ButtonGroup group = new ButtonGroup();
 
         rbMenuItem = new JRadioButtonMenuItem("40 columns");
@@ -195,17 +201,17 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         rbMenuItem.setMnemonic(KeyEvent.VK_S);
         group.add(rbMenuItem);
         rbMenuItem.addActionListener(this);
-        popup.add(rbMenuItem);
+        submenu2.add(rbMenuItem);
 
         rbMenuItem = new JRadioButtonMenuItem("80 columns");
         rbMenuItem.setMnemonic(KeyEvent.VK_O);
         group.add(rbMenuItem);
         rbMenuItem.addActionListener(this);
-        popup.add(rbMenuItem);
+        submenu2.add(rbMenuItem);
 
         //-------------------------------------------------------------
         //a group of check box menu items
-        popup.addSeparator();
+        submenu2.addSeparator();
         group = new ButtonGroup();
 
         rbMenuItem = new JRadioButtonMenuItem("25 rows");
@@ -213,23 +219,23 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         rbMenuItem.setMnemonic(KeyEvent.VK_R);
         group.add(rbMenuItem);
         rbMenuItem.addActionListener(this);
-        popup.add(rbMenuItem);
+        submenu2.add(rbMenuItem);
 
         rbMenuItem = new JRadioButtonMenuItem("40 rows");
         rbMenuItem.setMnemonic(KeyEvent.VK_O);
         group.add(rbMenuItem);
         rbMenuItem.addActionListener(this);
-        popup.add(rbMenuItem);
+        submenu2.add(rbMenuItem);
 
         rbMenuItem = new JRadioButtonMenuItem("90 rows");
         rbMenuItem.setMnemonic(KeyEvent.VK_O);
         group.add(rbMenuItem);
         rbMenuItem.addActionListener(this);
-        popup.add(rbMenuItem);
+        submenu2.add(rbMenuItem);
 
         //-------------------------------------------------------------
         //a group of check box menu items
-        popup.addSeparator();
+        submenu2.addSeparator();
         group = new ButtonGroup();
 
         rbMenuItem = new JRadioButtonMenuItem("Single pixel ( * 1 )");
@@ -237,25 +243,25 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         rbMenuItem.setMnemonic(KeyEvent.VK_R);
         group.add(rbMenuItem);
         rbMenuItem.addActionListener(this);
-        popup.add(rbMenuItem);
+        submenu2.add(rbMenuItem);
 
         rbMenuItem = new JRadioButtonMenuItem("Double pixel ( * 2 )");
         rbMenuItem.setMnemonic(KeyEvent.VK_O);
         group.add(rbMenuItem);
         rbMenuItem.addActionListener(this);
-        popup.add(rbMenuItem);
+        submenu2.add(rbMenuItem);
 
         rbMenuItem = new JRadioButtonMenuItem("Triple pixel ( * 3 )");
         rbMenuItem.setMnemonic(KeyEvent.VK_O);
         group.add(rbMenuItem);
         rbMenuItem.addActionListener(this);
-        popup.add(rbMenuItem);
+        submenu2.add(rbMenuItem);
 
         rbMenuItem = new JRadioButtonMenuItem("Double height ( Y*2 )");
         rbMenuItem.setMnemonic(KeyEvent.VK_O);
         group.add(rbMenuItem);
         rbMenuItem.addActionListener(this);
-        popup.add(rbMenuItem);
+        submenu2.add(rbMenuItem);
 
         //-------------------------------------------------------------
         //a group of check box menu items

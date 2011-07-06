@@ -1,8 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.34 2007/04/19 08:28:24 pgs Exp $
+// $Id: C64.java,v 1.35 2011/07/03 23:00:20 pgs Exp pgs $
 //
 // $Log: C64.java,v $
+// Revision 1.35  2011/07/03 23:00:20  pgs
+// Add EVAL$ function
+// Fix insertspace etc modes - they were buggy
+//
 // Revision 1.34  2007/04/19 08:28:24  pgs
 // Refactoring and simplifying/formatting code especially in Machine
 //
@@ -183,7 +187,8 @@ class C64 {
       }
 
       // special case command
-      if (result.length()>=4 && (result.substring(0,4)).equals("exit")) {
+      // should be a signal from machine itself?
+      if (result.length()>=4 && (result.trim().substring(0,4)).equals("exit")) {
         if (machine.program_modified) {
           screen.print("?program modified");
           continue;
