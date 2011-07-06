@@ -1,9 +1,9 @@
 #build number and date
-#Sat Jul 02 22:05:27 EST 2011
-build-date=20110702-2205
+#Mon Jul 04 09:01:03 EST 2011
+build-date=20110704-0901
 rev=5
-build.computer=sirius.futex-home.com.au
-major=3
 build.user.name=pgs
+major=3
+build.computer=sirius.futex-home.com.au
 minor=2
-build-number=0870
+build-number=0871
