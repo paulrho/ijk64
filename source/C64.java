@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.35 2011/07/03 23:00:20 pgs Exp pgs $
+// $Id: C64.java,v 1.36 2011/07/06 09:46:23 pgs Exp pgs $
 //
 // $Log: C64.java,v $
+// Revision 1.36  2011/07/06 09:46:23  pgs
+// Mouse pointing and scrolling
+//
 // Revision 1.35  2011/07/03 23:00:20  pgs
 // Add EVAL$ function
 // Fix insertspace etc modes - they were buggy
@@ -139,6 +142,13 @@ class C64 {
 
     machine=new Machine(screen=new C64Screen("C64")); // new way of attaching screen
     C64PopupMenu pop=new C64PopupMenu(machine,screen); // keep a reference to it for returning things
+
+    // set the icon (doesnt work with ico but does with png
+    //    java.net.URL url = ClassLoader.getSystemResource("images/c64.ico");
+    java.net.URL url = C64Screen.class.getResource("images/c64.png");
+    java.awt.Toolkit kit = java.awt.Toolkit.getDefaultToolkit();
+    java.awt.Image img = kit.getImage(url);
+    screen.setIconImage(img);
   
     //machine.runOS // gets a line and executes it (including running program)
 
@@ -158,51 +168,20 @@ class C64 {
       String result;
       do {
         result=screen.screenInput();
-        if (pop.forcedcompletion) break;
-      } while (result.trim().equals(""));
+      } while (result.trim().equals("") && !pop.forcedcompletion);
       if (pop.forcedcompletion) {
         pop.forcedcompletion=false;
-        // this is true if a special command was called from the popup
-        if (pop.command.equals("save")) {
-          machine.saveProgram(pop.arg);
-        } else if (pop.command.equals("fileopen")) {
-          machine.loadProgram(pop.arg);
-          machine.variables_clr();
-        } else if (pop.command.equals("fileopenrun")) {
-          machine.loadProgram(pop.arg);
-          machine.variables_clr();
-          machine.runProgram(); // we now execute the statements upon a machine
-        } else if (pop.command.equals("run")) {
-          machine.variables_clr();
-          machine.runProgram(); // we now execute the statements upon a machine
-          continue;
-        } else if (pop.command.equals("new")) {
-          screen.startupscreen();
-          continue;
-        } else if (pop.command.equals("exit")) {
-          break;
-        }
-        System.out.printf("Forced completion triggered\n");
-        continue;
+        result=pop.command;
+        /* read out the char that forced the line term (CR or BREAK) */
+        if (screen.hasinput()) screen.givemekey();
       }
-
-      // special case command
-      // should be a signal from machine itself?
-      if (result.length()>=4 && (result.trim().substring(0,4)).equals("exit")) {
-        if (machine.program_modified) {
-          screen.print("?program modified");
-          continue;
-        } else
-          break;
-      }
-
       if (result.trim().equals("")) continue; // just a blank line
-
       // execute immediate!
       if (machine.insertLine(result.trim())) {
         displayReady=false;
       } else {
         machine.runImmediate(result.trim()); // and again, upon a machine
+        if (machine.signal_exit) break;
        }
     } // end while
 

@@ -1,8 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: GenericType.java,v 1.7 2006/02/15 01:54:04 pgs Exp $
+// $Id: GenericType.java,v 1.8 2011/07/03 23:00:20 pgs Exp $
 //
 // $Log: GenericType.java,v $
+// Revision 1.8  2011/07/03 23:00:20  pgs
+// Add EVAL$ function
+// Fix insertspace etc modes - they were buggy
+//
 // Revision 1.7  2006/02/15 01:54:04  pgs
 // Standard header
 //
@@ -25,6 +29,7 @@ class GenericType {
   {
     type=base.type;
     aval=base.aval;
+    if (type==ST_STRING) astring=new String(base.astring);
   }
 
   GenericType()

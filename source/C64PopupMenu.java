@@ -18,6 +18,8 @@ import javax.swing.JFrame;
 import javax.swing.*;
 import javax.swing.filechooser.*;
 
+import javax.swing.event.*; // popupmenulistener
+
 // for Files
  import java.io.*;
 
@@ -55,7 +57,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         //popup.setLabel("JEBI"); // doesnt work
 
         ImageIcon icon = createImageIcon("images/run.png");
-        menuItem = new JMenuItem("JEBI",icon);
+        menuItem = new JMenuItem("JEBI / ijk64",icon);
 	menuItem.setEnabled(false);
         menuItem.addActionListener(this);
         popup.add(menuItem);
@@ -74,6 +76,14 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         submenu.setMnemonic(KeyEvent.VK_N);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_N, ActionEvent.CTRL_MASK));
+        menuItem.addActionListener(this);
+        submenu.add(menuItem);
+
+        icon = createImageIcon("images/fileopen.png");
+        menuItem = new JMenuItem("Directory",icon);
+        submenu.setMnemonic(KeyEvent.VK_O);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_O, ActionEvent.CTRL_MASK));
         menuItem.addActionListener(this);
         submenu.add(menuItem);
 
@@ -117,12 +127,64 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         menuItem.addActionListener(this);
         popup.add(menuItem);
 
+        icon = createImageIcon("images/editpaste.png");
+        menuItem = new JMenuItem("List program",icon);
+        menuItem.addActionListener(this);
+        popup.add(menuItem);
+
         icon = createImageIcon("images/applet-critical-blank.png");
         menuItem = new JMenuItem("Reset machine",icon);
         menuItem.addActionListener(this);
         popup.add(menuItem);
 
         popup.addSeparator();
+
+        submenu2 = new JMenu("Keys...");
+        submenu2.setMnemonic(KeyEvent.VK_F);
+        submenu2.addActionListener(this);
+        popup.add(submenu2);
+
+        menuItem = new JMenuItem("CLR (clear screen) [CTRL HOME]");
+        menuItem.addItemListener(this);
+        submenu2.add(menuItem);
+
+        menuItem = new JMenuItem("HOME (move to top of screen)");
+        menuItem.addItemListener(this);
+        submenu2.add(menuItem);
+
+        menuItem = new JMenuItem("BREAK [CTRL ESC]");
+        menuItem.addItemListener(this);
+        submenu2.add(menuItem);
+
+        submenu2.addSeparator();
+
+        menuItem = new JMenuItem("End of Line [END]");
+        menuItem.setMnemonic(KeyEvent.VK_END);
+        //menuItem.setAccelerator(KeyStroke.getKeyStroke(
+        //        KeyEvent.VK_END));
+        menuItem.addItemListener(this);
+        submenu2.add(menuItem);
+
+        menuItem = new JMenuItem("Toggle insert [INSERT]");
+        menuItem.addItemListener(this);
+        submenu2.add(menuItem);
+
+        menuItem = new JMenuItem("[DELETE]");
+        menuItem.addItemListener(this);
+        submenu2.add(menuItem);
+
+        menuItem = new JMenuItem("Page Up [PAGE UP]");
+        menuItem.addItemListener(this);
+        submenu2.add(menuItem);
+
+        menuItem = new JMenuItem("Page Down [PAGE DOWN]");
+        menuItem.addItemListener(this);
+        submenu2.add(menuItem);
+
+        menuItem = new JMenuItem("Scroll Wheel (up/down)");
+        menuItem.addItemListener(this);
+        submenu2.add(menuItem);
+
 
         submenu2 = new JMenu("Screen...");
         submenu2.setMnemonic(KeyEvent.VK_F);
@@ -162,11 +224,6 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         cbMenuItem.addItemListener(this);
         submenu2.add(cbMenuItem);
 
-        cbMenuItem = new JCheckBoxMenuItem("50% duty cycle");
-        //cbMenuItem.setSelected(true);
-        cbMenuItem.addItemListener(this);
-        submenu2.add(cbMenuItem);
-
         cbMenuItem = new JCheckBoxMenuItem("Frames");
         cbMenuItem.setSelected(false);
         cbMenuItem.addItemListener(this);
@@ -176,6 +233,17 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         cbMenuItem.setSelected(false);
         cbMenuItem.addItemListener(this);
         submenu2.add(cbMenuItem);
+
+
+        submenu = new JMenu("Machine...");
+        submenu.setMnemonic(KeyEvent.VK_F);
+        submenu.addActionListener(this);
+        popup.add(submenu);
+
+        cbMenuItem = new JCheckBoxMenuItem("50% duty cycle");
+        //cbMenuItem.setSelected(true);
+        cbMenuItem.addItemListener(this);
+        submenu.add(cbMenuItem);
 
 
 	//------------------------------------------------------------
@@ -263,6 +331,38 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         rbMenuItem.addActionListener(this);
         submenu2.add(rbMenuItem);
 
+
+        submenu = new JMenu("Editor...");
+        popup.add(submenu);
+        // submenu
+
+        cbMenuItem = new JCheckBoxMenuItem("Insert Chars");
+        cbMenuItem.setMnemonic(KeyEvent.VK_S);
+        cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_S, ActionEvent.ALT_MASK));
+        cbMenuItem.addItemListener(this);
+        submenu.add(cbMenuItem);
+
+        cbMenuItem = new JCheckBoxMenuItem("Allow Scroll");
+        cbMenuItem.setMnemonic(KeyEvent.VK_S);
+        cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_S, ActionEvent.ALT_MASK));
+        cbMenuItem.addItemListener(this);
+        submenu.add(cbMenuItem);
+
+        cbMenuItem = new JCheckBoxMenuItem("Allow Point");
+        cbMenuItem.setMnemonic(KeyEvent.VK_S);
+        cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_S, ActionEvent.ALT_MASK));
+        cbMenuItem.addItemListener(this);
+        submenu.add(cbMenuItem);
+
+        cbMenuItem = new JCheckBoxMenuItem("Line length infinite");
+        cbMenuItem.setMnemonic(KeyEvent.VK_S);
+        cbMenuItem.addItemListener(this);
+        submenu.add(cbMenuItem);
+
+
         //-------------------------------------------------------------
         //a group of check box menu items
         popup.addSeparator();
@@ -320,31 +420,31 @@ public class C64PopupMenu implements ActionListener, ItemListener {
 
         JMenu PCsubmenu_plain= new JMenu("Plain set");
         PCsubmenu.add(PCsubmenu_plain);
-        icon = createImageIcon("images/psd.jpg");
+        icon = createImageIcon("images/psd2.jpg");
         menuItem = new JMenuItem("Plain set",icon);
         PCsubmenu_plain.add(menuItem);
 
         JMenu PCsubmenu_shift= new JMenu("Shifted set");
         PCsubmenu.add(PCsubmenu_shift);
-        icon = createImageIcon("images/psd.jpg");
+        icon = createImageIcon("images/psd2.jpg");
         menuItem = new JMenuItem("Shifted set",icon);
         PCsubmenu_shift.add(menuItem);
 
         JMenu PCsubmenu_comm= new JMenu("C= set");
         PCsubmenu.add(PCsubmenu_comm);
-        icon = createImageIcon("images/psd.jpg");
+        icon = createImageIcon("images/psd2.jpg");
         menuItem = new JMenuItem("C= set",icon);
         PCsubmenu_comm.add(menuItem);
 
         JMenu PCsubmenu_ctrl= new JMenu("CTRL= set");
         PCsubmenu.add(PCsubmenu_ctrl);
-        icon = createImageIcon("images/psd.jpg");
+        icon = createImageIcon("images/psd2.jpg");
         menuItem = new JMenuItem("CTRL set",icon);
         PCsubmenu_ctrl.add(menuItem);
 
         JMenu C64submenu = new JMenu("C64 keyboard");
         submenu.add(C64submenu);
-        icon = createImageIcon("images/c64c.jpg");
+        icon = createImageIcon("images/c64c2.jpg");
         menuItem = new JMenuItem("Original",icon);
         C64submenu.add(menuItem);
 
@@ -379,6 +479,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         menuItem = new JMenuItem("META-COLS n"); submenu.add(menuItem);
         menuItem = new JMenuItem("META-BGTRANS [0|1]"); submenu.add(menuItem);
         menuItem = new JMenuItem("META-VERBOSE"); submenu.add(menuItem);
+        menuItem = new JMenuItem("META-TIMING"); submenu.add(menuItem);
         menuItem = new JMenuItem("META-DUMPSTATE"); submenu.add(menuItem); menuItem.addActionListener(this);
         menuItem = new JMenuItem("EXIT"); submenu.add(menuItem);
         submenu.addSeparator();
@@ -404,6 +505,31 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         menuItem.addActionListener(this);
         popup.add(menuItem);
 
+if (false) {
+  popup.addPopupMenuListener(new PopupMenuListener() {
+
+      @Override
+      public void popupMenuCanceled(PopupMenuEvent e) {
+          System.out.println("cancelled");
+          screen.invalidate();
+          screen.forcedrepaint();
+      }
+
+      @Override
+      public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+          System.out.println("vanishing");
+          screen.invalidate();
+          screen.forcedrepaint();
+      }
+
+      @Override
+      public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+          System.out.println("appearing");
+      }
+  });
+}
+
+
         //Add listener to the text area so the popup menu can come up.
         MouseListener popupListener = new PopupListener(popup);
 	// attach to screen
@@ -419,107 +545,93 @@ public class C64PopupMenu implements ActionListener, ItemListener {
                    + "    Event source: " + source.getText()
                    + " (an instance of " + getClassName(source) + ")";
         System.out.print(s + newline);
-	if (source.getText().equals("80 columns")) {
-		System.out.print("Setting to 80 columns...\n");
-        	screen.setCols(80);
-	} else if (source.getText().equals("40 columns")) {
-		System.out.print("Setting to 40 columns...\n");
-        	screen.setCols(40);
-	} else if (source.getText().equals("Single pixel ( * 1 )")) {
-		System.out.print("Setting single pixel...\n");
-        	screen.setScale(1);
-	} else if (source.getText().equals("Double pixel ( * 2 )")) {
-		System.out.print("Setting double pixel...\n");
-        	screen.setScale(2);
-	} else if (source.getText().equals("Triple pixel ( * 3 )")) {
-		System.out.print("Setting triple pixel...\n");
-        	screen.setScale(3);
-	} else if (source.getText().equals("Double height ( Y*2 )")) {
-		System.out.print("Setting double height pixel...\n");
-        	screen.setScaleY(2);
-	} else if (source.getText().equals("25 rows")) {
-		System.out.print("Setting 25 rows...\n");
-        	screen.setRows(25);
-	} else if (source.getText().equals("About")) {
-            aboutBox();
-	} else if (source.getText().equals("New")) {
-          //oldway//System.out.print("New (sys)...\n");
-          //oldway//addString("sys0");
-          //oldway//addkey(PETSCII_ENTER);
-          forcedcompletion=true;
-	  command="new";
-          addkey(PETSCII_ENTER);
-	} else if (source.getText().equals("Exit")) {
-          //oldway// System.out.print("Exiting...\n");
-          //oldway// addString("exit");
-          //oldway// addkey(PETSCII_ENTER);
-          forcedcompletion=true;
-	  command="exit";
-          addkey(PETSCII_ENTER);
-	} else if (source.getText().equals("Run program")) {
-          //oldway//System.out.print("Running...\n");
-          //oldway//addString("run");
-          //oldway//addkey(PETSCII_ENTER);
-          forcedcompletion=true;
-	  command="run";
-          addkey(PETSCII_ENTER);
+      if (source.getText().equals("80 columns")) {
+        System.out.print("Setting to 80 columns...\n");
+              screen.setCols(80);
+      } else if (source.getText().equals("40 columns")) {
+        System.out.print("Setting to 40 columns...\n");
+              screen.setCols(40);
+      } else if (source.getText().equals("Single pixel ( * 1 )")) {
+        System.out.print("Setting single pixel...\n");
+              screen.setScale(1);
+      } else if (source.getText().equals("Double pixel ( * 2 )")) {
+        System.out.print("Setting double pixel...\n");
+              screen.setScale(2);
+      } else if (source.getText().equals("Triple pixel ( * 3 )")) {
+        System.out.print("Setting triple pixel...\n");
+              screen.setScale(3);
+      } else if (source.getText().equals("Double height ( Y*2 )")) {
+        System.out.print("Setting double height pixel...\n");
+              screen.setScaleY(2);
+      } else if (source.getText().equals("25 rows")) {
+        System.out.print("Setting 25 rows...\n");
+              screen.setRows(25);
+      } else if (source.getText().equals("About")) {
+                aboutBox();
+      } else if (source.getText().equals("New")) {
+              //oldway//System.out.print("New (sys)...\n");
+              //oldway//addString("sys0");
+              //oldway//addkey(PETSCII_ENTER);
+        forcedcompletion=true; addkey(PETSCII_ENTER);
+        command="new";      
+      
+      } else if (source.getText().equals("Exit")) {
+        forcedcompletion=true; addkey(PETSCII_ENTER);
+        command="exit";        
 
-	} else if (source.getText().equals("Save")) {
-		System.out.print("Saving file...\n");
-                //openFile();
-	        arg="mysave.basic"; // hard coded for now
-                forcedcompletion=true;
-		command="save";
-                addkey(PETSCII_ENTER);
-	} else if (source.getText().equals("Open...")) {
-		System.out.print("Opening file...\n");
-                //Create a file chooser
-               // final JFileChooser fc = new JFileChooser();
-                //In response to a button click:
-                //JFrame jf=new JFrame("Open File");
-                //int returnVal = fc.showOpenDialog(jf);
-                if (openFile()) {
-	          //arg=fFile.getAbsolutePath().toLowerCase(); // why?
-	          arg=fFile.getAbsolutePath();
-                  forcedcompletion=true;
-		  command="fileopen";
-                  addkey(PETSCII_ENTER);
-                }
-	} else if (source.getText().equals("Open (and run)...")) {
-		System.out.print("Opening file...\n");
-                //Create a file chooser
-               // final JFileChooser fc = new JFileChooser();
-                //In response to a button click:
-                //JFrame jf=new JFrame("Open File");
-                //int returnVal = fc.showOpenDialog(jf);
-                if (openFile()) {
-		  if (false) {
-                    addString("load\""+fFile.getAbsolutePath().toLowerCase()+"\",8");
-                    addkey(PETSCII_ENTER);
-		  } else {
-		    //arg=fFile.getAbsolutePath().toLowerCase(); // why?
-		    arg=fFile.getAbsolutePath();
-                    //addString("poprun");
-                    forcedcompletion=true;
-		    command="fileopenrun";
-                    addkey(PETSCII_ENTER);
-		  }
-                }
-	} else if (source.getText().equals("Dumpstate now")) {
-		System.out.print("dump state (reentrant?)\n");
-                screen.printstats();
-		machine.dumpstate();
-	} else if (source.getText().equals("META-DUMPSTATE")) {
-		System.out.print("dump state (reentrant?)\n");
-                screen.printstats();
-		machine.dumpstate();
-	} else if (source.getText().equals("40 rows")) {
-		System.out.print("Setting 40 rows...\n");
-        	screen.setRows(40);
-	} else if (source.getText().equals("90 rows")) {
-		System.out.print("Setting 90 rows...\n");
-        	screen.setRows(90);
-	}
+      } else if (source.getText().equals("List program")) {
+        forcedcompletion=true; addkey(PETSCII_ENTER);
+        command="list";       
+
+      } else if (source.getText().equals("Run program")) {
+        forcedcompletion=true; addkey(PETSCII_ENTER);
+        command="run";       
+
+      } else if (source.getText().equals("Save")) {
+        System.out.print("Saving file...\n");
+        forcedcompletion=true; addkey(PETSCII_ENTER);
+        command="save";
+        
+      } else if (source.getText().equals("Reset machine")) {
+        System.out.print("Resetting...\n");
+        screen.has_controlC=true; // but chew it up
+        forcedcompletion=true; addkey((char)C64Screen.BREAK_KEY); // no different to ENTER really
+        //command="reset";
+        command="new:meta-charset0:meta-rows25:meta-cols40:meta-scale1:meta-scaley1:print\"(clr)\"";        
+
+      } else if (source.getText().equals("Open...")) {
+        System.out.print("Opening file...\n");
+        if (openFile()) {
+          arg=fFile.getAbsolutePath();
+          forcedcompletion=true; addkey(PETSCII_ENTER);
+          //		  command="fileopen";
+          command="load\""+arg+"\"";          
+        }
+
+      } else if (source.getText().equals("Open (and run)...")) {
+        System.out.print("Opening file...\n");
+        if (openFile()) {
+          arg=fFile.getAbsolutePath();
+          //addString("poprun");
+          forcedcompletion=true; addkey(PETSCII_ENTER);
+          //		    command="fileopenrun";
+          command="load\""+arg+"\":run";          
+        }
+      } else if (source.getText().equals("Dumpstate now")) {
+        System.out.print("dump state (reentrant?)\n");
+                    screen.printstats();
+        machine.dumpstate();
+      } else if (source.getText().equals("META-DUMPSTATE")) {
+        System.out.print("dump state (reentrant?)\n");
+                    screen.printstats();
+        machine.dumpstate();
+      } else if (source.getText().equals("40 rows")) {
+        System.out.print("Setting 40 rows...\n");
+              screen.setRows(40);
+      } else if (source.getText().equals("90 rows")) {
+        System.out.print("Setting 90 rows...\n");
+              screen.setRows(90);
+      }
     }
 
     public void itemStateChanged(ItemEvent e) {
@@ -739,6 +851,9 @@ boolean openFile () {
             + "LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)\n"
             + "ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN\n"
             + "IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.";
+
+        licence = "GPL";
+        
         JTextArea licenceArea = new JTextArea(licence);
         licenceArea.setEditable(false);
         String javaVersion = System.getProperty("java.version");

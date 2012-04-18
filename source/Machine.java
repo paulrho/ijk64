@@ -1,8 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Machine.java,v 1.36 2011/06/27 23:33:55 pgs Exp $
+// $Id: Machine.java,v 1.37 2011/07/03 23:00:20 pgs Exp pgs $
 //
 // $Log: Machine.java,v $
+// Revision 1.37  2011/07/03 23:00:20  pgs
+// Add EVAL$ function
+// Fix insertspace etc modes - they were buggy
+//
 // Revision 1.36  2011/06/27 23:33:55  pgs
 // More changes for 325 cut/paste, insertchar mode, List params
 //
@@ -62,6 +66,8 @@
 
 // for reading a file
 import java.io.*;
+
+import java.net.*; // for reading from http
 
 /** Machine modules :
 <PRE>
@@ -146,7 +152,8 @@ public class Machine {
   public boolean verbose=false;
   boolean enabledmovement=true;  // if this is false, we just parse from top to bottom, good for debugging!
   int partialDutyCycle=0;
-
+  public boolean signal_exit=false;
+  
   //////////////////////////////////
   // Machine State
   //////////////////////////////////
@@ -163,6 +170,7 @@ public class Machine {
   **/
   void clearMachineState() {
     toplinecache=0; // optimisation only & goto/gosub lookup & findcurrentline
+    toplabcache=0;
     topforloopstack=0;
     topgosubstack=0;
     // also clear data
@@ -355,7 +363,12 @@ public class Machine {
     try {
       value=Integer.parseInt(lineNostr);
     } catch(Exception e) {
-      throw new BasicException("NOT NUMERIC ERROR");
+      if (true) { // enable goto label
+        gotoLabel(lineNostr);
+        return;
+      } else {
+        throw new BasicException("NOT NUMERIC ERROR");
+      }
     }
     gotoLine(value);
   }
@@ -379,7 +392,12 @@ public class Machine {
     try {
       value=Integer.parseInt(lineNostr);
     } catch(Exception e) {
-      throw new BasicException("NOT NUMERIC ERROR");
+      if (true) { // enable goto label
+        gosubLabel(lineNostr,pnt);
+        return;
+      } else {
+        throw new BasicException("NOT NUMERIC ERROR");
+      }
     }
     gosubLine(value,pnt);
   }
@@ -436,6 +454,40 @@ public class Machine {
     }
     return ""; // just return negative otherwise
   }
+
+  //////////////////////////////////
+  // LabCache : Label cache
+  //////////////////////////////////
+  static final int MAXLABELS=1000;
+  int toplabcache=0;
+  String labcachelabel[]=new String[MAXLABELS]; // when we get to them, we store the pointer into the code of each line // of course we have to read ahead one we get a GOTO or GOSUB
+  int labcachepnt[]=new int[MAXLABELS];
+
+  void cacheLabel(String label, int pnt) {
+    if (verbose) { System.out.printf("Caching label %s pointer at %d\n",label,pnt); }
+    labcachelabel[toplabcache]=label;
+    labcachepnt[toplabcache]=pnt;
+    toplabcache++;
+  }
+
+  void gotoLabel(String label) throws BasicException {
+    for (int i=0; i<toplabcache; ++i) {
+      if (labcachelabel[i].equals(label)) {
+        executionpoint=labcachepnt[i]; // set this, and then pnt must be set after return
+        return;
+      }
+    }
+    if (verbose) System.out.printf("?LABEL %s NOT FOUND\n",label);
+    throw new BasicLineNotFoundError("LABEL "+label+" NOT FOUND");
+  }
+
+  void gosubLabel(String label, int pnt) throws BasicException {
+    // push on the stack where we are
+    gosubstack[topgosubstack]=pnt;
+    topgosubstack++;
+    gotoLabel(label);
+  }
+
 
   void dumpstate() {
     variables.dumpstate();
@@ -521,6 +573,10 @@ public class Machine {
   //////////////////////////////////
 
   int peek(int val) {
+    if (val==1024 || val>=1030 && val<=1033) 
+      if (graphicsDevice!=null) {
+        return graphicsDevice.command_PEEK(val);
+      }
     if (val==197) {
       if (machinescreen.hasinput()) 
         return 22; // made up number just to make it NOT 64
@@ -590,6 +646,9 @@ public class Machine {
     }
   }
   
+
+  /*****/
+  GraphicsDevice graphicsDevice=null;
   
   //////////////////////////////////
   // Screen
@@ -645,6 +704,21 @@ public class Machine {
   String program_name="";         // this is to keep a reference to what we save/loaded this program as
   boolean program_modified=false;
   
+  boolean performExit(boolean checkprogram) throws BasicException {
+    if (checkprogram) {
+      if (program_modified) {
+        print("program not saved, continue? ");
+        if (!getconfirmation()) {
+          printnewline();
+          throw new BasicException("PROGRAM NOT SAVED");        
+        }
+        printnewline();
+      }      
+    }
+    signal_exit=true;
+    return true;
+  }
+  
   void newProgramText() throws BasicException
   {
     if (program_modified) {
@@ -657,11 +731,14 @@ public class Machine {
     }
     programText=""; // NEW program
     program_modified=false;
+    program_name=""; // clear this too
+    variables_clr();    
   };
 
   /** reads the program basic text file 
   **/
-  static String read_a_file(String filename) throws BasicException {
+  /*static  why?*/
+  String read_a_file(String filename) throws BasicException {
     String content="";
 
     try {
@@ -671,6 +748,42 @@ public class Machine {
       fis.read(b);
       content = new String(b);
       //System.out.println(content);
+    } catch (Exception e) {
+      // try reading from the jar now
+      try {
+//        InputStream is = java.util.FileUtils.class.getResourceAsStream(filename);
+//        InputStream is = getClass().getResourceAsStream(filename);
+        InputStream is = getClass().getResourceAsStream("basic/"+filename);
+        int x= is.available();
+        byte b[]= new byte[x];
+        is.read(b);
+        content = new String(b);
+      } catch (Exception e2) {
+        throw new BasicException("FILE NOT FOUND");
+      }
+    }
+
+    return content;
+  }
+  
+  static String read_http(String urlstring) throws BasicException {
+    String content="";
+
+    try {
+      URL url = new URL(urlstring);
+      BufferedReader in = new BufferedReader(
+            new InputStreamReader(
+            url.openStream()));
+
+      String inputLine;
+
+      while ((inputLine = in.readLine()) != null)
+       //   System.out.println(inputLine);
+       content+=inputLine+"\n";
+      
+      in.close();
+        //}
+    
     } catch (Exception e) { 
       throw new BasicException("FILE NOT FOUND");
       // return null; 
@@ -740,23 +853,27 @@ public class Machine {
   
   boolean loadProgram(String filename) //throws BasicException
   {
-    if (program_modified) {
-      print("program not saved, continue? ");
-      if (!getconfirmation()) {
-         print("\n?program not saved"); // took off "[CR]"
-         return false;
-         //printnewline()
-        //throw new BasicException("PROGRAM NOT SAVED");        
-      }
-      printnewline();
-    }
 
     try {
       // if it ends in jpg or png or bmp - read the background image
       if (filename.toLowerCase().contains(".png") || filename.toLowerCase().contains(".jpg") || filename.toLowerCase().contains(".bmp")) {
         machinescreen.load_bgimage(filename);
+        return true;
       } else {
-        programText=read_a_file(filename);
+        if (program_modified) {
+          print("program not saved, continue? ");
+          if (!getconfirmation()) {
+             print("\n?program not saved"); // took off "[CR]"
+             return false;
+             //printnewline()
+            //throw new BasicException("PROGRAM NOT SAVED");        
+          }
+          printnewline();
+        }
+        if (filename.toLowerCase().contains("http:")) {
+          programText=read_http(filename);
+        } else
+          programText=read_a_file(filename);
       }
     } catch (BasicException basicerror) {
        System.out.printf("Basic Error: %s\n",basicerror.getMessage());
@@ -766,6 +883,7 @@ public class Machine {
     program_saved_executionpoint=(-1);
     program_name=filename; // keep a copy of what we loaded
     program_modified=false;
+    variables_clr();     // didnt do this before!
     return true;
   }
 
@@ -786,6 +904,22 @@ public class Machine {
     return ret;
   }
   
+  void listFiles() {
+    File dir = new File(".");
+  
+    String[] children = dir.list();
+    if (children == null) {
+        // Either dir does not exist or is not a directory
+    } else {
+        print("\n");
+        for (int i=0; i<children.length; i++) {
+            // Get filename of file or directory
+            String filename = children[i];
+            print(filename+"\n");
+        }
+    }
+  }
+
   boolean contProgram() throws BasicException
   {
     if (verbose) {
