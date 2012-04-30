@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: C64.java,v 1.36 2011/07/06 09:46:23 pgs Exp pgs $
+// $Id: C64.java,v 1.37 2012/04/18 06:07:53 pgs Exp $
 //
 // $Log: C64.java,v $
+// Revision 1.37  2012/04/18 06:07:53  pgs
+// Adding graphics capability
+//
 // Revision 1.36  2011/07/06 09:46:23  pgs
 // Mouse pointing and scrolling
 //
@@ -140,7 +143,8 @@ class C64 {
       }
     }
 
-    machine=new Machine(screen=new C64Screen("C64")); // new way of attaching screen
+//    machine=new Machine(screen=new C64Screen("C64")); // new way of attaching screen
+    machine=new Machine(screen=new C64Screen("ijk64")); // new way of attaching screen
     C64PopupMenu pop=new C64PopupMenu(machine,screen); // keep a reference to it for returning things
 
     // set the icon (doesnt work with ico but does with png

@@ -13,15 +13,19 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 
   Random generator = new Random();
 
-  int sizex=1000; 
-  int sizey=1000;
+//  int sizex=1000; 
+//  int sizey=1000;
+  int tby=30;
+  int sizex=768;   
+  int sizey=1004+tby;
    
   GraphicsDevice() {
+	super("ijk64 graphics");
     setSize(sizex,sizey);
     setVisible(true); // start AWT painting.
     addMouseListener(this);
     addMouseMotionListener(this);
-	newoffImage = createImage(1000,1000);
+	newoffImage = createImage(sizex,sizey);
 	newoffGraphics = (Graphics2D) newoffImage.getGraphics();
     if (true) newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
   }
@@ -42,14 +46,18 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 
 /*******************************************************************************************/
 
-   Color colorindex[] = {Color.WHITE,Color.RED,Color.GREEN,Color.BLUE
+   Color colorindex[] = {
+	   Color.WHITE             // 0
+	  ,Color.RED
+	  ,Color.GREEN
+	  ,Color.BLUE
       ,Color.BLACK
-      ,new Color(255,0,255)
+      ,new Color(128,0,128)   //new Color(16*13,32,255)     // 5 PURPLE
       ,Color.YELLOW
       ,Color.CYAN
       ,Color.ORANGE
       ,new Color(128,0,0)
-      ,Color.PINK
+      ,new Color(255,128,128)    // Color.PINK
       ,Color.DARK_GRAY
       ,Color.GRAY
       ,new Color(128,255,128)
@@ -59,6 +67,7 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 
 
    int fsize=16;
+   int lsize=1;
    int valevent=0;
    int valx=0;
    int valy=0;
@@ -88,31 +97,37 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 
    public synchronized void command_CLS() { /* try this */
      newoffGraphics.setColor(Color.WHITE);
-     newoffGraphics.fillRect(0, 0, sizex,sizey);	   
+     newoffGraphics.fillRect(0, 0, sizex,sizey+tby);	   
      if (!inframe) doupdate();
    }
          
    public void command_RECT(int x1, int y1, int x2, int y2, int col) {
      newoffGraphics.setColor(colorindex[col]);
-     newoffGraphics.fillRect(x1,y1,x2-x1,y2-y1);
+     newoffGraphics.fillRect(x1,y1+tby,x2-x1,y2-y1);
      if (!inframe) doupdate();
    }
 
    public void command_LINE(int x1, int y1, int x2, int y2, int col) {
      newoffGraphics.setColor(colorindex[col]);
-     newoffGraphics.drawLine(x1,y1,x2,y2);
+     newoffGraphics.drawLine(x1,y1+tby,x2,y2+tby);
      if (!inframe) doupdate();
    }
 
    public void command_FSET(String fontname, int s) {
      fsize=s;
    }
+
+   public void command_LSET(int w, int c) {
+     lsize=w;
+     newoffGraphics.setStroke(new BasicStroke(w));
+   }
+
 	
    public void command_GPRINT(String text, int x, int y, int col) {
       Font font= new Font ("Monospaced", Font.BOLD, fsize); //maybe keep this global?
       newoffGraphics.setFont(font);
       newoffGraphics.setColor(colorindex[col]);
-      newoffGraphics.drawString(text,x,y);
+      newoffGraphics.drawString(text,x,y+tby);
       if (!inframe) doupdate();
    }
    
@@ -135,7 +150,7 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
   public void mousePressed(MouseEvent e)
   {
     valx=e.getX();
-    valy=e.getY();
+    valy=e.getY()-tby;
     // also set type to 1
     valevent=1;    
   }
@@ -143,7 +158,7 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
   public void mouseReleased(MouseEvent e)
   {
     valx=e.getX();
-    valy=e.getY();
+    valy=e.getY()-tby;
     // also set type to 1
     valevent=3;    
   }
@@ -151,7 +166,7 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
   public void mouseDragged(MouseEvent e)
   {
     valx=e.getX();
-    valy=e.getY();
+    valy=e.getY()-tby;
     // also set type to 1
     valevent=2;    
   }

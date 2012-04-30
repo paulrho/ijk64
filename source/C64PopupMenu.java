@@ -127,6 +127,11 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         menuItem.addActionListener(this);
         popup.add(menuItem);
 
+        icon = createImageIcon("images/applet-critical-blank.png");
+        menuItem = new JMenuItem("Break run",icon);
+        menuItem.addActionListener(this);
+        popup.add(menuItem);
+
         icon = createImageIcon("images/editpaste.png");
         menuItem = new JMenuItem("List program",icon);
         menuItem.addActionListener(this);
@@ -225,7 +230,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         submenu2.add(cbMenuItem);
 
         cbMenuItem = new JCheckBoxMenuItem("Frames");
-        cbMenuItem.setSelected(false);
+        cbMenuItem.setSelected(!screen.isUndecorated());
         cbMenuItem.addItemListener(this);
         submenu2.add(cbMenuItem);
 
@@ -587,6 +592,11 @@ if (false) {
         forcedcompletion=true; addkey(PETSCII_ENTER);
         command="run";       
 
+      } else if (source.getText().equals("Break run")) {
+        screen.has_controlC=true; // but chew it up
+        forcedcompletion=false; addkey((char)C64Screen.BREAK_KEY); // no different to ENTER really
+        command="";
+        
       } else if (source.getText().equals("Save")) {
         System.out.print("Saving file...\n");
         forcedcompletion=true; addkey(PETSCII_ENTER);
@@ -820,10 +830,10 @@ boolean openFile () {
 
     public void aboutBox() {
         String myversion =
-            "JEBI/C64 version "
+            "JEBI/C64/ijk64 version "
             + version.programVersion + "\n"  // was 3.0.48
             + "Paul Salanitri, Futex\n"
-            + "Copyright (c) 2001-2007 P. Salanitri";
+            + "Copyright (c) 2001-2007-2012 P. Salanitri";
         String licence =
             "Redistribution and use in source and binary forms, with or\n"
             + "without modification, are permitted provided that the\n"
@@ -860,7 +870,7 @@ boolean openFile () {
         Object contents[] = new Object[] { myversion, licenceArea, 
         	"Java version " + javaVersion };
         //JOptionPane.showMessageDialog(parent, contents, "About GeomLab",
-        JOptionPane.showMessageDialog( screen, contents, "About JEBI/C64",
+        JOptionPane.showMessageDialog( screen, contents, "About JEBI/C64/ijk64",
         	JOptionPane.INFORMATION_MESSAGE);
     }
 

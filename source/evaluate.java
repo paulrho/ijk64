@@ -1,8 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: evaluate.java,v 1.33 2011/06/29 21:36:51 pgs Exp $
+// $Id: evaluate.java,v 1.34 2011/07/03 23:00:20 pgs Exp $
 //
 // $Log: evaluate.java,v $
+// Revision 1.34  2011/07/03 23:00:20  pgs
+// Add EVAL$ function
+// Fix insertspace etc modes - they were buggy
+//
 // Revision 1.33  2011/06/29 21:36:51  pgs
 // more changes - no space required after line number
 // shift return no-op
@@ -496,13 +500,46 @@ class evaluate {
         stknum[upto-2]=stkstring[upto-1].length();
         return;
       } else if (function.equals("asc")) {
-        stktype[upto-2]=ST_NUM;
-        stknum[upto-2]=(int)((stkstring[upto-1].charAt(0)+1-'A')&0xFF);  // need to convert from PET!
+		if (true && using_machine!=null) {
+          //stktype[upto-2]=ST_NUM;
+          //stknum[upto-2]=using_machine.asc(stkstring[upto-1]);
+          stktype[upto-2]=ST_NUM;
+          if (stkstring[upto-1]=="") throw new EvaluateException("ILLEGAL QUANTITY");
+
+          stknum[upto-2]=(int)((stkstring[upto-1].charAt(0))&0xFF);  // need to convert from PET!
+		} else {		  
+          stktype[upto-2]=ST_NUM;
+          stknum[upto-2]=(int)((stkstring[upto-1].charAt(0)+1-'A')&0xFF);  // need to convert from PET!
+	    }
         if (verbose) { System.out.printf("calculating the ascii of %s to be %f\n",stkstring[upto-1],stknum[upto-2]); }
         return;
       } else if (function.equals("chr$")) {
-        stktype[upto-2]=ST_STRING;
-        stkstring[upto-2]=""+(char)stknum[upto-1];
+		if (false && using_machine!=null) {
+          stktype[upto-2]=ST_STRING;
+          stkstring[upto-2]=using_machine.chrD((int)stknum[upto-1]);
+	    } else {
+          stktype[upto-2]=ST_STRING;
+          stkstring[upto-2]=""+(char)stknum[upto-1];
+	    }
+        return;
+      } else if (function.equals("petconvert")) {
+		if (using_machine!=null) {
+          stktype[upto-2]=ST_NUM;
+          stknum[upto-2]=using_machine.asc1((int)stknum[upto-1]);
+		} else {		  
+          stktype[upto-2]=ST_NUM;
+          stknum[upto-2]=0;
+	    }
+        if (verbose) { System.out.printf("calculating the ascii of %s to be %f\n",stkstring[upto-1],stknum[upto-2]); }
+        return;
+      } else if (function.equals("petunconvert")) {
+		if (using_machine!=null) {
+          stktype[upto-2]=ST_NUM;
+          stknum[upto-2]=using_machine.chrD1((int)stknum[upto-1]);
+	    } else {
+          stktype[upto-2]=ST_NUM;
+          stknum[upto-2]=0;
+	    }
         return;
       } else if (function.equals("metards")) { // meta read data stream
         // VERY special function to say, we dont read anything else and we also get our values from a machine function

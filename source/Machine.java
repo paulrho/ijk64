@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Machine.java,v 1.37 2011/07/03 23:00:20 pgs Exp pgs $
+// $Id: Machine.java,v 1.38 2012/04/18 06:07:53 pgs Exp $
 //
 // $Log: Machine.java,v $
+// Revision 1.38  2012/04/18 06:07:53  pgs
+// Adding graphics capability
+//
 // Revision 1.37  2011/07/03 23:00:20  pgs
 // Add EVAL$ function
 // Fix insertspace etc modes - they were buggy
@@ -655,6 +658,7 @@ public class Machine {
   //////////////////////////////////
 
   C64Screen machinescreen;
+  String baseTitle="ijk64";
   
   public void attachScreen(C64Screen ascreen) {
     machinescreen=ascreen;
@@ -693,7 +697,32 @@ public class Machine {
   {
     return machinescreen.hasControlC();
   }
-  
+
+
+  int asc(String str) {
+	  // return the petascii of a string for this machine
+//	  if (machinescreen!=null) return machinescreen.asc(str);
+      if (machinescreen!=null) return (int)machinescreen.petconvert(str.charAt(0));
+	  return 0;
+  }
+
+  String chrD(int asc) {
+	  // return the petascii of a string for this machine
+	  //if (machinescreen!=null) return machinescreen.chrD(str);
+      if (machinescreen!=null) return ""+machinescreen.petunconvert((char)asc);
+	  return "";
+  }
+
+  int asc1(int str) {
+      if (machinescreen!=null) return (int)machinescreen.petconvert((char)str);
+	  return 0;
+  }
+
+  int chrD1(int asc) {
+      if (machinescreen!=null) return (int)machinescreen.petunconvert((char)asc);
+	  return 0;
+  }
+
 
   //////////////////////////////////
   // PText : Program Text & editting
@@ -732,6 +761,7 @@ public class Machine {
     programText=""; // NEW program
     program_modified=false;
     program_name=""; // clear this too
+    machinescreen.setTitle(baseTitle); // try this
     variables_clr();    
   };
 
@@ -837,14 +867,20 @@ public class Machine {
     for (int i=0; i<lines.length; ++i) {
       int lineno=0;
       String thisline=machineReadLineNo(lines[i]);
-      if (thisline==null) continue;
-      try {
-        lineno=Integer.parseInt(thisline.trim());
-      } catch (NumberFormatException e) {
-        continue;
-      }
-      if (!printing && lineno>=from) printing=true;
-      if (printing && (lineno>to && to!=-1)) { printing=false; from=999999; }
+      // allow showing of no numbered lines
+      if (thisline==null) {
+		  //continue;
+		  lineno=-2;
+	  } else {
+		  try {
+			lineno=Integer.parseInt(thisline.trim());
+		  } catch (NumberFormatException e) {
+  		    lineno=-2;
+			//continue;
+		  }
+	  }
+      if (lineno!=-2 && !printing && lineno>=from) printing=true;
+      if (lineno!=-2 && printing && (lineno>to && to!=-1)) { printing=false; from=999999; }
       if (printing) subset+=lines[i]+"\n"; 
       //System.out.printf("this line %d\n",lineno);
     }
@@ -882,6 +918,8 @@ public class Machine {
     }
     program_saved_executionpoint=(-1);
     program_name=filename; // keep a copy of what we loaded
+    machinescreen.setTitle(baseTitle+" - "+program_name); // try this
+
     program_modified=false;
     variables_clr();     // didnt do this before!
     return true;
@@ -899,6 +937,7 @@ public class Machine {
     }
     if (ret) {
       program_name=filename; // keep a copy of what we last saved
+      machinescreen.setTitle(baseTitle+" - "+program_name); // try this
       program_modified=false;
     }      
     return ret;
@@ -1022,6 +1061,7 @@ public class Machine {
           programText + line;
       }
       program_modified=true;
+      machinescreen.setTitle(baseTitle+" - "+program_name+"*"); // try this
       return true;
     } else
       return false;
