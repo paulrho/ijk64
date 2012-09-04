@@ -67,6 +67,7 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 
 
    int fsize=16;
+   String fontuse="Monospaced";
    int lsize=1;
    int valevent=0;
    int valx=0;
@@ -114,6 +115,7 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
    }
 
    public void command_FSET(String fontname, int s) {
+	 fontuse=fontname;
      fsize=s;
    }
 
@@ -124,7 +126,8 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 
 	
    public void command_GPRINT(String text, int x, int y, int col) {
-      Font font= new Font ("Monospaced", Font.BOLD, fsize); //maybe keep this global?
+      //Font font= new Font ("Monospaced", Font.BOLD, fsize); //maybe keep this global?
+      Font font= new Font (fontuse, Font.BOLD, fsize); //maybe keep this global?
       newoffGraphics.setFont(font);
       newoffGraphics.setColor(colorindex[col]);
       newoffGraphics.drawString(text,x,y+tby);
