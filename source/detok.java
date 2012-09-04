@@ -1,7 +1,10 @@
 ////////////////////////////////////////////////////////////////////////
-// $Id: detok.java,v 1.5 2007/04/19 08:28:24 pgs Exp $
+// $Id: detok.java,v 1.6 2011/06/28 23:40:14 pgs Exp $
 //
 // $Log: detok.java,v $
+// Revision 1.6  2011/06/28 23:40:14  pgs
+// Standardising keycodes - now use PETSCII
+//
 // Revision 1.5  2007/04/19 08:28:24  pgs
 // Refactoring and simplifying/formatting code especially in Machine
 //
@@ -82,6 +85,9 @@ class detok
     /*230*/ ,"", "", "", "", "", "", "", "", "", ""
   };
 
+   // change _ to (anglethingo etc)
+   // change @ to (-)
+   
   static byte[] read_a_file(String filename) {
 
     //String content="";

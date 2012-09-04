@@ -500,13 +500,21 @@ class evaluate {
         stknum[upto-2]=stkstring[upto-1].length();
         return;
       } else if (function.equals("asc")) {
-		if (true && using_machine!=null) {
+		if (using_machine!=null) {
           //stktype[upto-2]=ST_NUM;
           //stknum[upto-2]=using_machine.asc(stkstring[upto-1]);
+            // need to convert from PET!
           stktype[upto-2]=ST_NUM;
           if (stkstring[upto-1]=="") throw new EvaluateException("ILLEGAL QUANTITY");
-
-          stknum[upto-2]=(int)((stkstring[upto-1].charAt(0))&0xFF);  // need to convert from PET!
+          int v=(int)((stkstring[upto-1].charAt(0))&0xFF);
+          if (v>=65&&v<=90) stknum[upto-2]=v+128; 
+          else if (v>=97&&v<=122) stknum[upto-2]=v-32; 
+          else if (v>=193&&v<=218) stknum[upto-2]=v-96; 
+          else if (v==95) stknum[upto-2]=96; 
+          else if (v==96) stknum[upto-2]=95; 
+          else          
+            stknum[upto-2]=v;
+          
 		} else {		  
           stktype[upto-2]=ST_NUM;
           stknum[upto-2]=(int)((stkstring[upto-1].charAt(0)+1-'A')&0xFF);  // need to convert from PET!
@@ -514,10 +522,32 @@ class evaluate {
         if (verbose) { System.out.printf("calculating the ascii of %s to be %f\n",stkstring[upto-1],stknum[upto-2]); }
         return;
       } else if (function.equals("chr$")) {
-		if (false && using_machine!=null) {
+		if (using_machine!=null) {
           stktype[upto-2]=ST_STRING;
-          stkstring[upto-2]=using_machine.chrD((int)stknum[upto-1]);
+          //stkstring[upto-2]=using_machine.chrD((int)stknum[upto-1]);
+          int v=(int)stknum[upto-1];
+          if (v>=193&&v<=218) v=v-128; 
+          else if (v>=65&&v<=90) v=v+32; 
+          else if (v>=97&&v<=122) v=v+96; 
+          else if (v==95) v=96; 
+          else if (v==96) v=95; 
+          stkstring[upto-2]=""+(char)v;
+            
 	    } else {
+          stktype[upto-2]=ST_STRING;
+          stkstring[upto-2]=""+(char)stknum[upto-1];
+	    }
+        return;
+      } else if (function.equals("pcasc")) {
+		{
+          stktype[upto-2]=ST_NUM;
+          if (stkstring[upto-1]=="") throw new EvaluateException("ILLEGAL QUANTITY");
+          stknum[upto-2]=(int)((stkstring[upto-1].charAt(0))&0xFF);  // need to convert from PET!
+		}
+        if (verbose) { System.out.printf("calculating the ascii of %s to be %f\n",stkstring[upto-1],stknum[upto-2]); }
+        return;
+      } else if (function.equals("pcchr$")) {
+	    {
           stktype[upto-2]=ST_STRING;
           stkstring[upto-2]=""+(char)stknum[upto-1];
 	    }
