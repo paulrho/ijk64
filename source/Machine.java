@@ -1,8 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Machine.java,v 1.38 2012/04/18 06:07:53 pgs Exp $
+// $Id: Machine.java,v 1.39 2012/04/30 09:45:34 pgs Exp $
 //
 // $Log: Machine.java,v $
+// Revision 1.39  2012/04/30 09:45:34  pgs
+// resizing ability
+// fixing (but not fixed yet) character tranlation mapping
+//
 // Revision 1.38  2012/04/18 06:07:53  pgs
 // Adding graphics capability
 //

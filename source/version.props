@@ -1,9 +1,9 @@
 #build number and date
-#Wed Apr 18 16:21:23 EST 2012
-build-date=20120418-1621
-rev=5
-build.computer=sirius.futex-home.com.au
-major=4
+#Tue Sep 04 23:24:04 EST 2012
+build-date=20120904-2324
+rev=0
 build.user.name=pgs
-minor=0
-build-number=1130
+major=3
+build.computer=sirius.futex-home.com.au
+minor=3
+build-number=1221

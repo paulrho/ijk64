@@ -1,8 +1,65 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: statements.java,v 1.21 2006/02/20 07:38:31 pgs Exp pgs $
+// $Id: statements.java,v 1.22.1.21 2012/09/04 11:22:38 pgs Exp $
 //
 // $Log: statements.java,v $
+// Revision 1.22.1.21  2012/09/04 11:22:38  pgs
+// petscii mapping
+//
+// Revision 1.22.1.19  2012/04/18 06:07:53  pgs
+// Adding graphics capability
+//
+// Revision 1.22.1.18  2011/07/03 23:00:20  pgs
+// Add EVAL$ function
+// Fix insertspace etc modes - they were buggy
+//
+// Revision 1.22.1.17  2011/06/29 21:36:51  pgs
+// more changes - no space required after line number
+// shift return no-op
+// using PETSCII
+//
+// Revision 1.22.1.16  2011/06/28 23:40:14  pgs
+// Standardising keycodes - now use PETSCII
+//
+// Revision 1.22.1.15  2011/06/27 23:33:55  pgs
+// More changes for 325 cut/paste, insertchar mode, List params
+//
+// Revision 1.22.1.13  2007/04/22 22:37:01  pgs
+// Add duty cycle
+//
+// Revision 1.22.1.12  2007/04/19 08:28:24  pgs
+// Refactoring and simplifying/formatting code especially in Machine
+//
+// Revision 1.22.1.11  2007/04/18 09:37:19  pgs
+// More refactoring with regards to creating program/immediate modes
+//
+// Revision 1.22.1.10  2007/04/17 09:22:33  pgs
+// Adding ability to restart with CONT
+// moved all statments into statements/Machine engine
+//
+// Revision 1.22.1.9  2007/04/16 21:31:00  pgs
+// Complete exception creation, ratify error messages, refactor code
+// to use exceptions (makes code clearer)
+//
+// Revision 1.22.1.7  2007/04/13 09:32:43  pgs
+// programText now in Machine - and used this way from C64
+// in preparation for C64 online editting of program
+// Added ability to enter line numbers and change program
+//
+// Revision 1.22.1.6  2007/04/11 17:57:58  pgs
+// clearing verbose stack display (to the same as comment in code)
+//
+// Revision 1.22.1.3  2007/03/28 21:33:10  pgs
+// Fixup end of file - exit nicely
+// fixup syntax error reporting
+//
+// Revision 1.22.1.1  2006/02/24 04:43:53  pgs
+// Testing an alternative reading method
+//
+// Revision 1.22  2006/02/21 22:24:38  pgs
+// Changes related to pre-tokenising text within strings.
+// This has not been made into a subversion, as it could be switched on and off easily with a boolean (not yet, but could be).
+//
 // Revision 1.21  2006/02/20 07:38:31  pgs
 // Add META-SCALEY and META-BGTRANS keywords
 //
@@ -43,66 +100,45 @@ import java.io.*;
 class statements {
 
   boolean verbose=false;
-  //boolean verbose=true;
-
-  String read_a_file() {
-    return read_a_file("test.basic");
-  }
-
-  static String read_a_file(String filename) {
-
-    String content="";
-
-    try {
-      FileInputStream fis = new FileInputStream(filename);
-      int x= fis.available();
-      byte b[]= new byte[x];
-      fis.read(b);
-      content = new String(b);
-      //System.out.println(content);
-    } catch (Exception e) { }
-
-    return content;
-  }
+  long startTime; // doesnt make a difference being in here
+  long endTime;
 
   statements(String interpstring, Machine themachine)
   {
     machine=themachine;
     verbose=machine.verbose; // inherit this now
-    interpret_string(interpstring);
+    // except if we are CONTinuing
+    machine.clearMachineState(); // clears the line cache and the forloops etc
+    interpret_string(interpstring, 0);
   }
 
-  statements(String[] args, Machine themachine)
+  statements(String interpstring, Machine themachine, int startat)
   {
     machine=themachine;
     verbose=machine.verbose; // inherit this now
-    boolean has_parameter=false;
-    for (int i=0; i<args.length; ++i) {
-      if (args[i].substring(0,1).equals("-")) {
-        if (verbose) { System.out.printf("Got a switch\n"); }
-
-        if (args[i].substring(0,2).equals("-v")) {
-          //evaluate_engine.verbose=true;
-        } else if (args[i].substring(0,2).equals("-q")) {
-          //evaluate_engine.verbose=false;
-        } else if (args[i].substring(0,2).equals("-t")) {
-          //do_many=true; // timing test
-        }
-      } else {
-        // parameter // do it immediately
-        has_parameter=true;
-        interpret_string( read_a_file(args[i]));
-      }
-    }
-    // at the moment, spaces are passed onto the "evaluate interpreter" that's okay
-    //interpret_string("FORI=1TO1000:PRINTI:NEXT");
-    if (!has_parameter) { interpret_string( read_a_file() ); }
-
-  } // end func
+     // dont clearmachinestate - as we are continueing
+    interpret_string(interpstring, startat);
+  }
 
 int MAXTOKENS=100;
 
-String[] basicTokens={"FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","PRINT#","PRINT","END","DIM","GET#5,","POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST","META-VERBOSE","SYS","CLR","META-SCALEY","META-ROWS","FAST","GET","REM","META-CHARSET","LOAD","META-DUMPSTATE","META-COLS","META-BGTRANS","META-SCALE"};
+String[] basicTokens={
+  "FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","PRINT#","PRINT","ENDFRAME","DIM",
+  "GET#5,",
+  "POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST",
+  "META-VERBOSE",
+  "SYS","CLR",
+  "META-SCALEY","META-ROWS",
+  "FAST","GET","REM",
+  "META-CHARSET","LOAD","META-DUMPSTATE","META-COLS","META-BGTRANS","META-SCALE","META-TIMING",
+  "NEW","SAVE","CONT","STOP",
+  "EXIT",
+  "LABEL"
+  ,"SCREEN","GPRINT","BEGINFRAME","END","CLS","LINE","FSET","SLEEP","ALERT","RECT","FILES"
+  ,"LSET"
+  ,"IMAGELOAD","DRAWIMAGE","DESTROYIMAGE"
+  ,"HELP"
+};
 static final int ST_FOR=0;
 static final int ST_TO=1;
 static final int ST_STEP=2;
@@ -114,7 +150,7 @@ static final int ST_GOSUB=7;
 static final int ST_RETURN=8;
 static final int ST_PRINThash=9;
 static final int ST_PRINT=10;
-static final int ST_END=11;
+static final int ST_ENDFRAME=11;
 static final int ST_DIM=12;
 static final int ST_GEThash=13; // this is just a work around for the moment
 static final int ST_POKE=14;
@@ -141,6 +177,33 @@ static final int ST_META_DUMPSTATE=34;
 static final int ST_META_COLS=35;
 static final int ST_META_BGTRANS=36;
 static final int ST_META_SCALE=37;
+static final int ST_META_TIMING=38;
+static final int ST_NEW=39;
+static final int ST_SAVE=40;
+static final int ST_CONT=41;
+static final int ST_STOP=42;
+static final int ST_EXIT=43;
+static final int ST_LABEL=44;
+
+static final int ST_SCREEN=45;
+static final int ST_GPRINT=46;
+static final int ST_BEGINFRAME=47;
+static final int ST_END=48;
+static final int ST_CLS=49;
+static final int ST_LINE=50;
+static final int ST_FSET=51;
+static final int ST_SLEEP=52;
+static final int ST_ALERT=53;
+static final int ST_RECT=54;
+static final int ST_FILES=55;
+static final int ST_LSET=56;
+
+static final int ST_IMAGELOAD=57;
+static final int ST_DRAWIMAGE=58;
+static final int ST_DESTROYIMAGE=59;
+
+static final int ST_HELP=60;
+
 
 String line;
 int pnt;
@@ -153,6 +216,116 @@ String keepLine;
 
 Machine machine; // we now expect to be passed this from machine itself
 
+static final int PT_NEWLINE=0;
+static final int PT_HASLINE=1;
+static final int PT_TOKEN=2;
+static final int PT_ASSIGN=3;
+static final int PT_EOF=4; // new - end of file
+int partType=PT_NEWLINE; // we start as though we are on a newline
+
+long lastTime = 0;
+
+static final int TIME_ReadPart=0;
+static final int TIME_ReadStatementToken=1;
+static final int TIME_ReadStatement=2;
+static final int TIME_ReadAssign=3;
+static final int TIME_RAReadExpression=4;
+static final int TIME_RAReadAssignment=5;
+static final int TIME_RAAssignment=6;
+static final int TIME_interp_while=7;
+static final int TIME_ReadPartReadStatementToken=8;
+static final int TIME_ReadExpression=9;
+long counter_func[]={0,0,0,0,0,0,0,0,0,0};
+long timer_func[]={0,0,0,0,0,0,0,0,0,0};
+String timername_func[]={"ReadPart","ReadStatementToken","ReadStatement","ReadAssign","ReadAssign->ReadExpression","ReadAssign->ReadAssignment","ReadAssign->machine.assignment","interp_whileloop","ReadPart->ReadStatementToken","ReadExpression"};
+
+void start_timing(int func)
+{
+    // not re-entrant!
+    startTime=System.currentTimeMillis(); 
+}
+
+void end_timing(int func)
+{
+    // not re-entrant!
+    endTime=System.currentTimeMillis(); 
+    counter_func[func]++;
+    timer_func[func]+=endTime-startTime;
+    if (counter_func[func]%10000==0) {
+      System.out.printf("%s c=%d t/c=%f\n",
+        timername_func[func],
+        counter_func[func],timer_func[func]/(double)counter_func[func]);
+    }
+}
+
+boolean ReadPart() throws BasicException
+{
+  // all new improved, it will return a couple of "global" codes
+  // indicating:
+  //   parttype
+  // we read from _pnt_ on the string _line_
+
+  // when changing String a= to chars, it took the same amount of time (in timingjar)
+
+    while (pnt<linelength) {
+      String a=line.substring(pnt,pnt+1);
+      if (partType==PT_NEWLINE && a.compareTo("0")>=0 && a.compareTo("9")<=0) {
+        // just read it here like the token thing
+        if (ReadLineNo()) {
+          partType=PT_HASLINE; // we are up to statements
+          // pnt+=at+1; already done (+1 is good?)
+          // keepLine set to line # (string)
+          // but wait, lets keep going...
+          if (verbose) { System.out.printf("On Line %s\n",keepLine); }
+          // not for now /// machine.currentLineNo=keepLine; // only added for error tracking - might slow things down
+
+        } else {
+          // we have a problem
+          System.out.printf("?SYNTAX ERROR parsing lineno\n");
+          throw new BasicException("SYNTAX ERROR : PARSING LINENO : NEEDS A SPACE");
+          // return false;
+        }
+      } else if (a.compareTo("?")==0) {
+        // special case print token
+        pnt++;
+        partType=PT_TOKEN;
+        gotToken=ST_PRINT;
+        return true;
+      } else if (a.compareToIgnoreCase("a")>=0 && a.compareTo("z")<=0) {
+        // one of two things here - a token, or an assignment!
+        if (ReadStatementToken()) {
+          partType=PT_TOKEN;
+          // gotToken already set
+          // pnt+=at; already done
+          return true;
+        } else {
+          // have to assume this is an assignment
+          partType=PT_ASSIGN;
+          // we dont move pnt at all, we start from the start!
+          return true;
+        }
+      } else if (a.equals("\n")) {
+        partType=PT_NEWLINE;
+        // keep going!
+        pnt++;
+      } else if (a.equals(":")) {
+        pnt++; 
+      } else if (a.equals(" ")) { // or TAB
+        pnt++; // no, chew it up
+      } else {
+        // we have found something that finished the sequence
+        // we have NO idea what is this!
+        System.out.printf("?SYNTAX ERROR parsing got character \"%s\"\n",a);
+        return false;
+      }
+    }
+    // is this really an error? (it is the end!)
+    // System.out.printf("?SYNTAX ERROR parsing - we fell off the end\n");
+    // return false;
+    partType=PT_EOF;
+    return true;
+} // ReadPart
+
 void precache_all_lines()
 {
   // read_all_lines
@@ -163,11 +336,14 @@ void precache_all_lines()
     //System.out.printf("\n");
     int start=pnt;
     if (!ReadLineNo()) {
-      if (verbose) { System.out.printf("No line # -finishing\n"); }
-      break;
+      if (verbose) { System.out.printf("No line # -skipping\n"); }
+      //break;
+    } else {
+      // got a line # cache it
+      if (verbose) { System.out.printf("keepLine=%s pnt=%d\n",keepLine,pnt); }
+      machine.cacheLine(keepLine,pnt); //was start
     }
-    // got a line # cache it
-    machine.cacheLine(keepLine,pnt); //was start
+    
     // read out rest of line
     IgnoreRestofLine();
 
@@ -181,6 +357,7 @@ void precache_all_lines()
 
 void precache_all_data()
 {
+  int keeppnt;
   // read_all_lines
   // read the line# first
   pnt=0;
@@ -190,27 +367,44 @@ void precache_all_data()
     //System.out.printf("\n");
     int start=pnt;
     if (!ReadLineNo()) {
-      if (verbose) { System.out.printf("No line # -finishing\n"); }
-      break;
-    }
-    // got a line # cache it
-    machine.cacheLine(keepLine,pnt); //was start
-
-    SkipSpaces();
-    if (ReadStatementToken()) {
-      if (gotToken==ST_DATA) {
-        if (verbose) { System.out.printf("Found a data line\n"); }
-        // from here to the end of the line is to be cached
-        // read out rest of line
-        String building="";
-        String a;
-        while (pnt<linelength && !(a=line.substring(pnt,pnt+1)).equals("\n")) {
-          building+=a;
-          pnt++;
-        }
-        machine.cacheDataAdd(building+"\n");
-        if (verbose) { System.out.printf("Adding %s\n",building); }
-      }
+      if (verbose) { System.out.printf("No line # -skipping\n"); }
+      //break;
+    } else {
+		// got a line # cache it
+		// shoud this be done here too?
+		machine.cacheLine(keepLine,pnt); //was start
+		keeppnt=pnt;
+		SkipSpaces();
+		if (ReadStatementToken()) {
+		  if (gotToken==ST_DATA) {
+			if (verbose) { System.out.printf("Found a data line\n"); }
+			// from here to the end of the line is to be cached
+			// read out rest of line
+			String building="";
+			String a;
+			while (pnt<linelength && !(a=line.substring(pnt,pnt+1)).equals("\n")) {
+			  building+=a;
+			  pnt++;
+			}
+			machine.cacheDataAdd(building+"\n");
+			if (verbose) { System.out.printf("Adding %s\n",building); }
+		  }
+		  if (gotToken==ST_LABEL) {
+			SkipSpaces();
+			if (verbose) { System.out.printf("Found a label\n"); }
+			// from here to the end of the line is to be cached
+			// read out rest of line
+			String building="";
+			String a;
+			while (pnt<linelength && !(a=line.substring(pnt,pnt+1)).equals("\n") && !(a=line.substring(pnt,pnt+1)).equals(":")) {
+			  building+=a;
+			  pnt++;
+			}
+			// trim off ending spaces (but allow middle spaces)
+			machine.cacheLabel(building.trim(),pnt); //cache the label - not the line
+			if (verbose) { System.out.printf("Label %s\n",building); }
+		  }
+		}
     }
     IgnoreRestofLine();
 
@@ -227,130 +421,125 @@ void precache_all_data()
 //boolean newline; // this is a bit of a work around, when we change the execution point to a new line
 //hmm, actually, changing mind, set the line cache to the first statement!
 
-void interpret_string(String passed_line)
+void interpret_string(String passed_line, int startat)
 {
   line=passed_line;
   linelength=line.length();
   if (verbose) { System.out.printf("\n**************************************\n"); }
-  //System.out.printf("Got line %s\n",line);
 
-  // fix up code
-  //try it without now // line=line.toUpperCase(); // convert to uppercase
-
-  // nomore // // instansiate the machine
-  // nomore // machine = new Machine();
-  // nomore // ///machine.verbose=verbose;
-  // nomore // machine.initialise_engines(); // silly, but there is a reason
-  // nomore // //machine.verbose=verbose;
+  if (machine.hasControlC()) { } // do nothing - just clear it initially!
 
   // skip to the chase, and just read the line #s
   precache_all_lines();
   precache_all_data();
   if (verbose) { System.out.printf("DATA is:\n%s\n",machine.allDATA); }
 
-  pnt=0;
+  pnt=startat; // 0 usually
+  // the newline might play havok with CONT
   // read the line# first
-  while (pnt<line.length()) {
-    SkipSpaces();
-    if (verbose) { System.out.printf("\n"); }
-    if (!ReadLineNo()) {
-      //if (verbose) { System.out.printf("No line # -finishing\n"); }
-      //break;
-      // what about this - execute that line IMMEDIATE mode
-      if (verbose) { System.out.printf("No line # NOT finishing going direct\n"); }
-    }
-    if (verbose) { System.out.printf("On Line %s\n",keepLine); }
-    machine.currentLineNo=keepLine; // only added for error tracking - might slow things down
-    // debugging
-    if (false) {
-      if (keepLine.equals("100")) {
-        System.out.printf("Found line, switching on debugging\n");
-        verbose=true;
-        machine.verbose=true;
-        machine.dumpstate();
-      } else {
-        //verbose=false;
-      }
-    }
+  partType=PT_NEWLINE; // we start as though we are on a newline
+  // no need any more // machine.currentLineNo=""; // do this to stop the keeping of previously used line #s
 
-    SkipSpaces();
-    while(pnt<linelength) {
-      SkipSpaces();
+  machine.save_executionpoint=(-1); // effectively flagging not restartable
 
-      if (verbose) { System.out.printf("At position %d\n",pnt); }
-      if (machine.hasControlC()) {
-        System.out.printf("?BREAK%s%s\n",machine.currentLineNo.equals("")?"":" ON LINE ",machine.currentLineNo);
-        machine.print("?break"+(machine.currentLineNo.equals("")?"":" on line ")+machine.currentLineNo+"[CR]");
-        return;
+  long partcount=0; // will this slow it down
+  try {
+  try {
+
+  while (pnt<linelength) {
+    // for each part, check control C status - is this inefficient?
+    if (machine.hasControlC()) {
+      machine.save_executionpoint=pnt; // it is restartable
+      if (verbose) {
+        System.out.printf("setting save_executionpoint to %d\n",machine.save_executionpoint);
       }
+      throw new BasicBREAK("BREAK");
+    }
+    if (machine.partialDutyCycle>0 && ((partcount++)%20)==0) {
       try {
-        if (!ReadStatement()) {
-          System.out.printf("?SYNTAX ERROR%s%s\n  101:Did not get statement\n",machine.currentLineNo.equals("")?"":" ON LINE ",machine.currentLineNo);
-          machine.print("?syntax error"+(machine.currentLineNo.equals("")?"":" on line ")+machine.currentLineNo+"[CR]");
-          // force it to exit
-          pnt=linelength;
-          break;
-        }
-      } catch (ArrayIndexOutOfBoundsException e) { 
-          System.out.printf("?ILLEGAL QUANTITY%s%s\n  201:Got ArrayIndexOutOfBoundsException\n",
-            machine.currentLineNo.equals("")?"":" ON LINE ",machine.currentLineNo);
-          machine.print("?illegal quantity"+(machine.currentLineNo.equals("")?"":" on line ")+machine.currentLineNo+"[CR]");
-          return; 
+        Thread.sleep(machine.partialDutyCycle);
       }
-
-      if (pnt>=line.length() || line.substring(pnt,pnt+1).equals("\n")) {
-        break;
+      catch(InterruptedException e) {
       }
-    } // while everything
-    if (pnt>=line.length()) {
-      break;
+      //machine.dutyCycle(); 
     }
-    SkipNewLines();
-  }
-  if (verbose) { machine.dumpstate(); }
 
+    // change order to see if CONT will work now
+    if (!ReadPart()) { 
+      throw new BasicException("SYNTAX ERROR");
+    }
+
+
+    try {
+      if (partType==PT_EOF) {
+        break; // better to put this at the end of the if condition (for speed)
+      } else if (partType==PT_TOKEN) {
+        if (!ReadStatement()) {
+          throw new BasicException("SYNTAX ERROR : BAD TOKEN");
+        }
+      } else if (partType==PT_ASSIGN) {
+        if (!ReadAssign()) {
+          //throw new BasicException("SYNTAX ERROR : NO TOKEN OR ASSIGNMENT");
+          // simplify this now, we didnt get a token OR an assignment - just a plain old syntax error
+          throw new BasicException("SYNTAX ERROR");          
+        }
+      } else {
+        throw new BasicException("SYNTAX ERROR : DID NOT GET STATEMENT");
+      }
+    } catch (ArrayIndexOutOfBoundsException e) { 
+      throw new BasicException("ILLEGAL QUANTITY");
+    }
+  } // while everything
+
+  } catch (BasicCONTrestart contrestart) {
+     // this is a special case where we want to start/restart the program 
+     // just like runProgram
+     // this way is a bit dodgy - it nests it!
+     machine.contProgram();
+     // goes from direct mode to program mode
+     // either by NEXT(into prog) RETURN GOTO GOSUB or CONT
+  } catch (BasicRUNrestart runrestart) {
+     // this is a special case where we want to start/restart the program 
+     // just like runProgram
+     // this way is a bit dodgy - it nests it!
+     machine.variables_clr();
+     machine.runProgram();
+  } // nested
+
+  } catch (BasicException basicerror) {
+     machine.setCurrentLine(pnt);
+     System.out.printf("Basic Error: %s\n",basicerror.getMessage());
+     machine.print("?"+basicerror.getMessage().toLowerCase()+
+       (machine.currentLineNo.equals("")?"":" on line ")+
+       machine.currentLineNo+""); // took off "[CR]"
+  } 
+
+  if (verbose) { machine.dumpstate(); }
+  machine.executionpoint=pnt;
 }
 
-boolean ReadStatement() {
+boolean ReadStatement() throws BasicException
+{
   // read statement should also read the colon at the end, ready for the next statement
+  // none of these return false, they throw an exception
   if (verbose) { System.out.printf("In ReadStatement\n"); }
-  if (ReadStatementToken()) {
-    if (verbose) { System.out.printf("Got %d as token\n",gotToken); }
+  if (verbose) { System.out.printf("Got %d as token\n",gotToken); }
     switch(gotToken) {
-      case ST_FOR: 
-        if (ProcessFORstatement()) { return true; }
-        break;
-      case ST_NEXT: 
-        if (ProcessNEXTstatement()) { return true; }
-        break;
-      case ST_IF: 
-        if (ProcessIFstatement()) { return true; }
-        break;
-      case ST_GOTO: 
-        if (ProcessGOTOstatement()) { return true; }
-        break;
-      case ST_GOSUB: 
-        if (ProcessGOSUBstatement()) { return true; }
-        break;
-      case ST_RETURN: 
-        if (ProcessRETURNstatement()) { return true; }
-        break;
-      case ST_PRINT: 
-        if (ProcessPRINTstatement()) { return true; }
-        break;
-      case ST_REM: 
-        if (ProcessREMstatement()) { return true; }
-        break;
+      case ST_FOR: if (ProcessFORstatement()) { return true; } break;
+      case ST_NEXT: if (ProcessNEXTstatement()) { return true; } break;
+      case ST_IF: if (ProcessIFstatement()) { return true; } break;
+      case ST_GOTO: if (ProcessGOTOstatement()) { return true; } break;
+      case ST_GOSUB: if (ProcessGOSUBstatement()) { return true; } break;
+      case ST_RETURN: if (ProcessRETURNstatement()) { return true; } break;
+      case ST_PRINT: if (ProcessPRINTstatement()) { return true; } break;
+      case ST_REM: if (ProcessREMstatement()) { return true; } break;
       case ST_PRINThash: // because it would have gone elsewhere
-        if (ProcessIGNOREstatement()) { return true; }
-        break;
+        if (ProcessIGNOREstatement()) { return true; } break;
       case ST_FAST:  // I wish
-        if (ProcessIGNOREstatement()) { return true; }
-        break;
+        if (ProcessIGNOREstatement()) { return true; } break;
       case ST_RESTORE: 
         machine.uptoDATA=0; // revert back again
-        if (ProcessIGNOREstatement()) { return true; }
-        return true;
+        if (ProcessIGNOREstatement()) { return true; } return true;
       case ST_READ: 
         if (ProcessREADstatement()) { return true; }
         // this is tricky, even though I added (and great effor) the
@@ -359,24 +548,20 @@ boolean ReadStatement() {
         // fix string of DATA, whereis we have a stream.
         break;
       case ST_CLR: 
-        // should really do something
-        if (ProcessIGNOREstatement()) { return true; }
-        break;
+        machine.variables_clr();
+        if (ProcessIGNOREstatement()) { return true; } break;
       case ST_DATA: 
-        if (ProcessIGNOREstatement()) { return true; }
-        break;
+        if (ProcessIGNOREstatement()) { return true; } break;
+      case ST_CONT: 
+        if (ProcessCONTstatement()) { return true; } break;
       case ST_RUN: 
-        if (ProcessREMstatement()) { return true; }
-        break;
+        if (ProcessRUNstatement()) { return true; } break;
       case ST_DIM: 
-        if (ProcessDIMstatement()) { return true; }
-        break;
+        if (ProcessDIMstatement()) { return true; } break;
       case ST_GET:
-        if (ProcessGETstatement()) { return true; }
-        break;
+        if (ProcessGETstatement()) { return true; } break;
       case ST_GEThash:
-        if (ProcessGEThashstatement()) { return true; }
-        break;
+        if (ProcessGEThashstatement()) { return true; } break;
       case ST_META_DUMPSTATE:
         machine.dumpstate();
         return true;
@@ -385,51 +570,262 @@ boolean ReadStatement() {
         machine.evaluate_engine.verbose=true;
         return true;
       case ST_META_CHARSET:
-        if (ProcessMETACHARSETstatement()) { return true; }
-        break;
+        if (ProcessMETACHARSETstatement()) { return true; } break;
       case ST_META_SCALE:
-        if (ProcessMETASCALEstatement()) { return true; }
-        break;
+        if (ProcessMETASCALEstatement()) { return true; } break;
       case ST_META_SCALEY:
-        if (ProcessMETASCALEYstatement()) { return true; }
-        break;
+        if (ProcessMETASCALEYstatement()) { return true; } break;
+      case ST_NEW:
+        machine.newProgramText();
+        return true;
+      case ST_META_TIMING:
+        long markTime = System.currentTimeMillis();
+        // the parameter is an integer indicating HOW MANY things happened
+        ReadExpression();
+        int howmany=(int)machine.evaluate(keepExpression).num();
+        // ... the code being measured ...
+        // long estimatedTime = System.nanoTime() - startTime;
+        //System.out.printf("System time = %d nanoseconds\n",startTime);
+        if (lastTime==0) {
+          System.out.printf("System time = %d milliseconds\n",markTime);
+        }  else {
+          System.out.printf("Delta time = %d milliseconds\n",markTime-lastTime);
+          if (howmany>0) {
+            System.out.printf("Unit time  = %.6f milliseconds (%d iterations)\n",(markTime-lastTime)/(double)howmany,howmany);
+            System.out.printf("Rate       = %.6f iterations per second\n",howmany/(double)(markTime-lastTime)*1000.0);
+          }
+        }
+        lastTime=markTime;
+        return true;
+      case ST_SAVE:
+        if (ProcessSAVEstatement()) { return true; } break;
       case ST_LOAD:
-        if (ProcessLOADstatement()) { return true; }
-        break;
+        if (ProcessLOADstatement()) { return true; } break;
       case ST_META_ROWS:
-        if (ProcessMETAROWSstatement()) { return true; }
-        break;
+        if (ProcessMETAROWSstatement()) { return true; } break;
       case ST_META_COLS:
-        if (ProcessMETACOLSstatement()) { return true; }
-        break;
+        if (ProcessMETACOLSstatement()) { return true; } break;
       case ST_META_BGTRANS:
-        if (ProcessMETABGTRANSstatement()) { return true; }
-        break;
-      case ST_INPUT: case ST_INPUT1:
-        if (ProcessINPUTstatement()) { return true; }
-        break;
+        if (ProcessMETABGTRANSstatement()) { return true; } break;
+      case ST_INPUT:
+        if (ProcessINPUTstatement(false)) { return true; } break;
+      case ST_INPUT1:
+        if (ProcessINPUTstatement(true)) { return true; } break;
+      case ST_SYS:
+        if (ProcessSYSstatement()) { return true; } break;
       case ST_POKE:
-        if (ProcessPOKEstatement()) { return true; }
-        break;
+        if (ProcessPOKEstatement()) { return true; } break;
       case ST_OPEN: case ST_CLOSE:
         if (ProcessIGNOREstatement()) { return true; }
         break;
       case ST_LIST:
         if (ProcessLISTstatement()) { return true; }
         break;
+      case ST_HELP:
+//        machine.print("?help! help! try this: load\"$\",8 [enter]");
+//        machine.print("?help! try this: load\"$\",8 [enter]");
+        machine.print("tokens: version "+version.programVersion+"\n");
+        for (int tok=0; tok<basicTokens.length; ++tok) {
+          machine.print(basicTokens[tok].toLowerCase()+",");
+		}
+        machine.print("\n");
+        machine.print("?help: try this (and press [");
+        machine.print("enter])\n");
+        machine.print("load\"$\",8\n");
+        machine.print("list\n");
+        return true;
+        //break;
+      case ST_STOP: 
+        machine.save_executionpoint=pnt; // it is restartable
+        if (verbose) {
+          System.out.printf("setting save_executionpoint to %d\n",machine.save_executionpoint);
+        }
+        throw new BasicBREAK("BREAK ON STOP");
+        //break;
       case ST_END: 
         MachineEND();
-        pnt=line.length();
         return true; // just END!
+      case ST_EXIT: 
+        if (machine.performExit(true)) {
+          MachineEND(); // not sure if I also need this
+          return true;
+        }
+        break;
+      case ST_LABEL:
+        // just ignore it
+        ReadExpression();
+        return true;
+
+      case ST_ALERT:
+        ReadExpression();
+        // ignored for now
+        return true;
+
+      case ST_SCREEN:
+        ReadExpression();
+        if (machine.graphicsDevice==null) {
+          machine.graphicsDevice = new GraphicsDevice();
+        } else {
+          // just to make sure it is all reset
+          machine.graphicsDevice.resetDevice();
+          // and make sure it is visible again (in case you closed it)
+          machine.graphicsDevice.setVisible(true);
+        }
+        return true;
+
+      case ST_SLEEP:
+        ReadExpression();
+        if (machine.graphicsDevice!=null) machine.graphicsDevice.command_SLEEP((int)machine.evaluate(keepExpression).num());
+        return true;
+
+      case ST_FILES:
+        machine.listFiles();
+        return true;
+      case ST_CLS:
+        if (machine.graphicsDevice!=null) machine.graphicsDevice.command_CLS();
+        return true;
+      case ST_BEGINFRAME:
+        if (machine.graphicsDevice!=null) machine.graphicsDevice.command_BEGINFRAME();
+        return true;
+      case ST_ENDFRAME:
+        if (machine.graphicsDevice!=null) machine.graphicsDevice.command_ENDFRAME();
+        return true;
+  //,"SCREEN","GPRINT","BEGINFRAME","ENDFRAME","CLS","LINE","FSET"
+
+      case ST_LINE:
+        if (machine.graphicsDevice!=null) {
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          if (gt.gttop==5) {
+              if (verbose) System.out.printf("about to draw line\n");
+              machine.graphicsDevice.command_LINE(
+                (int)gt.gtlist[0].num(),
+                (int)gt.gtlist[1].num(),
+                (int)gt.gtlist[2].num(),
+                (int)gt.gtlist[3].num(),
+                (int)gt.gtlist[4].num()
+               );
+              return true;
+          } 
+        }
+        break;
+
+      case ST_LSET:
+        if (machine.graphicsDevice!=null) {
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          if (gt.gttop==2) {
+              if (verbose) System.out.printf("about to set line size\n");
+              machine.graphicsDevice.command_LSET(
+                (int)gt.gtlist[0].num(),
+                (int)gt.gtlist[1].num()
+               );
+              return true;
+          } 
+        }
+        break;
+
+
+      case ST_RECT:
+        if (machine.graphicsDevice!=null) {
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          if (gt.gttop==5) {
+              if (verbose) System.out.printf("about to draw rect\n");
+              machine.graphicsDevice.command_RECT(
+                (int)gt.gtlist[0].num(),
+                (int)gt.gtlist[1].num(),
+                (int)gt.gtlist[2].num(),
+                (int)gt.gtlist[3].num(),
+                (int)gt.gtlist[4].num()
+               );
+              return true;
+          } 
+        }
+        break;
+
+      case ST_GPRINT:
+        if (machine.graphicsDevice!=null) {
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          if (gt.gttop==4) {
+              if (verbose) System.out.printf("about to draw string \"%s\"\n",gt.gtlist[0].str());
+              //for (int i=0; i<gt.gttop; ++i) System.out.printf("isNum[%d]=%s\n",i,gt.gtlist[i].isNum()?"yes":"no");
+              machine.graphicsDevice.command_GPRINT(
+                gt.gtlist[0].str(),
+                (int)gt.gtlist[1].num(),
+                (int)gt.gtlist[2].num(),
+                (int)gt.gtlist[3].num()
+               );
+              return true;
+          } 
+        }
+        break;
+
+      case ST_FSET:
+        if (machine.graphicsDevice!=null) {
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          if (gt.gttop==2) {
+              machine.graphicsDevice.command_FSET(
+                gt.gtlist[0].str(),
+                (int)gt.gtlist[1].num()
+               );
+              return true;
+          } 
+        }
+        break;
+
+      case ST_IMAGELOAD:
+        if (machine.graphicsDevice!=null) {
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          if (gt.gttop==1) {
+              if (verbose) System.out.printf("load the image to reference\n");
+              int imgno=machine.graphicsDevice.command_LOADIMAGE(
+                gt.str()
+               );
+               // special case here! so if it works
+              machine.assignment("imgno="+imgno);
+              return true;
+          } else throw new BasicException("INCORRECT PARAMETERS");
+
+        }
+        break;
+
+      case ST_DRAWIMAGE:
+        if (machine.graphicsDevice!=null) {
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          if (gt.gttop==5) {
+              if (verbose) System.out.printf("draw the image\n");
+              machine.graphicsDevice.command_DRAWIMAGE(
+                (int)gt.gtlist[0].num(),
+                (int)gt.gtlist[1].num(),
+                (int)gt.gtlist[2].num(),
+                (double)gt.gtlist[3].num(),
+                (double)gt.gtlist[4].num()
+               );
+              return true;
+          } else throw new BasicException("INCORRECT PARAMETERS");
+        }
+        break;
+
+
+
+
     }
     return false;
-  } else {
+}
+
+boolean ReadAssign() throws BasicException {
     // could be a null statement
-    if (ReadColon()) { return true; }
+    //if (ReadColon()) { return true; }
 
     // could be an assignment
     if (ReadAssignment()) {
       ReadExpression();
+
       if (verbose) { System.out.printf("MachineVariableSet(variable=%s with evaluate( %s ))\n",keepVariable,keepExpression); }
       // parse the keep variable in the machine to turn X(I+1) into X(42)
 
@@ -441,15 +837,84 @@ boolean ReadStatement() {
       ReadColon();
       return true;
     } else {
-      System.out.printf("?SYNTAX ERROR%s%s\n  103:Did not get token or assignment\n",machine.currentLineNo.equals("")?"":" ON LINE ",machine.currentLineNo);
-      // doubled errors// machine.print("?syntax error"+(machine.currentLineNo.equals("")?"":" on line ")+machine.currentLineNo+"[CR]");
+      // Did not get token or assignment (was 103:)
       return false;
     }
-  }
 }
 
+//---------------------------------------------------------------------//
+long counter_ReadStatementToken=0;
+long timer_ReadStatementToken=0;
+char firstchar[]=new char[100];
+boolean RSTinitted=false;
+int catop[]=new int[30];
+int chainarray[][]=new int[30][10];
+
+/** 
+    ReadStatementToken will identify a token from the current "pnt" in the basic text.
+    It is very inefficient and should be re-written.
+    A significant portion of the time gets spent in here.
+**/
+    
 boolean ReadStatementToken() {
-  
+  if (!RSTinitted) {
+    for (int i=0; i<30; ++i) { catop[i]=0; }
+    for (int tok=0; tok<basicTokens.length; ++tok) {
+      firstchar[tok]=basicTokens[tok].charAt(0);
+      //System.out.printf("char is %c\n",firstchar[tok]);
+      int index=basicTokens[tok].charAt(0)-'A';
+      //System.out.printf("array %d,%d = %d\n",index,catop[index],tok);
+      chainarray[index][catop[index]++]=tok;
+    }
+    RSTinitted=true;
+  }
+
+//if (true) { start_timing(TIME_ReadStatementToken); }
+
+  // just test the first char!
+  if (pnt>=linelength) return false; // guards against failing off end
+  char ch=line.charAt(pnt);
+  if (ch>='a'&&ch<='z') {ch-='a'-'A'; }
+  int index=ch-'A';
+  if (index>=26 || index<0) { return false; }
+  //for (int tok=0; tok<basicTokens.length; ++tok) {
+
+  for (int i=0; i<catop[index]; ++i) {
+    int at=0;
+    int tok=chainarray[index][i];
+    //System.out.printf("inside array char is %c tok=ch[%d][%d] tok=%d\n",ch,index,i,tok);
+    if (ch!=firstchar[tok]) continue;
+    //System.out.printf("matching char %c for token %s\n",ch,basicTokens[tok]);
+
+    while (pnt+at<linelength && at<basicTokens[tok].length()) {
+      char cchar=line.charAt(pnt+at);
+      if (cchar>='a' && cchar<='z') {cchar-='a'-'A'; }
+      if (cchar!=basicTokens[tok].charAt(at)) {
+        break;
+      }
+      at++;
+    }
+    if (at==basicTokens[tok].length()) {
+      // we matched it completely
+      pnt+=at;
+      if (verbose) { System.out.printf("Found match for %s\n",basicTokens[tok]); }
+      gotToken=tok;
+
+//if (true) { end_timing(TIME_ReadStatementToken); }
+
+      return true;
+    }
+  }
+  // otherwise, search for an "=" sign, and take note of the string preceeding
+  //ReadAssignment();
+
+//if (true) { end_timing(TIME_ReadStatementToken); }
+
+  return false;
+}
+
+boolean ReadStatementToken_old() {
+  startTime=System.currentTimeMillis(); 
   for (int tok=0; tok<basicTokens.length; ++tok) {
     int at=0;
     //System.out.printf("Comparing %s\n",basicTokens[tok]);
@@ -464,16 +929,28 @@ boolean ReadStatementToken() {
       pnt+=at;
       if (verbose) { System.out.printf("Found match for %s\n",basicTokens[tok]); }
       gotToken=tok;
+
+      endTime=System.currentTimeMillis(); 
+      counter_ReadStatementToken++;
+      timer_ReadStatementToken+=endTime-startTime;
+
       return true;
     }
   }
   // otherwise, search for an "=" sign, and take note of the string preceeding
   //ReadAssignment();
 
+  endTime=System.currentTimeMillis(); 
+  counter_ReadStatementToken++;
+  timer_ReadStatementToken+=endTime-startTime;
+  if (false && counter_ReadStatementToken%10000==0) {
+    System.out.printf("ReadStatementToken c=%d t/c=%f\n",counter_ReadStatementToken,timer_ReadStatementToken/(double)counter_ReadStatementToken);
+  }
+
   return false;
 }
 
-boolean ProcessDIMstatement()
+boolean ProcessDIMstatement() throws BasicException
 {
   if (verbose) { System.out.printf("Processing DIM statement\n"); }
   ReadExpression();
@@ -483,7 +960,7 @@ boolean ProcessDIMstatement()
   return true;
 }
 
-boolean ProcessPRINTstatement_original()
+boolean ProcessPRINTstatement_original() throws BasicException
 {
   if (verbose) { System.out.printf("Processing PRINT statement\n"); }
   ReadExpression();
@@ -511,7 +988,7 @@ boolean ProcessPRINTstatement_original()
   return true;
 }
 
-boolean ProcessPRINTstatement()
+boolean ProcessPRINTstatement() throws BasicException
 {
   if (verbose) { System.out.printf("Processing PRINT statement\n"); }
   ReadExpression();
@@ -545,7 +1022,7 @@ boolean ProcessPRINTstatement()
   return true;
 }
 
-boolean ProcessIFstatement()
+boolean ProcessIFstatement() throws BasicException
 {
   ReadExpression();
   
@@ -554,8 +1031,9 @@ boolean ProcessIFstatement()
   //ReadStatementToken(); // note MUST be THEN or GOTO
   // implicetly read already with the ReadExpression
   if (gotToken!=ST_GOTO && gotToken!=ST_THEN) {
-    System.out.printf("?SYNTAX ERROR 104: did not get THEN or GOTOT token\n");
-    return false;
+    System.out.printf("?SYNTAX ERROR 104: did not get THEN or GOTO token\n");
+    throw new BasicException("SYNTAX ERROR : NO THEN OR GOTO");
+    //return false;
   }
   // IF the evaluated expression is true (non zero), continue...
   // otherwise read out rest of line and skip to new line
@@ -567,7 +1045,8 @@ boolean ProcessIFstatement()
     }
     return true; // parsed okay
   }
-  // it might be just a line # - try and read it - if it isn't keep going
+  SkipSpaces(); // really - spaces arent good for anything
+  // it might be just a line # - try and read it - if it isn't keep going  
   if (ReadLineNo()) {
     if (machine.enabledmovement) {
       machine.gotoLine(keepLine);
@@ -578,10 +1057,17 @@ boolean ProcessIFstatement()
       //pnt++;
     //}
   }
+  // if it is a GOTO - just goto it anyway - it must be a label
+  else if (gotToken==ST_GOTO) {
+    //SkipSpaces();
+    ReadExpression();
+    machine.gotoLine(keepExpression);
+    pnt=machine.executionpoint; // we should now have a different execution point
+  }
   return true;
 }
 
-boolean ProcessGOTOstatement()
+boolean ProcessGOTOstatement() throws BasicException
 {
   SkipSpaces(); // added this in as there may be leading spaces (probably a better way to do this)
   ReadExpression(); // not really, should just be a numberic??? maybe an expression is good
@@ -596,8 +1082,9 @@ boolean ProcessGOTOstatement()
   return true;
 }
 
-boolean ProcessGOSUBstatement()
+boolean ProcessGOSUBstatement() throws BasicException
 {
+  SkipSpaces(); // added this in as there may be leading spaces (probably a better way to do this)
   ReadExpression(); // not really, should just be a numberic??? maybe an expression is good
   if (machine.enabledmovement) {
     machine.gosubLine(keepExpression,pnt);
@@ -608,7 +1095,7 @@ boolean ProcessGOSUBstatement()
   return true;
 }
 
-boolean ProcessRETURNstatement()
+boolean ProcessRETURNstatement() throws BasicException
 {
   if (machine.enabledmovement) {
     machine.popReturn();
@@ -619,7 +1106,7 @@ boolean ProcessRETURNstatement()
   return true;
 }
 
-boolean ProcessNEXTstatement()
+boolean ProcessNEXTstatement() throws BasicException
 {
   keepExpression=""; // in case it is nothing!
   ReadExpression(); // not really, should just be a variable!!
@@ -628,7 +1115,8 @@ boolean ProcessNEXTstatement()
   int start=0;
   while (at<keepExpression.length()) {
     if (keepExpression.substring(at,at+1).equals(",")) {
-      if (machine.processNEXT(pnt,keepExpression.substring(start,at).toLowerCase())) {
+      // skip spaces with trim!
+      if (machine.processNEXT(pnt,keepExpression.substring(start,at).toLowerCase().trim())) {
         // we did loop
         pnt=machine.executionpoint;
         return true; // we skip the following ones
@@ -637,7 +1125,8 @@ boolean ProcessNEXTstatement()
     }
     at++;
   }
-  if (machine.processNEXT(pnt,keepExpression.substring(start,keepExpression.length()).toLowerCase())) {
+  // skip spaces with trim!
+  if (machine.processNEXT(pnt,keepExpression.substring(start,keepExpression.length()).toLowerCase().trim())) {
     // we did loop
     pnt=machine.executionpoint;
     return true; // we skip the following ones
@@ -647,7 +1136,7 @@ boolean ProcessNEXTstatement()
   return true;
 }
 
-boolean ProcessFORstatement()
+boolean ProcessFORstatement() throws BasicException
 {
   String forto;
   String forstep="1";
@@ -655,6 +1144,12 @@ boolean ProcessFORstatement()
   ReadAssignment();
   ReadExpression();
 
+  if (keepVariable==null || keepVariable.equals("")) {
+    System.out.printf("?SYNTAX ERROR : NO VARIABLE\n");
+    throw new BasicException("SYNTAX ERROR : NO VARIABLE");
+  }
+  // trim spaces
+  keepVariable=keepVariable.trim();
   if (verbose) { System.out.printf("MachineVariableSet(variable=%s with evaluate( %s ))\n",keepVariable,keepExpression); }
   // parse the keep variable in the machine to turn X(I+1) into X(42)
   machine.assignment(keepVariable.toLowerCase()+"="+keepExpression);
@@ -664,7 +1159,8 @@ boolean ProcessFORstatement()
   ReadStatementToken(); // note MUST be TO
   if (gotToken!=ST_TO) {
     System.out.printf("?SYNTAX ERROR 104: did not get TO token\n");
-    return false;
+    throw new BasicException("SYNTAX ERROR : NO TO");
+    //return false;
   }
   ReadExpression();
   forto=keepExpression;
@@ -678,7 +1174,8 @@ boolean ProcessFORstatement()
       /// - no dont return -- all is okay !! - return true;
     } else {
       System.out.printf("?SYNTAX ERROR 105: did not get STEP token\n");
-      return false;
+      throw new BasicException("SYNTAX ERROR : NOT STEP");
+      //return false;
     }
   } else {
     // no STEP keyword
@@ -700,43 +1197,93 @@ void IgnoreRestofLine()
   return;
 }
 
+boolean ProcessCONTstatement() throws BasicException
+{
+  // again CONT is wierd because it transfers from immediate mode
+  // to run (continue running an old program
+  throw new BasicCONTrestart("Just restart the program and continue it");
+}
+
+boolean ProcessRUNstatement() throws BasicException
+{
+  // IgnoreRestofLine();
+
+  // this is a funny one - we effectively restart the processing, but with the program!
+    //machine.variables_clr();
+    //machine.runProgram(); // we now execute the statements upon a machine
+  throw new BasicRUNrestart("Just restart the program and rerun it");
+  //return true;
+}
+
 boolean ProcessREMstatement() 
 {
   IgnoreRestofLine();
   return true;
 }
 
+int getlineparse(String lineno) {
+  int ret;
+  try {
+    ret=Integer.parseInt(lineno);
+  } catch (NumberFormatException e) {
+     ret = -1;
+  }
+  return ret;
+}
+
 boolean ProcessLISTstatement()
 {
-  //machine.print(machine.code);
-  // not implemented yet!
+  int from,to;
+  from=-1; to=-1;
+  ReadExpression();
+  if (verbose) { System.out.printf("wanting to list lines: %s\n",keepExpression); }
+  /* split to from to */
+  /* nothing:   -1 -1 */
+  /* from-:     99 -1 */
+  /* -to:       -1 99 */
+  /* num        99 99 */
+  String lineno[] = (" "+keepExpression+" ").split("-");
+if (verbose)  for (int i=0; i<lineno.length; ++i)
+    System.out.printf("LIST VAR %d = \"%s\"\n",i,lineno[i]);
+  if (lineno.length>=1) from=getlineparse(lineno[0].trim());
+  if (lineno.length>=2) to=getlineparse(lineno[1].trim());
+  if (lineno.length==1 && from==-1) { to=-1; }
+  else if (lineno.length==1) { to=from; }
+  
+  machine.print(machine.listProgram(from,to)); // just prints the program text
   return true;
 }
 
-boolean ProcessGETstatement()
+boolean ProcessGETstatement() throws BasicException
 {
   ReadExpression();
   if (verbose) { System.out.printf("getting to %s\n",keepExpression); }
   String got=machine.getkey();
   if (verbose) { System.out.printf("got string \"%s\"\n",got); }
   // it a string so keep it quoted
-  machine.assignment(keepExpression.toLowerCase()+"="+"\""+got.toLowerCase()+"\"");
+  //machine.assignment(keepExpression.toLowerCase()+"="+"\""+got.toLowerCase()+"\"");
+//  else machine.assignment(keepExpression.toLowerCase()+"="+"chr$("+(int)got.charAt(0)+")");
   //machine.setvariable(machine.parse(keepExpression),machine.evaluate("\""+got.toLowerCase()+"\""));
+  if (got=="" || got==null) machine.assignment(keepExpression.toLowerCase()+"="+"\""+"\"");
+  else machine.assignment(keepExpression.toLowerCase()+"="+"\""+got+"\"");  // try this now
   return true;
 }
-boolean ProcessGEThashstatement()
+
+boolean ProcessGEThashstatement() throws BasicException
 {
   ReadExpression();
   if (verbose) { System.out.printf("getting to %s\n",keepExpression); }
   String got=machine.getkey();
   if (verbose) { System.out.printf("got string \"%s\"\n",got); }
   // it a string so keep it quoted
-  machine.assignment(keepExpression.toLowerCase()+"="+"\""+got.toLowerCase()+"\"");
+  //machine.assignment(keepExpression.toLowerCase()+"="+"\""+got.toLowerCase()+"\"");
   //machine.setvariable(machine.parse(keepExpression),machine.evaluate("\""+got.toLowerCase()+"\""));
+  if (got=="" || got==null) machine.assignment(keepExpression.toLowerCase()+"="+"\""+"\"");
+  else machine.assignment(keepExpression.toLowerCase()+"="+"\""+got+"\"");  // try this now
   return true;
 }
 
-boolean ProcessREADstatement()
+boolean ProcessREADstatement() throws BasicException
 {
   // here we use the special feature of evaluate
   ReadExpression();
@@ -749,7 +1296,7 @@ boolean ProcessREADstatement()
 // maybe allow assignments like this
 // A$,B$,C$="X","Y","Z"
 // can be used for INPUT and READ
-boolean ProcessINPUTstatement()
+boolean ProcessINPUTstatement(boolean stayonsameline) throws BasicException
 {
   ReadExpression();
   if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
@@ -763,6 +1310,9 @@ boolean ProcessINPUTstatement()
   // change all commas to \",\"
   String processedString = stringQuoteStuff(got.trim().toLowerCase());
   machine.assignment(keepExpression.toLowerCase()+"="+processedString);
+  if (stayonsameline) {
+    machine.print("(up)");
+  }
   if (verbose) { machine.dumpstate(); }
   return true;
 }
@@ -793,15 +1343,49 @@ void verboseOff()
   machine.evaluate_engine.verbose=verbose;
 }
 
-boolean ProcessLOADstatement() 
+boolean ProcessSAVEstatement() throws BasicException
 {
   ReadExpression();
   if (verbose) { machine.dumpstate(); }
-  machine.print("loading filename "+machine.evaluate(keepExpression).str().toLowerCase());
-  //machine....(machine.evaluate(keepExpression).str());
+  String filename;
+  if (keepExpression==null || keepExpression.equals("") || machine.evaluate(keepExpression).str()==null) {
+    /* save the existing program previously mentioned */
+    if (machine.program_name=="" || machine.evaluate(keepExpression).str()==null) {
+      throw new BasicException("MISSING FILENAME");
+    } else {
+      filename=machine.program_name;
+    }
+  } else {
+    filename=machine.evaluate(keepExpression).str().toLowerCase();
+  }
+
+  machine.print("saving "+filename.toLowerCase()+"...");
+  if (!filename.matches(".*\\.basic")) {
+    filename=filename.toLowerCase()+".basic";
+  } else {
+  }
+  
+  machine.saveProgram(filename);
   return true;
 }
-boolean ProcessMETACHARSETstatement() 
+boolean ProcessLOADstatement() throws BasicException
+{
+  // this will be a bit wierd if actually run from a program itself!
+  ReadExpression();
+  if (verbose) { machine.dumpstate(); }
+  if (keepExpression==null || keepExpression.equals("") || machine.evaluate(keepExpression).str()==null) {
+    throw new BasicException("MISSING FILENAME");
+  }
+  String filename=machine.evaluate(keepExpression).str();
+  // only add basic if it doesnt have it already
+  machine.print("loading "+filename.toLowerCase()+"...");
+  if (!filename.matches(".*\\.basic")) {
+    filename=filename.toLowerCase()+".basic";
+  }
+  machine.loadProgram(filename);
+  return true;
+}
+boolean ProcessMETACHARSETstatement() throws BasicException
 {
   ReadExpression();
   if (verbose) { machine.dumpstate(); }
@@ -809,7 +1393,7 @@ boolean ProcessMETACHARSETstatement()
   return true;
 }
 
-boolean ProcessMETASCALEstatement() 
+boolean ProcessMETASCALEstatement() throws BasicException
 {
   ReadExpression();
   if (verbose) { machine.dumpstate(); }
@@ -817,7 +1401,7 @@ boolean ProcessMETASCALEstatement()
   return true;
 }
 
-boolean ProcessMETASCALEYstatement() 
+boolean ProcessMETASCALEYstatement() throws BasicException
 {
   ReadExpression();
   if (verbose) { machine.dumpstate(); }
@@ -825,7 +1409,7 @@ boolean ProcessMETASCALEYstatement()
   return true;
 }
 
-boolean ProcessMETAROWSstatement() 
+boolean ProcessMETAROWSstatement() throws BasicException
 {
   ReadExpression();
   if (verbose) { machine.dumpstate(); }
@@ -833,7 +1417,7 @@ boolean ProcessMETAROWSstatement()
   return true;
 }
 
-boolean ProcessMETACOLSstatement() 
+boolean ProcessMETACOLSstatement() throws BasicException
 {
   ReadExpression();
   if (verbose) { machine.dumpstate(); }
@@ -841,7 +1425,7 @@ boolean ProcessMETACOLSstatement()
   return true;
 }
 
-boolean ProcessMETABGTRANSstatement() 
+boolean ProcessMETABGTRANSstatement() throws BasicException
 {
   ReadExpression();
   if (verbose) { machine.dumpstate(); }
@@ -850,7 +1434,7 @@ boolean ProcessMETABGTRANSstatement()
   return true;
 }
 
-boolean ProcessPOKEstatement() 
+boolean ProcessPOKEstatement() throws BasicException
 {
   ReadExpression();
   if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
@@ -858,9 +1442,39 @@ boolean ProcessPOKEstatement()
   // we should have num,num evaluate into a list
   if (verbose) { System.out.printf("inputting to %s\n",machine.evaluate(keepExpression).print()); }
   if (verbose) { machine.dumpstate(); }
+
+  if (machine.graphicsDevice!=null) {
+    GenericType gt=machine.evaluate(keepExpression);
+    int memloc;
+    int memval;
+    if (gt.gttop==2) {
+      memloc=(int)gt.gtlist[0].num();
+      memval=(int)gt.gtlist[1].num();
+      if (memloc==1024) {
+        machine.graphicsDevice.command_POKE(memloc,memval);
+        return true;
+      }
+    }
+  }
+
   machine.performPOKE(machine.evaluate(keepExpression)); // we assume it is a list of two numbers
   //verboseOff();
   return true;
+}
+
+boolean ProcessSYSstatement() throws BasicException
+{
+  ReadExpression();
+  if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
+  if (verbose) { System.out.printf("inputting to %s\n",machine.evaluate(keepExpression).print()); }
+  if (verbose) { machine.dumpstate(); }
+  if (!keepExpression.equals("")) {
+    machine.performSYS(machine.evaluate(keepExpression));
+    machine.machinescreen.startupscreen();
+    return true;
+  } else {
+    throw new BasicException("TOO FEW PARAMETERS");
+  }
 }
 
 boolean ProcessIGNOREstatement() 
@@ -934,13 +1548,12 @@ boolean ReadExpression()
     previous=pnt;
     boolean quoted=false;
     keepExpression=""; // because we are going to build it up
+//if (true) { start_timing(TIME_ReadExpression); }
     while (pnt<linelength) {
       String a=line.substring(pnt,pnt+1);
       previous=pnt;
       if (a.equals("\n")) { break; }
-      if (!quoted && a.equals(":")) {
-        break;
-      }
+      if (!quoted && a.equals(":")) { break; }
       // add a bit to to change the meta codes e.g. (home) to 1 char
       if (quoted && (a.equals("(") || a.equals("["))) {
         // we may have a meta code, lets check it out
@@ -952,23 +1565,16 @@ boolean ReadExpression()
           continue;
         }
       }
-      if (false) {  // for new print method
-        if (!quoted && a.equals(";")) {
-          break;
-        }
-      }
-      if (!quoted && ReadStatementToken()) {
-        break;
-      }
-      if (a.equals("\"")) {
-        quoted=!quoted;
-      }
+      if (!quoted // no difference && a.compareToIgnoreCase("a")>=0 && a.compareTo("z")<=0
+        && ReadStatementToken()) { break; }
+      if (a.equals("\"")) { quoted=!quoted; }
       pnt++;
     }
   if (pnt==linelength) previous=pnt; // special case when we read to end of line
   if (verbose) { System.out.printf("Interpreting \"%s\" as an expression\n",line.substring(start,previous)); }
   //keepExpression=line.substring(start,previous);
   keepExpression=keepExpression+line.substring(start,previous);
+//if (true) { end_timing(TIME_ReadExpression); }
   return true;
 }
 
@@ -1015,6 +1621,10 @@ boolean ReadAssignment()
         // if (at==0) start allowed
         // else internal allowed
         break;
+      } else if (a.equals("\n")) {
+        // we got to the end of the line - i think this will fix the syntax error miss??
+        keepVariable="";
+        return false;
       }
       at++;
     }
@@ -1029,12 +1639,21 @@ boolean ReadAssignment()
     }
 }
 
+/** for now will read a line number that has a space after it - 
+    will change this to allow no space in the future
+**/
 boolean ReadLineNo() {
     int at=0;
+    int chewspace=0;
     //System.out.printf("Trying to read line number - looking at [%d] %s\n",pnt,line.substring(pnt+at,pnt+at+1));
     while (pnt+at<linelength) {
       String a=line.substring(pnt+at,pnt+at+1);
       if (a.equals("\n")) {
+		// bug fix
+		if (at==0) {
+            if (verbose) { System.out.printf("Empty line\n"); }
+			return false;
+		}
         // dont read this
         if (verbose) { System.out.printf("Line number %s\n",line.substring(pnt,pnt+at)); }
         keepLine=line.substring(pnt,pnt+at);
@@ -1042,12 +1661,18 @@ boolean ReadLineNo() {
         return true;
       }
       if (a.equals(" ")) {
+        chewspace=1;
         break; // hopefully got some part of a number
       }
+
+      /* for now - break when not a space! */
       if (!(a.compareTo("0")>=0 && a.compareTo("9")<=0)) {
-        keepLine="";
-        return false; // not a number
-      }
+        break;
+      }      
+      //if (!(a.compareTo("0")>=0 && a.compareTo("9")<=0)) {
+      //  keepLine="";
+      //  return false; // not a number
+      //}
       at++;
     }
     //if (pnt+at<linelength && at>0) {  // no, not now, as we may be reading a ...THEN100 line
@@ -1055,7 +1680,8 @@ boolean ReadLineNo() {
       // we have got number
       if (verbose) { System.out.printf("Line number %s\n",line.substring(pnt,pnt+at)); }
       keepLine=line.substring(pnt,pnt+at);
-      pnt+=at+1;
+      pnt+=at+chewspace;
+      // add one if we ended in space
       return true;
     } else {
       keepLine="";
@@ -1085,18 +1711,12 @@ boolean ReadColon() {
   }
 }
 
-///////////////////////////////
 boolean MachineEND() {
+  pnt=line.length();
   return true;
 }
 
-///////////////////////////////
 
-  public static void main(String[] args) {
-    if (false) { System.out.printf("Mello Word\n"); }
-    // no longer can run it like this - must run it from machine
-    //new statements(args );
-  }
 }
 
 /////////

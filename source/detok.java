@@ -1,7 +1,11 @@
 ////////////////////////////////////////////////////////////////////////
-// $Id: detok.java,v 1.6 2011/06/28 23:40:14 pgs Exp $
+// $Id: detok.java,v 1.7 2012/09/04 11:22:38 pgs Exp $
 //
 // $Log: detok.java,v $
+// Revision 1.7  2012/09/04 11:22:38  pgs
+// petscii mapping
+// /
+//
 // Revision 1.6  2011/06/28 23:40:14  pgs
 // Standardising keycodes - now use PETSCII
 //

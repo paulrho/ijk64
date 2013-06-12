@@ -1,8 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: Variables.java,v 1.8 2006/02/15 01:56:07 pgs Exp $
+// $Id: Variables.java,v 1.9 2007/04/17 09:22:33 pgs Exp $
 //
 // $Log: Variables.java,v $
+// Revision 1.9  2007/04/17 09:22:33  pgs
+// Adding ability to restart with CONT
+// moved all statments into statements/Machine engine
+//
 // Revision 1.8  2006/02/15 01:56:07  pgs
 // Standard header
 //

@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: GenericType.java,v 1.8 2011/07/03 23:00:20 pgs Exp $
+// $Id: GenericType.java,v 1.9 2012/04/18 06:07:53 pgs Exp $
 //
 // $Log: GenericType.java,v $
+// Revision 1.9  2012/04/18 06:07:53  pgs
+// Adding graphics capability
+//
 // Revision 1.8  2011/07/03 23:00:20  pgs
 // Add EVAL$ function
 // Fix insertspace etc modes - they were buggy

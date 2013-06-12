@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: ev.java,v 1.16 2007/04/17 09:22:33 pgs Exp $
+// $Id: ev.java,v 1.17 2007/04/18 09:37:19 pgs Exp $
 //
 // $Log: ev.java,v $
+// Revision 1.17  2007/04/18 09:37:19  pgs
+// More refactoring with regards to creating program/immediate modes
+//
 // Revision 1.16  2007/04/17 09:22:33  pgs
 // Adding ability to restart with CONT
 // moved all statments into statements/Machine engine
@@ -105,7 +108,7 @@ class ev {
         } else if (args[i].substring(0,2).equals("-t")) {
           iterations=100;
         } else if (args[i].substring(0,2).equals("-h")) {
-          System.out.printf("evaluate test harness : ev : version $Id: ev.java,v 1.16 2007/04/17 09:22:33 pgs Exp $\n");
+          System.out.printf("evaluate test harness : ev : version $Id: ev.java,v 1.17 2007/04/18 09:37:19 pgs Exp $\n");
           System.out.printf("  -a : assignment\n");
           System.out.printf("  -e : evaluate only - no assignment (default)\n");
           System.out.printf("  -h : help\n");

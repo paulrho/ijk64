@@ -1,8 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: evaluate.java,v 1.34 2011/07/03 23:00:20 pgs Exp $
+// $Id: evaluate.java,v 1.36 2012/09/04 11:22:38 pgs Exp $
 //
 // $Log: evaluate.java,v $
+// Revision 1.36  2012/09/04 11:22:38  pgs
+// petscii mapping
+// /
+//
 // Revision 1.34  2011/07/03 23:00:20  pgs
 // Add EVAL$ function
 // Fix insertspace etc modes - they were buggy

@@ -6,6 +6,11 @@ import java.awt.*;
 import java.awt.event.*;        // for key events
 import java.awt.Toolkit.*;      // for image loading
 
+import java.io.*;
+import javax.imageio.ImageIO;
+import java.awt.image.*;
+import java.awt.geom.*;
+
 public class GraphicsDevice extends JFrame implements MouseListener, MouseMotionListener {
 
   Image newoffImage;
@@ -37,6 +42,7 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
   public void resetDevice() {
     command_ENDFRAME();
     fsize=16;
+    topimage=0; //reset this back
   }
    
   void doupdate() {
@@ -147,6 +153,32 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 	   if (address==1033) { return (valy>>8)&0xFF; }
 	   return 0;
    }
+   
+   /* new things for drawing images*/
+   int topimage=0;
+   BufferedImage[] imgarray= new BufferedImage[20]; // bad hard code at moment
+   
+   public int command_LOADIMAGE(String filename) {
+	 if (topimage+1==20) return -1;
+     try {
+       imgarray[topimage] = ImageIO.read(new File(filename));
+     } catch (IOException e) {
+		 return -1;
+     }
+     return topimage++;
+   }
+
+   public void command_DRAWIMAGE(int imgno, int x, int y, double scale, double rotation) {
+       AffineTransform tx = AffineTransform.getScaleInstance(scale, scale);
+//       tx.translate(x,y+(double)tby/scale); // was but scales the x,y too
+       tx.translate(x/scale,(y+(double)tby)/scale);
+       if (rotation!=0.0) tx.rotate(rotation); 
+       AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+       newoffGraphics.drawImage(imgarray[imgno],tx,null);
+
+     if (!inframe) doupdate();
+   }
+   
    
 /*******************************************************************************************/
 
