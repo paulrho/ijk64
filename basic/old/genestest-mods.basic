@@ -1,0 +1,396 @@
+    1 poke53280,0:poke53281,0:goto40000
+    2 mx=300:nc=2:rn=int(rnd(ti)*1000):a=rnd(-rn)
+    5 print"(wht)";
+    7 print"(clr)";
+   10 dimlg%(mx,nc),rg%(mx,nc),t(50),d%(mx),le%(mx),al%(mx),pm%(mx),pf%(mx)
+   12 print"do you want to bypass the generating    proceedures? (y/n):"
+   14 rem geta$:ifa$=""then14 - pgs disabled
+   16 ifa$="y"thenprint"<?> for help":goto100
+   18 print"o.k.generating creatures.  (seed";rn;")"
+   20 forip=1to20:fork=0tonc:forj=0to14
+   22 ifk<>1orj<>11thenlg%(ip,k)=lg%(ip,k)or(2^j*(int(rnd(rn)*2)))
+   24 rg%(ip,k)=rg%(ip,k)or(2^j*(int(rnd(rn)*2)))
+   26 nextj,k
+   28 s9=1:nx=ip:a=0:b=0:gosub450:s9=0
+   30 nextip
+   40 print"waiting 15 days.":formm=1to15:gosub5100:nextmm:print"finished.":nd%=0
+   99 s9=0
+
+  100 open1,0:input#1,a$:close1:print
+  101 goto5000:ifa$=""thenprint"(up)";:goto300
+  102 ifa$=""thenprint"(up)";:goto300
+  103 a=val(a$):ifa<1ora>mxthenprint"(up)(up)":goto100
+  104 ifal%(a)=0thenprint"no such one.":goto100
+  200 x=a:xr=x:gosub10000:goto100
+
+  300 print"male,female:";
+  301 open1,0:input#1,a$,b$:close1:print:a$="c":rem pgs added to make it do something
+  302 if a$="x"then100
+  303 a=val(a$):b=val(b$):ifa<1orb<0ora>mxorb>mxthen100
+  305 ifabs(al%(a))<>1orabs(al%(b)<>1)thenprint"must all be alive!":goto300
+  310 x=a:gosub10000:ifsx<>1thenprint"male first":goto300
+  312 ifam=9thenprint"the male has no ability to mate.":goto300
+  350 x=b:gosub10000:ifsx<>2thenprint"female second":goto300
+  351 ifam=9thenprint"the female has no ability to mate.":goto300
+  352 ifd%(a)<14thenprint"male too young.":goto300
+  354 ifd%(b)<10thenprint"female too young.":goto300
+  360 fori=1tomx:ifal%(i)=0thennx=i:goto400
+  362 next:remprint"(up)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)looking for dead bug"
+  370 fori=1tomx:ifd%(i)>260andal%(i)=2thennx=i:goto400
+  371 next:print"--=======--":fori=1tomx:ifal%(i)=2thennx=i:goto400
+  372 next:print"no more spaces":gosub5100:goto360
+
+  400 fori=0tonc:lg%(nx,i)=0:rg%(nx,i)=0:next
+  405 fork=0tonc:forj=0to14
+  410 l1=-((lg%(a,k)and2^j)<>0)
+  411 l2=-((lg%(b,k)and2^j)<>0)
+  412 r1=-((rg%(a,k)and2^j)<>0)
+  413 r2=-((rg%(b,k)and2^j)<>0)
+  414 c1=l1:ifint(rnd(ti)*2)=1thenc1=r1
+  415 c2=l2:ifint(rnd(ti)*2)=1thenc2=r2
+  416 lg%(nx,k)=lg%(nx,k)or(2^j*c1)
+  418 rg%(nx,k)=rg%(nx,k)or(2^j*c2)
+  430 nextj,k
+  450 al%(nx)=1:d%(nx)=0:le%(nx)=50+int(rnd(rn)*35):pm%(nx)=a:pf%(nx)=b
+  500 x=nx:gosub10000:ife1=0ande2=0thenal%(x)=2:le%(x)=1
+  502 ifsb=1thenal%(x)=2:print"(red)creature still-born(wht)":le%(x)=1
+  504 iff1=1thenle%(x)=int(le%(x)/1.5)
+  506 iff2=1thenle%(x)=int(le%(x)/2.5)
+  508 ift(31)=0thenle%(x)=int(le%(x)*.8)
+  510 ift(32)=0thenle%(x)=int(le%(x)*.7)
+  512 ift(33)=0thenle%(x)=int(le%(x)*.6)
+  514 ift(23)=0thenle%(x)=int(le%(x)*.8)
+  516 ift(24)=0thenle%(x)=int(le%(x)*.9)
+  518 ift(25)=0thenle%(x)=int(le%(x)*.8)
+  560 ifs9=0thenifint(rnd(ti)*10)=7then360
+  568 ifs9=1thenreturn
+  570 fori=1tomx:ifal%(i)<>0thend%(i)=d%(i)+1:ifd%(i)>=le%(i)thenal%(i)=2
+  572 nexti:nd%=nd%+1
+  600 ifacnthen20000
+  990 goto300
+
+ 1000 print"program name to write?:"
+ 1010 open1,0:input#1,a$,dd$:close1:print
+ 1020 dd=val(dd$):ifa$=""then100
+ 1090 open15,dd,15,"s0:gg01/"+a$:close15
+ 1100 open8,dd,8,"`0:gg01/"+a$+",s,w"
+ 1110 print#8,nd%
+ 1120 fori=1tomx:forj=0tonc:print#8,lg%(i,j):print#8,rg%(i,j):nextj
+ 1130 print#8,d%(i):print#8,le%(i):print#8,al%(i):print#8,pm%(i):print#8,pf%(i)
+ 1140 nexti
+ 1150 close8
+ 1990 goto100
+
+ 2000 print"replace file?"
+ 2010 geta$:ifa$=""then2010
+ 2020 ifa$<>"y"then1150
+ 2030 goto1120
+ 3000 print"program name to read?:"
+ 3010 open1,0:input#1,a$,dd$:close1:print
+ 3020 dd=val(dd$):ifa$=""then100
+ 3090 :
+ 3100 open8,dd,8,"0:gg01/"+a$+",s,r"
+ 3110 input#8,nd%
+ 3120 fori=1tomx:forj=0tonc:input#8,lg%(i,j):input#8,rg%(i,j):nextj
+ 3130 input#8,d%(i):input#8,le%(i):input#8,al%(i):input#8,pm%(i):input#8,pf%(i)
+ 3140 nexti:close8
+ 3990 goto100
+ 4000 print"disk error";a;b$;c;d:goto1150
+
+ 5000 re=0:ifa$="s"ora$="save"thenprint"(up)save  ":goto1000
+ 5002 ifa$="l"ora$="load"thenprint"(up)load  ":goto3000
+ 5004 ifa$="e"ora$="end"thenprint"(up)end ":end
+ 5005 ifa$="c"ora$="colony"thenprint"(up)colony ":goto20000
+ 5006 ifa$="n"ora$="next"ora$="-"ora$="="thenprint"(up)next":zx=xr+1:a$=str$(zx)
+ 5007 ifa$="h"ora$="help"ora$="?"thenprint"(up)help":goto 30000
+ 5008 ifa$="w"ora$="wait"thenprint"(up)-==-":gosub5100:print"(up)";a$;"    "
+ 5009 ifa$="g"ora$="genes"thenprint"(up)genes ":goto50000
+ 5010 ifa$="r"ora$="remove"thenprint"(up)remove ":goto5200
+ 5011 ifa$="k"ora$="kill"thenprint"(up)kill ":goto5260
+ 5012 ifa$="a"ora$="analyse"thenprint"(up)analyse ":goto6000
+ 5013 ifa$="li"ora$="life"thenprint"(up)life ":goto5050
+ 5014 ifa$="b"ora$="breeds"thenprint"(up)breeds ":goto7000
+ 5015 ifa$="q"ora$="quit"thenprint"(up)quit ":run
+ 5016 ifa$="d"ora$="days"thenprint"number of days:";nd%:gosub5400
+ 5018 re=0:ifa$="read"thenre=1:goto6000
+ 5049 goto102
+
+ 5050 print"which victim to revive?":open1,0:input#1,a$:close1:print
+ 5052 ifa$=""then5120
+ 5055 a=val(a$):x=a:ifa<1ora>mxthenprint"no way!":goto100
+ 5057 ifd%(a)=>le%(a)thenprint"victim permanently dead.":goto100
+ 5060 gosub10000:print"are you sure?:"
+ 5065 open1,0:input#1,a$:close1:print
+ 5070 ifa$="y"ora$="yes"thenal%(x)=1*sgn(al%(x)):print"ok.it is alive again.":goto100
+ 5080 print"ok.it is still dead":goto100
+ 5100 fori=1tomx:ifal%(i)<>0thend%(i)=d%(i)+1:ifd%(i)>le%(i)thenal%(i)=2*sgn(al%(i))
+ 5110 nexti:nd%=nd%+1:return
+ 5120 print"first,last?":open1,0:input#1,a$,b$:close1:print
+ 5125 a=val(a$):b=val(b$):ifa<1ora>mxorb<=aorb>mxthenprint"no way!":goto100
+ 5126 printa;"-";b;":are you sure?:"
+ 5127 open1,0:input#1,a$:close1:print
+ 5128 ifa$="y"ora$="yes"then5130
+ 5129 print"ok.all still dead":goto100
+ 5130 forx=atob
+ 5140 ifd%(x)=>le%(a)thennextx
+ 5150 al%(x)=1*sgn(al%(x)):nextx
+ 5160 print"ok.all alive again.":goto 100
+ 5200 print"which victim to remove?":open1,0:input#1,a$:close1:print
+ 5202 ifa$=""then5214
+ 5205 a=val(a$):x=a:ifa<1ora>mxthenprint"no way!":goto100
+ 5207 gosub10000:print"are you sure?:"
+ 5208 open1,0:input#1,a$:close1:print
+ 5210 ifa$="y"ora$="yes"thenal%(x)=0:print"ok.it has been disposed of.":goto5300
+ 5212 print"ok.it has been kept.":goto100
+ 5214 print"first,last?":open1,0:input#1,a$,b$:close1:print
+ 5215 a=val(a$):b=val(b):ifa<1ora>mxorb<=aorb>mxthenprint"no way!":goto100
+ 5216 printa;"-";b;":are you sure?:"
+ 5217 open1,0:input#1,a$:close1:print
+ 5218 ifa$="y"ora$="yes"thenforx=atob:al%(x)=0:ret=1:gosub 5300:ret=0:nextx:goto5220
+ 5219 print"ok.all kept.":goto100
+ 5220 print"ok.all disposed of":goto100
+ 5260 print"which victim to kill?":open1,0:input#1,a$:close1:print
+ 5265 ifa$=""then5280
+ 5270 a=val(a$):x=a:ifa<1ora>mxthenprint"no way!":goto100
+ 5275 gosub10000:print"are you sure?:"
+ 5277 open1,0:input#1,a$:close1:print
+ 5278 ifa$="y"ora$="yes"thenal%(x)=2*sgn(al%(x)):print"ok.it has been killed.":goto100
+ 5279 print"ok.it has been spared.":goto100
+ 5280 print"first,last?":open1,0:input#1,a$,b$:close1:print
+ 5282 a=val(a$):b=val(b$):ifa<1ora>mxorb<=aorb>mxthenprint"no way!":goto100
+ 5285 printa;"-";b;":are you sure?:"
+ 5287 open1,0:input#1,a$:close1:print
+ 5288 ifa$="y"ora$="yes"then5290
+ 5289 print"ok.all spared.":goto100
+ 5290 forx=atob:al%(x)=2*sgn(al%(x)):nextx:print"ok.all killed.":goto100
+ 5300 fori=0tonc:lg%(x,i)=0:rg%(x,i)=0:nexti:d%(x)=0:le%(x)=0:pm%(x)=0:pf%(x)=0
+ 5301 ifretthenreturn
+ 5302 goto100
+ 5400 jj=int(nd%/30):jk=nd%-jj*30
+ 5410 ifjj<>0andjk<>0thenprintjj"months";jk"days"
+ 5412 ifjj=0andjk<>0thenprintjk"days"
+ 5414 ifjj<>0andjk=0thenprintjj"months"
+ 5490 print:goto100
+ 5500 ll=lg%(i,1)and2^11:rr=rg%(i,1)and2^11:sx$="f":ifll<>0orrr<>0thensx$="m"
+ 5510 return
+
+ 6000 print"cheat sheet:analyse genes"
+ 6005 print"which victim"
+ 6010 open1,0:input#1,a$:close1:print
+ 6020 x=val(a$):ifx>mxorx<-mxthenprint"no-way":goto100
+ 6022 ifx<0thenx=-x:pn=1:open4,4:print#4,"genes of"x
+ 6025 ifre=1andal%(x)=>0thenprint"no record of genes being analysed.":goto6160
+ 6027 ifal%(x)=0thenprint"no animal with that id.":goto6160
+ 6028 ifre=0andal%(x)<0thenre=1:print"already analysed.reading it now."
+ 6100 forj=1tonc+1:fori=0to14
+ 6110 l=-((lg%(x,j-1)and2^i)<>0):r=-((rg%(x,j-1)and2^i)<>0)
+ 6120 nn=(j-1)*15+i:nn$=left$("   ",3-len(str$(nn)))+str$(nn)
+ 6122 b$=right$(str$(l),1)+right$(str$(r),1)
+ 6125 ifpn=1thenprint#4,nn$;":";b$;:pl=pl+6
+ 6130 print"(wht)";nn$;"(cyn)"l;"(left)";r;:ifpos(x)>31thenprint:ifpl>70thenprint#4,chr$(0):pl=0
+ 6150 ifi>=0andi<15then nexti
+ 6151 ifj>=1andj<=(nc+1)then nextj
+ 6155 print"(wht)":ifre=0thengosub5100:al%(x)=-al%(x)
+ 6160 ifpn=1thenprint#4:close4:pl=0:pn=0
+ 6170 goto100
+ 7000 print"breeding chart"
+ 7005 print"start at which victim"
+ 7010 open1,0:input#1,a$:close1:print
+ 7020 x2=val(a$):ifx2<0orx2>mxthenprint"no-way":goto100
+ 7030 fori=x2tomx:ifal%(i)=0then7090
+ 7035 gosub5500
+ 7037 nn$=str$(i):nn$=left$("   ",4-len(nn$))+nn$
+ 7038 nm$=str$(pm%(i)):nm$=left$("   ",4-len(nm$))+nm$
+ 7039 nf$=str$(pf%(i)):nf$=left$("   ",4-len(nf$))+nf$
+ 7040 print"(yel)";nn$;"(pur)"sx$;"(wht)";nm$;"(grn)+(wht)";nf$;tab(17);
+ 7050 ifabs(al%(i))=2thenprint"(red)died:";le%(i);"(cyn)since:";d%(i);"(wht)"
+ 7060 ifabs(al%(i))=1thenprint"(cyn)days old:";d%(i)
+ 7065 ifpeek(197)<>64thenpoke198,0:print"(wht)";:goto100
+ 7070 ifpeek(653)<>0then7070
+ 7090 nexti:print"(wht)";:goto100
+ 9999 end
+
+ 10000 forj=0tonc:fori=0to14
+ 10002 l=-((lg%(x,j)and2^i)<>0):r=-((rg%(x,j)and2^i)<>0)
+ 10006 t(j*15+i)=0:t=0:ifl=1orr=1thent(j*15+i)=1:t=1
+ 10008 nexti,j
+ 10010 print"(cyn)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+ 10012 remfori=1to7:print"]                            ]":next
+ 10014 print"(down)(down)(down)(down)(down)(down)(down)(down)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@(up)(up)(up)(up)(up)(up)(up)(up)(up)"
+ 10016 print"(wht)identif.no.";mid$(str$(x),2);".(cyn) breed:(wht)";pm%(x)"+";pf%(x);"(left)."
+ 10020 ift(19)=0andt(20)=0andt(21)=0andt(22)=0thenprint"(pur)purple";
+ 10022 ift(19)=0andt(20)=0andt(21)=0andt(22)=1thenprint"(cyn)blue";
+ 10024 ift(19)=0andt(20)=0andt(21)=1andt(22)=0thenprint"(brn)dark brown";
+ 10026 ift(19)=0andt(20)=0andt(21)=1andt(22)=1thenprint"(lgrn)dark blue-green";
+ 10028 ift(19)=0andt(20)=1andt(21)=0andt(22)=0thenprint"(red)red";
+ 10030 ift(19)=0andt(20)=1andt(21)=0andt(22)=1thenprint"(wht)albino";
+ 10032 ift(19)=0andt(20)=1andt(21)=1andt(22)=0thenprint"(brn)brown";
+ 10034 ift(19)=0andt(20)=1andt(21)=1andt(22)=1thenprint"(grn)green";
+ 10040 ift(19)=1andt(20)=0andt(21)=0andt(22)=0thenprint"(brn)light brown";
+ 10042 ift(19)=1andt(20)=0andt(21)=0andt(22)=1thenprint"(grn)dark green";
+ 10044 ift(19)=1andt(20)=0andt(21)=1andt(22)=0thenprint"(orng)dark tan";
+ 10046 ift(19)=1andt(20)=0andt(21)=1andt(22)=1thenprint"(lgrn)light blue-green";
+ 10048 ift(19)=1andt(20)=1andt(21)=0andt(22)=0thenprint"(orng)orange";
+ 10050 ift(19)=1andt(20)=1andt(21)=0andt(22)=1thenprint"(yel)yellow";
+ 10052 ift(19)=1andt(20)=1andt(21)=1andt(22)=0thenprint"(orng)tan";
+ 10054 ift(19)=1andt(20)=1andt(21)=1andt(22)=1thenprint"(grn)light green";
+ 10056 print
+ 10058 print"(down)(down)   (rvon)   (rvof)(up)(up)(up)"
+ 10100 ift(17)=0then10110
+ 10102 ift(1)=1andt(2)=1thenprint"(down)(down)(down)(rght)(rght)(rght)(CBM-X)(up)(up)(up)(up)"
+ 10104 ift(1)=0andt(2)=1thenprint"(down)(down)(down)(rght)(rght)@(CBM-X)(rght)(up)(up)(up)(up)"
+ 10106 ift(1)=1andt(2)=0thenprint"(down)(down)(down)(rght)(rght)(rght)(rvon)(CBM-V)(rvof)(up)(up)(up)(up)"
+ 10108 ift(1)=0andt(2)=0thenprint"(down)(down)(down)(rght)(rght)(CBM-I)(rvon)(CBM-V)(rvof)(up)(up)(up)(up)"
+ 10110 :
+ 10200 ift(18)=0then10210
+ 10202 ift(3)=1andt(4)=1thenprint"(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(CBM-Z)(up)(up)(up)(up)"
+ 10204 ift(3)=0andt(4)=1thenprint"(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(CBM-Z)@(up)(up)(up)(up)"
+ 10206 ift(3)=1andt(4)=0thenprint"(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(rvon)(CBM-C)(rvof)(up)(up)(up)(up)"
+ 10208 ift(3)=0andt(4)=0thenprint"(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(rvon)(CBM-C)(rvof)(CBM-I)(up)(up)(up)(up)"
+ 10210 :
+ 10300 ift(5)=1andt(6)=1thenprint"(down)(rght)(rght)(rght)(rght)(rght).(up)(up)"
+ 10302 ift(5)=0andt(6)=1thenprint"(down)(rght)(rght)(rght)(rght)(rght)(CBM-F)(up)(up)"
+ 10400 ift(7)=1andt(8)=1thenprint"(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)=(up)(up)(up)"
+ 10402 ift(7)=0andt(8)=1thenprint"(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)<(up)(up)(up)"
+ 10500 ift(9)=0andt(10)=1thenprint"(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)I(up)(up)(up)"
+ 10502 ift(9)=0andt(10)=0thenprint"(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)--(up)(up)(up)"
+ 10600 ift(11)=1andt(12)=1and(t(40)=1ort(41)=1)thenprint"(down)(down)(rght)(rght)(CBM-I)(up)(up)(up)"
+ 10604 ift(11)=0andt(12)=1and(t(40)=1ort(41)=1)thenprint"(down)(down)(rght)(CBM-I)(CBM-I)(up)(up)(up)"
+ 10606 ift(11)=1andt(12)=0and(t(40)=1ort(41)=1)thenprint"(down)(down)(rght)(rght)(rvon)(SHIFT-POUND)(up)(up)(up)"
+ 10608 ift(11)=0andt(12)=0and(t(40)=1ort(41)=1)thenprint"(down)(down)(rght)(rvon)(SHIFT-POUND) (up)(up)(up)"
+ 10700 ift(13)=0andt(14)=0thenprint"(rght)(rght)(rght)(rght)(rght)(rght)(rght)N(left)(left)(down)N(up)(up)"
+ 10702 ift(13)=0andt(14)=1thenprint"(rght)(rght)(rght)(rght)(rght)(rght)(down)N(up)(up)"
+ 10800 ift(15)=0andt(16)=0thenprint"(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)M(CBM-@)(up)(up)(up)(up)"
+ 10802 ift(15)=0andt(16)=1thenprint"(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)M(up)(up)(up)(up)"
+ 10900 e1=1:ift(23)=0andt(24)=0thenprint"(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)no cellulose(up)(up)":e1=0
+ 10902 ift(23)=1andt(24)=1thenprint"(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)all cellulose(up)(up)"
+ 10904 ift(23)=1andt(24)=0thenprint"(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)soft cellulose(up)(up)"
+ 10906 ift(23)=0andt(24)=1thenprint"(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)hard cellulose(up)(up)"
+ 10910 e2=1:ift(25)=1thenprint"(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)protein(up)(up)(up)"
+ 10912 ift(25)=0thenprint"(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)no protein(up)(up)(up)":e2=0
+ 10920 sx=0:ift(26)=1thenprint"(down)(down)(down)(down)(down)male(up)(up)(up)(up)(up)(up)":sx=1
+ 10922 ift(26)=0thenprint"(down)(down)(down)(down)(down)female(up)(up)(up)(up)(up)(up)":sx=2
+ 10930 ifabs(al%(x))=1thenprint"(down)(down)(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)days old:";d%(x);"(up)(up)(up)(up)(up)(up)"
+ 10932 ifabs(al%(x))=2thenprint"(down)(down)(down)(down)(down)"spc(10)"died:"le%(x)"would be:";d%(x);"(up)(up)(up)(up)(up)(up)"
+ 11000 am=0:ift(27)=0andt(28)=0thenam=9
+ 11002 sb=0:ift(38)=0andt(39)=0thensb=1
+ 11004 f1=0:ift(29)=0thenf1=1
+ 11006 f2=0:ift(30)=0thenf2=1
+ 11010 ift(31)=0thenprint"(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)weak bones(up)(up)(up)(up)"
+ 11012 ift(32)=0thenprint"(down)(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)no clotting(up)(up)(up)(up)(up)"
+ 11014 ift(33)=0thenprint"(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)retarded(up)"
+ 11020 ift(34)=0andt(35)=1thenprint"(down)(rght)(rght)(rght)(rght)M(up)(up)"
+ 11022 ift(34)=0andt(35)=0andt(36)=0thenprint"(down)(rght)(rght)(rght)(CBM-T)M(up)(up)"
+ 11024 ift(34)=0andt(35)=0andt(36)=1andt(37)=1thenprint"(down)(rght)(rght)(CBM-T)(CBM-T)M(up)(up)"
+ 11026 ift(34)=0andt(35)=0andt(36)=1andt(37)=0thenprint"(down)(rght)(CBM-T)(CBM-T)(CBM-T)M(up)(up)"
+ 19998 print"(wht)(down)(down)(down)(down)(down)(down)":return
+
+ 20000 a$="":rem pgs put this here to keep it doing something
+ 20001 geta$:ifa$<>""thenacn=0:goto100
+ 20003 acn=0:print"day-";nd%
+ 20004 a=int(rnd(ti)*mx)+1:acn=acn+1
+ 20005 ifacn>400thengosub5100:goto20000
+ 20010 if abs(al%(a))<>1then20004
+ 20020 i=a:gosub5500:ifsx$="f"then20004
+ 20030 ifd%(a)<14then20004
+ 20035 a9=0
+ 20040 if(lg%(a,1)and4096=0)and(rg%(a,1)and4096=0)and(lg%(a,1)and8192=0)thena9=9
+ 20050 if(a9=9)and(rg%(a,1)and8192=0)then20004
+ 20059 acn=0
+ 20060 b=int(rnd(ti)*mx)+1:acn=acn+1
+ 20065 ifacn>400thengosub5100:goto20000
+ 20070 if abs(al%(b))<>1then20060
+ 20080 i=b:gosub5500:ifsx$="m"then20060
+ 20090 ifd%(b)<10then20060
+ 20095 a9=0
+ 20100 if(lg%(b,1)and4096=0)and(rg%(b,1)and4096=0)and(lg%(b,1)and8192=0)thena9=9
+ 20110 if(a9=9)and(rg%(b,1)and8192=0)then20060
+ 20115 ifacn>100thenfori=1tomx:ifal%(i)<>0thend%(i)=d%(i)+1:next:goto20000
+ 20116 ifacn>100then20000
+ 20200 goto360
+
+ 30000 print"(clr)(lgrn)        genes 17 help screen  ":print"(lblu)        (CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)"
+ 30005 print
+ 30010 print"(red) <rtn>    (gry3)mate a pair manually       "
+ 30020 print"(red) <id nW>  (gry3)show creature of that id nW"
+ 30030 print"(lred) h(red)elp  (lred)?(red)  (gry3)command help scren     "
+ 30035 print"(lred) g(red)enes    (gry3)gene usage help screen "
+ 30040 print"(lred) c(red)olony   (gry3)start automatic random mating"
+ 30050 print"(lred) n(red)ext (lred)=(red) (lred)-(red) (gry3)show creature with next id nW"
+ 30060 print"(lred) b(red)reeds   (gry3)breeding chart         "
+ 30070 print"(lred) w(red)ait     (gry3)wait one day           "
+ 30080 print"(lred) d(red)ays     (gry3)show nW of days since start"
+ 30090 print"(lred) a(red)nalyse  (gry3)show genes of a creature"
+ 30100 print"(lred) read(red)     (gry3)show genes of a bug again"
+ 30110 print"(lred) k(red)ill     (gry3)kills a creature not dead"
+ 30115 print"(lred) li(red)fe     (gry3)revives a killed bug    "
+ 30120 print"(lred) r(red)emove   (gry3)disposes of a creature   "
+ 30130 print"(lred) l(red)oad     (gry3)loads a file (name$,device)"
+ 30140 print"(lred) s(red)ave     (gry3)saves a file (name$,device)"
+ 30150 print"(lred) q(red)uit     (gry3)reruns program      "
+ 30160 print"(lred) e(red)nd      (gry3)escapes from program"
+ 30170 print"(down)(down)      (lblu)(press any key to continue)"
+ 30180 geta$:ifa$=""then30180
+ 30190 print"(clr)(wht)":goto100
+ 40000 print"(clr)(lblu)  the(down)(down)futex corporation(down)(down)(left)(left)(left)(left)proudly presents"
+ 40010 print"(up)"
+ 40020 print"      (rvon)    (rvof)"
+ 40030 print"      (rvon) (rvof)  (rvon) (rvof)"
+ 40040 print"      (rvon) (rvof)     (rvon)   (rvof)  (rvon) (rvof)  (rvon) (rvof)  (rvon)   (rvof)  (rvon)   (rvof)"
+ 40050 print"      (rvon) (rvof)     (rvon) (rvof)    (rvon) _(rvof) (rvon) (rvof)  (rvon) (rvof)    (rvon) (rvof)"
+ 40060 print"      (rvon) (rvof) (rvon)  (rvof)  (rvon)  (rvof)   (rvon) (rvof)_(rvon)_ (rvof)  (rvon)  (rvof)   (rvon)   (rvof)"
+ 40070 print"      (rvon) (rvof)  (rvon) (rvof)  (rvon) (rvof)    (rvon) (rvof) _(rvon) (rvof)  (rvon) (rvof)      (rvon) (rvof)"
+ 40080 print"      (rvon)    (rvof)  (rvon)   (rvof)  (rvon) (rvof)  (rvon) (rvof)  (rvon)   (rvof)  (rvon)   (rvof)"
+ 40090 print"(down)"
+ 40100 print"             (rvon)(SHIFT-POUND) (rvof)   (rvon)    (rvof)"
+ 40110 print"             (SHIFT-POUND)(rvon) (rvof)      (rvon) (rvof)"
+ 40120 print"              (rvon) (rvof)     (rvon)(SHIFT-POUND)(rvof)(SHIFT-POUND)"
+ 40130 print"              (rvon) (rvof)    (rvon)(SHIFT-POUND)(rvof)(SHIFT-POUND)"
+ 40140 print"              (rvon) (rvof)    (rvon) (rvof)"
+ 40150 print"             (rvon)   (rvof)   (rvon) (rvof)"
+ 40160 print"(down)(down)     (press any key to continue)"
+ 40170 rem geta$:ifa$=""then40170  - pgs disabled as this just loops around!
+ 40180 goto 2
+
+ 50000 print"(clr)(lgrn)       genes usage chart (page 1)(home)(down)(lblu)       (CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)"
+ 50010 for i=1to21step3:readn1$,d1$,r1$,n2$,d2$,r2$,n3$,d3$,r3$
+ 50020 i$="(lgrn)"+right$(str$(i),2)+" (lblu)"
+ 50030 i2$="(lgrn)"+right$(str$(i+1),2)+" (lblu)"
+ 50040 i3$="(lgrn)"+right$(str$(i+2),2)+" (lblu)"
+ 50045 spd$="     ":d1$=left$(spd$,5-len(d1$))+d1$
+ 50046 d2$=left$(spd$,5-len(d2$))+d2$
+ 50047 d3$=left$(spd$,5-len(d3$))+d3$
+ 50050 printi$;n1$tab(13)i2$;n2$tab(27)i3$;n3$:print"(gry3)";tab(00)d1$tab(05)",";r1$;
+ 50060 printtab(13)d2$tab(18)",";r2$tab(27)d3$tab(32)",";r3$:print: next
+ 50070 readn$,d$,r$:print"(lgrn)";:n$="(lblu)"+n$+"(gry3)":r$=r$+"(red)"
+ 50080 print"22 ";n$:printtab(00)d$tab(05)",";r$tab(11);"(press any key to continue)(up)(up)"
+ 50090 geta$:ifa$=""then50090
+ 50100 print"(clr)(lgrn)       genes usage chart (page 2)(home)(down)(lblu)       (CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)(CBM-T)"
+ 50110 for i=23to40step3:readn1$,d1$,r1$,n2$,d2$,r2$,n3$,d3$,r3$
+ 50120 i$="(lgrn)"+right$(str$(i),2)+" (lblu)"
+ 50130 i2$="(lgrn)"+right$(str$(i+1),2)+" (lblu)"
+ 50140 i3$="(lgrn)"+right$(str$(i+2),2)+" (lblu)"
+ 50145 spd$="     ":d1$=left$(spd$,5-len(d1$))+d1$
+ 50146 d2$=left$(spd$,5-len(d2$))+d2$
+ 50147 d3$=left$(spd$,5-len(d3$))+d3$
+ 50150 printi$;n1$tab(13)i2$;n2$tab(27)i3$;n3$:print"(gry3)";tab(00)d1$tab(05)",";r1$;
+ 50160 printtab(13)d2$tab(18)",";r2$tab(27)d3$tab(32)",";r3$:print: next
+ 50170 readn$,d$,r$:print"(lgrn)";:n$="(lblu)"+n$+"(gry3)":r$=r$+"(red)"
+ 50180 print"41 ";n$:printtab(00)d$tab(05)",";r$tab(11);"(press any key to continue)(up)(up)"
+ 50190 geta$:ifa$=""then50190
+ 50200 print"(clr)(wht)":goto100
+
+ 51000 datab legs,short,long,b legs,thin,thick,f legs,short,long
+ 51010 dataf legs,thin,thick,eyes,small,large,eyes,yes,none,mouth,small,large
+ 51020 datamouth,yes,none,poison,none,yes,poison,none,spray,tail,short,long
+ 51030 datatail,thin,thick,antenna,none,yes,antenna,short,long,tongue,none,yes
+ 51040 datatongue,short,long,b legs,yes,none,f legs,yes,none,colour,yellw
+ 51050 datanone,colour,none,blue,colour,green,none,colour," none",red
+ 51060 datacellulose,soft,none,cellolose,hard,none,protien,yes,none,sex,male,female
+ 51070 datasterile 1,no,yes,sterile 2,no,yes,lim life,no,yes,vlim life,no,yes
+ 51080 databones,hard,weak,clotting,yes,none,retarded,no,yes,1st wing,none,yes
+ 51090 data2nd wing,none,yes,3rd wing,none,yes,4th wing,none,yes,death 1,no,yes
+ 51100 datadeath 2,no,yes,tail 1,yes,no,tail 2,"  yes",no
+ 59999 end
+ 60000 open15,8,15:input#15,a,b$,c,d:close15:printb$:end
+

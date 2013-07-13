@@ -1,0 +1,8 @@
+10 label test.2
+20 print "sdgsdg"
+25 gosub "get.something.keys"
+30 goto test.2
+900 label "get.something.keys"
+910 geta$
+920 ifa$<>""thenprint"got a key"
+990 return

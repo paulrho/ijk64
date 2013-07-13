@@ -1,0 +1,542 @@
+   10 fast:poke53280,0:poke53281,0:mv=5:x$="22.1"
+   11 rp$=chr$(141):rp$="":rp=0
+   13 po=11:tl=23.45229444:cp=3:dimla(20),lo(20),p$(20):gosub11005:dimhh(po)
+   14 tl=23.4392805:tl=23.4411025:dimad(po,po)
+   15 np=16:fori=1tonp:readp$(i),la,ma,lo,mb:la(i)=la+ma/60:lo(i)=lo+mb/60:next
+   16 dataredcliffe,-27,-14,153,07,melbourne,-37,-49,144,58,harare,-17,-50,31,03
+   17 datasalekhard,66,33,66,40,north pole,90,0,0,0,apr. gren.,52,30,0,0
+   18 databrisbane,-27,-29,153,02,gayndah,-25,-37,151,37,kingston,51,25,0,-17
+   19 datacanberra,-35,-18,149,08,charleville,-26,-24,146,15,69 cornelius st
+   20 data-27,-15.33,153,5.5,36 pamrick cres,-27.23888889,0,153.088888,0
+   21 i=po:datao'reillys,-28.2416667,,153.166667,,south pole,-90,0,0,0
+   22 datawoody point,-27,-15.333,+153,+07.0
+   23 print"(clr)":dims$(101),rh(101),dd(101),ga(120),gp(120),ld(i,i),ap(i,i),rc(i,i)
+   30 deffnl2(kk)=kk/4-int(kk/4)+((kk/100-int(kk/100))=0)*(kk>1752)
+   35 deffnlp(kk)=fnl2(kk)-(kk/400-int(kk/400)=0)*(kk>1752)
+   40 datajan,31,feb,28,mar,31,apr,30,may,31,jun,30,jul,31,aug,31,sep,30,oct,31,nov,30
+   50 datadec,31
+   55 ifha=21then20000
+   60 dimm$(12),d%(12):fori=1to12:readm$(i),d%(i):next
+   61 dimz$(12):fori=1to12:readz$(i):next:gosub11005
+   62 dataaries,taurus,gemini,cancer,leo,virgo,libra,scorpio
+   63 datasagittarius,capricorn,aquarius,pisces
+   64 dimha(20),hp(20),x(20),y(20),z(20),xt(20),yt(20),zt(20)
+   65 dima$(20),ax(20),ec(20),ii(20),om(20),wt(20),mu(20),l(20),a(20),b(20),c(20)
+   66 fori=1topo-1:reada$(i),ax(i),ec(i),ii(i),om(i),wt(i),mu(i),l(i),a,b,c:next
+   70 sp$="                          ":a$(po)="moon":gosub11000
+   80 gosub440:goto1790
+  260 d2=1:m2=m2+1:ifm2=13theny2=y2+1:m2=1
+  270 return
+  400 d2=bd:m2=md:y2=yd:ln=0
+  410 ln=ln+1:d2=d2+1:ifd2>d%(m2)thengosub260
+  420 ifd2=dthenifm2=mandy2=ythenreturn
+  430 goto410
+  440 cc=0:d3=0:ng=1:print"(clr)(wht)";
+  450 print"(home)(wht)";:print"date(d,m,y)(lred)":open1,0:input#1,d,m,y:close1:print"(wht)"
+  455 d=abs(d):m=abs(m)
+  460 d7=d:m7=m:y7=y
+  465 ifm=2thenifd>28-(fnlp(y)=0)thenprint"(up)(up)(up)":goto450
+  467 ifm<>2thenifd>d%(m)orm>12ord<1orm<1thenprint"(up)(up)(up)":goto450
+  470 print"time in u.t.(hrs,min)  {91}a.e.s.t-10 hrs}(lred)"
+  480 open1,0:input#1,h0,m0:close1:print"(wht)":h0=abs(h0):m0=abs(m0)
+  482 remif(h0+m0/60)>24thenprint"(up)(up)(up)":goto470
+  489 gosub8600:remifet=0thenot=0
+  490 d3=15:m3=5:y3=1985
+  500 ifcc=1thend3=16:m3=4:y3=1983:cc=1
+  510 ify<y3ory=y3andm<m3ory=y3andm=m3andd<d3thenng=-1:wd=d:wm=m:wy=y:gosub720
+  520 bd=d3:md=m3:ifm3<mthen560
+  530 ifm3=mandd3<dthen560
+  540 yd=y-1:em=-1:ifd=d3thenifm3=mthenln=0:em=0:goto570
+  550 gosub400:goto570
+  560 yd=y:em=0:gosub400
+  570 l=0:lk=365*(y-y3+em):iffnlp(y3)=0thengosub660
+  580 iffnlp(y)=0andy<>y3thengosub680
+  590 ify3+1>y-1then620
+  600 fori=y3+1toy-1:iffnlp(i)=0thenl=l+1
+  610 next:ify3+1<1752thenl=l-11
+  620 l1=ln+l+lk
+  630 ifcc=0thenw9=l1*ng:cc=1:return
+  640 ifcc=1thenl1=l1*ng:gosub700
+  650 return
+  660 ifm3=1orm3=2andd3<29thenl=l+1
+  670 return
+  680 ifm>2orm=2andd=29thenl=l+1
+  690 return
+  700 j=l1:w=int(j/100):j=j-w*100:e=int(j/10):j=j-e*10:e=e+1:j=j+1
+  710 return
+  720 d=d3:m=m3:y=y3:d3=wd:m3=wm:y3=wy:return
+  730 gosub440:g=180/{pi}
+  740 dt$=mid$(str$(d7),2)+"/"+mid$(str$(m7),2)+"/"+mid$(str$(y7),2)
+  750 th$=mid$(str$(h0),2):tm$=mid$(str$(m0),2):gosub1310
+ 1790 poke53280,0:poke53281,0:print"(wht)(clr)";:rr=4:ifot=3andzk$="s"then2000
+ 1800 td=w9+(h0+m0/60)/24:ifet oret%thenepoch=td+110760
+ 1801 a$(0)="mean sun":yr=365.24219879:y2=365.24219:kk=180/{pi}:en=(epoch-110260)/yr
+ 1803 ife7<99000then1820
+ 1805 open8,8,8,"star file2,s,r"
+ 1807 fori=1to1000:input#8,s$(i),rh(i),rm,dd(i),dm:ife7<99000then1817
+ 1810 rh=(rh(i)+rm/60)*15:da=0:dp=0:dd=dd(i)+dm/60:ifdd(i)<0thendd=dd(i)-dm/60
+ 1811 ifot=3then1816
+ 1812 gosub8400:ifdd<>90thenda=(3.074+1.336*sin(rh/kk)*tan(dd/kk))/240*en
+ 1813 dp=(20.04*cos(rh/kk))/3600*en:dd=dd+dp:rh=rh+da
+ 1814 ifdd<-90thendd=-dd-180:rh=rh-180:goto1814
+ 1815 ifdd>90thendd=180-dd:rh=rh-180:goto1815
+ 1816 rh(i)=(rh-360*(rh<0)+360*(rh>360))/15:dd(i)=dd
+ 1817 ifs$(i)<>"%"thennexti
+ 1819 close8:ns=i-1:ife7=99000thene7=po+ns
+ 1820 datamercury,0.387097,0.205636,7.0047,48.158,77.232,4.09236,340.5390
+ 1830 data23.439595,3.028523,0.539737
+ 1840 datavenus,0.723333,0.006803,3.3945,76.547,131.27,1.60213,259.1885
+ 1850 data0.779562,0.003315,0.000020
+ 1860 dataearth,0.999996,0.016721,0,0,102.558,0.985615,232.6745
+ 1870 data1.916018,0.020024,0.000290
+ 1880 datamars,1.523670,0.093301,1.8497,49.447,335.755,0.524020,74.5556
+ 1890 data10.679873,0.623455,0.050413
+ 1900 datajupiter,5.20264,0.048060,1.3052,100.344,15.421,0.0830952,310.1093
+ 1910 data5.505680,0.165425,0.006890
+ 1920 datasaturn,9.56053,0.051027,2.4855,113.547,92.884,0.033346,231.0667
+ 1930 data5.845360,0.186480,0.008247
+ 1940 datauranus,19.2864,0.046899,0.7743,73.991,176.509,0.0116154,250.4757
+ 1950 data5.372752,0.157529,0.006403
+ 1960 dataneptune,30.2674,0.007236,1.7704,131.643,358.98,0.00592724,272.8166
+ 1970 data0.829179,0.003750,0.000024
+ 1980 datapluto,39.6385,0.251986,17.1321,110.223,224.357,0.00394938,217.7395
+ 1990 data28.646281,4.547634,0.993148
+ 1995 datahalley,17.94026344,0.9672746,162.23931,58.14415,169.99103,0.012967171
+ 1996 data169.99103,,,
+ 2000 n=1:td=w9+(h0+m0/60)/24:en=(epoch-td-110760)/365.24219879
+ 2006 rt=(h0+m0/60)*15:ifmzthenrt=td/24.66:rt=(rt-int(rt))*360
+ 2008 ifs7>pothengosub2160:goto16000
+ 2010 ifn=pothen16800
+ 2012 ax=ax(n):ec=ec(n):ii=ii(n)/kk:om=om(n)/kk:wt=wt(n)/kk:mu=mu(n)/kk
+ 2020 l=l(n)/kk:a=a(n):b=b(n):c=c(n)
+ 2025 t2=td:ifn=10thent2=td-270.4441
+ 2030 m=l-wt+mu*t2:w=wt-om:gosub31000
+ 2050 r=ax*(1-ec*ec)/(1+ec*cos(vc)):v=vc+w
+ 2060 x=r*(cos(v)*cos(om)-sin(v)*cos(ii)*sin(om))
+ 2070 y=r*(cos(v)*sin(om)+sin(v)*cos(ii)*cos(om)):z=r*sin(v)*sin(ii)
+ 2130 x(n)=x:y(n)=y:z(n)=z:gosub10001:ha(n)=a:hp(n)=p
+ 2140 n=n+1:ifn=po+1thenn=1:goto16300
+ 2150 goto2010
+ 2160 sk=(td+134)/365.25636042+.779420139:sk=sgn(sk)*(abs(sk)-int(abs(sk)))
+ 2161 sk=sk*360:xt(0)=cos(sk/kk):yt(0)=sin(sk/kk):na=sk
+ 2162 ifdn%<>4thenopen4,dn%:goto2218
+ 2163 open6,4,6:print#6,chr$(26):close6
+ 2170 open4,dn%:ww=int(110760+td):wk=(td-int(td))*24:aa=wk:ra%=2:gosub4100
+ 2180 tm$=aa$+":"+a2$+":"+a3$
+ 2185 wd$=right$(str$(ww),2):wm$=str$(val(left$(wd$,1))+1):wd$=right$(wd$,1)
+ 2190 wd$=str$(val(wd$)+1):wm$=right$("0"+mid$(wm$,2),2)
+ 2200 wd$=right$("0"+mid$(wd$,2),2):i=4:iflen(str$(ww))<7theni=len(str$(ww))-3
+ 2202 f$=p$(np%):ifcp<>3thenf$=a$(cp):ifcp=0thenf$="sun"
+ 2203 ifpr%=4thenclose4:open4,4
+ 2204 ee$=".0":e=td-int(td)+1111.5:ife<>1111thenee$=mid$(str$(e),6)
+ 2205 print#4,"  ";f$;" ";d7;m$(m7);y7;"jd#";str$(int(td+.5)+110760+2335440);ee$
+ 2210 wy$=mid$(str$(ww),2,i):print#4,wd$;"-";wm$;"-";wy$;" ";tm$;" ut {91}mssy}";
+ 2215 print#4," epoch";:ifet oret%thenprint#4," of date"
+ 2217 ifet=0andet%=0thenprint#4,":";str$(epoch)
+ 2218 ifpr%=4thenclose4:open4,dn%
+ 2220 ifs7>pothen2245
+ 2225 fori=1topo:x=x(i)-x(cp):y=y(i)-y(cp):z=z(i)-z(cp):ifi=pothenii=ha(i)
+ 2230 ifi=cpthenx=-x(i):y=-y(i):z=-z(i)
+ 2232 ifi=po thena=ii/kk:p=hp(i)/kk:x=cos(a)*cos(p):y=sin(a)*cos(p):z=sin(p):x(i)=x:y(i)=y:z(i)=z
+ 2235 gosub10001:ga(i)=a:gp(i)=p:gosub2430:xt(i)=x:yt(i)=y:zt(i)=z:nexti:gosub18000
+ 2245 fori=s7toe7:ifi=<pothenx=xt(i):y=yt(i):z=zt(i)
+ 2246 ifi>pothenrh=(rh(i-po)*15)/kk:dd=(90-dd(i-po))/kk:x=cos(rh)*sin(dd)
+ 2247 ifi>potheny=sin(rh)*sin(dd):z=cos(dd):gosub2800:goto2249
+ 2248 gosub9100:ifettthengosub10001:gosub8200:gosub8300
+ 2249 ifetthengosub8000
+ 2250 gosub10001:gosub8100:ifetthen2298
+ 2291 ifi>pothen2300
+ 2292 gosub8200
+ 2298 ifp<0and(ot<>2or(i<>cpandi<>0))andotthen2395
+ 2300 ifot=3orot=4thenifi>6andi<=pothen2395
+ 2302 ifot=3orot=4then2394
+ 2305 ra=a:ra%=1:aa=ra/15:ifetthenra%=0:aa=ra
+ 2331 ifetthenaa=180-a:ifaa<0thenaa=aa+360
+ 2332 ifetthenifaa>=360thenaa=aa-360
+ 2335 gosub4100:ak$=aa$+":"+a2$+":"+a3$:ifetthenak$=aa$+"(CBM-V)"+a2$+"'"+a3$+chr$(34)
+ 2340 aa=p:dc%=1:gosub4100:p$=a$+aa$+"(CBM-V)"+a2$+"'"+a3$+chr$(34):aa$=ak$
+ 2389 ifi>pothene$=s$(i-po)
+ 2390 ifi<=pothene$=a$(i)
+ 2391 ifi=cpthene$="sun"
+ 2392 gosub2470:printe$;:ifgc%<>2thenprinttab(15);aa$;" ";p$
+ 2393 ifgc%thenprinttab(14);ga(i);tab(26);gp(i)
+ 2394 ifot=3orot=4thengosub15100
+ 2395 nexti:print#4:close4:return
+ 2410 print#4,e$;chr$(141);tab(15);a;chr$(141);spc(28);p;chr$(141);tab(41);d;
+ 2420 return
+ 2430 bt=tl:y2=y*cos(bt/kk)-z*sin(bt/kk):z=y*sin(bt/kk)+z*cos(bt/kk):y=y2:return
+ 2470 r$=rp$:print#4,spc(2);left$(e$+sp$,11+mv);r$;spc((11+mv)*rp);aa$;" ";p$;" ";
+ 2480 ifetthen2496
+ 2485 ifi<=pothenprint#4,d;r$;spc((42+mv)*rp);ga(i);r$;spc((54+mv)*rp);gp(i);
+ 2490 ifi>pothenprint#4,r$;spc((32+mv)*rp);ga(i);r$;spc((44+mv)*rp);gp(i);
+ 2496 print#4:return
+ 2500 fori=1to4:r(i)=int(rnd(ti)*10):next:return
+ 2700 bt=-tl:y2=y*cos(bt/kk)-z*sin(bt/kk):z=y*sin(bt/kk)+z*cos(bt/kk):y=y2:return
+ 2800 ifgc%=0thenreturn
+ 2810 x7=x:y7=y:z7=z:gosub2700:gosub10001:ga(i)=a:gp(i)=p:x=x7:y=y7:z=z7:return
+ 2900 a$(po+1)="ascendant":a$(po+2)="midheaven"
+ 2901 fori=1topo:ifi=cpthenx=-x(i):y=-y(i):z=-z(i):nexti:goto2905
+ 2902 ifpo=ithenx=x(i):y=y(i):z=z(i):goto2904
+ 2903 x=x(i)-x(cp):y=y(i)-y(cp):z=z(i)-z(cp)
+ 2904 gosub10001:ga(i)=a:gp(i)=p:nexti:gosub16500:a$(cp)="sun"
+ 2905 ifpr%=4thenopen7,4:print#7
+ 2906 fori=1topo-1:forj=i+1topo+2:u=ga(j)
+ 2907 jk=0:ifj=po+1thenu=az:jk=2
+ 2908 ifj=po+2thenu=mc:jk=2
+ 2910 tt=ga(i)-u:iftt<-180thentt=tt+360
+ 2911 iftt>180thentt=tt-360
+ 2912 t2=abs(tt):ee=0:ifabs(t2-60)<2+jkthene$="sxt":ee=1
+ 2913 ifabs(t2-45)<2+jk-ss%thene$="ssq":ee=1
+ 2914 ifabs(t2-30)<2+jk-ss%thene$="ssx":ee=1
+ 2915 ifabs(t2-120)<7+jk-ss%*6thene$="tri":ee=1
+ 2916 ifabs(t2)<7+jk-ss%*6thene$="con":ee=1
+ 2917 ifabs(t2-180)<7+jk-ss%*6thene$="opp":ee=1
+ 2918 ifabs(t2-90)<7+jk-ss%*6thene$="sqr":ee=1
+ 2919 ifabs(t2-72)<2+jk-ss%thene$="qtl":ee=1
+ 2920 ifabs(t2-135)<2+jk-ss%thene$="sqq":ee=1
+ 2921 ifabs(t2-150)<2+jk-ss%thene$="qcx":ee=1
+ 2922 ifabs(t2-144)<2+jk-ss%thene$="bqt":ee=1
+ 2923 jk=0:ifss%=1thenreturn
+ 2924 ifee=0then2950
+ 2925 printa$(i);tab(10);a$(j);tab(20);e$;tt
+ 2926 ifpr%=4thenprint#7,a$(i);chr$(141);spc(10);a$(j);chr$(141);spc(20);e$;tt
+ 2950 nextj
+ 2952 poke198,0
+ 2955 ifpr%<>4thengeta$:ifa$=""then2955
+ 2960 nexti:r$=chr$(141)+"(up)":ifpr%=4thencmd7
+ 2962 le=10:p1=0:p2=0:fori=1topo:tt=ga(i)-az:iftt<-180thentt=tt+360
+ 2964 iftt>180thentt=tt-360
+ 2966 t2=abs(tt):ifabs(t2)<10andabs(t2)<l1thenl1=t2:p1=i
+ 2968 ifabs(t2-180)<10andabs(t2-180)<l1thenl2=abs(t2-180):p2=i
+ 2970 tt=ga(i)-az:iftt<0thentt=tt+360
+ 2972 iftt>360thentt=tt-360
+ 2974 hh=tt/30+1:printa$(i);":";r$;spc(17);"(up)h(down)ouse:(up)";int(hh):hh(i)=hh
+ 2980 nexti:print"rising planet: ";:a$="none":ifp1<>0thena$=a$(p1)
+ 2982 printa$
+ 2984 print"setting planet:";:a$="none":ifp2<>0thena$=a$(p2)
+ 2986 printa$:print
+ 2987 ifpeek(653)<>0then2987
+ 2988 fori=1topo+2:ifi<=po thentt=ga(i)/30+1
+ 2990 ifi=po+1thentt=az/30+1
+ 2991 ifi=po+2thentt=mc/30+1
+ 2992 printa$(i);r$;spc(10);z$(int(tt));r$;spc(21);(tt-int(tt))*30:nexti
+ 2994 ifpr%=4thenprint#7:close7
+ 2998 return
+ 3000 bt=23.45229444:bb=sin(th/kk)/(tan(bt/kk)*cos(mg/kk))-cos(th/kk)/tan(mg/kk)
+ 3010 bb=atn(bb)*kk
+ 3020 y=-cos(bb/kk)*sin(th/kk)/sin(bt/kk):y=1
+ 3030 x=y*(cos(bt/kk)*tan(mg/kk)-sin(bt/kk)/tan(th/kk)/cos(mg/kk))
+ 3040 gosub10001:az=a
+ 3090 return
+ 3100 tt=az-mc
+ 3110 iftt<0thentt=tt+360
+ 3120 iftt>360thentt=tt-360
+ 3150 iftt>180thenaz=az-180
+ 3160 ifaz<0thenaz=az+360
+ 3162 ifaz>360thenaz=az-360
+ 3170 return
+ 3200 th=90-la(np%):mg=-na-lo(np%)-rt+180:ifmzthenmg=-lo(np%)-rt+180
+ 3210 gosub3000:ifpr%=4thenopen7,4:cmd7
+ 3220 x=xt(0):y=yt(0):z=zt(0):gosub2700:gosub10001:mc=a+rt-180+lo(np%)
+ 3222 ifmc<0thenmc=mc+360:goto3222
+ 3224 ifmc>360thenmc=mc-360:goto3224
+ 3230 print"midheaven (mc)=";mc:ifdn%=4thenprint#7,"midheaven (mc)=";mc
+ 3240 gosub3100:print"ascendant(asc)=";az:ifdn%=4thenprint#7,"ascendant(asc)=";az
+ 3244 ifpr%=4thenprint#7:close7:print
+ 3245 return
+ 4100 a9=aa:aa=abs(aa):a2=(aa-int(aa))*60:a3=(a2-int(a2))*60
+ 4105 ct=0:tt=int(a3+.5):iftt>=60thentt=0:ct=1
+ 4110 a3$=right$("00"+mid$(str$(tt),2),2)
+ 4115 tt=int(a2+ct):ct=0:iftt>=60thentt=0:ct=1
+ 4120 a2$=right$("00"+mid$(str$(tt),2),2)
+ 4125 tt=int(aa+ct):ct=0:iftt>=24andra%=1thentt=0
+ 4130 ifra%ordc%thenaa$=right$("00"+mid$(str$(tt),2),2)
+ 4135 ifra%=0anddc%=0thenaa$=right$("000"+mid$(str$(tt),2),3)
+ 4140 a$=left$(str$(sgn(a9)),1):ra%=0:dc%=0:return
+ 8000 et=1:th=90-la(np%):mg=-na-lo(np%)-rt+180:ifmzthenmg=-lo(np%)-rt+180
+ 8010 x2=x*cos(mg/kk)-y*sin(mg/kk):y2=y*cos(mg/kk)+x*sin(mg/kk):x=x2:y=y2
+ 8020 x2=x*cos(th/kk)-z*sin(th/kk):z2=z*cos(th/kk)+x*sin(th/kk):x=x2:z=z2:return
+ 8100 geta$:ifa$=""thenreturn
+ 8105 ifa$="r"thenrun
+ 8107 ifa$="e"thenend
+ 8110 print"(lblu)(rvon) (rvof)(left)";:z$=a$
+ 8120 geta$:ifa$=""ora$=z$then8120
+ 8130 print" (left)(wht)";
+ 8140 ifa$="e"thenend
+ 8145 ifa$="r"thenrun
+ 8150 return
+ 8200 ifp<>90thenda=(3.074+1.336*sin(a/kk)*tan(p/kk))/240*en
+ 8210 dp=(20.04*cos(a/kk))/3600*en
+ 8220 p=p+dp:a=a+da
+ 8230 ifp<-90thenp=-p-180:a=a-180:goto8230
+ 8240 ifp>90thenp=180-p:a=a-180:goto8240
+ 8250 a=a-360*(a<0)+360*(a>360):return
+ 8300 d=sqr(x*x+y*y+z*z)
+ 8310 x=d*cos(p/kk)*cos(a/kk):y=d*cos(p/kk)*sin(a/kk):z=d*sin(p/kk):return
+ 8400 en=(epoch-110260)/yr
+ 8405 b$=right$(s$(i),3):ifleft$(b$,1)<>"*"thenreturn
+ 8410 bb$=right$(b$,2)
+ 8420 s$(i)=left$(s$(i),len(s$(i))-3)
+ 8425 ifbb$="50"thenen=(ep-97842)/yr:rem (1950)
+ 8490 return
+ 8500 x=sin(sa/kk):y=cos(sa/kk):gosub2430:sk=sa:x2=x:x=y:y=x2:gosub10001:return
+ 8600 ifot=4then:{222}1:{232}:{229}1,210,100,105,95
+ 8602 ifot=4then:{222}1:{232}:{229}1,199,99,98.8*1.1858824,98.8:gosub15010
+ 8605 remifot=3then:graphic2,1:draw1,0,0to319,0to319,199to0,199to0,0
+ 8607 ifot=3then:{254,129}0,14,6,1,0:graphic1,1:{254,137}1,0,0to159,0to159,199to0,199to0,0
+ 8610 return
+ 9000 th=-mp:mg=-na
+ 9010 x2=x*cos(mg/kk)-y*sin(mg/kk):y2=y*cos(mg/kk)+x*sin(mg/kk):x=x2:y=y2
+ 9020 x2=x*cos(th/kk)-z*sin(th/kk):z2=z*cos(th/kk)+x*sin(th/kk):x=x2:z=z2:return
+ 9100 ifmzthengosub9000
+ 9110 return
+10001 d=sqr(x*x+y*y+z*z):ifdthenw=z/d:a=90-180*(y<0):ifxthena=atn(y/x)*kk
+10002 p=90*sgn(z):k=sqr(1-w*w):a=a-180*(x<0):a=a-360*(a<0):ifkthenp=atn(w/k)*kk
+10003 return
+11000 goto11085
+11005 print"(clr)(wht)";chr$(14);chr$(8);
+11010 print"(CBM-A)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@(CBM-S)":print"]      (yel) PLANETCALC ";x$;
+11020 print" (lblu)V.6.1985  (wht)     ]":print"(CBM-Z)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@(CBM-X)":return
+11023 print"(clr)(wht)";chr$(142);chr$(8);
+11024 print"(CBM-A)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@(CBM-S)":print"]      (yel) planetcalc ";x$;
+11025 print" (lblu)v.6.1985  (wht)     ]":print"(CBM-Z)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@(CBM-X)":return
+11027 gosub11005:print"(down)This program accounts for precession."
+11052 print"All times and dates are in U.T.":gosub16200
+11055 print"(down)PLANETCALC ";x$;" by (lgrn)Paul Salanitri(wht)."
+11057 print"(down)(lred)+.(yel) Forward Search.1/2d(lred) D. (yel)Debrief"
+11058 print"(lred)   A.(yel) 1 Hr (lred)B.(yel) 10Mins (wht)"
+11060 print"(lred)-.(yel) Backward Search.   (lred) Z. (yel)Zodiac (wht)"
+11061 a$="(yel)":b$=".   ":ifss%=1thena$="(grn)":b$=" ON."
+11062 print"(down)(lred)T.";a$;" Transits";b$;"(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(lred)P.(yel) Print Zodiac."
+11064 print"(down)(lgrn)IF NOT: *PRESS RETURN*"
+11067 gosub16900:ifeethen11000
+11073 ifa$="p"thenpr%=4:zd%=1
+11074 ifa$="t"andss%=1thenss%=0:goto11027
+11075 ifa$="t"thenss%=1:goto11027
+11077 ifa$="+"thensr=1
+11078 ifa$="-"thensr=-1
+11079 ifa$="d"then11500
+11080 ifa$="z"thenzd%=1
+11081 ifa$="a"thensr=1/12
+11082 ifa$="b"thensr=1/3/24
+11083 ifss%=1thenet%=1:et=0:ot=0:goto11300
+11084 ifzd%=1thenet%=1:et=1:ot=0:dn%=5:goto11310
+11085 gosub11005
+11087 print"(lgrn)   SIDEREAL Co-ordinates:"
+11090 print"(down)(lred)A.(yel) Epoch of Date."
+11091 print"(lred)B.(yel) Epoch 1950.0     (lred)D.(yel) Epoch 1984.0"
+11092 print"(lred)C.(yel) Epoch 2000.0     (lred)F.(yel) Epoch 1983.8"
+11093 print"(down)  (lgrn) ALTAZIMUTH Co-ordinates:"
+11094 print"(down)(lred)1.(yel) All Objects."
+11096 print"(lred)2.(yel) Above Horizon Objects."
+11098 print"(lred)3.(yel) Sun,Mean Sun & Above Horizon Objects."
+11100 print"(lred)4.(yel) Part Of Sky Objects Plotted."
+11105 print"(lred)5.(yel) All Above Horizon Objects Plotted."
+11110 print"(down)  (lgrn) MISCELLANEOUS:"
+11115 print"(down)(lred)T.(yel) Rise/Set Times.(red)  (N/A)"
+11120 print"(lred)X.(yel) Auxiliary Screen."
+11125 print"(lred)N.(yel) Change from MPS 802(left)";:ifrp=0thenprint"3";
+11130 print
+11200 print"(down)(pur)               (lred)p=(pur)On,(lred)o=(pur)Off.":print"(up)(cyn)PRINTER: (lred)OFF(up)":dn%=5
+11210 geta$:ifa$=""then11210
+11211 ifa$=chr$(13)ora$="x"then11027
+11212 gosub16925:ifeethen11000
+11213 ifa$="n"andrp=0thenrp=1:rp$=chr$(141):goto11085
+11214 ifa$="n"andrp=1thenrp=0:rp$="":goto11085
+11215 ifa$="p"thenprint"(cyn)PRINTER: (lred)ON (up)":dn%=4:goto11210
+11216 ifa$="o"thenprint"(cyn)PRINTER: (lred)OFF(up)":dn%=5:goto11210
+11220 a=val(a$):if(a<1ora>5)and(a$<"a"ora$>"f")then11210
+11230 et=0:ot=0:et%=1:ifa$="a"thenet=0:ot=0:et%=1
+11232 ifa$="b"thenet=0:ot=0:epoch=97842:et%=0
+11234 ifa$="c"thenet=0:ot=0:epoch=116104:et%=0
+11235 ifa$="d"thenet=0:ot=0:epoch=110260:et%=0
+11236 ifa$="f"thenet=0:ot=0:epoch=110187:et%=0
+11237 ifa=1thenet=1:ot=0
+11238 ifa=2thenet=1:ot=1
+11240 ifa=3thenet=1:ot=2
+11242 ifa=4thenet=1:ot=3
+11244 ifa=5thenet=1:ot=4
+11250 print" ";
+11300 ifet=0then11400
+11310 gosub11023:print"place:(cyn)":fori=1tonp
+11315 print"(lred)";i;"(yel)";p$(i);tab(20);"(cyn)(";int(la(i)*100)/100;
+11320 printint(lo(i)*100)/100;")":next:print"(lred) 0 (cyn)other data(wht)"
+11325 print"(wht)enter number:(lred)"
+11330 open1,0:input#1,i:close1:print"(up)(wht)":np%=np+1:ifi=<npthennp%=i
+11332 ifnp%=0thengosub16100
+11335 ifnp%<0ornp%>npthenprint"(up)(lred)":goto11330
+11400 gosub11005:print"(down)(wht)OBJECT SELECTION  and  DISPLAY:"
+11420 print"(down)(lred)1. (yel)Sun, Planets & Stars Only."
+11422 print"(down)(lred)2. (yel)Sun & Planets Only."
+11424 print"(down)(lred)3. (yel)Stars Only."
+11425 print"(down)(lred)4. (yel)Mean Sun, Sun & Planets Only."
+11426 print"(down)(lred)5. (yel)Mean Sun, Sun, Planets & Stars."
+11427 ifet=0andet%=1thenprint"(down)(lred)A. (yel)Change from ";:a$="Sidereal":gosub16400
+11429 ifet=1then11438
+11430 print"(down)(lred)B. (yel)Use alternative base Planet instead     of ";
+11435 a$=a$(cp):ifcp=0thena$="sun"
+11437 printchr$(asc(left$(a$,1))+32);mid$(a$,2);"."
+11438 print"(down)(down)(down)(pur)               (lred)p=(pur)On,(lred)o=(pur)Off.":ifdn%=5thenprint"(up)(cyn)PRINTER: (lred)OFF(up)"
+11439 ifdn%=4thenprint"(up)(cyn)PRINTER: (lred)ON (up)"
+11440 geta$:ifa$=""then11440
+11441 gosub16925:ifeethen11000
+11442 ifa$="a"andet=0andet%=1thengc%=gc%+1:ifgc%>2thengc%=0
+11443 ifa$="a"then11400
+11444 ifa$="p"thenprint"(cyn)PRINTER: (lred)ON (up)":dn%=4:goto11440
+11445 ifa$="o"thenprint"(cyn)PRINTER: (lred)OFF(up)":dn%=5:goto11440
+11446 a=val(a$):if(a<1ora>5)anda$<>"b"then11440
+11447 ifa=6andet<>0then11440
+11450 ifa=5thens7=0:e7=99000
+11452 ifa=3thens7=po+1:e7=99000
+11454 ifa=2thens7=1:e7=po
+11456 ifa=4thens7=0:e7=po
+11458 ifa=1thens7=1:e7=99000
+11460 ifa$="b"thengosub16150:goto11400
+11490 goto11910
+11500 gosub11005
+11510 print"Three Different types of Co-ordinate Systems can be displayed. ";
+11520 print"The (lgrn)Sidereal Grid(wht)is the system ";
+11525 print"that is used most commonly, Stars remain fixed  upon this gri";
+11530 print"d    (except for precession which is why the Epoch is required.)";
+11535 print" Co-Ordinates are    given as Right Ascension in Hours, and ";
+11540 print"Declination in degrees. ":print"The";
+11545 print" (lgrn)Celestial Grid (wht)is based on the Ecliptic, but is basicly th";
+11550 print"e same as the     Sidereal Grid, although Co-ordinates are both given";
+11552 print" in Degrees."
+11560 print"The (lgrn)Altazimuth Grid (wht)is the sky from a location on the Earth. ";
+11565 print"This is the sky as the observer would see it, given the time and";
+11570 print" his location. Co-ordinates are    given as the bearing from Due North";
+11580 print" in  degrees (Azimuth,) and degrees above theHorizon (Altitude.)(up)"
+11582 gosub16900:goto11000
+11596 geta$:ifa$=""then11596
+11598 goto11000
+11900 geta$:ifa$=""then11900
+11910 print"(clr)(wht)";chr$(142);:return
+15010 {254,136}1,0,17,"equidistant":{254,136}1,0,16,"zenithal"
+15015 {254,136}1,0,1,mid$(str$(h0),2)+":"+right$("0"+mid$(str$(int(m0)),2),2)+" ut"
+15020 {254,136}1,0,0,mid$(str$(d7),2)+"/"+mid$(str$(m7),2)+"/"+mid$(str$(y7),2)
+15025 {254,136}1,0,2,"("+left$(p$(np%),12)+")"
+15030 {254,136}1,0,22,"planetcalc "+x$
+15035 {254,136}1,0,4,"  w":{254,136}1,0,5,"n@{219}@s":{254,136}1,0,6,"  e"
+15040 {254,136}1,0,24,"futex corporation":return
+15100 j=98.8/90:ifot=4thenx=210+cos(a/kk)*(90-p)*1.167:y=100+sin(a/kk)*(90-p)*1.056
+15101 ifot=4thenx=199+cos(a/kk)*(90-p)*j*1.1858824:y=99+sin(a/kk)*(90-p)*j
+15102 ifot=4then:{254,137}1,x-1,ytox+1,y:{254,137}1,x,y-1tox,y+1:return
+15103 ac=30:ac=90
+15105 a=180-a:a=a-360*(a<0)+360*(a>=360)
+15107 a=a-ac:a=a-360*(a<0)+360*(a>=360)
+15110 remcolor0,12,11,1,0 (0,15,11,7,0)
+15115 {254,129}0,14,6,1,0:ifa<53ora>127orp>48orp<-1thenreturn
+15120 x=int(160/2+(a-90)*4.4444/2):y=int(100-(p-23.4945845)*4.2563)
+15130 remdraw1,x,y-1tox,y+1:draw1,x-1,ytox+1,y:return
+15132 c=1:ifi<=po+32thenc=3
+15133 ifi>po+69thenc=2
+15135 {254,137}c,x,y:{254,137}c,x,y+1
+15145 ifi=cpthen:{254,137}c,x,y-1tox+1,y-1tox+1,y+1
+15190 return
+16000 ifzd%thengosub3200:gosub2900
+16001 print"(lgrn)(rvon) (rvof)(left)(wht){6}(blk)aaaa(wht){6}";
+16002 geta$:ifa$=""then16002
+16003 print" (left)";
+16004 ifot=3orot=4then:graphic0
+16005 ifa$="p"thensys52224
+16010 zk$=a$:ifa$="e"thenend
+16012 ifa$="r"thenrun
+16013 ifa$="s"andot=3then:graphic0:goto80
+16014 goto16000
+16020 end
+16100 print"(up)(cyn)place name:(lred)          "
+16105 open1,0:input#1,p$(0):close1:print"(up)(wht)"
+16110 print"(up)(cyn)enter co-ords (lat,long):(lred)":print"                        (up)"
+16115 open1,0:input#1,la(0),lo(0):close1:print"(up)(wht)":return
+16150 print"                          (up)"
+16152 print"(up)(up)(cyn)WHAT BASE PLANET (#):(lred)"
+16160 open1,0:input#1,cp:close1:print"(wht)":ifcp<0orcp>po-1thenprint"(up)(up)(lred)":goto16160
+16170 return
+16200 print"The Mean Solar day is defined by the average movement of the Sun";
+16210 print" along the      Celestial Equator based on the Sidereal Year, as";
+16220 print" opposed to the Tropical Year.":return
+16300 :
+16302 ifsr=0andss%=0thengosub2160:goto16000
+16305 ifss%=1then17000
+16309 dt=td+110760+.417:a$(cp)="sun":r$=rp$:fori=1topo:ifi=pothenii=ha(i)
+16310 ifi=pothena=ii/kk:p=hp(i)/kk:x=cos(a)*cos(p):y=sin(a)*cos(p):z=sin(p):goto16312
+16311 x=x(i)-x(cp):y=y(i)-y(cp):z=z(i)-z(cp)
+16312 ifi=cpthenx=-x(i):y=-y(i):z=-z(i)
+16313 gosub10001:ga(i)=a:gp(i)=p:nexti:sd=110760
+16314 fori=1topo-1:forj=i+1topo:ifi=jthen16370
+16315 dd=abs((ga(i)-ga(j))/360):dd=(dd-int(dd))*360:ds=gp(i)-gp(j)
+16317 ifdd>180thendd=360-dd
+16318 ld=ld(i,j):ap=ap(i,j):rc=rc(i,j)
+16320 ifap=0andrc=0thenld(i,j)=dd:ap(i,j)=1:rc(i,j)=1:goto16370
+16325 ifap=1thenifrc=1thenifld>ddthenrc(i,j)=0:goto16370
+16327 ifap=1thenifrc=1thenifld<ddthenap(i,j)=0:goto16370
+16330 ifap=1thenifld<ddthenprinti;"conj:";j;td+sd;:ap(i,j)=0:rc(i,j)=1:goto16350
+16331 ifj<>3thenifi=1ori=2thenee=1:goto16337
+16332 ifi<>3thenifj=pothenee=1:goto16337
+16333 a$="oppo:":ifi<3thena$="elon:"
+16334 ifrc=1thenifld>ddthenprinti;a$;j;td+sd;:ap(i,j)=1:rc(i,j)=0:goto16360
+16337 ifee=1thenifrc=1thenifld>ddthenap(i,j)=1:rc(i,j)=0:ee=0
+16340 goto16370
+16350 ifdn%=4thenopen4,4:print#4,"conj:";a$(i);r$;spc(14*rp+1);a$(j);r$;
+16352 ifdn%=4thenprint#4,spc(23*rp);ds;r$;spc(35*rp);dt:close4
+16353 printds
+16355 goto16370
+16360 ifdn%=4thenopen4,4:print#4,a$;a$(i);r$;spc(14*rp+1);a$(j);r$;
+16365 printds:ifdn%=4thenprint#4,spc(23*rp);ds;r$;spc(35*rp);dt:close4
+16370 ld(i,j)=dd:nextj:nexti
+16390 td=td+sr/2:goto2010
+16400 b$="Celestial":ifgc%=0thenprinta$;"."
+16410 ifgc%=1thenprinta$;"/";b$;"."
+16420 ifgc%=2thenprintb$;"."
+16430 return
+16500 {222}1:{232}1
+16510 fori=1to9:{229}1,160,100to160+105*cos(ga(i)/kk),100-95*sin(ga(i)/kk):next
+16515 remgeta$:ifa$=""andpeek(653)=0then16515
+16520 {222}4:return
+16800 remii=-5.145*sin(2*{pi}*(td-181.5833)/27.21222)
+16802 ii=-5.1454*sin(2*{pi}*(td+4336.5382)/27.21222)
+16810 remm=(td-181.5833)/27.321661:m=(m-int(m))*360+230.138851
+16812 m=(td-4.903472222)/27.321661:m=(m-int(m))*360+58.843643
+16814 remm=(td+4336.5382)/27.32158:m=(m-int(m))*360+98.6496618
+16820 ha(n)=m:hp(n)=ii:ga(n)=m:gp(n)=ii:goto2140
+16900 printspc(23);"(down)(cyn)FUTEX CORPORATION(wht)(up)(up)":geta$:ifa$<>""then16922
+16905 x2=1:xx$="(rght)"+chr$(20):x=0
+16915 geta$:ifabs(x)>22thenx2=-sgn(x):x=0:xx$="(rght)"+chr$(20):ifx2<0thenxx$=chr$(148)
+16920 printxx$:print"(up)";:x=x+x2:ifa$=""then16915
+16922 print"                                        ";
+16925 ifa$="e"thengosub11005
+16930 ifa$="e"thenprint"(down)(down)(down)(lred)FINISHED.(blk)(up)(up)(up)":poke198,2:poke631,17:poke632,5:end
+16935 ee=0:ifa$="r"thenee=1
+16950 return
+17000 r$=chr$(141)
+17002 a$(cp)="sun":fori=1topo:ifi=cpthenx=-x(i):y=-y(i):z=-z(i):goto17012
+17008 ifpo=ithenx=x(i):y=y(i):z=z(i):goto17012
+17010 x=x(i)-x(cp):y=y(i)-y(cp):z=z(i)-z(cp)
+17012 :
+17020 gosub10001:ga(i)=a:gp(i)=p
+17030 tt=ga(i)-fx:iftt<-180thentt=tt+360
+17035 e$="":ee=0:gosub2911:ifeethenprinta$(i);tab(10);e$;td+110760
+17037 tt=ld(i)-sr/2+110760:a$=le$(i)+" last ":ez=0:ifeetheniftd<>ld(i)thenez=1
+17038 ifee=0andld(i)=tdthenopen4,4:print#4,a$(i);r$;spc(10);a$;tt:close4
+17040 ifeeandezthenopen4,4:print#4,a$(i);r$;spc(10);e$;" n.sun";td+110760:close4
+17047 ifeethenld(i)=td+sr/2:le$(i)=e$
+17050 nexti:td=td+sr/2:goto2010
+18000 return:fori=1topo-1:p=gp(i)/kk:a=ga(i)/kk:forj=i+1topo
+18010 x=cos(gp(j)/kk)*cos(p)*cos(ga(j)/kk-a)+sin(gp(j)/kk)*sin(p)
+18020 ad(i,j)=90-kk*atn(x/sqr(1-x*x))
+18030 printa$(i);tab(12);a$(j);tab(24);ad(i,j):nextj
+18040 ifpeek(653)<>0then18040
+18050 nexti:return
+30000 kk=180/{pi}:f=165/kk:q=f:e1=.205636
+30010 f1=q-e1*sin(q)
+30020 t=abs(f-f1):n=n+1
+30030 ift=0thenend
+30040 c1=(f-f1)/(1-e1*cos(q))
+30050 q=q+c1:printc1;"(left)";sin(n*f);"(left)";23.439595/kk*sin(f):goto30010
+31000 q=m:n%=0
+31030 f1=q-ec*sin(q):n%=n%+1:ifabs(m-f1)=0orn%=12then31100
+31040 q=q+(m-f1)/(1-ec*cos(q)):goto31030
+31100 ifq<>0theniftan(q/2-{pi}/2)=0thenvc={pi}:return
+31110 vc=2*atn(sqr((1+ec)/(1-ec))*tan(q/2)):n%=0:return
+63000 open15,8,15:input#15,a$,b$,c$,d$:a=val(a$):return

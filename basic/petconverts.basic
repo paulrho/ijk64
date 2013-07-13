@@ -1,0 +1,4 @@
+5 print"(clr)";
+10 fori=0to255step8:forj=0to7:printleft$(str$(i+j)+"  ",4);")";left$(str$(petconvert(i+j))+"   ",4);:nextj:print:nexti
+20 print
+30 fori=0to255step8:forj=0to7:printleft$(str$(i+j)+"  ",4);")";left$(str$(petunconvert(i+j))+"   ",4);:nextj:print:nexti

@@ -1,0 +1,9 @@
+110 x=2*{pi}
+120 print x
+210 x=2*mathpi
+220 print x;" ";mathpi
+310 x=2*math_pi
+320 print x;" ";math_pi
+400 mathPI=3.1415
+410 x=2*mathPI
+420 print x;" ";mathPI

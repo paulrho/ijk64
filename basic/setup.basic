@@ -1,0 +1,6 @@
+10 load"../images/backgrounds/lcd4.png"
+20 meta-charset 1
+30 meta-rows 55
+40 meta-bgtrans 1
+50 print"(gry1)";
+60 print"(clr)";

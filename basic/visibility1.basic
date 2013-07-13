@@ -1,0 +1,14 @@
+10 r=6375
+20 h=200
+21 h=350
+22 forh=200to400step20
+25 elev=20: rem 10 degrees above horiz
+30 a=(90+elev)/180*(mathpi)
+40 b=r*cos(a)+sqrt((r+h)^2-r^2*sin(a)^2)
+60 bb=asin(b*sin(a)/(r+h))
+100 print "height"h
+110 print "elev"elev
+120 print b"range km"
+130 print bb*180/(mathpi) " degrees earth"
+135 print 1/(bb*180/(mathpi)/h)
+140 nexth

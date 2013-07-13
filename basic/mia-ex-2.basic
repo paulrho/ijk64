@@ -1,0 +1,10 @@
+10 print "how old are you"
+20 input age$
+21 age=val(age$)
+30 print "you are ";age
+40 print "next year you will be ";age+1
+50 print "greta is ";age-5
+60 if age >=13 then print "teenager"
+70 if age <3 then print "toddler"
+80 print "teenager in ";13-age;"years"
+90 goto 10

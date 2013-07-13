@@ -1,0 +1,19 @@
+#export ANT_HOME=/usr/local/ant
+# This is REQUIRED to make any use the right javac program
+# sirius : /usr/java/jdk1.5.0_05/bin/javac
+if [ "$HOSTNAME" = "sirius" ]
+then
+  export JAVA_HOME=/usr/java/jdk1.5.0_05
+else
+  export JAVA_HOME=/usr/java/jdk1.5.0_07
+fi
+#export PATH=${PATH}:${ANT_HOME}/bin
+
+
+# will go up a directory if already in source
+if [ 1 -eq 0 ]
+then
+  ant -s 
+  # how to run
+  ant run -s
+fi

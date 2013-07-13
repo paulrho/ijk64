@@ -1,0 +1,536 @@
+    5 fast:printchr$(14)chr$(11)"(wht)(clr)Futex Corporation":print"(down)(down)(down)(down)(down)(down)(down)(down)(down)                          (yel)H  (lgrn)y  (lblu)p  (lred)e  (brn)r  (orng)i  (cyn)o  (pur)n(wht)"
+   10 rem you'll never see me writing programs like this normally!
+   20 fm$="hyp.file.6":rem file name:rem (peek(211)and8)
+   25 print"(home)(yel)Enter File Number:(cyn)":open1,0:input#1,a$:close1:print"(wht)":a=val(a$)
+   27 ifa>0anda<999thenfm$=left$(fm$,9)+mid$(str$(a),2):rem "Alt" key held down
+   30 fd$="......":fh$="......":sd$="120687":sh$=ti$:rem start/finish date/time
+   40 sp$="                         "
+   50 fl$=chr$(15):fo$=chr$(143):rem flash on/off
+   60 gp=0:rem graphics off
+  100 dim a%(200,3):rem score record
+  103 dim tx%(99)  :rem transform co-ords matrix
+  104 dim tm(3,9)  :rem cop use
+  105 dim ty%(99)  :rem transform co-ords matrix
+  107 fory=0to9:forx=0to9:i=y*10+x:tx%(i)=x:ty%(i)=y:nextx,y
+  110 dim s%(99)   :rem square status
+  112 dim l$(99)   :rem left hand string intructions
+  114 dim r$(99)   :rem right hand string intructions
+  120 dim p%(99)   :rem   "    player#
+  125 dim cs%(3)   :rem players' character set
+  130 dim t%(3)    :rem player's score
+  131 dim u$(7)    :rem piece name
+  132 dim n%(99)   :rem scored flags
+  133 dim k$(7)    :rem piece symbol array
+  135 dim u%(3,7)  :rem pieces left
+  136 dim co%(3)   :rem computer operated person flag; 0=not c.o.p.
+  137 dim n$(3)    :rem player's name
+  138 dim m%(110,3):rem move record
+  139 dimf(5),d%(4):rem flag and ofset arrays
+  140 t=0:p=0:sc=0 :rem turn# and player's# and score number
+  142 dim i$(10)   :rem get key string record (input)
+  145 tp=0         :rem total pieces put down
+  147 bx=0:pc=0    :rem box number,piece number (of your turn)
+  148 x=0:y=0      :rem box co-ords: converted to box number by y*10+x
+  149 ts%=1        :rem shows the position of the game recorded on disk
+  150 ex$="{151}":rem color of "(CBM-S),(CBM-X) & {179}"
+  152 gosub9000:fori=0to3:tm(i,0)=65:tm(i,1)=.35:tm(i,2)=40:tm(i,3)=.5:tm(i,4)=.76:tm(i,5)=.70:nexti
+  153 i=1:tm(i,0)=50:tm(i,1)=.40:tm(i,2)=40:tm(i,3)=.5:tm(i,4)=.00:tm(i,5)=.00
+  154 i=3:tm(i,0)= 0:tm(i,1)=.  :tm(i,2)= 0:tm(i,3)=. :tm(i,4)=.00:tm(i,5)=.00
+  155 cs%(1)=1:cs%(2)=2:cs%(3)=3
+  156 u%(0,1)=1:u%(0,2)=3:u%(0,3)=3:u%(0,4)=2:u%(0,5)=2:u%(0,6)=3
+  160 fori=1to6:j=u%(0,i):u%(1,i)=j:u%(2,i)=j:u%(3,i)=j:next:rem initialize pieces
+  170 k$(1)="U":k$(2)="A":k$(3)="K":k$(4)="M":k$(5)="X":k$(6)="P":k$(7)="S":k$(0)="+":m$(0)=" ":m$(6)="{179}":m$(4)="(CBM-S)":m$(2)="(CBM-X)"
+  175 k2$(0)=" ":k2$(1)="+":k2$(2)="S":k2$(3)="A":k2$(4)="K":rem for c.o.p
+  180 c$(1)="(yel)":c$(2)="(pur)":c$(3)="(lred)":c$(0)="{31}":rem colors for each player
+  190 u$(1)="Universal":u$(2)="Angle":u$(3)="Knight":u$(4)="Mirror":u$(5)="Kill":u$(6)="Plural":u$(7)="Singular"
+  195 j%(0)=-11:j%(1)=-10:j%(2)=-9:j%(3)=-1:j%(4)=1:j%(5)=9:j%(6)=10:j%(7)=11
+  196 j2%(0)=-12:j2%(1)=-21:j2%(2)=-19:j2%(3)=-8:j2%(4)=8:j2%(5)=19:j2%(6)=21:j2%(7)=12
+  197 kx%(0)=-1:kx%(1)=0:kx%(2)=1:kx%(3)=-1:kx%(4)=1:kx%(5)=-1:kx%(6)=0:kx%(7)=1
+  198 ky%(0)=-1:ky%(1)=-1:ky%(2)=-1:ky%(3)=0:ky%(4)=0:ky%(5)=1:ky%(6)=1:ky%(7)=1
+  200 sn$(1)="Paul Salanitri":sn$(3)="Darren Tracey":sn$(2)="Laurance Kubel"
+  205 sl$(1)="Salanitri":sl$(3)=" Tracey":sl$(2)="  Kubel"
+  207 sn$(6)="Ford Prefect":sl$(6)=" Prefect":sc%(6)=1
+  208 sn$(5)="Arthur Dent":sl$(5)="  Dent":sc%(5)=1
+  209 sn$(4)="Zaphod Bebblebrox":sl$(4)="Bebblebrox":sc%(4)=1
+  210 fori=0to2:n$(1+i)=sn$(4+i):ln$(1+i)=sl$(4+i):co%(1+i)=sc%(4+i):next
+  212 d%(1)=-10:d%(2)=-1:d%(3)=+1:d%(4)=+10
+  215 l$(87)="(lred)Instructions for this Program:(wht)":l$(88)="From turn entry mode: Information Menu:"
+  216 l$(89)="                      G=   Show Move Record"
+  217 l$(90)="                      I=   Rules & Information"
+  218 l$(91)="                    {91}C=C}= (Cancel) End with NO save"
+  219 l$(92)="                      E=   End session and save current progress"
+  220 l$(93)="                     <CR>= Exit from Menu"
+  230 sn$(7)="Isaac Asimov":sl$(7)=" Asimov":sc%(7)=1
+  232 sn$(8)="Ford Prefect":sl$(8)=" Prefect":sc%(8)=1
+  234 sn$(9)="Carl Sagan":sl$(9)=" Sagan":sc%(9)=1
+  250 dim l%(99)  :rem label array
+  252 dim l2%(99) :rem label array (images)
+  260 open8,8,8,fm$+",s,r":ifds=0thengosub6110:print"(clr)";:gosub2000:goto304
+  270 close8:print"(clr)";
+  275 print"(clr)(lred)Press(wht) <CR> to select defaults"
+  277 print"       1.  To select three reals"
+  278 print"       2.  To select three imaginaries (C.O.P's)"
+  279 print"       3.  To select two reals and one imaginary"
+  280 print"       4.  To select one real and two imaginaries"
+  282 print"       5.  To swap sets"
+  283 print"       6.  New Images"
+  285 geta$:ifa$=""then285
+  287 ifa$=chr$(13)then297
+  288 ifa$="1"thenfori=1to3:n$(i)=sn$(i):ln$(i)=sl$(i):co%(i)=sc%(i):next:goto297
+  290 ifa$="2"thenfori=1to3:n$(i)=sn$(i+3):ln$(i)=sl$(i+3):co%(i)=sc%(i+3):next:goto297
+  291 ifa$="6"thenfori=1to3:n$(i)=sn$(i+6):ln$(i)=sl$(i+6):co%(i)=sc%(i+6):next:goto297
+  292 ifa$="3"thenfori=1to2:n$(i)=sn$(i):ln$(i)=sl$(i):co%(i)=sc%(i):next:n$(i)=sn$(i+3):ln$(i)=sl$(i+3):co%(i)=sc%(i+3):goto297
+  293 ifa$="4"theni=1:n$(i)=sn$(i):ln$(i)=sl$(i):co%(i)=sc%(i):fori=2to3:n$(i)=sn$(i+3):ln$(i)=sl$(i+3):co%(i)=sc%(i+3):next:goto297
+  295 ifa$="5"thencs%(1)=1:cs%(2)=3:cs%(3)=2
+  296 goto285
+  297 print"(clr)"
+  300 gosub2000
+  302 iftp=100thengv=1:printchr$(15)"(home)(orng)   G a m e   O v e r !  "chr$(143):ys=0:gosub6800:goto400
+  303 p=p+1:t=t+1:ifp>3thenp=1
+  304 gosub3000:print:iftp=100then302
+  305 print"(home)(wht)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)Player:"c$(p)n$(p)chr$(27)"q":print"(yel)row/column/piece:(cyn)   (left)(left)(left)";:geta$:ifa$=chr$(13)then6200
+  306 ifco%(p)then1500
+  307 ni=3:gosub3100:a$=i$(1):b$=i$(2):c$=i$(3):print:printchr$(27)"@";
+  310 ifa$="?"andb$=a$andc$=a$then6200
+  313 x=val(b$):y=val(a$):bx=y*10+x:rem box number
+  315 fori=1to7:if(asc(k$(i))and127)=(asc(c$+chr$(0))and127)thenprint"{31}("u$(i)")(wht)":pc=i:goto320
+  317 nexti:print"Error piece!":goto305
+  320 ifpc=0orx<0ory<0orx>9ory>9thenprint"Error!":goto305
+  325 ifpc=5andu%(p,1)=1thenprint"You haven't used your Universal yet!":goto305
+  327 ifpc=5and(n%(bx)and4)=0thenprint"This piece cannot be killed (not used yet)!":goto305
+  330 ifp%(bx)>0andpc<>5thenprint"Already Occupied!":goto305
+  340 ifu%(p,pc)=0andpc<>7thenprint"No More Left!":goto305
+  350 u%(p,pc)=u%(p,pc)-1:rem debit piece (even singles)
+  355 tp=tp-1*(pc<>5):rem total put down of pieces
+  357 pp%=p%(bx):s%=s%(bx):n%=n%(bx):rem retraction variables
+  360 p%(bx)=p:s%(bx)=pc:ifpc=5thenn%(bx)=0
+  362 m%(t,0)=pc:m%(t,1)=bx:i=x:j=y:pc%=pc:gosub2100
+  372 ifgpthenp%=p:gosub9400
+  375 ifgpthenifpc<7thengosub9460
+  395 gosub2080:gosub3000
+  397 printchr$(27)"@";:ys=1
+  400 print"(home)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(wht)"
+  402 printchr$(27)"q(pur)Register Score/s (G,clr,I=info,{91}C=C}";
+  403 ifgv=0thenprint"(lred),Yes<CR>,Diamond,No{91}Next turn}(pur)";
+  404 ifys=1thenprint",R=retract";
+  405 ifgv=1andts%<>tthenprint",S";
+  406 print")?(wht)"
+  407 ifgv=0andw%=0andco%(p)thena$="n":goto420
+  408 ifgv=0andco%(p)thenw%=0:ys=0:print"(grn)Score {155}Attempt.(wht)":goto490
+  409 ifgpthen:@{224},55296,352,170,2,3,""
+  410 geta$:ifa$=""then410
+  411 gosub6900:ifgpthen:@{224},55296,352,170,2,3," ":ifa$="{175}"thengosub9300
+  412 ifa$="!"andys=0thenp2=p:gosub1100:goto400
+  413 ifa$="(CBM-C)"and(ts%<>t orgv=0)thenprint"(clr)(wht)Futex Corporation(cyn)":print"(down)Progress (lred)NOT(cyn) Saved. Type (yel)cont(cyn) to continue.":end:print"(clr)":goto400
+  415 ifa$="d"andgv=0then950
+  416 ifa$="r"andys=1thengosub6700:pc=pc%:p%(bx)=pp%:s%(bx)=s%:u%(p,pc)=u%(p,pc)+1:tp=tp+1*(pc<>5):n%(bx)=n%:i=tx%(bx):j=ty%(bx):gosub2100:goto304
+  417 ifa$="i"thengosub6300:print"(clr)";:gosub2000:gosub3000:goto400
+  418 ifa$="g"thengosub5100:print"(clr)";:gosub2000:gosub3000:goto400
+  419 ifa$="s"andgv=1andts%<>tthengosub6000:print"Saved!":ys=0:goto400
+  420 ifa$="n"thenprint"(up)"chr$(27)"@";:goto302
+  422 if(a$="y"ora$=chr$(13))andgv=0then425
+  423 ifa$="(CBM-C)"thenprint"(clr)(wht)Futex Corporation(cyn)":print"(down)Progress Already Saved.":end:goto400
+  424 goto409
+  425 print"(up)Indicate use of reflection with flag=1 otherwise flag=0";:lm=0:ys=0:rem last move flag (did you're go effect the wanted scoring poso. sec4.2)?
+  427 printchr$(27)"@"
+  430 print"(lgrn)#1:r/c/flag:(cyn)";:ni=3:gosub3100:a$=i$(1):b$=i$(2):c$=i$(3):print
+  440 x=val(b$):y=val(a$):b(1)=y*10+x
+  442 x(1)=x:y(1)=y:f(1)=sgn(val(c$)):f1=f(1)
+  445 ifx<0ory<0orx>9ory>9thenprint"Error!":goto400
+  450 print"(lgrn)#2:r/c/flag:(cyn)";:ni=3:gosub3100:a$=i$(1):b$=i$(2):c$=i$(3):print
+  460 x=val(b$):y=val(a$):b(2)=y*10+x
+  462 x(2)=x:y(2)=y:f(2)=sgn(val(c$)):f2=f(2)
+  465 ifx<0ory<0orx>9ory>9thenprint"Error!":goto400
+  470 print"(lgrn)#3:r/c/flag:(cyn)";:ni=3:gosub3100:a$=i$(1):b$=i$(2):c$=i$(3):print
+  480 x=val(b$):y=val(a$):b(3)=y*10+x
+  482 x(3)=x:y(3)=y:f(3)=sgn(val(c$)):f3=f(3)
+  485 ifx<0ory<0orx>9ory>9thenprint"Error!":goto400
+  490 iff1=0andf2=0andb(1)=b(2)thenprint"Like Squares (1+2)!":goto400
+  492 iff2=0andf3=0andb(2)=b(3)thenprint"Like Squares (2+3)!":goto400
+  494 iff1=0andf3=0andb(1)=b(3)thenprint"Like Squares (1+3)!":goto400
+  495 iff1=1andf2=1andb(1)=b(2)thenprint"Like Reflec. (1+2)!":goto400
+  496 iff2=1andf3=1andb(2)=b(3)thenprint"Like Reflec. (2+3)!":goto400
+  497 iff1=1andf3=1andb(1)=b(3)thenprint"Like Reflec. (1+3)!":goto400
+  500 fori=1to3
+  505 ifs%(b(i))=5thenprint"Square killed!":goto400
+  510 iff(i)thenif(n%(b(i))and2)thenprint"Reflection used!":goto400
+  520 iff(i)=0then550
+  530 j=9-x(i)+y(i)*10:    ifp%(j)=pands%(j)=4then547
+  535 j=9-x(i)+(9-y(i))*10:ifp%(j)=pands%(j)=4then547
+  540 j=x(i)+(9-y(i))*10:  ifp%(j)=pands%(j)=4then547
+  545 print"No reflection available!":goto400
+  547 ifj=bxthenlm=1:rem did you just lay down the reflection?
+  550 nexti
+  600 fori=1to3:iff(i)then650
+  610 ifp%(b(i))<>pthenprint"Not yours!":goto400
+  620 if(n%(b(i))and1)thenprint"Already used!":goto400
+  650 nexti
+  670 d1=x(2)-x(1):e1=y(2)-y(1):d1%=abs(d1):e1%=abs(e1)
+  680 d2=x(3)-x(2):e2=y(3)-y(2):d2%=abs(d2):e2%=abs(e2)
+  685 d3=abs(x(3)-x(1)):e3=abs(y(3)-y(1))
+  690 s1=s%(b(1)):s2=s%(b(2)):s3=s%(b(3))
+  695 iff1thens1=8:rem reflection code
+  696 iff2thens2=8
+  697 iff3thens3=8
+  700 rem check for legal configuration
+  702 ifd1=d2ande1=e2andd1%<2andd1%<2ande1%<2ands1<>3ands2>3ands3<>3thenprint"Good straight score.":goto800
+  705 ifd1%<2ande1%<2andd2%<2ande2%<2ands1<>3ands2<3ands3<>3and(d1%=1ore1%=1)and(d2%=1ore2%=1)thenprint"Good angle score.":goto800
+  710 if(d1%=2ande1%=1ord1%=1ande1%=2)ands1=3ands2<3ands3<>3ande2%<2andd2%<2thenprint"Good knight score.(#710)":goto800
+  720 if(d2%=2ande2%=1ord2%=1ande2%=2)ands3=3ands2<3ands1<>3ande1%<2andd1%<2thenprint"Good knight score.(#720)":goto800
+  730 if(d1%=2ande1%=1ord1%=1ande1%=2)ands1=3ands2>3ands3<>3ande2%<2andd2%<2and(d3>1ore3>1)thenprint"Good knight score.(#730)":goto800
+  740 if(d2%=2ande2%=1ord2%=1ande2%=2)ands3=3ands2>3ands1<>3ande1%<2andd1%<2and(d3>1ore3>1)thenprint"Good knight score.(#740)":goto800
+  790 print"No score!":goto400
+  800 fori=1to3:ifb(i)=bxandf(i)=0thenlm=1: rem did you just lay down one of these pieces?
+  803 next
+  804 iflm=0thenprint"Ha ha ha, you missed this score, bad luck!":goto400:rem see sec4.2
+  805 b1=b(1)+100*f1:b2=b(2)+100*f2:b3=b(3)+100*f3:rem check for duplication (duplication could only occur in your current turn!(instro be at this point)
+  807 ifm%(t,2)=0then870:rem first score of current turn (no dupl. possible)
+  810 fori=m%(t,2)tosc:t1=a%(i,0):t2=a%(i,1):t3=a%(i,2):ifa%(i,3)>=0then860:rem diamond
+  820 ifb1<>t1andb1<>t2andb1<>t3then860
+  830 ifb2<>t1andb2<>t2andb2<>t3then860
+  835 ifb3<>t1andb3<>t2andb3<>t3then860
+  840 print"Score Duplicated:("i")!":goto400
+  860 next
+  870 sc=sc+1:a%(sc,0)=b1:a%(sc,1)=b2:a%(sc,2)=b3:t%(p)=t%(p)+1:a%(sc,3)=-1
+  880 fori=1to3:iff(i)thenn%(b(i))=n%(b(i))or2
+  885 next: rem mark reflections used: bit 1
+  890 iff1=0ands1>1ands1<>6thenn%(b(1))=n%(b(1))or1
+  892 iff2=0ands2>1ands2<>6thenn%(b(2))=n%(b(2))or1
+  894 iff3=0ands3>1ands3<>6thenn%(b(3))=n%(b(3))or1
+  895 rem mark used parts: bit 0
+  897 fori=1to3:iff(i)=0thenn%(b(i))=n%(b(i))or4
+  898 next:rem mark actual used pieces (incl. plurals) bit 2
+  899 ifm%(t,2)=0thenm%(t,2)=sc:rem record # of first score of turn (if any)
+  900 m%(t,3)=sc:rem record # of last score of turn (if any)
+  910 fork=1to3:i=tx%(b(k)):j=ty%(b(k)):gosub2100:nextk:gosub9700
+  920 gosub2080:gosub3000:goto400
+  950 print"(lgrn)(up)Centre position r/c/f1/f2/f3/f4:(cyn)"chr$(27)"@":ni=6:gosub3100:lm=0:print:ys=0
+  955 x=val(i$(2)):y=val(i$(1)):b=y*10+x:f1=sgn(val(i$(3))):f2=sgn(val(i$(4))):f3=sgn(val(i$(5))):f4=sgn(val(i$(6))):xt=x:yt=y:u(1)=-1:u=0
+  957 f(1)=f1:f(2)=f2:f(3)=f3:f(4)=f4
+  960 ifx<1orx>8ory<1ory>8thenprint"Out of range!":goto400
+  961 fori=1to4
+  962 ifp%(b+d%(i))<>pandf(i)=0ors%(b+d%(i))=5thenprint"Not yours!":goto400
+  963 next:rem if one is a kill of not yours then illegal!
+  965 fori=1to4
+  966 iff(i)=0ands%(b+d%(i))=4thenu=u+1:u(u)=b+d%(i)
+  967 next:rem no common mirror/reflec see sec4.5
+  969 rem log usage of mirrors see sec4.5
+  970 iff1thenx=xt:y=yt-1:gosub1000:ifok=0or(n%(b-10)and2)thenprint"Sorry!":goto400
+  972 iff2thenx=xt-1:y=yt:gosub1000:ifok=0or(n%(b-1)and2)thenprint"Sorry!":goto400
+  974 iff3thenx=xt+1:y=yt:gosub1000:ifok=0or(n%(b+1)and2)thenprint"Sorry!":goto400
+  976 iff4thenx=xt:y=yt+1:gosub1000:ifok=0or(n%(b+10)and2)thenprint"Sorry!":goto400
+  980 fori=1to4
+  982 iff(i)=0and(s%(b+d%(i))<4or(n%(b+d%(i))and4))thenprint"Not allowable!":goto400
+  984 next:rem use of piece screen!
+  987 sc=sc+1:a%(sc,0)=(b-10)+100*f1:a%(sc,1)=(b-1)+100*f2
+  988 a%(sc,2)=(b+1)+100*f3:a%(sc,3)=(b+10)+100*f4
+  990 print"Good Diamond Score.":t%(p)=t%(p)+2
+  991 fori=1to4
+  992 d=d%(i):iff(i)=0thenn%(b+d)=n%(b+d)or4:ifs%(b+d)<>6thenn%(b+d)=n%(b+d)or1
+  995 iff(i)thenn%(b+d)=n%(b+d)or2
+  996 nexti:rem mark off
+  999 b(1)=b-10:b(2)=b-1:b(3)=b+1:i=tx%(b+10):j=ty%(b+10):gosub2100:goto899
+ 1000 j=9-x+y*10:ifp%(j)=pands%(j)=4then1040
+ 1010 j=9-x+(9-y)*10:ifp%(j)=pands%(j)=4then1040
+ 1020 j=x+(9-y)*10:ifp%(j)=pands%(j)=4then1040
+ 1030 ok=0:return
+ 1040 fori=1tou:ifu(i)=jthen1030
+ 1050 next:u=u+1:u(u)=j:ok=1:return
+ 1100 rem score scan!!!!! n/a
+ 1102 print"(home)(down)(down)(down)(down)";:fori=1to12:printtab(35)sp$:next
+ 1105 print"(home)(wht)(down)(down)(down)(down)"tab(35)"   0 1 2 3 4 5 6 7 8 9"
+ 1110 fory=0to9:printtab(35)"(wht)"str$(y)" {151}";:forx=0to9:i=y*10+x:l%(i)=0:l2%(i)=0:s%=s%(i):p%=p%(i):ifs%=5then1150
+ 1111 ifp%=0thenl%(i)=1:goto1125
+ 1112 ifp%<>p2then1125
+ 1115 if(n%(i)and1)then1125:rem used
+ 1120 l%(i)=2:ifs%<4thenl%(i)=3:ifs%=3thenl%(i)=4:rem (l%(i)=3 for an angle, but so as to see universals ~~~~~~)
+ 1125 if(n%(i)and2)then1150:rem reflection used
+ 1130 j=9-x+y*10:ifs%(j)=4thenifp%(j)=p2thenl2%(i)=1:rem mirror found
+ 1132 j=9-x+(9-y)*10:ifs%(j)=4thenifp%(j)=p2thenl2%(i)=1
+ 1134 j=x+(9-y)*10:ifs%(j)=4thenifp%(j)=p2thenl2%(i)=1
+ 1150 printc$(p2);:a=l%(i):ifa=1thenprint"{155}";
+ 1151 ifl2%(i)thenprintc$(p2)"(rvon)";
+ 1152 printk2$(a)"(rvof) ";:nextx:print:nexty
+ 1160 print"(cyn)":return
+ 1500 w%=0:print:printchr$(27)"@";:p2=p:gosub1100:print"(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)";
+ 1502 c$="s":ifu%(p2,6)>0andrnd(ti)>tm(p2,4)thenc$="p":goto1505
+ 1503 ifu%(p2,4)>0andrnd(ti)>tm(p2,5)thenc$="m"
+ 1505 fori=1to3:f(i)=0:next
+ 1510 fory=0to9:forx=0to9:i=y*10+x
+ 1520 v%(0)=(x<1ory<1):v%(1)=(y<1):v%(2)=(y<1orx>8):v%(3)=(x<1):v%(4)=(x>8):v%(5)=(x<1ory>8):v%(6)=(y>8):v%(7)=(x>8ory>8)
+ 1525 x(2)=x:y(2)=y:ifl%(i)<2andl2%(i)=0then1548
+ 1544 fori2=0to7:ifv%(i2)=0andv%(7-i2)=0thenif(l2%(i+j%(i2))orl%(i+j%(i2))>=2)andl%(i-j%(i2))=1thenx=x-kx%(i2):y=y-ky%(i2):goto1580
+ 1545 nexti2:goto1558
+ 1548 ifl%(i)<>1then1558:rem if not blank, skip
+ 1550 fori2=0to3:ifv%(i2)=0andv%(7-i2)=0thenif((l%(i+j%(i2))>=2)orl2%(i+j%(i2)))and((l%(i-j%(i2))>=2)orl2%(i-j%(i2)))thenx=x-kx%(i2):y=y-ky%(i2):goto1590
+ 1551 nexti2
+ 1558 ifl%(i)=3thengosub1800:ifjt>-1then1595
+ 1559 nextx,y
+ 1560 ifu%(p2,2)>0thengosub1600:ifjt>-1andi2>-1then1595
+ 1561 ifu%(p2,3)>0thengosub1700:ifjt>-1thenc$="k":goto1595
+ 1562 gosub1900:ifi2>-1then1595
+ 1563 x=int(rnd(ti)*10):y=int(rnd(ti)*10):ifs%(x+y*10)=0thena$=str$(y):b$=str$(x):goto1595
+ 1565 goto1563
+ 1580 w%=1:b$=str$(x):a$=str$(y):x(1)=x:y(1)=y:x(3)=x(2)*2-x:y(3)=y(2)*2-y
+ 1582 b(1)=y(1)*10+x(1):b(2)=y(2)*10+x(2):b(3)=y(3)*10+x(3)
+ 1583 ifl%(i)<2thenf(2)=1
+ 1584 ifl%(b(3))<2thenf(3)=1
+ 1585 goto1595
+ 1590 w%=1:b$=str$(x(2)):a$=str$(y(2)):x(1)=x:y(1)=y:x(3)=x(2)*2-x:y(3)=y(2)*2-y
+ 1591 b(1)=y(1)*10+x(1):b(2)=y(2)*10+x(2):b(3)=y(3)*10+x(3)
+ 1593 ifl%(b(1))<2thenf(1)=1
+ 1594 ifl%(b(3))<2thenf(3)=1
+ 1595 a$=mid$(a$,2):b$=mid$(b$,2):f1=f(1):f2=f(2):f3=f(3):printa$b$c$"   ":goto313
+ 1600 jt=-1:iftp<tm(p2,0)andrnd(ti)>tm(p2,1)thenreturn
+ 1601 print"Umm...(left)(left)(left)(left)(left)(left)";:fory=0to9:forx=0to9:i=y*10+x
+ 1602 ifl%(i)<>1then1640
+ 1603 v%(0)=(x<1ory<1):v%(1)=(y<1):v%(2)=(y<1orx>8):v%(3)=(x<1):v%(4)=(x>8):v%(5)=(x<1ory>8):v%(6)=(y>8):v%(7)=(x>8ory>8)
+ 1605 fori2=0to7:ifv%(i2)=0thenif(l2%(i+j%(i2))orl%(i+j%(i2))>=2)thenjt=i2:goto1620
+ 1610 nexti2:goto1640
+ 1620 if(l2%(i+j%(i2))andl%(i+j%(i2))>=2)then1660
+ 1622 fori2=0to7:ifjt=i2then1630
+ 1625 ifv%(i2)=0thenif(l2%(i+j%(i2))orl%(i+j%(i2))>=2)then1660
+ 1630 nexti2:i2=-1
+ 1640 nextx,y:jt=-1:return
+ 1660 x(2)=x:y(2)=y:w%=1:b$=str$(x):a$=str$(y):x(1)=x+kx%(jt):y(1)=y+ky%(jt):x(3)=x+kx%(i2):y(3)=y+ky%(i2):c$="a":ifu%(p2,1)>0thenc$="u"
+ 1670 b(1)=y(1)*10+x(1):b(2)=y(2)*10+x(2):b(3)=y(3)*10+x(3)
+ 1675 ifl%(b(1))<2thenf(1)=1
+ 1680 ifl%(b(3))<2thenf(3)=1
+ 1685 ifb(1)=b(3)thenf(3)=1
+ 1690 return
+ 1700 jt=-1:iftp<tm(p2,2)andrnd(ti)>tm(p2,3)thenreturn
+ 1705 print"Mmm...(left)(left)(left)(left)(left)(left)";:fory=0to9:forx=0to9:i=y*10+x
+ 1710 ifl%(i)<2andl2%(i)=0then1750
+ 1720 v%(0)=(x<1ory<1):v%(1)=(y<1):v%(2)=(y<1orx>8):v%(3)=(x<1):v%(4)=(x>8):v%(5)=(x<1ory>8):v%(6)=(y>8):v%(7)=(x>8ory>8)
+ 1725 v2%(0)=(y<1orx<2):v2%(1)=(x<1ory<2):v2%(2)=(y<2orx>8):v2%(3)=(y<1orx>7):v2%(4)=(y>8orx<2):v2%(5)=(x<1ory>7):v2%(6)=(y>7orx>8):v2%(7)=(x>7ory>8)
+ 1730 fori2=0to7:ifv%(i2)=0theni9=i+j%(i2):if(l2%(i9)orl%(i9)>=2)then1760
+ 1740 nexti2
+ 1750 nextx,y:jt=-1:return
+ 1760 fori3=0to7:ifv2%(i3)=0theni8=i+j2%(i3):ifl%(i8)=1and(abs(tx%(i9)-tx%(i8))>1orabs(ty%(i9)-ty%(i8))>1)thenjt=i8:goto1770
+ 1765 nexti3:jt=-1:goto1740
+ 1770 x(3)=tx%(i8):y(3)=ty%(i8):w%=1:b$=str$(x(3)):a$=str$(y(3)):x(1)=tx%(i9):y(1)=ty%(i9):x(2)=x:y(2)=y
+ 1775 b(1)=y(1)*10+x(1):b(2)=y(2)*10+x(2):b(3)=y(3)*10+x(3)
+ 1777 ifl%(b(1))<2thenf(1)=1
+ 1778 ifl%(b(2))<2thenf(2)=1
+ 1780 return
+ 1800 :
+ 1810 fori2=0to7:ifv%(i2)=0thenif(l2%(i+j%(i2))orl%(i+j%(i2))>=2)thenjt=i2:goto1830
+ 1820 nexti2:jt=-1:return
+ 1830 fori2=0to7:ifv%(i2)=0thenifl%(i+j%(i2))=1then1850
+ 1840 nexti2:jt=-1:return
+ 1850 x(2)=x:y(2)=y:w%=1:x(1)=x+kx%(jt):y(1)=y+ky%(jt):x(3)=x+kx%(i2):y(3)=y+ky%(i2):b$=str$(x(3)):a$=str$(y(3))
+ 1855 b(1)=y(1)*10+x(1):b(2)=y(2)*10+x(2):b(3)=y(3)*10+x(3)
+ 1860 ifl%(b(1))<2thenf(1)=1
+ 1870 ifb(1)=b(3)thenf(1)=1
+ 1880 return
+ 1900 i2=-1
+ 1905 print"Look'n(left)(left)(left)(left)(left)(left)";:fory=0to9:forx=0to9:i=y*10+x
+ 1910 v%(0)=(x<1ory<1):v%(1)=(y<1):v%(2)=(y<1orx>8):v%(3)=(x<1):v%(4)=(x>8):v%(5)=(x<1ory>8):v%(6)=(y>8):v%(7)=(x>8ory>8)
+ 1915 ifl%(i)<>1then1932
+ 1920 fori2=0to7:ifv%(i2)=0andv%(7-i2)=0thenif(l2%(i-j%(i2))orl%(i-j%(i2))>=2)thenifl%(i+j%(i2))=1then1950
+ 1930 nexti2:goto1940
+ 1932 ifl%(i)<2then1940
+ 1933 fori2=0to3:ifv%(i2)=0andv%(7-i2)=0thenifl%(i+j%(i2))=1thenifl%(i+j%(i2))=1then1960
+ 1935 nexti2
+ 1940 nextx,y:i2=-1:return
+ 1950 a$=str$(y):b$=str$(x):return
+ 1960 a$=str$(y+ky%(i2)):b$=str$(x+kx%(i2)):return
+ 2000 print"(home)(down)(lblu)Start  Dt/Tm:"sd$"/"sh$chr$(7)
+ 2002 print"(lblu)Finish Dt/Tm:"fd$"/"fh$
+ 2003 print"(wht)            ]"
+ 2004 print"   0 1 2 3 4 5 6 7 8 9"
+ 2005 forj=0to9:printj;:ifj=4thenprint"(left)(left)(left)(CBM-@)(rght)(rght)";
+ 2070 fori=0to9:b=j*10+i:printc$(p%(b))k$(s%(b))ex$m$(n%(b)and6);:nexti
+ 2075 print"(wht)":nextj:print"(red) ~(wht)";
+ 2080 ifp2>0thenprint"(home)(down)(down)(down)(down)";:fori=1to11:printtab(35)sp$:next:p2=0
+ 2082 print"(home)(down)(down)(down)(down)"tab(35);:fori=1to6:forj=1to3:print"(down)(rght)"c$(j)k$(i)"(left)(left)(up)(wht)"chr$(142)left$("W W W ",u%(j,i)*2)chr$(14)right$("      ",6-u%(j,i)*2)spc(4);:nextj
+ 2084 print"(yel)"u$(i)"(down)(wht)":printtab(35);:nexti:print"(up)"
+ 2090 return
+ 2100 print"(home)(down)(down)(down)(down)(down)"left$("(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)",j)"(rght)(rght)(rght)"left$("(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)",i*2);
+ 2110 b=j*10+i:printc$(p%(b))k$(s%(b))ex$m$(n%(b)and6);:return
+ 2120 rem alter board (only one char!)
+ 3000 print"(home){151}Turn #(lgrn)"str$(t)"{151} Put Down:(lgrn)"tp
+ 3002 rem ifgpthen:@char,55296,0,0,1,1,"Player:"+str$(p)+" Turn:"+str$(t)+" Used:"+str$(tp)+" %  "
+ 3003 ifgpthen:@{224},55296,0,0,1,1,n$(p)+"                 "
+ 3005 print"(home)(lred)";:fori=1to3:ifi=pandtp<100thenprintchr$(15)chr$(2);
+ 3010 printtab(23+i*10)c$(i)"Player"i;chr$(130)chr$(143);:next:print
+ 3015 fori=1to3:printtab(22+i*10)"(lblu)"ln$(i);:next:print"(lgrn)"
+ 3020 fori=1to3:printtab(26+i*10)t%(i);:next:print
+ 3025 ifgpthenfori=1to3:@{224},55296,370+i*56,0,2,2,right$(str$(t%(i)),2):next
+ 3030 print"(home)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(wht)":return
+ 3100 fori=1toni
+ 3110 print"(CBM-@)(left)";
+ 3111 ifgpthen:@{224},55296,352,170,2,3,">"
+ 3112 geti$:ifi$=""then3112
+ 3113 ifgpthen:@{224},55296,352,170,2,3," "
+ 3114 ifi$=chr$(20)andi>1then3120
+ 3116 ifi$=chr$(13)andni=3theni$(1)="?":i$(2)="?":i$(3)="?":print" (left)";:return
+ 3117 ifasc(i$)>90then3111
+ 3118 ifasc(i$)<48then3111
+ 3120 print" (left)"i$;
+ 3125 ifi$=chr$(20)theni=i-1:goto3110
+ 3130 i$(i)=i$:next:return
+ 5000 print"(up)";:forj=xtoy:t1=a%(j,0):t2=a%(j,1):t3=a%(j,2):t4=a%(j,3)
+ 5010 printtab(15)j":";:l1$="":l2$="":l3$="":l4$=""
+ 5015 r1$="":r2$="":r3$="":r4$=""
+ 5020 ift1>99thent1=t1-100:l1$="(":r1$=")"
+ 5022 ift2>99thent2=t2-100:l2$="(":r2$=")"
+ 5024 ift3>99thent3=t3-100:l3$="(":r3$=")"
+ 5026 ift4>99thent4=t4-100:l4$="(":r4$=")"
+ 5030 printl1$t1;r1$l2$t2;r2$l3$t3;r3$;:ift4=>0thenprintl4$t4;r4$;
+ 5040 f(k)=f(k)+1-(t4=>0):printtab(40);:forl=1to3
+ 5045 printc$(l)f(l);:nextl:printc$(k):nextj:return
+ 5050 geta$:ifa$=""then5050
+ 5060 return
+ 5100 print"(clr)(lgrn)Move Record:"
+ 5110 f(1)=0:f(2)=0:f(3)=0:fori=1tot:k=int(1.5+3*((i-1)/3-int((i-1)/3))):print"(wht)"i;c$(k)k$(m%(i,0))m%(i,1):x=m%(i,2):y=m%(i,3):ifx>0thengosub5000
+ 5115 nexti
+ 5120 goto5050
+ 6000 open8,8,8,"@0:"+fm$+",s,w":cr$=chr$(13):q$=chr$(34)
+ 6005 print#8,sd$;cr$;sh$;cr$;fd$;cr$;fh$
+ 6007 fori=1to3:print#8,n$(i)cr$q$ln$(i)q$cr$co%(i):next
+ 6010 print#8,t;cr$;p;cr$;tp;cr$;sc
+ 6020 fori=1tot:forj=0to3:print#8,m%(i,j):nextj,i
+ 6030 fori=1to7:forj=1to3:print#8,u%(j,i):nextj,i
+ 6040 fori=1tosc:forj=0to3:print#8,a%(i,j):nextj,i
+ 6050 fori=0to99:print#8,s%(i);cr$;p%(i);cr$;n%(i):next
+ 6060 fori=1to3:print#8,t%(i):next
+ 6065 fori=1to3:print#8,cs%(i):next
+ 6067 fori=0to3:print#8,c$(i):next
+ 6070 print#8,"dummy":ts%=t:close8:return
+ 6100 open8,8,8,fm$+",s,r"
+ 6110 input#8,sd$,sh$,fd$,fh$
+ 6115 fori=1to3:input#8,n$(i),ln$(i),co%(i):next
+ 6118 input#8,t,p,tp,sc
+ 6120 fori=1tot:forj=0to3:input#8,m%(i,j):nextj,i
+ 6130 fori=1to7:forj=1to3:input#8,u%(j,i):nextj,i
+ 6140 fori=1tosc:forj=0to3:input#8,a%(i,j):nextj,i
+ 6150 fori=0to99:input#8,s%(i),p%(i),n%(i):next
+ 6160 fori=1to3:input#8,t%(i):next
+ 6165 fori=1to3:input#8,cs%(i):next
+ 6167 fori=0to3:input#8,c$(i):next
+ 6170 input#8,a$:close8:ts%=t:return
+ 6200 print"(home)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(wht)"
+ 6205 printchr$(27)"q(pur)Information (orng)((pur)<CR>(orng),(pur)G(orng)=Move Record,(pur)I(orng)=Rules,(pur)S(orng)=Save,(pur)Alt R(orng)=Run,(pur)E(orng)=Save&End,(pur){91}C=C}(orng))?(wht)"chr$(27)"@"
+ 6207 ifgpthen:@{224},55296,352,170,2,3,"?"
+ 6210 geta$:ifa$=""then6210
+ 6212 ifgpthen:@{224},55296,352,170,2,3," "
+ 6213 gosub6900
+ 6215 ifa$="e"andts%<>tthengosub6000:print"(clr)(wht)Futex Corporation(cyn)":print"(down)Progress Saved.":end:goto6200
+ 6216 ifa$="e"thenprint"(clr)(wht)Futex Corporation(cyn)":print"(down)Progress Already Saved.":end:goto6200
+ 6218 ifa$="g"thengosub5100:print"(clr)";:gosub2000:gosub3000:goto6200
+ 6220 ifa$="(CBM-C)"andts%<>tthenprint"(clr)(wht)Futex Corporation(cyn)":print"(down)Progress (lred)NOT(cyn) Saved. Type (yel)cont(cyn) to continue.":end:print"(clr)":goto6200
+ 6222 ifa$="(CBM-C)"thenprint"(clr)(wht)Futex Corporation(cyn)":print"(down)Progress Already Saved.":end:goto6200
+ 6225 ifa$="i"thengosub6300:print"(clr)";:gosub2000:gosub3000:goto6200
+ 6227 ifa$="s"and(ts%<>t ort=1)thengosub6000:print"Saved!":goto6200
+ 6228 ifa$="r"andts%=tthenrun
+ 6230 ifa$="x"ora$=chr$(13)thengoto304
+ 6232 ifa$="{175}"thengosub9300
+ 6240 goto6200
+ 6300 ifl$(1)=""thengosub8000
+ 6305 print"(clr)"chr$(27)"m";:fori=1to25:printl$(i):next:sp=1
+ 6310 geta$:ifa$=""then6310
+ 6320 ifa$="(up)"andsp>1thensp=sp-1:print"(home)"chr$(27)"w"l$(sp)
+ 6330 ifa$="(down)"andsp+24<99thensp=sp+1:print"(home)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)"chr$(27)"v"l$(sp+24)
+ 6335 ifa$="x"ora$=" "ora$=chr$(13)thenprintchr$(27)"l":return
+ 6337 ifa$="(clr)"ora$="(home)"then6305
+ 6340 goto6310
+ 6700 ifgpands%(bx)<7thengosub9470
+ 6710 ifgpands%thenp%=pp%:pc=s%:x=tx%(bx):y=ty%(bx):gosub9400
+ 6720 ifgpands%=0thenp%=2:pc=7.5:x=tx%(bx):y=ty%(bx):gosub9400
+ 6730 return
+ 6800 ifval(fd$)=0thenfd$="230687":fh$=ti$
+ 6810 return
+ 6900 ifgpthen:ifa$="{163}"then@text:printchr$(27)"x(clr)";:gp=0:gosub2000:gosub3000:return
+ 6910 ifa$="(clr)"thenprint"(clr)";:gosub2000:gosub3000:return
+ 6920 ifa$="{165}"thengosub9500:gosub3000
+ 6990 return
+ 8000 open8,8,8,"rules(hyp),s,r"
+ 8010 fori=1to84:input#8,l$(i):next
+ 8020 input#8,a$:close8
+ 8090 return
+ 8100 {254,4}"v2t7o2.wcv1t4o5u9hco4ig$eq.gh.chrm"
+ 8110 {254,4}"v2t7o2.wcv1t4o5hco4ig$eq.gh.chrm"
+ 8120 {254,4}"v2t7o1.w$bv1t4o4h$bo4iagq.ah.dhrm"
+ 8130 {254,4}"v2t7o1.wfv1t4o4iagfhfiragfhf"
+ 8140 {254,4}"mv2t7o3wcv1t6o5i$ed$eqc$esro4ig"
+ 8150 {254,4}"mv2t7o3wcv1t6o5i$ed$eqc$eqro4"
+ 8160 {254,4}"mv2t7o2.w$bv1t6o5idco4$bq$b.rio5dco4$bq$bhrm"
+ 8170 goto8100
+ 8190 end
+ 8200 {254,4}"v2t7o1icscicscicscicscic"
+ 8210 {254,4}"v2t7o0i$bs$bi$bs$bi$bs$bi$bs$bi$b"
+ 8220 {254,4}"v2t7o0ifsfifsfifsfifsfif"
+ 9000 data0,0,24,36,90,231,129,0,+0,248,32,34,253,34,32,248
+ 9020 data0,203,60,8,8,60,203,0, +0,255,137,137,137,81,33,0
+ 9030 data0,224,18,10,127,10,18,224,+0,10,42,82,130,82,42,10
+ 9032 data0,199,169,145,129,129,199,0,+0,0,195,52,8,6,1,0
+ 9034 data0,0,127,146,146,106,4,0
+ 9060 data3,57,71,128,128,71,57,3
+ 9062 data0,0,34,60,32,60,34,66,+48,74,201,177,141,147,82,12
+ 9070 data0,28,34,69,73,81,34,28,0,28,34,81,73,69,34, 28
+ 9072 data+0,28,34,65,127,65,34,28
+ 9080 data0,76,148,100,4,31,4,4,+0,0,127,8,16,12,2,4
+ 9082 data128,126,128,126,128,126,1,6
+ 9090 data0,0,178,74,79,74,178,0
+ 9100 data0,6,73,73,94,96,32,16,+0,96,128,124,3,124,128,96
+ 9110 data96,144,144,96,0,0,0,0,+97,145,146,98,4,4,8,8
+ 9150 dimb$(40),pc%(22,7):remopen6,4,6:print#6,chr$(19):close6:open4,4:open5,4,5
+ 9160 fori=0to22
+ 9170 a$="":forj=0to7:reada:pc%(i,j)=a
+ 9180 a$=a$+chr$(a):next:b$(i)=a$
+ 9190 next:return
+ 9200 fori=0to22:print#5,b$(i)
+ 9210 print#4,spc(i*2)" "chr$(141)spc(i*2)chr$(254)chr$(141);:next:print#4:end
+ 9300 open6,4,6:print#6,chr$(19):close6:open4,4:open5,4,5
+ 9302 print#4
+ 9305 fory=0to9:forx=0to9:i=y*10+x
+ 9310 ifp%(i)thenprint#5,b$(p%(i)+s%(i)*3-4):print#4,spc(x*2)chr$(254)chr$(141);
+ 9315 if(n%(i)and4)thenprint#4,spc(x*2)"/";chr$(141);
+ 9317 if(n%(i)and2)thenprint#5,b$(21):print#4,spc(x*2+1)chr$(254)chr$(141);
+ 9320 nextx:print#4:print#4:nexty:close4:close5:close6:return
+ 9400 rem a=p%+pc*3-4:forj=0to7:fork=0to7:if(pc%(a,j)and(2~k))thenx2=x*mx+j*2+7:y2=7-k+6+19+20+y*my:@draw,x2,y2,x2 +1 ,y2,1
+ 9401 rem nextk:nextj:return
+ 9402 j=(14.5+(p%-1)*2)*28+29+6:k=((pc-1)*1.3+.5)*18+6+19
+ 9405 @{244},j,k,16,8,x*mx+9,y*my+19+20+6
+ 9410 return
+ 9420 forj=0to7:fork=0to7:if(pc%(a,j)and(2^k))thenx2=x*28+j*2+6+29:y2=7-k+6+19+y*18:@{229},x2,y2,x2+1,y2,1
+ 9430 nextk:nextj:return
+ 9440 mx=32:my=16:fori=0to10:@{229},i*mx,19+20,i*mx,199,1:@{229},0,19+20+i*my,320,i*my+19+20,1:next:return
+ 9450 forj2=0to2*{pi}step.1:@{235}t,cos(j2)*15+16.5+mx*x,my*y+sin(j2)*7.5+9.5+19+19,1:nextj2:return
+ 9460 x=14.5+(p-1)*2:y=(pc-1)*1.3+1-.5:a=p+pc*3:k=u%(p,pc)+1
+ 9465 x2=29+28*x+k*13-10:y2=18*y+19:forj2=-1to1:@{229},x2-3,y2+j2,x2+4,y2+j2,1:next:return
+ 9467 forj2=0to2*{pi}step.3:@{235}t,cos(j2)*3+29+28*x+k*13-9,18*y+sin(j2)*1.7+20,1:nextj2
+ 9468 forj2=0to2*{pi}step.3:@{235}t,cos(j2)+29+28*x+k*13-9,18*y+sin(j2)+20,1:nextj2:return
+ 9470 x=14.5+(p-1)*2:y=(s%(bx)-1)*1.3+1-.5:a=p+pc*3:k=u%(p,s%(bx))+1
+ 9475 x2=29+28*x+k*13-10:y2=18*y+19:forj2=-1to1:@{229},x2-3,y2+j2,x2+4,y2+j2,0:next:return
+ 9480 ifi=6thenreturn
+ 9482 fork=1tou%(0,i+1):ifu%(i2+1,i+1)<kthengosub9465
+ 9483 ifi3thennextk:return
+ 9484 x2=29+28*x+k*13-10:y2=18*y+19:@{229},x2-3,y2-2,x2+4,y2-2,1:@{229},x2-3,y2+2,x2+4,y2+2,1:@{229},x2-4,y2-1,x2-4,y2+1,1:@{229},x2+5,y2-1,x2+5,y2+1,1:nextk:return
+ 9485 forj2=0to2*{pi}step.3:@{235}t,cos(j2)*4+29+28*x+k*11-6,18*y+sin(j2)*2.5+20,1:nextj2:nextk:return
+ 9500 i3=0:@{222},0,5:@clr,0:gp=1
+ 9501 gosub9440:@{224},7168,450,193,1,0,"(C) 1987  Futex Corporation":fori=117to121:@{229},156,i,164,i,1:nexti
+ 9502 fori=0to6:@{224},7168,595,i*18*1.3+35,1,0,u$(i+1):nexti:if(peek(211)and8)=0then@{254,33},0,430,24:i3=1
+ 9503 fori2=0to2:fori=0to6:x=14.5+i2*2:y=i*1.3+.5:a=cs%(i2+1)-1+i*3
+ 9504 gosub9480:ifi3=0thengosub9420
+ 9505 nexti,i2:ift=1then@{254,31},0,430,24,167,165
+ 9506 fory=0to9:forx=0to9:i=y*10+x:p%=p%(i)
+ 9507 ifp%>0thenpc=s%(i):gosub9400
+ 9530 nextx,y:gosub9600
+ 9540 fori=1to3:@{224},7168,380+i*56,16,1,0,ln$(i):next
+ 9550 printchr$(27)"x";:return
+ 9600 ifsc=0thenreturn
+ 9610 forj=1tosc:f(1)=a%(j,0):f(2)=a%(j,1):f(3)=a%(j,2):f(4)=a%(j,3):gosub9660
+ 9622 fori=1tok-1:iff(i)<100andf(i+1)<100then@{229},x(i),y(i),x(i+1),y(i+1),1:goto9650
+ 9625 iff(i)<100then@{229},x(i),y(i),(x(i)+x(i+1))/2,(y(i)+y(i+1))/2,1:goto9650
+ 9630 iff(i+1)<100then@{229},x(i+1),y(i+1),(x(i)+x(i+1))/2,(y(i)+y(i+1))/2,1:goto9650
+ 9650 nexti,j:return
+ 9660 k=3:iff(4)=>0thenk=5:i=f(3):f(3)=f(4):f(4)=i:f(5)=f(1)
+ 9670 fori=1tok:f=f(i):iff>99thenf=f-100:x=tx%(f):y=ty%(f):gosub9450
+ 9680 x(i)=tx%(f)*mx+15:y(i)=ty%(f)*my+20+19+9:nexti:return
+ 9700 j=sc:f(1)=a%(j,0):f(2)=a%(j,1):f(3)=a%(j,2):f(4)=a%(j,3):gosub9660
+ 9710 fori=1tok-1:iff(i)<100andf(i+1)<100then@{229},x(i),y(i),x(i+1),y(i+1),1:goto9730
+ 9715 iff(i)<100then@{229},x(i),y(i),(x(i)+x(i+1))/2,(y(i)+y(i+1))/2,1:goto9730
+ 9720 iff(i+1)<100then@{229},x(i+1),y(i+1),(x(i)+x(i+1))/2,(y(i)+y(i+1))/2,1:goto9730
+ 9730 nexti:return

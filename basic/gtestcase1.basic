@@ -1,0 +1,9 @@
+10 rem this is the same as a the built in test for the graphicsdevice
+100 screen1
+110 cls
+120 lineRND(0)*1000,RND(0)*1000,RND(0)*1000,RND(0)*1000,rnd(0)*16
+130 gprint"x",rnd(0)*1000,rnd(0)*1000,3
+140 ifpeek(1024)<>0thengprint"m="+str$(peek(1024)),peek(1030)+peek(1031)*256,peek(1032)+peek(1033)*256,9
+150 poke1024,0
+160 sleep1
+170 goto120

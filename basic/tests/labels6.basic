@@ -1,0 +1,18 @@
+5   x=100
+10  print"hello"
+15  gosub MySub 3
+17  gosub This is a Test
+20  goto TestThis
+90  end
+99  :
+100 label TestThis
+110 print "got here at 100"
+190 end
+199 :
+200 label MySub 3
+210   print "in mysub"
+220 return
+299  :
+300 label This is a Test
+310   print "looks like this works already"
+320 return

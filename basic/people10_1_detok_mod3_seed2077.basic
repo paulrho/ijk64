@@ -1,0 +1,417 @@
+    0 meta-charset 1:meta-rows 87:meta-cols 80
+    0 rem meta-scaley 2:meta-charset 1:meta-rows 55:meta-cols 80
+    1 fast:poke53280,0:poke53281,0:print"(clr)(wht)";
+    2 xx$="life.9":br=.90:zz$=chr$(141)
+    3 rem trap61000
+    4 p0=0:pn=0:ifpnorp0thenopen4,4,7
+    5 it=int(rnd(ti)*10000):it=2077:printrnd(-it);"(down)"
+    6 dimcv%(100),pv%(100),tv%(100)
+    7 m=15000:nb=100:m9=.003:l0=.001:sf=.001
+   10 dimpm%(m),pf%(m),m%(m),a%(m),d%(m),s%(m),c%(m),n%(m),n$(60),f$(m),ff$(50,2)
+   12 diml%(m),cl%(nb),mr%(40),mv%(40),ss%(m),mm$(12)
+   13 w$(0)="Drifter":w$(1)="Alpha":w$(2)="Beta":w$(3)="Gamma":w$(4)="Delta"
+   15 w$(5)="Omega":deffnr(a)=int(rnd(it)*a)+1
+   17 op=1:ja=3:dj=4:pb=6:fori=1tonb:cl%(i)=-(int(i/21)+1):next
+   18 cl%(op)=abs(cl%(op)):cl%(ja)=abs(cl%(ja)):cl%(dj)=abs(cl%(dj))
+   19 cl%(pb)=abs(cl%(pb)):goto60
+   20 fori=1to35:a%(i)=12*(int(rnd(it)*8)+19):x=i:gosub7000
+   30 d%(i)=12*(int(rnd(it)*50)+60):s%(i)=1:ifrnd(it)>.5thens%(i)=-1
+   40 hh=int(i*2.8)
+   50 cl%(hh)=abs(cl%(hh)):l%(i)=hh:nexti:h=i-1:n%=h
+   59 goto99
+   60 data"Richardson","Hawkens","Saymor","Jackson","Hetherton","Charters","Davis","Reykar","Doil"
+   62 data"Rixon","Forelock","Graemes","Johnstone","Parker","Hall","Williams","Frawely"
+   64 data"Rogers","Richards","Shaw","Neilson","Macintosh","Oakleigh","Murphy","Charlton"
+   66 data"Peters","Bennett","Perry","Wilson","Winsor","Logan","Newman","Asimov","Sagan","Winters"
+   70 fori=1to35:readn$(i):n%(i)=i:next
+   72 datab,d,f,g,h,j,l,m,n,p,qu,r,k,s,t,v,w,z,st,ch,th,kr,fr,sr,tr,pr,%
+   74 dataa,e,i,o,u,ay,oy,ee,%
+   76 datab,d,f,g,h,j,l,m,n,p,r,s,t,k,v,w,z,st,ch,th,nd,ght,rn,sk,ck,%
+   80 data"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"
+   90 forj=0to2:fori=1to1000:readff$(i,j):ifff$(i,j)<>"%"thennexti:end
+   91 ifj=0thenf1=i-1
+   92 ifj=1thenf2=i-1
+   93 ifj=2thenf3=i-1
+   94 nextj
+   95 fori=1to12:readmm$(i):next
+   98 goto20
+   99 geta$:ifa$="L"thengosub3100:ifjbthen105
+  100 ifvk=0thenprint"(up)                                      (up)"
+  102 mt=mt+1:print"(lred)Year:";int(mt/12+.01)+1997;:gosub8400:vk=0:printmm$(mm);
+  104 print". (M";mt;"(left))(wht)"
+  105 ifmt/36-int(mt/36)<.001ord%(pm)<0orpm=0orjbthengosub5100
+  106 ifjbthenjb=0:goto100
+  108 i=1
+  110 a%(i)=a%(i)+1:ifd%(i)>0thenifa%(i)>d%(i)thengosub1000
+  111 ifd%(i)<0then125
+  112 ifa%(i)=0thenprinti;"(lblu)born.(wht)":vk=1:gosub1400
+  113 ifl%(i)=opanda%(i)>17*12thenl%(i)=0:printi;"(lblu)released from orph.(wht)":vk=1
+  114 kg=1:ifl%(i)=jathenkg=0:ss%(i)=ss%(i)-1:ifss%(i)=0thengosub7200
+  115 ifc%(i)<0thenc%(i)=c%(i)+1
+  116 ifrnd(it)<l0thengosub6700
+  117 ifl%(i)=0thengosub6400
+  118 rn=rnd(it):gosub8000
+  119 ifkgandrnd(it)>.98thenifm%(i)<>0anda%(i)<30*12thengosub6500
+  120 ifrnd(it)>.99thenifkganda%(i)>19*12anda%(i)<70*12andm%(i)=0thengosub1100
+  121 ifrnd(it)<sfanda%(i)>15*12anda%(i)<89*12thengosub7300
+  122 ifm%(i)<>0anda%(i)<80*12thenifrnd(it)>.9995thengosub1300
+  123 ifrnd(it)<.0001or(l%(i)=0andrnd(it)<.005)thenac=1:d%(i)=a%(i):gosub1000
+  124 ifrnd(it)>brthenifkganda%(i)<45*12andm%(i)<>0andc%(i)=0andc%(m%(i))=0thengosub1200
+  125 geta$:ifa$=chr$(10)thengosub2100
+  126 ifa$<>""thengosub4320
+  127 ifa$="(CBM-S)"thensv=1
+  128 ifa$="{182}"thenld=1
+  129 ifa$="b"thengosub4000
+  135 ifpeek(653)=1then135
+  190 i=i+1:ifi<=hthen110
+  200 ifsvthensv=0:gosub3000
+  202 ifldthenld=0:gosub3100:ifjbthen105
+  990 goto100
+ 1000 vk=1:a$="died.":ifac=1thenprint"(lgrn)Accident:(wht)";:a$="Accident Victim.":ac=0
+ 1001 ifac=2thenprint"(lgrn)Executed:(wht)";:a$="Death Sentence.":ac=0
+ 1002 ifac=3thenprint"(lgrn)Murdered:(wht)";:a$="Murdered.":ac=0
+ 1003 x=i:gosub7110:print"(cyn)Died.(wht)":d%(i)=-abs(d%(i))
+ 1004 xx=i:gosub4500:ifpnthenprint#4,mt;k$;i;a$;int(a%(i)/12*100)/100
+ 1010 gosub8300:ifm%(i)<>0thenm%(m%(i))=0
+ 1015 ifc%(i)<>0then1030
+ 1020 gosub8200:return
+ 1030 remforj=1toh:ifpf%(j)<>iora%(j)>=0thennextj:print"Wrong 1030.": print"j=";j;" h=";h;" pf%(j)=";pf%(j);" i=";i;" a%(j)=";a%(j);" c%(i)=";c%(i):print"******************":stop
+ 1031 forj=1toh:ifpf%(j)<>iora%(j)>=0thennextj: return :rem BUG FIX - has just finished carrying - but not actually carrying now - but still flagged for another six months or so
+ 1035 d%(j)=a%(j):ifd%(j)<0thend%(j)=0
+ 1040 i4=i:i=j:gosub1000:i=i4:return
+ 1100 ha=10000:hp=0:ss=sgn(s%(i)):printi;chr$(13);"(up)";:forj=1toh
+ 1102 if(pm%(i)=pm%(j)orpf%(i)=pf%(j))andpm%(i)<>0then1120
+ 1103 remifcl%(l%(i))<>cl%(l%(j))then1120
+ 1104 ifl%(j)=jathen1120
+ 1105 ifabs(a%(i)-a%(j))>15*12ord%(j)<0then1120
+ 1110 ifss<>sgn(s%(j))thenifa%(j)>19*12thenifm%(j)=0andd%(i)>0then4400
+ 1120 nextj:ifhp=0thenprint"     ";chr$(13);"(up)";:return
+ 1130 j=hp:gosub8500
+ 1132 fork=1tonb:ifcl%(k)<0thencl%(k)=abs(cl%(k)):l%(j)=k:l%(i)=k:goto1138
+ 1134 nextk:l%(i)=0:l%(j)=0
+ 1138 :
+ 1140 vk=1:ifpnthenprint#4,mt;"per:";str$(i*sgn(s%(i)));j*sgn(s%(j));"married.";
+ 1145 ifpnthenprint#4,str$(int(a%(i)/12*100+.5)/100);int(a%(j)/12*100+.5)/100
+ 1147 x=i:gosub7110:print"(lgrn)married (wht)";:x=j:gosub7110:print
+ 1150 m%(j)=i:m%(i)=j:return
+ 1200 ifh-1>=mthenvk=1:print"Unallowable.":return
+ 1201 ifd%(i)<0thenreturn
+ 1202 ifa%(m%(i))>45*12orl%(m%(i))=jathenreturn
+ 1205 forj=1toh:ifd%(j)>0or1=1thennextj:h=h+1:j=h
+ 1210 vk=1:print"Person:(cyn)";j;"(lblu)Alive. (wht)";:e=abs(s%(j))+1:print"(file:(lred)";e;"(wht))"
+ 1220 s%(j)=e:ifrnd(it)=>.5thens%(j)=-e
+ 1230 a%(j)=-9:pm%(j)=i:pf%(j)=m%(i):ifs%(i)<0thenpf%(j)=i:pm%(j)=m%(i)
+ 1232 d%(j)=12*(int(rnd(it)*50)+60)
+ 1235 l%(j)=l%(i):ifl%(j)=0thenl%(j)=op:print"(lblu)orphanige.(wht)"
+ 1236 ifl%(j)=jathenl%(j)=op:print"(lblu)orphanige.(wht)"
+ 1238 c%(pf%(j))=-15:m%(j)=0
+ 1240 print"to(cyn)";i;"+";m%(i);:x=j:gosub7000:print"(gry2)  (";f$(x);")(wht)"
+ 1242 fork=hto1step-1:ifpm%(k)=pm%(j)andpf%(k)=pf%(j)andpf%(i)=0andk<>jthen1260
+ 1250 nextk:return
+ 1260 ifn%(k)=n%(pf%(j))thenreturn
+ 1262 print"Inherited surname change.";j
+ 1265 n%(j)=n%(pf%(j)):print"(lblu)";n$(n%(j));"(wht)"
+ 1270 return
+ 1300 ifd%(m%(i))<0thenreturn
+ 1302 ss=m%(i):m%(i)=0:m%(ss)=0:vk=1
+ 1305 ifpnthenprint#4,mt;"per:";str$(i*sgn(s%(i)));ss*sgn(s%(ss));"divorced.";
+ 1307 ifpnthenprint#4,str$(int(a%(i)/12*100+.5)/100);int(a%(ss)/12*100+.5)/100
+ 1310 x=i:gosub7110:print"(cyn)divorced (wht)";:x=ss:gosub7110:print
+ 1320 forj=1tonb:ifcl%(j)<0thencl%(j)=abs(cl%(j)):l%(i)=j:goto1330
+ 1325 nextj:l%(i)=0
+ 1330 :
+ 1390 return
+ 1400 xx=i:gosub4500:ifpnthenprint#4,mt;k$;i;"born. to";pm%(i);pf%(i);
+ 1405 ifpnthenifpm%(i)<>m%(pf%(i))thenprint#4,"(";m%(pf%(i));")":return
+ 1410 ifpnthenprint#4
+ 1420 return
+ 1490 return
+ 2000 ifx<1orx>hthenreturn
+ 2002 vk=1:print"(cyn)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@(wht)"
+ 2005 print"(yel)";f$(x);"(wht)";tab(20);"(pur)";w$(abs(cl%(l%(x))));"(grn)";
+ 2006 l=l%(x):ifl=0thenprint
+ 2007 ifl<>opandl<>jaandl<>0andl<>djandl<>pbthenprintl%(x);"(wht)"
+ 2008 ifl%(x)=opthenprint" Orphanige.(wht)"
+ 2009 gosub6900:ifl%(x)=jathenprint" Jail(wht)"
+ 2010 print"Person:(cyn)";x;"(left).";tab(20);
+ 2012 ifd%(x)>0thenprint"(wht)Age:(cyn)";int(a%(x)/12*100+.5)/100
+ 2015 ifd%(x)<=0thenprint"(lred)Was:(cyn)";int(-(d%(x)-1)/12*100+.5)/100
+ 2020 print"(wht)File:(lred)";abs(s%(x));tab(20);"(wht)Mar.:";m%(x);"(wht)((lred)";abs(s%(m%(x)));"(wht))"
+ 2030 print"(wht)Born to:(cyn)";pm%(x);"+";pf%(x);
+ 2035 ss=s%(x):a$="Male":ifss<0thena$="Female ":ifc%(x)<>0thena$=a$+"(lblu)c"
+ 2037 printtab(20);"(lgrn)";a$;"(wht)"
+ 2038 gosub5000:print"(lblu)";e$;"(wht)":ifpm=xthenprint"(up)";tab(20);"(lred)Prime Minister.(wht)"
+ 2039 iff$<>e$thenprint"(lgrn)";f$;"(wht)"
+ 2040 ifss%(x)<>0thenprint"term left:(pur)";int(ss%(x)/.12+.5)/100;"(wht)"
+ 2042 print"(cyn)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@(wht)"
+ 2090 return
+ 2100 open1,0:input#1,a$:close1:print"(up)":x=val(a$)
+ 2105 ifa$=""thenreturn
+ 2110 gosub2000:return
+ 2200 vk=1:print"(pur)executed:(wht)"
+ 2210 forj=1toh
+ 2220 ifl%(j)=djthenx=j:gosub5000:prints$;" ";f$(x);" ";e$;"(pur)";x;"(wht)";
+ 2230 ifl%(j)=djthenprint"(cyn)";int(a%(x)/.12+.5)/100;int(ss%(x)/.12+.5)/100
+ 2240 print"(wht)";:nextj:return
+ 3000 gosub6100:ifeethenreturn
+ 3005 open8,8,8,"@0:"+xx$+",s,w"
+ 3010 print#8,h:print#8,mt:print#8,pm
+ 3020 fori=1toh:print#8,s%(i):print#8,a%(i):print#8,pm%(i):print#8,f$(i)
+ 3030 print#8,pf%(i):print#8,m%(i):print#8,c%(i):print#8,d%(i):print#8,n%(i)
+ 3035 print#8,ss%(i)
+ 3040 print#8,l%(i):nexti:print#8,mr:fori=1tomr:print#8,mr%(i):print#8,mv%(i):nexti
+ 3050 print#8,nb:fori=1tonb:print#8,cl%(i):nexti
+ 3060 print#8,n%:fori=1ton%:print#8,n$(i):nexti:close8:return
+ 3100 gosub6100:ifeethenreturn
+ 3105 open8,8,8,xx$+",s,r"
+ 3110 input#8,h:input#8,mt:input#8,pm
+ 3120 fori=1toh:input#8,s%(i):input#8,a%(i):input#8,pm%(i):input#8,f$(i)
+ 3130 input#8,pf%(i):input#8,m%(i):input#8,c%(i):input#8,d%(i):input#8,n%(i)
+ 3135 input#8,ss%(i)
+ 3140 input#8,l%(i):nexti:input#8,mr:fori=1tomr:input#8,mr%(i):input#8,mv%(i):nexti
+ 3150 input#8,nb:fori=1tonb:input#8,cl%(i):nexti
+ 3160 input#8,n%:fori=1ton%:input#8,n$(i):nexti:close8:return
+ 4000 gosub4300:ifx<1orx>hthenx=1
+ 4002 vk=1:forj=xtoh:printj;:a$="m":ifs%(j)<0thena$="f"
+ 4010 print"(yel)"a$"(lblu)";tab(10);pm%(j);pf%(j);"(lgrn)";f$(j);"(wht)";
+ 4012 ifd%(j)<=0thenprint"(lred)dead.(wht)";int(-(d%(j)-1)/12*100+.5)/100
+ 4015 ifd%(j)>0thenprintint(a%(j)/12*100+.5)/100
+ 4017 ifpeek(653)<>0then4017
+ 4020 getaa$:ifaa$<>""thenreturn
+ 4090 next:return
+ 4100 pp=0:dd=0:forj=1toh:dd=dd+1:ifd%(j)>0thenpp=pp+1:dd=dd-1
+ 4110 nextj:vk=1:print"Population:(cyn)";pp:print"(lred)Past away:";dd;"(wht)":return
+ 4200 gosub4300:ifa$=""thenreturn
+ 4210 vk=1:forj=1toh
+ 4220 ifpm%(j)=xorpf%(j)=xthenprintj;"(cyn)";pm%(j);"(lblu)";pf%(j);"(wht)"
+ 4230 nextj:return
+ 4300 open1,0:input#1,a$:close1:print:x=val(a$):return
+ 4320 ifa$="f"thengosub4200
+ 4322 ifa$="p"thengosub4100
+ 4324 ifa$="r"thengosub4600
+ 4326 ifa$="m"thengosub4700
+ 4327 ifa$="(orng)"thengosub4840
+ 4328 ifa$="e"thengosub4800
+ 4329 ifa$="{177}"thengosub4820
+ 4330 ifa$="n"thengosub4900
+ 4332 ifa$="{175}"thenprintpm;"(down)"
+ 4334 ifa$="2"thengosub6800
+ 4336 ifa$="3"thengosub6820
+ 4338 ifa$="u"thengosub7400
+ 4339 ifa$="c"thengosub8200
+ 4340 ifa$="{172}"thengosub8600
+ 4345 ifa$="4"thengosub2200
+ 4390 return
+ 4400 j1=pm%(j):j2=pf%(j):i1=pm%(i):i2=pf%(i)
+ 4410 a1=pm%(j1):a2=pf%(j1):if(a1=pm%(i1)anda1<>0)or(a2=pf%(i1)anda2<>0)then4490
+ 4420 a1=pm%(j2):a2=pf%(j2):if(a1=pm%(i2)anda1<>0)or(a2=pf%(i2)anda2<>0)then4490
+ 4422 a1=pm%(j1):a2=pf%(j1):if(a1=pm%(i2)anda1<>0)or(a2=pf%(i2)anda2<>0)then4490
+ 4424 a1=pm%(j2):a2=pf%(j2):if(a1=pm%(i1)anda1<>0)or(a2=pf%(i1)anda2<>0)then4490
+ 4480 h0=abs(a%(i)-a%(j)):ifh0<hathenha=h0:hp=j
+ 4485 goto1120
+ 4490 goto1120:print"(pur)similar grandparents(wht) (";str$(i);str$(j);" )"
+ 4500 k$="Mal:":ifs%(xx)<0thenk$="Fem:"
+ 4510 return
+ 4600 gosub4300:vk=1:xx=x:gosub4500:print"(yel)";k$;"(wht)":pr=x:ifx=0thenreturn
+ 4610 p2=pr:pr=pm%(pr):print"(cyn)";pr;"(wht)";:ifd%(pr)<0thenprint"(lred)*(wht)";
+ 4612 printtab(8);"(pur)";pf%(p2);"(wht)";:ifd%(pf%(p2))<0thenprint"(lred)*(wht)";
+ 4618 ifm%(pm%(p2))<>pf%(p2)thenprinttab(16);"(lgrn)";m%(pm%(p2));"(wht)";:gosub4640
+ 4620 print:ifpr<>0then4610
+ 4630 gosub5000:printe$:return
+ 4640 ifd%(m%(pm%(p2)))<0thenprint"(lred)*(wht)";
+ 4650 return
+ 4700 gosub4300:ifx<1orx>hthenx=1
+ 4702 vk=1:x2=x:forj=x2toh:ifs%(j)<0ord%(j)<0then4740
+ 4710 ifm%(j)=0then4740
+ 4720 ifd%(m%(j))<=0then4740
+ 4730 print"(cyn)";j;"(lgrn)";m%(j);"(wht)";tab(11);"(lred)";int(a%(j)/12);
+ 4735 x=j:gosub5000:printint(a%(m%(j))/12);"(wht)";tab(25);e$
+ 4737 getaa$:ifaa$<>""thenreturn
+ 4740 nextj:return
+ 4800 open1,0:printstr$(br)"(up)":input#1,a$:close1:print:ifval(a$)>.80thenbr=val(a$)
+ 4810 vk=1:return
+ 4820 open1,0:printstr$(m9)"(up)":input#1,a$:close1:print:ifval(a$)<>0thenm9=val(a$)
+ 4830 vk=1:return
+ 4840 open1,0:printstr$(l0)"(up)":input#1,a$:close1:print:ifval(a$)<>0thenl0=val(a$)
+ 4842 vk=1:return
+ 4900 vk=1:print"names:";n%:forj=1ton%:print"(cyn)";j;"(wht)";n$(j):next
+ 4910 input"number:";nn:ifnn>99thenprint"too high.":goto4910
+ 4915 print"((cyn)";n$(nn);"(wht))"
+ 4920 input"name";n$:input"person";pp:ifpp<h+1thenprint"((cyn)";n$(n%(pp));"(wht))"
+ 4925 ifpp>hthenprint"too high.":goto4920
+ 4930 input"correct";a$:ifleft$(a$,1)<>"y"thenreturn
+ 4940 n%(pp)=nn:n$(nn)=n$:ifnn>n%thenn%=nn
+ 4950 goto4900
+ 5000 x2=x:ifx<0thenreturn
+ 5005 e$="???":s$="Mr.":pr=x:ifpm%(x)=0andn%(x)<>0thene$=n$(n%(x)):goto5030
+ 5010 p2=pr:pr=pm%(pr):ifn%(pr)<>0thene$=n$(n%(pr)):goto5030
+ 5020 ifpr<>0then5010
+ 5030 ifs%(x2)<0thens$="Miss":ifm%(x2)<>0thens$="Mrs."
+ 5040 f$=e$:gosub6000:return
+ 5100 vk=1:fori=1to100:tv%(i)=0:cv%(i)=0:pv%(i)=0:next
+ 5105 print"(yel)Election(wht)":gosub6200:nl=0:ni=0:gg=int((ra+aa)/7+5):ifgg>100thengg=100
+ 5106 al=60*12:ifra<4thenal=130*12
+ 5107 ifpnthenprint#4,"Election:";mt
+ 5108 ifaa=0andra=0thenprint"No Prime Minister":return
+ 5110 nv=0:fori=1togg:ifpm<>0andi=1thenx=pm:goto5121
+ 5120 x=int(rnd(ti)*h)+1
+ 5121 ifd%(x)<0orl%(x)=jathen5120
+ 5122 ifa%(x)<20*12ora%(x)>alandx<>pmthen5120
+ 5124 ifs%(x)<0andrnd(it)>.1andx<>pmthen5120
+ 5130 forj=1tonv:ifcv%(j)=xthen5140
+ 5132 nextj:nv=nv+1:cv%(nv)=x:gosub5000:gosub7100
+ 5140 nexti
+ 5145 n6=5:ifn6>nvthenn6=nv
+ 5150 fori=1toh:printi;"(left)     ":print"(up)";:tv=0:ifd%(i)<0then5200
+ 5152   ifrnd(it)<.01andi<>pmthenni=ni+1:goto5200
+ 5160   if((a%(i)<18*12or(a%(i)>(al+15*12)))andi<>pm)orl%(i)=jathen5200
+ 5162   ff=0:forj=1tonv:ifi=cv%(j)thenff=1:fp=j:pv%(n6)=j
+ 5163   nextj
+ 5165   fork=1ton6:ifffandk=n6thenx=fp:goto5174
+ 5170     x=int(rnd(it)*nv)+1
+ 5172     forj=1ton6:ifpv%(j)=xthen5170
+ 5173     nextj
+ 5174     tv=tv+1:pv%(tv)=x:nextk
+ 5175   n0=n6-3:ifn0<1thenn0=1
+ 5176   forj=n6ton0step-1:g=pv%(j):tv%(g)=tv%(g)+2^(j-n0):pv%(j)=0:nextj:nl=nl+1
+ 5200 nexti:tt=0
+ 5205 print"(pur)Formal votes:(wht)";nl:print"(lred)Informal(wht)";ni
+ 5207 ifpnthenprint#4,"Formal";nl;"Informal";ni
+ 5210 fori=1tonv:hs=0:forj=1tonv:
+ 5220 iftv%(j)>hsthenpl=j:hs=tv%(j)
+ 5230 nextj:tv%(pl)=-tv%(pl)
+ 5235 ifi=1thenpm=cv%(pl)
+ 5240 x=cv%(pl):gosub5000:prints$;" ";f$(x);" ";e$;"(lblu)";x;"(wht)";abs(tv%(pl))
+ 5242 ifpnthenprint#4,s$;" ";f$(x);" ";e$;"(";x;")";zz$;spc(20);abs(tv%(pl))
+ 5250 forj=1tonv:iftv%(j)=abs(tv%(pl))andj<>plandi=1thentt=1
+ 5260 nextj
+ 5270 nexti:ifttthenprint"(lred)Tie.(wht)":goto5300
+ 5271 print"(lred)The Prime Minister is:(lgrn)"
+ 5272 x=pm:gosub5000:prints$;" ";f$(x);" ";e$;"(lblu)";x;"(wht)"
+ 5280 ifp0thenprint#4,int(mt/12)+1997;s$;" ";f$(x);" ";e$;x;"(";nl;ni;")"
+ 5282 ifp0thengosub4100:print#4,"      (";pp;dd;")";
+ 5284 ifp0thenprint#4,str$(int(a%(x)/.12+.5)/100);-nv;:gosub8100
+ 5290 return
+ 5300 fori=1to100:tv%(i)=0:next:nl=0:ni=0
+ 5310 ifpnthenprint#4,"Re-election:";mt
+ 5320 goto5150
+ 6000 x2=x:ifs%(x)<0andm%(x)<>0thenx=m%(x2)
+ 6005 e$="???":s$="Mr.":pr=x:ifpm%(x)=0andn%(x)<>0thene$=n$(n%(x)):goto6030
+ 6010 p2=pr:pr=pm%(pr):ifn%(pr)<>0thene$=n$(n%(pr)):goto6030
+ 6020 ifpr<>0then6010
+ 6030 ifs%(x2)<0thens$="Miss":ifm%(x2)<>0thens$="Mrs."
+ 6040 x=x2:return
+ 6100 ee=0:printxx$;"(up)":open1,0:input#1,a$:close1:print:ifa$<>""thenxx$=a$:return
+ 6110 ee=1:return
+ 6200 ra=0:aa=0:fori=1toh
+ 6210 ifd%(i)<0orl%(i)=jathennexti:return
+ 6215 ifa%(i)>20*12anda%(i)<60*12thenra=ra+1:nexti:return
+ 6220 ifa%(i)>60*12thenaa=aa+1:nexti:return
+ 6221 nexti:return
+ 6300 vk=1:x1=pm%(x):x2=pf%(x):s1=-1:ifrnd(it)>.8thens1=1
+ 6302 s2=-1:ifrnd(it)>.95thens2=1
+ 6310 ifs1=1ands2=-1thenprint"(lblu)The mother gets custody outright.(wht)":goto6350
+ 6312 ifs2=1ands1=-1thenprint"(lblu)The father gets custody outright.(wht)":goto6360
+ 6315 ifs2=1ands1=1thenprint"(lblu)The child goes to an orphanige.(wht)":goto6370
+ 6320 remss=-1:ifrnd(it)>.5thenss=1
+ 6322 ifm%(x2)<>0andm%(x1)=0thenss=-1
+ 6324 ifm%(x2)=0andm%(x1)<>0thenss=1
+ 6340 ifss=-1thenprint"The court rules in favour of the mother.":goto6350
+ 6342 ifss=1thenprint"The court rules in favour of the father.":goto6360
+ 6350 l%(x)=l%(x2):return
+ 6360 l%(x)=l%(x1):return
+ 6370 l%(x)=op:return
+ 6400 vk=1:l=l%(m%(i)):ifl<>0andl<>jaandl<>djthenl%(i)=l:print"(lblu)Returned home.(wht)":return
+ 6415 forj=1tonb:ifcl%(j)<0thencl%(j)=abs(cl%(j)):l%(i)=j:goto6420
+ 6418 nextj:return
+ 6420 ifm%(i)<>0andl<>jathenl%(m%(i))=j
+ 6425 print"(lblu)Found a place.(wht)";i;m%(i):return
+ 6500 vk=1:forj=1toh:ifl%(j)=opandd%(j)>0then6520
+ 6510 nextj:return
+ 6520 l%(j)=l%(i):x=j:gosub7110:print"(lblu)adopted by(wht) ";:x=i:gosub7110:print:return
+ 6600 at=0:vk=1
+ 6602 x=int(rnd(it)*h)+1:ifd%(x)<0then6650
+ 6615 ifl%(x)=jaandl%(i)<>jathen6650
+ 6617 ifl%(x)<>jaandl%(i)=jathen6650
+ 6618 kp=1:ifx=pmthenprint"(lblu)assasination.(wht)":kp=-1
+ 6620 forj=1tomr:ifmr%(j)=0thenmr%(j)=i:mv%(j)=x*kp:goto6635
+ 6630 nextj:mr=mr+1:mr%(mr)=i:mv%(mr)=x*kp
+ 6635 d%(x)=a%(x):ifd%(x)<0thend%(x)=0
+ 6640 i2=i:i=x:ac=3:gosub1000:i=i2:return
+ 6650 at=at+1:ifat<50then6602
+ 6652 return
+ 6700 at=0:vk=1
+ 6710 x=int(rnd(it)*mr)+1:ifmr%(x)<>0then6720
+ 6712 at=at+1:ifat<30then6710
+ 6715 return
+ 6720 x0=x:x=mr%(x0):gosub7110:print"(lgrn)Convicted of Murdering (wht)";:x=mv%(x0):gosub7110:print:xx=mr%(x0):mr%(x0)=0:x=x0
+ 6722 mv=mv%(x):mv%(x)=0:ifd%(xx)<0thenreturn
+ 6724 ifxx=pmthenpm=0:print"(Prime Minister)"
+ 6725 ss%(xx)=15*12+abs(ss%(xx))
+ 6730 ifss%(xx)>30*12ormv<0thenprint"Death sentence for";xx:goto6750
+ 6748 l%(xx)=ja:return
+ 6750 d%(xx)=a%(xx):i2=i:i=xx:ac=2:l%(i)=dj:gosub1000:i=i2
+ 6790 return
+ 6800 vk=1:print"(pur)Murder Victims.(Nobody convicted)(wht)"
+ 6805 forj=1tomr
+ 6810 ifmv%(j)<>0thenx=abs(mv%(j)):gosub5000:prints$;" ";f$(x);" ";e$;"(pur)";x;"(wht)"
+ 6812 nextj:return
+ 6820 vk=1:print"(pur)Jailed:(wht)"
+ 6830 forj=1toh
+ 6835 ifl%(j)=jaandd%(j)>0thenx=j:gosub5000:prints$;" ";f$(x);" ";e$;"(pur)";x;"(wht)";
+ 6840 ifl%(j)=jaandd%(j)>0thenprint"(cyn)";int(a%(x)/.12+.5)/100;int(ss%(x)/.12+.5)/100
+ 6850 print"(wht)";:nextj:return
+ 6900 ifl%(x)=djthenprint" Condemned(wht)"
+ 6910 ifl%(x)=pbthenprint" Probation(wht)"
+ 6990 return
+ 7000 f$=""
+ 7008 f$=f$+ff$(fnr(f1),0)+ff$(fnr(f2),1)
+ 7010 ifrnd(it)>.05thenf$=f$+ff$(fnr(f3),2):goto7030
+ 7012 goto7008:f$=f$+ff$(fnr(f1),0)+ff$(fnr(f2),1)+ff$(fnr(f3),2)
+ 7030 forjj=1toh:iff$(jj)=f$then7000
+ 7032 nextjj
+ 7035 f$=chr$(asc(left$(f$,1))+32)+right$(f$,len(f$)-1)
+ 7040 f$(x)=f$:return
+ 7100 prints$;" ";f$(x);" ";e$;"(lblu)";x;"(wht)":return
+ 7110 gosub5000:prints$;" ";f$(abs(x));" ";e$;"(lblu)";x;"(wht)";:return
+ 7111 rem gosub5000:prints$;" ";f$(x);" ";e$;"(lblu)";x;"(wht)";:return rem bug fix
+ 7200 vk=1:printi;"(lred)Freed from jail(wht)":l%(i)=0:return
+ 7300 ifl%(i)=jathenreturn
+ 7305 vk=1:ifrnd(it)>.4then7330
+ 7307 ifi=pmthenpm=0:print"(prime minister)"
+ 7310 x=i:gosub7110:print"(lgrn)Arrested on minor Criminal charges.(wht)":ss%(i)=int((rnd(it)*2.5+.5)*12)
+ 7320 l%(i)=ja:return
+ 7327 ifi=pmthenpm=0:print"(Prime Minister)"
+ 7330 x=i:gosub7110:print"(lgrn)Arrested on minor Felony charges.(wht)":ss%(i)=int((rnd(it)*4+1)*12)
+ 7340 l%(i)=ja:return
+ 7400 open1,0:input#1,a$:close1:print:k=val(a$):vk=1
+ 7410 print"(up)(lblu)";w$(abs(cl%(k)));"(lgrn)";k;"(wht)":forj=1toh
+ 7420 ifl%(j)=kthenx=j:gosub5000:prints$;" ";f$(x);" ";e$;"(pur)";x;"(wht)";
+ 7430 ifl%(j)=kandd%(j)<0thenprint"(lred)*(wht)";
+ 7440 ifl%(j)=kthenprint
+ 7450 nextj:return
+ 8000 ifrn<m9thenifs%(i)>0anda%(i)>17*12anda%(i)<50*12thengosub6600
+ 8010 ifrn<(m9/3)thenifs%(i)<0anda%(i)>17*12anda%(i)<50*12thengosub6600
+ 8012 return
+ 8090 return
+ 8100 mm=int((mt/12-int(mt/12))*12+.4)+1:print#4,"mnth:";mm:return
+ 8200 print:forj=1tonb:cl%(j)=-abs(cl%(j)):nextj:rem "(up)";j;"(left)  "
+ 8205 cl%(op)=abs(cl%(op)):cl%(ja)=abs(cl%(ja)):cl%(dj)=abs(cl%(dj))
+ 8207 cl%(pb)=abs(cl%(pb))
+ 8210 forj=1toh:ifd%(j)>0thenl=l%(j):cl%(l)=abs(cl%(l)):rem 8200
+ 8220 nextj:return
+ 8300 l=l%(i):ifl=jaorl=oporl=djorl=pbthenreturn
+ 8305 gosub8360:ifee=0then8350
+ 8310 return
+ 8350 vk=1:fork=1toh:ifl%(k)=l%(i)andd%(k)>0andk<>ithenl%(k)=op:printk;"(lblu)orphanige(wht)"
+ 8352 nextk:return
+ 8360 ee=0:fork=1toh:ifk=ithen8362
+ 8361 ifd%(k)>0and(a%(k)>20*12orm%(k)<>0)andl%(k)=lthenee=1:return
+ 8362 nextk:return
+ 8400 mm=int((mt/12-int(mt/12))*12+.4)+1:return
+ 8500 i2=i:l=l%(i):gosub8305:i=j:l=l%(j):gosub8305:i=i2:return
+ 8600 vk=1:dd=0:forj=1toh:ifl%(j)=0andd%(j)>0thendd=dd+1
+ 8610 nextj:print"(lblu)drifters:(lgrn)";dd;"(wht)":return
+60000 open15,8,15:input#15,a$,b$,c$,d$:close15:printa$;",";b$;",";c$;",";d$;
+60010 print"                       ":return
+61000 printerr$(er);el:print#4,err$(er);el:{214}next

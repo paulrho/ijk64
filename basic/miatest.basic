@@ -1,0 +1,15 @@
+0 meta-scale3
+1 meta-charset 1
+10 poke53281,0:rempoke53280,12
+20 print"(clr)(wht)";
+25 rem printchr$(7*32+3);
+26 rem print"(rvon)";chr$(3*32+3);
+28 print"(pur)";
+30 print "Hello Mia how are you today?"
+40 print
+50 print"(wht)";
+90  print"-(left)";
+100 geta$:ifa$=""then100
+110 printa$;
+120 print"-(left)";
+190 goto100

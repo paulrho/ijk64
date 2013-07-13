@@ -1,0 +1,3 @@
+10 print"mello word"
+20 goto 40
+30 print"cant get here"

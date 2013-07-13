@@ -1,0 +1,5 @@
+10 fori=1to10:a$=str$(i):gosub100:next:a$="finish":gosub100:print"done":goto20
+15 end
+20 print "here anyway"
+90 end
+100 print a$:return

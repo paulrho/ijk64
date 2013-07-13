@@ -1,0 +1,17 @@
+10 gosub1000
+20 fori=1to10000:next
+30 gosub1100
+80 geta$:ifa$=""then80
+90 goto 30
+90 end
+1000 rem setuplcd
+1010 poke53280,0:poke53281,13:printchr$(141);
+1010 print"(clr)(blu)";
+1020 fori=1024to1024+1000:pokei,160:next
+1030 print"01234567890123456789"
+1040 print"01234567890123456789"
+1090 return
+1100 print"(home)(blu)";
+1110 print"Ready.              "
+1110 print"                    "
+1190 return

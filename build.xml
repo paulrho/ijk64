@@ -90,7 +90,7 @@
 
     <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
     <!--jar jarfile="${dist}/jar/C64-${DSTAMP}.jar" basedir="${build}" -->
-    <jar jarfile="${dist}/C64.jar" basedir="${build}">
+    <jar jarfile="${dist}/ijk64.jar" basedir="${build}">
       <manifest>
         <attribute name="Built-By" value="${user.name}"/>
         <attribute name="Main-Class" value="C64"/>
@@ -118,7 +118,7 @@
   <!-- spawn="yes" would be good - but we see no output!-->
   <!-- normal "run" is transparent and no frames - this now requires command line options -->
   <target name="run" description="run the program" depends="dist">
-    <java jar="${dist}/C64.jar" fork="true" maxmemory="128m" dir="basic">
+    <java jar="${dist}/ijk64.jar" fork="true" maxmemory="128m" dir="basic">
        <arg value="-t"/>
        <arg value="-n"/>
        <arg value="-b"/>
@@ -128,19 +128,19 @@
   <!-- spawn="yes" would be good - but we see no output!-->
   <!-- normal "run" is transparent and no frames - this now requires command line options -->
   <target name="runnormal" description="run the program in normal mode" depends="dist">
-    <java jar="${dist}/C64.jar" fork="true" maxmemory="128m" dir="basic">
+    <java jar="${dist}/ijk64.jar" fork="true" maxmemory="128m" dir="basic">
     </java>
   </target>
 
   <!-- spawn="yes" would be good - but we see no output!-->
   <!-- normal "run" is transparent and no frames - this now requires command line options -->
   <target name="runfree" description="run the program in normal mode" depends="dist">
-    <java jar="${dist}/C64.jar" fork="true" dir="basic">
+    <java jar="${dist}/ijk64.jar" fork="true" dir="basic">
     </java>
   </target>
 
   <target name="timingjar" description="timing test the program using the jar (no profiling)" depends="dist">
-    <java jar="${dist}/C64.jar" dir="basic" fork="true"
+    <java jar="${dist}/ijk64.jar" dir="basic" fork="true"
       maxmemory="128m"
     >
        <arg value="../basic/tests/mp2.basic"/>
@@ -150,7 +150,7 @@
   </target>
 
   <target name="timingjar_profile" description="timing test the program using the jar with profiling" depends="dist">
-    <java jar="${dist}/C64.jar" dir="basic" fork="true"
+    <java jar="${dist}/ijk64.jar" dir="basic" fork="true"
       maxmemory="128m"
     >
        <jvmarg value="-Xrunhprof:cpu=samples,interval=1,depth=10,thread=y" />

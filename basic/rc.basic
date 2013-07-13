@@ -1,0 +1,9 @@
+5 print"(clr)"
+10 print"length of field in meters?"
+20 inputa$:a=val(a$)
+25 v=45
+30 b= v/180*mathpi:rem field of vision
+40 h=a/2/tan(b/2)
+50 print"to get entire field in view"
+60 print"with field of view";v;" deg."
+70 print"height";int(h/.305);" feet"

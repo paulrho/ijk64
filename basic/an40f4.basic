@@ -1,0 +1,188 @@
+1 rem reminder add != as equivalent to <>
+1 pi=3.1415
+2 screen1
+3 cls
+  rem car
+  rem bx=150:by=150:v=5:an=.25
+4 nc=1
+4 dim bx(nc),by(nc),v(nc),an(nc),wa(nc)  
+4 bx(1)=130:by(1)=300:v(1)=0:an(1)=-2.356:wa(1)=0
+
+5 cx=600:cy=600:c1=150
+6 fp=40 : rem frames per second
+
+7 gosub8000
+   rem t=   touching screen, 1=touch down 2=draging 3=touch up
+   rem td=  time 
+   rem bt=  1 touching screen
+   rem iz=  indicator?
+   rem fp=  frames per second
+   
+   rem cx,cy  centre of virtual control stick
+   rem c1     limits of control stick
+   
+   rem bx,by car position
+   rem v     car velocity
+   rem an    angle of car
+   rem wa    angle of steering
+   
+   rem loop
+10 gosub 3000: rem read commands
+17 beginframe:cls
+18 forc=1tonc:rem for each car
+
+19 ift>0thenbt=1:ift=3thenbt=0
+20 ift>0then:gprint str$(t),x,y,4
+21 ifbt=0thenx=cx
+22 ifbt>0thengosub4000: rem command inputs if pressing
+23 ift=3theniz=0: rem hard coded indicator change
+24 ifbt=1thenwa=atn(75/10*(x-cx)/c1*0.10):rem else leave as is!
+
+25 gosub8050
+26 an(c)=an(c)+v(c)*tan(wa(c))/75
+30 gprint"o",cx,cy,6: rem control stick centre
+35 gosub5000: rem do indicators
+40 gosub7000: rem draw landscape
+45 gosub6500: rem draw stats
+50 gosub6000: rem draw car more complex
+75 endframe
+
+   rem physics
+80 v(c)=v(c)*0.99:rem friction/braking
+82 ifabs(v(c))>0.1then:alert2
+
+86 if bt=0thenv(c)=v(c)*0.975:rem friction/braking
+
+92 bx(c)=bx(c)+v(c)*cos(an(c)):by(c)=by(c)+v(c)*sin(an(c))
+
+   rem virtual bounding box
+93 ifc<>1then100
+93 ifbx(c)<95thenbx(c)=95:v(c)=-v(c)*0.1
+94 ifby(c)<95thenby(c)=95:v(c)=-v(c)*0.1
+95 ifbx(c)>730thenbx(c)=730:v(c)=-v(c)*0.1
+96 ifby(c)>985thenby(c)=985:v(c)=-v(c)*0.1
+
+100 :
+190 sleep20
+192 if1=0thensleep100:rem slow motion
+194 td=td+1/fp:rem fp=frames/sec
+195 goto 10
+
+
+3000 rem [sub read user tap]
+3010 deffn pk(a)=peek(a)+peek(a+1)*256
+3020 xt=1030
+3030 yt=1032
+3040 rempoke 1024,0
+3050 t=peek(1024):remif t = 0 then goto 3050
+3055 poke1024,0
+3060 x = fn pk(xt) : y = fn pk(yt)
+3070 return
+
+     rem command inputs
+4000 ifiz=1thenifx<cx-c1thenx=cx-c1
+4001 ifiz=1thenifx>cx+c1thenx=cx+c1
+4002 ifiz=1thenify<cy-c1theny=cy-c1
+4003 ifiz=1thenify>cy+c1theny=cy+c1
+4005 ifx<cx-c1 or x>cx+c1 then x=cx:return
+4010 ify<cy-c1 or y>cy+c1 then x=cx:return
+4020 acc=-(y-cy)/c1
+4022 reman=an+v/10*(x-cx)/c1*0.10
+4042 ifacc<0andv>0thenacc=acc*3
+4043 ifacc>0andv<0thenacc=acc*3:rem brake in rev
+
+4045 v(c)=v(c)+acc*0.20*cos(v(c)/30)
+
+4050 gprint"a",x-30,y-30,5
+4060 ifbt>0then:linecx,cy,x,y,12
+4065 gprintstr$(x-cx),x,y,11
+4070 iz=1
+4090 return
+
+     rem lights/indicators
+5000 f=f+1:iff>20thenf=0
+5005 i1=5:i2=5
+5010 ifv(c)<-0.02theni1=6:i2=6
+5020 ifv(c)>0theni1=5:i2=5
+5030 iff>=0theni2=5:iff>5theni2=6
+5040 ifacc<0andv(c)>0theni1=1:i2=1
+5050 ifacc>0andv(c)<-0.02theni1=1:i2=1
+5090 return
+
+     rem draw  car
+6000 line bx(c),by(c),bx(c)+cos(an(c))*67,by(c)+sin(an(c))*67,5
+6002 hx=bx(c)+cos(an(c)+pi/2)*18:hy=by(c)+sin(an(c)+pi/2)*18
+6004 line hx,hy, bx(c)+cos(an(c)-pi/2)*18,by(c)+sin(an(c)-pi/2)*18,5
+6006 rem wa=atn(75/10*(x-cx)/c1*0.10)
+     rem draw  car front wheels
+6007 ws=7:lset3,0
+6008 hx=bx(c)+cos(an(c)+pi/2)*18:hy=by(c)+sin(an(c)+pi/2)*18
+6010 line hx+cos(an(c)+pi)*ws,hy+sin(an(c)+pi)*ws, hx+cos(an(c))*ws,hy+sin(an(c))*ws,5
+6020 hx=bx(c)+cos(an(c)-pi/2)*18:hy=by(c)+sin(an(c)-pi/2)*18
+6030 line hx+cos(an(c)+pi)*ws,hy+sin(an(c)+pi)*ws, hx+cos(an(c))*ws,hy+sin(an(c))*ws,5
+6040 hx=bx(c)-70*cos(an(c)+pi/12+pi):hy=by(c)+sin(an(c)+pi/12)*70
+6050 line hx+cos(an(c)+pi+wa(c))*ws,hy+sin(an(c)+pi+wa(c))*ws, hx+cos(an(c)+wa(c))*ws,hy+sin(an(c)+wa(c))*ws,5
+6060 hx=bx(c)-70*cos(an(c)-pi/12+pi):hy=by(c)+sin(an(c)-pi/12)*70
+6070 line hx+cos(an(c)+pi+wa(c))*ws,hy+sin(an(c)+pi+wa(c))*ws, hx+cos(an(c)+wa(c))*ws,hy+sin(an(c)+wa(c))*ws,5
+6100 lset1,0
+6105 kx=bx(c)+cos(an(c)+pi*0.7)*25:ky=by(c)+sin(an(c)+pi*0.7)*25
+6110 lx=bx(c)+cos(an(c)+0.24)*85:ly=by(c)+sin(an(c)+0.24)*85
+6115 line kx,ky,lx,ly,3
+6120 hx=bx(c)+cos(an(c)-pi*0.7)*25:hy=by(c)+sin(an(c)-pi*0.7)*25
+6130 jx=bx(c)+cos(an(c)-0.24)*85:jy=by(c)+sin(an(c)-0.24)*85
+6135 linehx,hy,jx,jy,3
+6140 linehx,hy,kx,ky,3
+6150 linelx,ly,jx,jy,3
+6190 return
+
+6500 rem write stats
+6560 gprint"t="+str$(int(td*1000)/1000),100,50,5
+6561 gprint"v(r)="+str$(int(40.5*fp*3.6/1000*v*1000)/1000),100,75,5
+6562 gprint"v="+str$(int(v(c)*1000)/1000),100,100,5
+6563 remgprint"dA="+str$(int(v(c)/10*(x-cx)/c1*0.10*10000)/10000),100,150,5
+6564 gprintstr$(int(atn(75/10*(x-cx)/c1*0.10)*180/pi*100)/100)+" deg",100,200,5
+6590 return
+
+     rem background
+7000 line30,0,30,1000,3
+7010 line350,0,350,1000,3
+7020 line490,0,490,1000,3
+7030 line200,0,200,480,3
+7040 line200,480,260,550,3
+7050 line260,550,260,630,3
+7060 line260,630,200,1000,3
+7070 line30,250,200,410,3
+7080 line30,170,200,330,3
+7090 line30,90,200,250,3
+7100 line50+30,180+30,50+30+72,180+30+72,10
+7110 line50+30,180+30,50+30+25,180+30-25,10
+7120 line50+30+72,180+72+30,50+30+72+25,180+30+72-25,10
+7130 line50+30+72+25,180+30+72-25,50+30+25,180+30-25,10
+7290 return
+
+8000 mx=40:i=0:dimat(mx),ao(mx),ac(mx),ar(mx),av(mx),ad(mx),as(mx)
+8010 readat(i),ao(i),ac(i),ar(i),av(i),ad(i)
+8020 ifat(i)>=0theni=i+1:goto8010
+8030 mx=i-1:return
+
+8050 fori=0tomx
+8052   ifao(i)<>cthen8090:rem continue
+8055   iftd>=at(i) and td<=at(i)+ad(i) then8070
+8060   goto8090
+8070   ifar(i)<0then8080:rem already started
+8072   rem calc step
+8074   ifac(i)=0thenas(i)=(( v(c)*ar(i)+av(i))-v(c) )/ad(i):ar(i)=-1
+8076   ifac(i)=1thenas(i)=((wa(c)*ar(i)+av(i))-wa(c))/ad(i):ar(i)=-1
+8080   ifac(i)=0thenv(c)=v(c)+as(i):rem will /fp when all fixed
+8082   ifac(i)=1thenwa(c)=wa(c)+as(i)/fp:rem will /fp when all fixed
+8090 nexti:return
+
+8100 remdata  0.1,1,1,1,+0.5,0.2: rem turn wheel right in one second
+8105 data  2.0,1,0,1, -0.20,5.0
+8110 data  5.0,1,1,1,-0.40,1.0: rem turn wheel left in one second
+8115 data  7.0,1,0,1, -0.04,2.0
+8110 data  9.0,1,1,1,+0.42,1.0: rem turn wheel left in one second
+8120 data 11.0,1,0,1,1.0,5.0
+8110 data 12.0,1,1,1,-0.02,1.0: rem turn wheel
+8990 data -1,-1,-1,-1,-1,-1
+

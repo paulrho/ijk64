@@ -1,0 +1,288 @@
+    5 fast
+   10 restore
+   20 goto70
+   
+   30 print:print"(red)(rvon)terminated(rvof):(press 'f1' to restart)(wht)"
+   40 poke198,0
+   50 geta$:ifa$<>"(F1)"anda$<>"e"then50
+   60 ifa$="e"thenend
+   
+   70 poke53280,0:poke53281,0:restore:clr
+   80 print"(wht)(clr)";
+   92 print"(home)";tab(20);"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";chr$(14)
+  110 printtab(20);"(down)(down)(down)(down)(down)(down)(down)(down)           (gry2)by(wht) Paul Salanitri ";chr$(142)
+  190 printtab(20);"(down)(down)(down)(cyn) (CBM-A)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@(CBM-S)"
+  192 printtab(20);"(cyn) ]                                  ]"
+  200 printtab(20);"(cyn) ]          (yel) genes twenty (cyn)          ]"
+  202 printtab(20);"(cyn) ]                                  ]"
+  204 printtab(20);"(cyn) (CBM-Z)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@(CBM-X)"
+  210 printtab(20);"(down)(lred)                (nrc)"
+  215 printtab(20);chr$(14);"(down)(down)(red)   Delve into the mystery of Genetics.";chr$(142)
+  220 f$="(cyn)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)":print"(home)(down)";:gosub250
+  225 printtab(20);"(wht)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+  227 print"(cyn)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)"
+  230 geta$:ifa$=""then230
+  240 print"(clr)";:goto330
+  250 printf$;"(rvon)     (rvof) (rvon)        (rvof)  (rvon) (rvof)"
+  260 printf$;"(rvon)  (rvof)  (rvon) (rvof) (rvon) (rvof) (rvon) (rvof) (rvon) (rvof)  _(rvon)_(SHIFT-POUND)(rvof)(SHIFT-POUND)"
+  270 printf$;"(rvon)  (rvof)  (rvon) (rvof) (rvon) (rvof) (rvon) (rvof) (rvon)  (rvof)  (rvon)  (rvof)"
+  280 printf$;"(rvon)   (rvof) (rvon) (rvof) (rvon) (rvof) (rvon) (rvof) (rvon) (rvof)  (rvon)(SHIFT-POUND)(rvof)(SHIFT-POUND)_(rvon)_(rvof)"
+  290 printf$;"(rvon)  (rvof)  (rvon)   (rvof) (rvon) (rvof) (rvon)    (rvof)  (rvon) "
+  300 printf$;"(rvon)  (rvof)(lblu)corporation ltd":return
+  
+  330 mx=300:nc=3
+  
+  340 poke53280,0:poke53281,0:print"(wht)";
+  350 print"(clr)";
+  360 dimlg%(mx,nc),rg%(mx,nc),t(70),d%(mx),le%(mx),al%(mx),pm%(mx),pf%(mx)
+  370 print"do you want to generate creatures ?     (y/n):"
+  380 geta$:ifa$=""then380
+  
+  390 ifa$="n"then530
+  400 print"what 'rn' number?"
+  410 open1,0:input#1,a$:close1:print:a=val(a$):ifa<0thenprint"(up)(up)":goto410
+  420 rn=a:printrnd(-rn)
+  
+  430 print"o.k.generating creatures."
+  440 forip=1to40:fork=0tonc:forj=0to14
+  450 ifk<>1orj<>11thenlg%(ip,k)=lg%(ip,k)or(2^j*(int(rnd(rn)*2)))
+  460 rg%(ip,k)=rg%(ip,k)or(2^j*(int(rnd(rn)*2)))
+  470 nextj,k
+  480 s9=1:nx=ip:a=0:b=0:gosub820:s9=0
+  490 nextip
+  500 printrnd(-ti):hi%=20
+  510 print"waiting 15 days.":formm=1to15:gosub1390:nextmm:print"finished.":nd%=0
+  520 s9=0
+  
+  530 open1,0:input#1,a$:close1:print
+  540 goto1220:ifa$=""thenprint"(up)";:goto590
+  550 ifa$=""thenprint"(up)";:goto590
+  560 a=val(a$):ifa<1ora>mxthenprint"(up)(up)":goto530
+  570 ifal%(a)=0thenprint"no such creature.":goto530
+  580 x=a:xr=x:print"(up)";:gosub1930:goto530
+
+  590 print"male,female:";
+  600 open1,0:input#1,a$,b$:close1:print
+  610 a=val(a$):b=val(b$):ifa<1orb<0ora>mxorb>mxthen530
+  620 ifabs(al%(a))<>1orabs(al%(b)<>1)thenprint"must all be alive!":goto590
+  630 x=a:gosub1930:ifsx<>1thenprint"enter male first!":goto590
+  640 ifam=9thenprint"the male has no ability to mate.":goto590
+  650 x=b:gosub1930:ifsx<>2thenprint"enter female second!":goto590
+  660 ifam=9thenprint"the female has no ability to mate.":goto590
+  670 ifd%(a)<14thenprint"male is too young.":goto590
+  680 ifd%(b)<10thenprint"female is too young.":goto590
+  690 fori=1tomx:ifal%(i)=0thennx=i:goto710
+  700 next:print"no more spaces":goto530
+  
+  710 ifnx>hi%thenhi%=nx
+  720 cr=cr-26:fork=0tonc:forj=0to14
+  730 l1=-((lg%(a,k)and2^j)<>0)
+  740 l2=-((lg%(b,k)and2^j)<>0)
+  750 r1=-((rg%(a,k)and2^j)<>0)
+  760 r2=-((rg%(b,k)and2^j)<>0)
+  770 c1=l1:ifint(rnd(ti)*2)=1thenc1=r1
+  780 c2=l2:ifint(rnd(ti)*2)=1thenc2=r2
+  790 lg%(nx,k)=lg%(nx,k)or(2^j*c1)
+  800 rg%(nx,k)=rg%(nx,k)or(2^j*c2)
+  810 nextj,k
+  820 al%(nx)=1:d%(nx)=0:le%(nx)=60+int(rnd(ti)*45):pm%(nx)=a:pf%(nx)=b
+  830 x=nx:gosub1930:ife1=0ande2=0thenal%(x)=2:le%(x)=1
+  840 ifsb=1thenal%(x)=2:print"(red)creature still-born(wht)":le%(x)=1
+  850 iff1=1thenle%(x)=int(le%(x)/1.5)
+  860 iff2=1thenle%(x)=int(le%(x)/2.5)
+  870 iff9=1thenle%(x)=int(le%(x)*1.7)
+  880 ifs9=0thenifint(rnd(ti)*4)=1then690
+  890 ifs9=1thenreturn
+  900 fori=1tomx:ifal%(i)<>0thend%(i)=d%(i)+1:ifd%(i)=le%(i)thenal%(i)=2
+  910 ifal%(i)=1thencr=cr-.12
+  920 nexti:nd%=nd%+1:cr=cr-5
+  930 goto530
+
+  940 print"program name to write?:"
+  950 open1,0:input#1,a$,dd$:close1:print
+  960 dd=val(dd$):ifa$=""then530
+  970 :
+  980 ifdd<>1thenopen8,dd,8,"@0:gg02/"+a$+",s,w"
+  990 ifdd=1thenopen8,dd,1,"gg02/"+a$
+ 1000 print#8,nd%:print#8,hi%:print#8,cr
+ 1010 fori=1tohi%:forj=0tonc:print#8,lg%(i,j):print#8,rg%(i,j):nextj
+ 1020 print#8,d%(i):print#8,le%(i):print#8,al%(i):print#8,pm%(i):print#8,pf%(i)
+ 1030 nexti
+ 1040 close8
+ 1050 goto530
+ 1060 print"replace file?"
+ 1070 geta$:ifa$=""then1070
+ 1080 ifa$<>"y"then1040
+ 1090 goto1010
+ 
+ 1100 print"program name to read?:"
+ 1110 open1,0:input#1,a$,dd$:close1:print
+ 1120 dd=val(dd$):ifa$=""then530
+ 1130 :
+ 1140 ifdd<>1thenopen8,dd,8,"0:gg02/"+a$+",s,r"
+ 1150 ifdd=1thenopen8,dd,0,"gg02/"+a$
+ 1160 input#8,nd%:input#8,hi%:input#8,cr
+ 1170 fori=1tohi%:forj=0tonc:input#8,lg%(i,j):input#8,rg%(i,j):nextj
+ 1180 input#8,d%(i):input#8,le%(i):input#8,al%(i):input#8,pm%(i):input#8,pf%(i)
+ 1190 nexti:close8
+ 1200 goto530
+ 
+ 1210 print"disk error";a;b$;c;d:goto1040
+ 
+ 1220 re=0:ifa$="save"then940
+ 1230 ifa$="load"then1100
+ 1240 ifa$="end"thenend
+ 1250 ifa$="n"ora$="-"ora$="="thenzx=xr+1:a$=str$(zx)
+ 1260 ifa$="w"ora$="wait"thengosub1390
+ 1270 ifa$="remove"then1420
+ 1280 ifa$="analyse"then1580
+ 1290 ifa$="bytes"thenprint"(up)(rght)(rght)(rght)(rght)(rght):";mid$(str$(fre(0)-(fre(0)<0)*65536),2);"(down)"
+ 1300 ifa$="breeds"then1770
+ 1310 ifa$="money"thengosub1350
+ 1320 ifa$="days"thenprint"number of days:";nd%:gosub1510
+ 1330 re=0:ifa$="read"thenre=1:goto1580
+ 1340 goto550
+ 
+ 1350 aa$="cr":c2=cr:ifcr<0thenaa$="od":c2=-cr
+ 1360 ff=int((c2-int(c2))*100+.2):cf=int(c2):print"$";mid$(str$(cf),2);
+ 1370 print".";:ff$=mid$(str$(ff),2):ff$=left$("0",2-len(ff$))+ff$
+ 1380 printff$;"(cyn)";aa$;"(wht)(down)":return
+ 
+ 1390 fori=1tomx:ifal%(i)<>0thend%(i)=d%(i)+1:ifd%(i)>le%(i)thenal%(i)=2
+ 1400 ifal%(i)=1thencr=cr-.12
+ 1410 nexti:nd%=nd%+1:cr=cr-5:return
+ 
+ 1420 open1,0:input#1,a$:close1:print
+ 1430 a=val(a$):x=a:ifx<1then530
+ 1440 gosub1930
+ 1450 print"are you sure?:"
+ 1460 open1,0:input#1,a$:close1:print
+ 1470 ifa$="yes"thenal%(x)=0:print"ok.it has been thrown away.":goto1490
+ 1480 print"ok.it isn't thrown away.":goto530
+ 
+ ##
+ 1490 fori=0tonc:lg%(x,i)=0:rg%(x,i)=0:nexti:d%(x)=0:le%(x)=0:pm%(x)=0:pf%(x)=0
+ 1500 goto530
+ 1510 jj=int(nd%/30):jk=nd%-jj*30
+ 1520 ifjj<>0andjk<>0thenprintjj"months";jk"days"
+ 1530 ifjj=0andjk<>0thenprintjk"days"
+ 1540 ifjj<>0andjk=0thenprintjj"months"
+ 1550 print:goto530
+ 1560 ll=lg%(i,1)and2^11:rr=rg%(i,1)and2^11:sx$="f":ifll<>0orrr<>0thensx$="m"
+ 1570 return
+ 
+ 1580 print"cheat sheet:analyse genes"
+ 1590 print"which victim"
+ 1600 open1,0:input#1,a$:close1:print
+ 1610 x=val(a$):ifx>mxorx<-mxthenprint"no-way":goto530
+ 1620 ifx<0thenx=-x:pn=1:open4,4:print#4,"genes of"x
+ 1630 ifre=1andal%(x)=>0thenprint"no record of genes being analysed.":goto1750
+ 1640 ifal%(x)=0thenprint"no animal with that id.":goto1750
+ 1650 ifre=0andal%(x)<0thenre=1:print"already analysed.reading it now."
+ 
+ 1660 ifre<>1thencr=cr-215
+ 
+ 1670 forj=0tonc:fori=0to14
+ 1680 l=-((lg%(x,j)and2^i)<>0):r=-((rg%(x,j)and2^i)<>0)
+ 1690 nn=j*15+i:nn$=left$("   ",3-len(str$(nn)))+str$(nn)
+ 1700 b$=right$(str$(l),1)+right$(str$(r),1)
+ 1710 ifpn=1thenprint#4,nn$;":";b$;:pl=pl+6
+ 1720 print"(wht)";nn$;"(cyn)"l;"(left)";r;:ifpos(x)>31thenprint:ifpl>70thenprint#4,chr$(0):pl=0
+ 1730 nexti,j
+ 1740 print"(wht)":ifre=0thengosub1390:al%(x)=-al%(x)
+ 1750 ifpn=1thenprint#4:close4:pl=0:pn=0
+ 1760 goto530
+ 
+ 1770 print"breeding chart"
+ 1780 print"start at which victim"
+ 1790 open1,0:input#1,a$:close1:print
+ 1800 x2=val(a$):ifx2<0orx2>mxthenprint"no-way":goto530
+ 1810 fori=x2tomx:ifal%(i)=0then1910
+ 1820 gosub1560
+ 1830 nn$=str$(i):nn$=left$("   ",4-len(nn$))+nn$
+ 1840 nm$=str$(pm%(i)):nm$=left$("   ",4-len(nm$))+nm$
+ 1850 nf$=str$(pf%(i)):nf$=left$("   ",4-len(nf$))+nf$
+ 1860 print"(yel)";nn$;"(pur)"sx$;"(wht)";nm$;"(grn)+(wht)";nf$;tab(17);
+ 1870 ifabs(al%(i))=2thenprint"(red)died:";le%(i);"(cyn)since:";d%(i);"(wht)"
+ 1880 ifabs(al%(i))=1thenprint"(cyn)days old:";d%(i)
+ 1890 ifpeek(197)<>64thenpoke198,0:print"(wht)";:goto530
+ 1900 ifpeek(653)<>0then1900
+ 1910 nexti:print"(wht)";:goto530
+ 1920 goto30
+ 
+ 1930 forj=0tonc:fori=0to14
+ 1940 l=-((lg%(x,j)and2^i)<>0):r=-((rg%(x,j)and2^i)<>0)
+ 1950 t(j*15+i)=0:t=0:ifl=1orr=1thent(j*15+i)=1:t=1
+ 1960 nexti,j
+ 1970 print"(cyn)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+ 1980 remfori=1to7:print"]                            ]":next
+ 1990 print"(down)(down)(down)(down)(down)(down)(down)(down)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@(up)(up)(up)(up)(up)(up)(up)(up)(up)"
+ 2000 print"(wht)identif.no.";mid$(str$(x),2);".(cyn) breed:(wht)";pm%(x)"+";pf%(x);"(left)."
+ 2010 ift(19)=0andt(20)=0andt(21)=0andt(22)=0thenprint"(pur)purple";
+ 2020 ift(19)=0andt(20)=0andt(21)=0andt(22)=1thenprint"(lblu)blue";
+ 2030 ift(19)=0andt(20)=0andt(21)=1andt(22)=0thenprint"(brn)dark brown";
+ 2040 ift(19)=0andt(20)=0andt(21)=1andt(22)=1thenprint"(cyn)dark blue-green";
+ 2050 ift(19)=0andt(20)=1andt(21)=0andt(22)=0thenprint"(red)red";
+ 2060 ift(19)=0andt(20)=1andt(21)=0andt(22)=1thenprint"(wht)albino";
+ 2070 ift(19)=0andt(20)=1andt(21)=1andt(22)=0thenprint"(brn)brown";
+ 2080 ift(19)=0andt(20)=1andt(21)=1andt(22)=1thenprint"(grn)green";
+ 2090 ift(19)=1andt(20)=0andt(21)=0andt(22)=0thenprint"(brn)light brown";
+ 2100 ift(19)=1andt(20)=0andt(21)=0andt(22)=1thenprint"(grn)dark green";
+ 2110 ift(19)=1andt(20)=0andt(21)=1andt(22)=0thenprint"(brn)tan";
+ 2120 ift(19)=1andt(20)=0andt(21)=1andt(22)=1thenprint"(cyn)light blue-green";
+ 2130 ift(19)=1andt(20)=1andt(21)=0andt(22)=0thenprint"(orng)orange";
+ 2140 ift(19)=1andt(20)=1andt(21)=0andt(22)=1thenprint"(yel)yellow";
+ 2150 ift(19)=1andt(20)=1andt(21)=1andt(22)=0thenprint"(lred)pink";
+ 2160 ift(19)=1andt(20)=1andt(21)=1andt(22)=1thenprint"(lgrn)light green";
+ 2170 print
+ 2180 print"(down)(down)   (rvon)   (rvof)(up)(up)(up)"
+ 2190 ift(17)=0then2240
+ 2200 ift(1)=1andt(2)=1thenprint"(down)(down)(down)(rght)(rght)(rght)(CBM-X)(up)(up)(up)(up)"
+ 2210 ift(1)=0andt(2)=1thenprint"(down)(down)(down)(rght)(rght)@(CBM-X)(rght)(up)(up)(up)(up)"
+ 2220 ift(1)=1andt(2)=0thenprint"(down)(down)(down)(rght)(rght)(rght)(rvon)(CBM-V)(rvof)(up)(up)(up)(up)"
+ 2230 ift(1)=0andt(2)=0thenprint"(down)(down)(down)(rght)(rght)(CBM-I)(rvon)(CBM-V)(rvof)(up)(up)(up)(up)"
+ 2240 :
+ 2250 ift(18)=0then2300
+ 2260 ift(3)=1andt(4)=1thenprint"(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(CBM-Z)(up)(up)(up)(up)"
+ 2270 ift(3)=0andt(4)=1thenprint"(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(CBM-Z)@(up)(up)(up)(up)"
+ 2280 ift(3)=1andt(4)=0thenprint"(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(rvon)(CBM-C)(rvof)(up)(up)(up)(up)"
+ 2290 ift(3)=0andt(4)=0thenprint"(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(rvon)(CBM-C)(rvof)(CBM-I)(up)(up)(up)(up)"
+ 2300 :
+ 2310 ift(5)=1andt(6)=1thenprint"(down)(rght)(rght)(rght)(rght)(rght).(up)(up)"
+ 2320 ift(5)=0andt(6)=1thenprint"(down)(rght)(rght)(rght)(rght)(rght)(CBM-F)(up)(up)"
+ 2330 ift(7)=1andt(8)=1thenprint"(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)=(up)(up)(up)"
+ 2340 ift(7)=0andt(8)=1thenprint"(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)<(up)(up)(up)"
+ 2350 ift(9)=0andt(10)=1thenprint"(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)I(up)(up)(up)"
+ 2360 ift(9)=0andt(10)=0thenprint"(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)--(up)(up)(up)"
+ 2370 ift(11)=1andt(12)=1and(t(40)=1ort(41)=1)thenprint"(down)(down)(rght)(rght)(CBM-I)(up)(up)(up)"
+ 2380 ift(11)=0andt(12)=1and(t(40)=1ort(41)=1)thenprint"(down)(down)(rght)(CBM-I)(CBM-I)(up)(up)(up)"
+ 2390 ift(11)=1andt(12)=0and(t(40)=1ort(41)=1)thenprint"(down)(down)(rght)(rght)(rvon)(SHIFT-POUND)(up)(up)(up)"
+ 2400 ift(11)=0andt(12)=0and(t(40)=1ort(41)=1)thenprint"(down)(down)(rght)(rvon)(SHIFT-POUND) (up)(up)(up)"
+ 2410 ift(13)=0andt(14)=0thenprint"(rght)(rght)(rght)(rght)(rght)(rght)(rght)N(left)(left)(down)N(up)(up)"
+ 2420 ift(13)=0andt(14)=1thenprint"(rght)(rght)(rght)(rght)(rght)(rght)(down)N(up)(up)"
+ 2430 ift(15)=0andt(16)=0thenprint"(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)M(CBM-@)(up)(up)(up)(up)"
+ 2440 ift(15)=0andt(16)=1thenprint"(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)M(up)(up)(up)(up)"
+ 2450 e1=1:ift(23)=0andt(24)=0thenprint"(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)no cellulose(up)(up)":e1=0
+ 2460 ift(23)=1andt(24)=1thenprint"(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)all cellulose(up)(up)"
+ 2470 ift(23)=1andt(24)=0thenprint"(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)soft cellulose(up)(up)"
+ 2480 ift(23)=0andt(24)=1thenprint"(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)hard cellulose(up)(up)"
+ 2490 e2=1:ift(25)=1thenprint"(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)protein(up)(up)(up)"
+ 2500 ift(25)=0thenprint"(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)no protein(up)(up)(up)":e2=0
+ 2510 sx=0:ift(26)=1thenprint"(down)(down)(down)(down)(down)male(up)(up)(up)(up)(up)(up)":sx=1
+ 2520 ift(26)=0thenprint"(down)(down)(down)(down)(down)female(up)(up)(up)(up)(up)(up)":sx=2
+ 2530 ifabs(al%(x))=1thenprint"(down)(down)(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)days old:";d%(x);"(up)(up)(up)(up)(up)(up)"
+ 2540 ifabs(al%(x))=2thenprint"(down)(down)(down)(down)(down)"spc(10)"died:"le%(x)"would be:";d%(x);"(up)(up)(up)(up)(up)(up)"
+ 2550 am=0:ift(27)=0andt(28)=0thenam=9
+ 2560 sb=0:ift(38)=0andt(39)=0thensb=1
+ 2570 f1=0:ift(29)=0andt(43)=0thenf1=1
+ 2580 f2=0:ift(30)=0andt(42)=0thenf2=1
+ 2590 f9=0:ift(44)=0andt(45)=0thenf9=1
+ 2600 ift(31)=0thenprint"(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)low calcium(up)(up)(up)(up)"
+ 2610 ift(32)=0thenprint"(down)(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)no clotting(up)(up)(up)(up)(up)"
+ 2620 ift(33)=0thenprint"(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)retarded(up)"
+ 2630 ift(34)=0andt(35)=1thenprint"(down)(rght)(rght)(rght)(rght)M(up)(up)"
+ 2640 ift(34)=0andt(35)=0andt(36)=0thenprint"(down)(rght)(rght)(rght)(CBM-Y)M(up)(up)"
+ 2650 ift(34)=0andt(35)=0andt(36)=1andt(37)=1thenprint"(down)(rght)(rght)E(CBM-Y)M(up)(up)"
+ 2660 ift(34)=0andt(35)=0andt(36)=1andt(37)=0thenprint"(down)(rght)DE(CBM-Y)M(up)(up)"
+ 2670 print"(wht)(down)(down)(down)(down)(down)(down)":return
+ 2680 open15,8,15:input#15,a,b$,c,d:close15:printb$:goto30

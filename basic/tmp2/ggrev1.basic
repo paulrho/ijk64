@@ -1,0 +1,6 @@
+10 gosub1000
+1000 rem setuplcd
+1010 print"(clr)(rvon)(lgrn)";
+1020 print"01234567890123456789"
+1030 print"(rvon)";
+1040 print"01234567890123456789"

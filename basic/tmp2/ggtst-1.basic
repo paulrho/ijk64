@@ -1,0 +1,4 @@
+10 gosub1000
+1000 rem setuplcd 
+     print "this is a test"
+     poke53281,4

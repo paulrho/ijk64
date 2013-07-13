@@ -1,0 +1,31 @@
+0  rem "calculator.basic"
+10  print"(clr)";
+20  rem setup colours/format etc
+30 fgc$="(wht)":fgc$="(cyn)"
+90 print"(home)";
+100 printfgc$;
+110 inputa$
+120 print "                                      ": rem clear the line
+125 print "
+130 print "(up)";
+135 print "(up)";
+140 print eval$(a$)
+150 if everr$<>"" then print"(red)";everr$:goto100
+155 remprint"(up)";
+160 goto 100
+200 rem   @b3@@b1 @
+210 rem   @t @ @b2@
+220 rem   @b @h
+230 rem   @kk@ @s @    ; k:5 keyring:5a
+240 rem   @dt@         ; dtable
+250 rem        @l @
+260 rem  -----------
+270 rem        @ly@
+280 rem   @car@
+290 rem    drv
+300 rem    road
+310 rem    streetend
+320 rem    crossing
+330 rem    overpass
+340 rem    platform
+350 rem    train

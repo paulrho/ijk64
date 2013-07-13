@@ -1,0 +1,5 @@
+1 META-VERBOSE
+10 nn=55
+20 nn$=left$("   ",3-len(str$(nn)))+str$(nn)
+30 print nn$
+

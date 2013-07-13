@@ -1,0 +1,3 @@
+ 10015 rem print"(wht)identif.no.";mid$(str$(x),2);".(cyn) breed:(wht)";pm%(x)"+";pf%(x);"(left)."
+ 10016 print"(wht)identif.no.";mid$(str$(x),2);".(cyn) breed:(wht)";pm%(x);"+";pf%(x);"(left)."
+

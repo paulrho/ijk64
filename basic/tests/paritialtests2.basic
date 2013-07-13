@@ -1,0 +1,3 @@
+10 print"(wht)";nn$;"(cyn)"l;"(left)";r;:
+10932 ifabs(al%(x))=2thenprint"(down)(down)(down)(down)(down)"spc(10)"died:"le%(x)"would be:";d%(x);"(up)(up)(up)(up)(up)(up)"
+10932 rem ifabs(al%(x))=2thenprint"(down)(down)(down)(down)(down)";spc(10);"died:";le%(x);"would be:";d%(x);"(up)(up)(up)(up)(up)(up)"

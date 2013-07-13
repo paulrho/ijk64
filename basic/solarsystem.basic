@@ -1,0 +1,12 @@
+10 print"Planetary scale"
+20 scale=10000000/2
+100 read planet$,diam,dist
+110 if planet$=""thenend
+115 remprint diam
+120 print left$(planet$+"          ",10); " size=";right$("     "+str$(int(diam*100*1000/scale)/100),10);" mm dist=";(int(dist*1000/scale)/1000);"m"
+140 goto 100
+150 printleft$("sadsdg",5)
+1000 data"Sun",1392000,0
+1030 data"Earth",12750,150000000
+1035 data"Moon",3350,350000
+1050 data"Jupiter",69911,778547200

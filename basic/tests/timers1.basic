@@ -1,0 +1,3 @@
+10 t=ti$: printt/86400;t%86400
+20 fori=1to100:geta$:nexti: remsleep 1
+30 goto 10

@@ -1,0 +1,4 @@
+10 print "this is a test"
+20 a=123
+30 b=12456
+40 printa*b

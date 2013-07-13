@@ -1,0 +1,7 @@
+    5 fast
+   10 restore
+   20 goto70
+   30 print:print"(red)(rvon)terminated(rvof):(press 'f1' to restart)(wht)"
+   50 end
+   70 print "at 70"
+
