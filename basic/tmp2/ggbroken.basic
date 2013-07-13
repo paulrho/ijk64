@@ -1,7 +1,0 @@
-10 gosub1000
-1000 rem setuplcd
-1010 print"(brn)"
-1010 print"this is a test";
-1020 poke53281,6
-1030 fori=0to19:poke55296+i,13:next
-1040 fori=0to19:poke55296+i+40,13:next
