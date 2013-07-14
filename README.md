@@ -8,3 +8,4 @@ C64 like (approximate) emulator in pure java - experimental but extensible
 $ cd basic
 $ java -jar ../jar/ijk64.jar
 </PRE>
+<IMG SRC="http://www.futex.com.au/ijk64/a.php" />
