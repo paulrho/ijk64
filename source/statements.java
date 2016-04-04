@@ -521,7 +521,7 @@ void interpret_string(String passed_line, int startat, String lineNo)
       machine.gotoLine(lineNo);
     } catch (BasicException basicerror) {
       System.out.printf("Basic Error: %s\n",basicerror.getMessage());
-      machine.print("?"+basicerror.getMessage().toLowerCase());
+      machine.print("\n"+"?"+basicerror.getMessage().toLowerCase());
       return;
     } 
     pnt=machine.executionpoint;
@@ -608,7 +608,7 @@ void interpret_string(String passed_line, int startat, String lineNo)
      System.out.printf("Basic Error: %s%s\n",basicerror.getMessage(),
        (machine.program_running && !machine.currentLineNo.equals("")?" on line "+machine.currentLineNo:"")
      );
-     machine.print("?"+basicerror.getMessage().toLowerCase()+
+     machine.print("\n"+"?"+basicerror.getMessage().toLowerCase()+
        (machine.program_running && !machine.currentLineNo.equals("")?" on line "+machine.currentLineNo:"")
      );
   } 

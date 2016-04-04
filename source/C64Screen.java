@@ -1009,7 +1009,8 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
     else if (ch >= 'a' + 128 && ch <= 'z' + 128)
       pos = 1 + (ch - 'a') - 32;
     else if (ch == ' ' + 128)
-      pos = PETSCII_SPACE + 128;           // reversed block
+      //pos = PETSCII_SPACE + 128;           // reversed block  // no - this was wrong! it is still a space
+      pos = 96;  // shift space
     else if (ch >= '0' && ch <= '9' || ch >= ' ' && ch <= '?')
       pos = (ch);
 

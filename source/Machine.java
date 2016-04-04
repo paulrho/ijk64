@@ -241,7 +241,8 @@ public class Machine {
   //////////////////////////////////
   // FStack : for loop stack
   //////////////////////////////////
-  static final int MAXFORS=30; // make it break faster
+  //static final int MAXFORS=30; // make it break faster
+  static final int MAXFORS=100; // really need more if combining gosub and for
   int topforloopstack=0;
   int forloopstack[]=new int[MAXFORS];
   String forloopstack_var[]=new String[MAXFORS];
@@ -256,7 +257,7 @@ public class Machine {
     }
   }
   // continue...
-  void createFORloop(int current, String variable, double forto, double forstep)
+  void createFORloop(int current, String variable, double forto, double forstep) throws BasicException
   {
     // I think that if we use an already used variable, we pop off the rest of the stack
     // e.g.  FOR I   FOR J   FOR K ......then FOR I again
@@ -288,6 +289,7 @@ public class Machine {
     forloopstack_var[topforloopstack]=variable;
     forloopstack_to[topforloopstack]=forto;
     forloopstack_step[topforloopstack]=forstep;
+    if (topforloopstack==MAXFORS-1) throw new BasicException("OUT OF MEMORY");
     topforloopstack++;
   }
 
@@ -329,6 +331,36 @@ public class Machine {
       }
     }
     //return false;
+  }
+
+
+  // repurpose for loop for gosub too
+  void push_fl_gosub(int current) throws BasicException
+  {
+    forloopstack[topforloopstack]=current;
+    forloopstack_var[topforloopstack]="_GOSUB";
+    //forloopstack_to[topforloopstack]=forto;
+    //forloopstack_step[topforloopstack]=forstep;
+    if (topforloopstack==MAXFORS-1) throw new BasicException("OUT OF MEMORY"); // FORMULA TO COMPLEX in c128
+    topforloopstack++;
+  }
+  
+  int pop_fl_gosub() throws BasicException
+  {
+    // search back for most recent gosub
+    if (verbose) { System.out.printf("processing RETURN\n"); }
+    int fl=topforloopstack;
+    //executionpoint=current;
+    while(fl>0) {
+      fl--;
+      if (forloopstack_var[fl].equals("_GOSUB")) {
+          // pop it off, but keep on going, we may be popping off many
+          topforloopstack=fl; // at least one
+          return forloopstack[fl];
+      }
+    }
+    topforloopstack=0; // new!!!
+    throw new BasicException("RETURN WITHOUT GOSUB");
   }
 
   //////////////////////////////////
@@ -415,19 +447,27 @@ public class Machine {
 
   void gosubLine(int lineNo, int pnt) throws BasicException {
     // push on the stack where we are
-    gosubstack[topgosubstack]=pnt;
-    topgosubstack++;
+    if (true) {
+      push_fl_gosub(pnt);
+    } else {
+      gosubstack[topgosubstack]=pnt;
+      topgosubstack++;
+    }
     gotoLine(lineNo);
   }
 
   void popReturn() throws BasicException {
-    if (topgosubstack>0) {
-      topgosubstack--;
-      executionpoint=gosubstack[topgosubstack];
+    if (true) {
+      executionpoint=pop_fl_gosub();
     } else {
-      System.out.printf("?RETURN WITHOUT GOSUB\n");
-      // must throw an error here
-      throw new BasicException("RETURN WITHOUT GOSUB");
+      if (topgosubstack>0) {
+        topgosubstack--;
+        executionpoint=gosubstack[topgosubstack];
+      } else {
+        System.out.printf("?RETURN WITHOUT GOSUB\n");
+        // must throw an error here
+        throw new BasicException("RETURN WITHOUT GOSUB");
+      }
     }
   }
 
@@ -494,8 +534,12 @@ public class Machine {
 
   void gosubLabel(String label, int pnt) throws BasicException {
     // push on the stack where we are
-    gosubstack[topgosubstack]=pnt;
-    topgosubstack++;
+    if (true) {
+      push_fl_gosub(pnt);
+    } else {
+      gosubstack[topgosubstack]=pnt;
+      topgosubstack++;
+    }
     gotoLabel(label);
   }
 
@@ -539,6 +583,7 @@ public class Machine {
     String building="";
     boolean quoted=false;
     boolean cont=false;
+    boolean preamble=true; // chew all spaces until quote
     for (; uptoDATA<allDATA.length(); ++uptoDATA) {
       String a=allDATA.substring(uptoDATA,uptoDATA+1);
       // this continuation code was a mistake, it was actually implemented in a basic program!
@@ -557,6 +602,7 @@ public class Machine {
       } else if (quoted && a.equals(""+(char)127)) {
         // it looks like a continuation character
         // really must be followed by close quote and end of line!
+	preamble=false; //?
         cont=true;
       } else if (!quoted && a.equals(":")) {
         // chew up rest of line
@@ -571,10 +617,13 @@ public class Machine {
       } else if (!quoted && a.equals(",")) {
         uptoDATA++;
         break;
+      } else if (preamble && a.equals(" ")) {
+        // chew
       } else if (a.equals("\"")) {
         quoted=!quoted;
+	preamble=false;
         //building+=a; - no, chew this up!
-      } else { building+=a; }
+      } else { building+=a; preamble=false; }
     }
     if (verbose) { System.out.printf("Returning DATA >>>%s<<<\n",building); }
     return new GenericType(building);

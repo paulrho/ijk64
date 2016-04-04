@@ -495,6 +495,46 @@ class evaluate {
         stktype[upto-2]=ST_NUM;
         stknum[upto-2]=cursx;
         return;
+      } else if (function.equals("fre")) {
+          int param=(int)stknum[upto-1];
+          /* Returns the maximum amount of memory available to 
+             the Java Virtual Machine set by the '-mx' or '-Xmx' flags. */
+          long maxMemory = Runtime.getRuntime().maxMemory();
+
+          /* Returns the total memory allocated from the system 
+             (which can at most reach the maximum memory value 
+             returned by the previous function). */
+          long totalMemory = Runtime.getRuntime().totalMemory();
+
+          /* Returns the free memory *within* the total memory 
+             returned by the previous function. */
+          long freeMemory = Runtime.getRuntime().freeMemory();
+          long allocatedMemory = (Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory());
+          long presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
+        stktype[upto-2]=ST_NUM;
+        switch(param) {
+          case 1:
+            stknum[upto-2]=freeMemory;
+            break;
+          case 2:
+            stknum[upto-2]=allocatedMemory;
+            break;
+          case 3:
+            stknum[upto-2]=totalMemory;
+            break;
+          case 4:
+            stknum[upto-2]=maxMemory;
+            break;
+          //case 0:
+          default:
+            stknum[upto-2]=presumableFreeMemory;
+        }
+        //if (using_machine!=null) {
+        //} else {
+          //stktype[upto-2]=ST_NUM;
+          //stknum[upto-2]=0.0;
+        //}
+        return;
       } else if (function.equals("peek")) {
         if (using_machine!=null) {
           stktype[upto-2]=ST_NUM;
