@@ -298,17 +298,11 @@ public class Machine {
     // could be multiple steps?, no, this should be dealt with by the statements parser
     int fl=topforloopstack;
     executionpoint=current;
-    while(true) {
-      if (fl<=0) { 
-        if (verbose) { System.out.printf("No more for loops to match!\n"); }
-
-        topforloopstack=0; // new!!!
-
-        throw new BasicLineNotFoundError("NEXT WITHOUT FOR ERROR");
-        //return false; 
-      }
+    while(fl>0) {
       fl--;
+      if (forloopstack_var[fl].startsWith("_")) break; // matches c64 behavior 
       if (var.equals("") || forloopstack_var[fl].equals(var)) {
+      //if (var.equals("") && !forloopstack_var[fl].startsWith("_") || forloopstack_var[fl].equals(var)) {
         // just pop the last one
         setvariable(forloopstack_var[fl].toLowerCase(),evaluate(forloopstack_var[fl].toLowerCase()+"+"+forloopstack_step[fl]));
         if (verbose) { System.out.printf("about to add to loop at stack location %d %f>%f\n",fl,getvariable(forloopstack_var[fl]).num(),forloopstack_to[fl]); }
@@ -330,7 +324,11 @@ public class Machine {
         }
       }
     }
-    //return false;
+    if (verbose) { System.out.printf("No more for loops to match!\n"); }
+
+    topforloopstack=fl; // new!!!
+
+    throw new BasicLineNotFoundError("NEXT WITHOUT FOR ERROR");
   }
 
 
@@ -922,7 +920,8 @@ public class Machine {
 
         String charset = "UTF-8"; 
         //String url = "http://localhost/test2.php";
-        String url = "http://www.futex.com.au/basic/uploader.php";
+        //String url = "http://www.futex.com.au/basic/uploader.php";
+        String url = "http://test.futex.com.au/basic/uploader.php";
         try {
           String boundary = Long.toHexString(System.currentTimeMillis()); // Just generate some unique random value.
 

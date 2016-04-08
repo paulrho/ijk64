@@ -801,7 +801,8 @@ boolean hasFocus=false;
     for (int j = 0; j < MAXmaxY; ++j) { //last screen was CLEARed
       for (int i = 0; i < MAXmaxX; ++i) {
       //pscreenchar[i][j]='X'; should
-        pscreenchar[i][j] = (char)(screenchar[i][j]^1); // to make sure it is always different
+        //pscreenchar[i][j] = (char)(screenchar[i][j]^1); // to make sure it is always different  !! wrong!!
+        pscreenchar[i][j] = (char)(screenchar[i][j]^255); // to make sure it is always different
         pscreencharColour[i][j] = 0;
       }
     }
@@ -1901,6 +1902,7 @@ if (verbose) System.out.printf("%d,%d to %d,%d\n",ox,oy,x,y);
           for (int i = 0; i < maxX; i++) {
 
             if (pscreenchar[i][j] == screenchar[i][j] && pscreencharColour[i][j] == screencharColour[i][j]) {
+//System.out.printf("skipping [%d][%d] %d,%d ",i,j,(int)screenchar[i][j],(int)screencharColour[i][j]);
             } else {
               pscreenchar[i][j] = screenchar[i][j];
               pscreencharColour[i][j] = screencharColour[i][j];

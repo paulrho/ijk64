@@ -1602,9 +1602,11 @@ boolean ProcessLOADstatement() throws BasicException
   String filename=machine.evaluate(keepExpression).str();
   // only add basic if it doesnt have it already
   if (filename.equals("%")) {
-    filename=filename.replaceFirst("%","http://www.futex.com.au/basic/dir.php");
+    //filename=filename.replaceFirst("%","http://www.futex.com.au/basic/dir.php");
+    filename=filename.replaceFirst("%","http://test.futex.com.au/basic/dir.php");
   } else if (filename.startsWith("%")) {
-    filename=filename.replaceFirst("%","http://www.futex.com.au/c64x");
+    //filename=filename.replaceFirst("%","http://www.futex.com.au/c64x");
+    filename=filename.replaceFirst("%","http://test.futex.com.au/cloud/c64x");
     filename=filename+".basic.txt";
   } else
   if (filename.matches(".*\\.au")
