@@ -1138,19 +1138,40 @@ boolean ProcessPRINTstatement() throws BasicException
   if (verbose) { System.out.printf("Processing PRINT statement\n"); }
   ReadExpression();
   if (verbose) { System.out.printf("MachinePrintEvaluate( %s )\n",keepExpression); }
-  if (verbose  ) { System.out.printf("%s",machine.evaluate_partial(keepExpression).print()); }
-  machine.print(machine.evaluate_partial(keepExpression).print());
+  /// if (verbose  ) { System.out.printf("%s",machine.evaluate_partial(keepExpression).print()); }
+  /// machine.print(machine.evaluate_partial(keepExpression).print());
   // this should probably be nicer
-  int x;
+  int x=0;
   String separator="";
-  while ((x=machine.evaluate_engine.parse_restart)>0) {
+  /// while ((x=machine.evaluate_engine.parse_restart)>0) { 
+  do {
     if (verbose) { System.out.printf("More to evaluate!!!! - should resubmit with the remaining string after %d...\n",machine.evaluate_engine.parse_restart); }
     // there is more to evaluate
     String temp=new String(keepExpression);  // do I need to do this?
     keepExpression=temp.substring(x,temp.length());
 
     x=0; // now we are at the start of it again
-    while (x<keepExpression.length() && keepExpression.substring(x,x+1).equals(";")) { x++; separator=";"; } // chew them up // need to include blanks and , too!
+    while (x<keepExpression.length() && 
+      (keepExpression.substring(x,x+1).equals(";") || keepExpression.substring(x,x+1).equals(",") || keepExpression.substring(x,x+1).equals(" ")))
+      { 
+        if (keepExpression.substring(x,x+1).equals(",")) {
+          if (verbose) { System.out.printf("Should space out to next position....(Not impl yet)\n"); }
+          int cursx=machine.machinescreen.cursX;
+          //int tab=cursx-(int)(cursx/10)*10; if (tab>0) tab=10-tab;
+          int tab=cursx-(int)(cursx/10)*10; if (tab>=0) tab=10-tab;
+          if (cursx+tab>=machine.machinescreen.maxX) {
+             machine.print("\n");
+          } else {
+             machine.machinescreen.cursX+=tab;
+             if (verbose) { System.out.printf("adding %d tab\n",tab); }
+          }
+          separator=","; 
+        } else if (keepExpression.substring(x,x+1).equals(";")) {
+          separator=";"; 
+        }
+        x++;
+      } // chew them up // need to include blanks and , too!
+    /// String
     temp=new String(keepExpression);  // do I need to do this?
     keepExpression=temp.substring(x,temp.length());
     if (keepExpression.equals("")) { break; }
@@ -1158,8 +1179,10 @@ boolean ProcessPRINTstatement() throws BasicException
     if (verbose) { System.out.printf("should resubmit with the remaining string after %d will do so with:%s\n",machine.evaluate_engine.parse_restart,keepExpression); }
     machine.print(machine.evaluate_partial(keepExpression).print());
     separator="";
-  }
-  if (!separator.equals(";")) {
+  /// }
+  } while ((x=machine.evaluate_engine.parse_restart)>0);
+  if (machine.evaluate_engine.stayonline && separator.equals("")) separator=";";
+  if (!separator.equals(";") && !separator.equals(",")) {
     if (verbose  ) { System.out.printf("\n"); }
     machine.printnewline();
   }

@@ -171,6 +171,7 @@ class evaluate {
   boolean quiet=false;
   int parse_restart=0;
   boolean partialmatching=false;
+  boolean stayonline=false;
 
   Machine using_machine=null;
 
@@ -440,6 +441,7 @@ class evaluate {
           building+="(rght)";
         }
         stkstring[upto-2]=building;
+        stayonline=true; 
         return;
       } else if (function.equals("spc")) { // they probably are different
         stktype[upto-2]=ST_STRING;
@@ -448,6 +450,7 @@ class evaluate {
           building+="(rght)";
         }
         stkstring[upto-2]=building;
+        stayonline=true; 
         return;
 
       } else if (function.equals("eval$")) { // recursive!! - will this work?
@@ -937,6 +940,17 @@ class evaluate {
       }
       calc_and_pop(); //overhead of func passed too
     }
+    // try this
+    if (partialmatching && op==OP_COMMA && (upto==1 || upto==2 && stkop[upto-2].equals("==="))) {
+      if (verbose) { System.out.printf("I think we should bomb out here\n"); }
+      if (!partialmatching) {
+        /* ... */
+        throw new EvaluateException("TOP LEVEL COMMA ERROR");
+      } else {
+        parse_restart=ispnt; // because we are currently on the next invalid char
+        return;
+      }
+    }
     stkop[upto-1]=op;
     doing=D_NUM;
   }
@@ -1190,6 +1204,7 @@ class evaluate {
 
   GenericType interpret_string_partial(String intstring_param) throws EvaluateException {
     partialmatching=true;
+    stayonline=false;
     return interpret_string(intstring_param, false, 0.0, false);
   }
 
@@ -1343,7 +1358,14 @@ boolean dontallowextraclosingbrackets=true; // here for now
         } else if (a.equals(OP_COMMA)) {
           // comma separators allowed within brackets, when you hit a comma, calculate everything back to the
           // brackets, note, I'm using setOp to do this and if prec of , is lower than all else it will do what I want
+          parse_restart=(-1);
           setOp(OP_COMMA);
+           /** COMMA **/
+          if (parse_restart>=0) {
+            /* can only get here if setOp flagged it as bad */
+            break; /* ? */
+          }
+          
         // allow also multi charactor operators OR and AND
         } else if (a.compareToIgnoreCase("a")>=0 && a.compareToIgnoreCase("z")<=0) {
           int save_ispnt=ispnt;
@@ -1407,6 +1429,7 @@ boolean dontallowextraclosingbrackets=true; // here for now
           // we can now list assignment targets
           setOp("===,"); // note, we now change this to be a series of ===s (to differentiate from index ,s
                          // yet another which means assignment, with a comma
+           /** COMMA **/
         } else {
           // we have a problem
           System.out.printf("?ASSIGNMENT ERROR\n");
@@ -1671,6 +1694,8 @@ void ProcessAssignment() throws EvaluateException {
           parameters=1;
           stackvar=stackp;
         } else if (stkop[stackp].equals(OP_COMMA)) {
+          /** COMMA **/
+          /* should this be checked for the open bracket, e.g. if paraeters is 0 now, then this is wrong ?? */
           parameters++;
         }
       }
