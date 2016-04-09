@@ -162,6 +162,7 @@ public class Machine {
   int partialDutyCycle=0;
   public boolean signal_exit=false;
   boolean hasSyntaxHighlighting=true;
+  boolean crlfText=false;
 
   boolean basictimer; // passed directly to statements
   
@@ -832,6 +833,7 @@ public class Machine {
     programText=""; // NEW program
     program_modified=false;
     program_name=""; // clear this too
+    crlfText=false;
     machinescreen.setTitle(baseTitle); // try this
     variables_clr();    
   };
@@ -904,7 +906,8 @@ public class Machine {
 		out = new FileOutputStream(filename);
 		// Connect print stream to the output stream
 		p = new PrintStream( out );
-		p.print (programText);
+		if (crlfText) p.print (programText.replaceAll("\n","\r\n"));
+		else p.print (programText);
 		p.close();
 	}
 	catch (Exception e)
@@ -1213,6 +1216,12 @@ void chewcr() {
           programText=read_http(filename);
         } else
           programText=read_a_file(filename);
+        // fix CR LF issue, just remove CR LF and replace with (unix) LF
+        if (programText.contains("\r\n")) {
+          programText=programText.replaceAll("\r\n","\n");
+          crlfText=true; // use this to convert back on save!
+          if (verbose) System.out.printf("Flagging as crlf (and stripping)\n");
+        } else crlfText=false;
       }
     } catch (BasicException basicerror) {
        System.out.printf("Basic Error: %s\n",basicerror.getMessage());

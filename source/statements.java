@@ -149,6 +149,7 @@ String[] basicTokens={
   ,"LSET"
   ,"IMAGELOAD","DRAWIMAGE","DESTROYIMAGE"
   ,"ON"
+  ,"DEF","LET"
   ,"HELP"
 };
 static final int ST_FOR=0;
@@ -216,7 +217,10 @@ static final int ST_DESTROYIMAGE=59;
 
 static final int ST_ON=60;
 
-static final int ST_HELP=61;
+static final int ST_DEF=61;
+static final int ST_LET=62;
+
+static final int ST_HELP=63;
 
 
 String line;
@@ -286,6 +290,8 @@ boolean ReadPart() throws BasicException
           }
     while (pnt<linelength) {
       String a=line.substring(pnt,pnt+1);
+      //if (partType==PT_NEWLINE && a.equals("\r")) continue; // try this to allow CRLF
+      //else 
       if (partType==PT_NEWLINE && a.compareTo("0")>=0 && a.compareTo("9")<=0) {
         // just read it here like the token thing
         if (ReadLineNo()) {
@@ -317,6 +323,15 @@ boolean ReadPart() throws BasicException
           partType=PT_TOKEN;
           // gotToken already set
           // pnt+=at; already done
+          if (gotToken==ST_DEF || gotToken==ST_LET) { // this adds a bit EVERY statement...
+            if (ReadStatementToken()) {
+              partType=PT_TOKEN;
+              return true;
+            } else {
+              partType=PT_ASSIGN;
+              return true;
+            }
+          }
           return true;
         } else {
           // have to assume this is an assignment
