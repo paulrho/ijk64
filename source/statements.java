@@ -813,6 +813,7 @@ boolean ReadStatement() throws BasicException
           machine.graphicsDevice.resetDevice();
           // and make sure it is visible again (in case you closed it)
           machine.graphicsDevice.setVisible(true);
+          //if (true) machine.machinescreen.setVisible(true);
         }
         return true;
 
@@ -1560,7 +1561,33 @@ boolean ProcessREADstatement() throws BasicException
 boolean ProcessINPUTstatement(boolean stayonsameline) throws BasicException
 {
   ReadExpression();
+  // simplistic addition to allow string part of INPUT ["string";] x$, y$, z$...
+  // search for semicolon, trim off and print
+  //contains
+  // read partial, see if ends in semicolon???
+  if (keepExpression.contains(";")) {
+        // check if string AND semicolon is next
+    String prompt=machine.evaluate_partial(keepExpression).print();
+    int x=machine.evaluate_engine.parse_restart;
+      // trim spaces not required
+    if(x>=0 && x<keepExpression.length()-1 && keepExpression.substring(x,x+1).equals(";") &&
+      keepExpression.substring(0,x-1).contains("\"")) {
+        // print 
+        if (verbose) { System.out.printf("Got a input with prompt string\n"); }
+        machine.print(prompt);
+        x=x+1;
+        String temp=new String(keepExpression);  // do I need to do this?
+        keepExpression=temp.substring(x,temp.length());
+    }  else 
+      /// / or anything else for that mattter, is a syntax error
+      throw new BasicException("SYNTAX ERROR NEEDS LITERAL");
+  } else if (keepExpression.contains("\"")) {
+    throw new BasicException("SYNTAX ERROR NEEDS ;");
+  }
+
   if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
+  if (!stayonsameline) machine.print("? ");
+
   String got=machine.getline();
   if (verbose) { System.out.printf("got string \"%s\"\n",got.trim()); }
   // it a string so keep it quoted
@@ -1640,9 +1667,17 @@ boolean ProcessLOADstatement() throws BasicException
   String filename=machine.evaluate(keepExpression).str();
   // only add basic if it doesnt have it already
   if (filename.equals("%")) {
+    machine.print("\n");
+    machine.print("searching for "+filename.toLowerCase()+"\n");
     //filename=filename.replaceFirst("%","http://www.futex.com.au/basic/dir.php");
     filename=filename.replaceFirst("%","http://test.futex.com.au/basic/dir.php");
+  } else if (filename.equals("*")) {
+    machine.print("\n");
+    machine.print("searching for "+filename.toLowerCase()+"\n");
+    filename=filename.replaceFirst("\\*","http://test.futex.com.au/basic/dir.php");
   } else if (filename.startsWith("%")) {
+    machine.print("\n");
+    machine.print("searching for "+filename.toLowerCase()+"\n");
     //filename=filename.replaceFirst("%","http://www.futex.com.au/c64x");
     filename=filename.replaceFirst("%","http://test.futex.com.au/cloud/c64x");
     filename=filename+".basic.txt";
@@ -1656,7 +1691,9 @@ boolean ProcessLOADstatement() throws BasicException
     if (filename.startsWith("$$")) {
       filename=filename.replaceFirst("\\$",":");
     }
-    machine.print("loading "+filename.toLowerCase()+"...");
+    machine.print("\n");
+    machine.print("searching for "+filename.toLowerCase()+"\n");
+    //machine.print("loading "+filename.toLowerCase()+"...");
     if (filename.startsWith(":")) {
       filename=filename.replaceFirst(":","http://www.futex.com.au/basic/");
     }

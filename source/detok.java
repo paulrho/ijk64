@@ -98,11 +98,11 @@ class detok
     /*150*/ ,"(lred)", "(gry1)", "(gry2)", "(lgrn)", "(lblu)", "(gry3)", "(pur)", "(left)", "(yel)", "(cyn)"
     /*160*/ ,"(BLOCK)", "(CBM-K)", "(CBM-I)", "(CBM-T)", "(CBM-@)", "(CBM-G)", "(CBM-PLUS)", "(CBM-M)", "(CBM-POUND)", "(SHIFT-POUND)"
     /*170*/ ,"(CBM-N)", "(CBM-Q)", "(CBM-D)", "(CBM-Z)", "(CBM-S)", "(CBM-P)", "(CBM-A)", "(CBM-E)", "(CBM-R)", "(CBM-W)"
-    /*180*/ ,"(CBM-H)", "(CBM-J)", "(CBM-L)", "(CBM-Y)", "(CBM-U)", "(CBM-O)", "", "(CBM-F)", "(CBM-C)", "(CBM-X)"
+    /*180*/ ,"(CBM-H)", "(CBM-J)", "(CBM-L)", "(CBM-Y)", "(CBM-U)", "(CBM-O)", "(SHIFT-@)", "(CBM-F)", "(CBM-C)", "(CBM-X)"
     /*190*/ ,"(CBM-V)", "(CBM-B)", "(HLINE)", "", "", "", "", "", "", ""   // HLINE did have - // then A-G
     /*200*/ ,"", "", "", "", "", "", "", "", "", "" // H-Q
     /*210*/ ,"", "", "", "", "", "", "", "", "", "(SHIFT-PLUS)" // R-Z 
-    /*220*/ ,"", "|", "", "_", "", "", "", "", "", ""
+    /*220*/ ,"", "|", "", "(BACK-TRIANGLE)", "", "", "", "", "", ""  // 223 was _
     /*230*/ ,"", "", "", "", "", "", "", "", "", ""
   };
 

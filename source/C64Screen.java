@@ -283,7 +283,7 @@ class C64Screen extends JFrame
   final static char PETSCII_GREEN        =  30;
   final static char PETSCII_BLUE         =  31;
   final static char PETSCII_SPACE        =  32;
-  final static char PETSCII_SHIFT_AT     =  96;
+  final static char PETSCII_SHIFT_STAR   =  96;  // screen -32
   final static char PETSCII_PI           = 126;
   final static char PETSCII_ORANGE       = 129;
   final static char PETSCII_F1           = 133;
@@ -1074,18 +1074,29 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
     int ch = 0;
     // new turn 0 into 64
     if (pos==0) ch= 64;
-    if (pos > 0 && pos <= 26)
+    else if (pos > 0 && pos <= 26)
       //ch = 'A' + pos - 1;
       ch = 'a' + pos - 1; // to make equivalent ???
-    if (pos >= 32 && pos < 64)
+    else if (pos >= 32 && pos < 64)
       ch = pos;
-    if (pos >= 64 && pos <= 26 + 64)
+    else if (pos > 64 && pos <= 26 + 64)
       //ch = 'a' + pos - 1 - 64; // switch this around
       ch = 'A' + pos - 1 - 64;
-    if (pos == 30) ch='^'; // not pos==94
-    else if (pos == 31) ch='`'; // new translations
     else if (pos == 115) ch='{'; // new translations
     else if (pos == 107) ch='}'; // new translations
+
+    else if (pos >= 27 && pos<=30) ch=pos+64; // technical - not normally used
+    else if (pos == 31) ch='`'; // 96
+    else if (pos == 64) ch='_'; // to match petconvert
+    else if (pos == 93) ch='|'; // to match petconvert  124
+    else if (pos == 94) ch=126; // to match petconvert  
+    else if (pos == 95) ch=127; // to match petconvert  
+    //else if (pos == 27) ch=91; // technical - not normally used
+    //else if (pos == 28) ch=92; // technical - not normally used
+    //else if (pos == 29) ch=93; // technical - not normally used
+    //else if (pos == 30) ch='^'; // not pos==94
+    //else if (pos == 31) ch='`'; // new translations
+
     return (char) ch;
   }
 
@@ -1110,69 +1121,73 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
     //else if (pos == 93) ch=pos; // try
     else if (pos == 93) ch=124; // try
     else if (pos == 27 || pos == 29 || pos==28) ch=pos+64; // try [] add pound
+
     if (pos == PETSCII_BLACK  +64) return "(blk)";
-    if (pos == PETSCII_WHITE +128) return "(wht)";
-    if (pos == PETSCII_RED   +128) return "(red)";
-    if (pos == PETSCII_CYAN   +64) return "(cyn)";
-    if (pos == PETSCII_PURPLE +64) return "(pur)";
-    if (pos == PETSCII_GREEN +128) return "(grn)";
-    if (pos == PETSCII_BLUE  +128) return "(blu)";
-    if (pos == PETSCII_YELLOW +64) return "(yel)";
-    if (pos == PETSCII_ORANGE +64) return "(orng)";
-    if (pos == PETSCII_BROWN  +64) return "(brn)";
-    if (pos == PETSCII_LTRED  +64) return "(lred)";
-    if (pos == PETSCII_GREY1  +64) return "(gry1)";
-    if (pos == PETSCII_GREY2  +64) return "(gry2)";
-    if (pos == PETSCII_LTGREEN+64) return "(lgrn)";
-    if (pos == PETSCII_LTBLUE +64) return "(lblu)";
-    if (pos == PETSCII_GREY3  +64) return "(gry3)";
+    else if (pos == PETSCII_WHITE +128) return "(wht)";
+    else if (pos == PETSCII_RED   +128) return "(red)";
+    else if (pos == PETSCII_CYAN   +64) return "(cyn)";
+    else if (pos == PETSCII_PURPLE +64) return "(pur)";
+    else if (pos == PETSCII_GREEN +128) return "(grn)";
+    else if (pos == PETSCII_BLUE  +128) return "(blu)";
+    else if (pos == PETSCII_YELLOW +64) return "(yel)";
+    else if (pos == PETSCII_ORANGE +64) return "(orng)";
+    else if (pos == PETSCII_BROWN  +64) return "(brn)";
+    else if (pos == PETSCII_LTRED  +64) return "(lred)";
+    else if (pos == PETSCII_GREY1  +64) return "(gry1)";
+    else if (pos == PETSCII_GREY2  +64) return "(gry2)";
+    else if (pos == PETSCII_LTGREEN+64) return "(lgrn)";
+    else if (pos == PETSCII_LTBLUE +64) return "(lblu)";
+    else if (pos == PETSCII_GREY3  +64) return "(gry3)";
 
-    if (pos == PETSCII_LEFT +64) return "(left)";
-    if (pos == PETSCII_RGHT+128) return "(rght)";
-    if (pos == PETSCII_UP   +64) return "(up)";
-    if (pos == PETSCII_DOWN+128) return "(down)";
-    if (pos == PETSCII_HOME+128) return "(home)";
-    if (pos == PETSCII_CLR  +64) return "(clr)";
-    if (pos == PETSCII_RVON+128) return "(rvon)";
-    if (pos == PETSCII_RVOF +64) return "(rvof)";
+    else if (pos == PETSCII_LEFT +64) return "(left)";
+    else if (pos == PETSCII_RGHT+128) return "(rght)";
+    else if (pos == PETSCII_UP   +64) return "(up)";
+    else if (pos == PETSCII_DOWN+128) return "(down)";
+    else if (pos == PETSCII_HOME+128) return "(home)";
+    else if (pos == PETSCII_CLR  +64) return "(clr)";
+    else if (pos == PETSCII_RVON+128) return "(rvon)";
+    else if (pos == PETSCII_RVOF +64) return "(rvof)";
 
-    if (pos == PETSCII_SHIFT_AT-32) return "(-)";
-    if (pos == PETSCII_SHIFT_SPACE) return "(BLOCK)";
+    else if (pos == PETSCII_SHIFT_STAR-32) return "(-)";
+    else if (pos == PETSCII_SHIFT_SPACE) return "(BLOCK)"; // not really BLOCK any more - just a shift space
 
-    if (pos == 94) return "(mathpi)";
+    else if (pos == 94) return "(mathpi)";
     //if (pos == 97) return "(CBM-A)"; // try this first of the set...
     //if (pos >= 97 && pos <=97+26) return "(CBM-"+(char)('A'+pos-97)+")";
-    if (pos == 11+96) return "(CBM-Q)"; 
-    if (pos == 19+96) return "(CBM-W)"; 
-    if (pos == 17+96) return "(CBM-E)"; 
-    if (pos == 18+96) return "(CBM-R)"; 
-    if (pos == 3+96) return "(CBM-T)"; 
-    if (pos == 23+96) return "(CBM-Y)"; 
-    if (pos == 24+96) return "(CBM-U)"; 
-    if (pos == 2+96) return "(CBM-I)"; 
-    if (pos == 4+96) return "(CBM-@)"; 
-    if (pos == 16+96) return "(CBM-A)"; 
-    if (pos == 14+96) return "(CBM-S)"; 
-    if (pos == 27+96) return "(CBM-F)"; 
-    if (pos == 13+96) return "(CBM-Z)"; 
-    if (pos == 29+96) return "(CBM-X)"; 
-    if (pos == 28+96) return "(CBM-C)"; 
-    if (pos == 30+96) return "(CBM-V)"; 
+    else if (pos == 11+96) return "(CBM-Q)"; 
+    else if (pos == 19+96) return "(CBM-W)"; 
+    else if (pos == 17+96) return "(CBM-E)"; 
+    else if (pos == 18+96) return "(CBM-R)"; 
+    else if (pos == 3+96) return "(CBM-T)"; 
+    else if (pos == 23+96) return "(CBM-Y)"; 
+    else if (pos == 24+96) return "(CBM-U)"; 
+    else if (pos == 2+96) return "(CBM-I)"; 
+    else if (pos == 4+96) return "(CBM-@)"; 
+    else if (pos == 16+96) return "(CBM-A)"; 
+    else if (pos == 14+96) return "(CBM-S)"; 
+    else if (pos == 27+96) return "(CBM-F)"; 
+    else if (pos == 13+96) return "(CBM-Z)"; 
+    else if (pos == 29+96) return "(CBM-X)"; 
+    else if (pos == 28+96) return "(CBM-C)"; 
+    else if (pos == 30+96) return "(CBM-V)"; 
 
-    if (pos == 31+96) return "(CBM-B)"; 
-    if (pos == 12+96) return "(CBM-D)"; 
-    if (pos ==  5+96) return "(CBM-G)"; 
-    if (pos == 20+96) return "(CBM-H)"; 
-    if (pos == 21+96) return "(CBM-J)"; 
-    if (pos ==  1+96) return "(CBM-K)"; 
-    if (pos == 22+96) return "(CBM-L)"; 
-    if (pos ==  7+96) return "(CBM-M)"; 
-    if (pos == 10+96) return "(CBM-N)"; 
-    if (pos == 25+96) return "(CBM-O)"; 
-    if (pos == 15+96) return "(CBM-P)"; 
-    if (pos ==  9+96) return "(SHIFT-POUND)"; 
-    if (pos == 95) return "(BACK-TRIANGLE)"; 
-    if (pos == 102) return "(CBM-PLUS)"; // try 
+    else if (pos == 31+96) return "(CBM-B)"; 
+    else if (pos == 12+96) return "(CBM-D)"; 
+    else if (pos ==  5+96) return "(CBM-G)"; 
+    else if (pos == 20+96) return "(CBM-H)"; 
+    else if (pos == 21+96) return "(CBM-J)"; 
+    else if (pos ==  1+96) return "(CBM-K)"; 
+    else if (pos == 22+96) return "(CBM-L)"; 
+    else if (pos ==  7+96) return "(CBM-M)"; 
+    else if (pos == 10+96) return "(CBM-N)"; 
+    else if (pos == 25+96) return "(CBM-O)"; 
+    else if (pos == 15+96) return "(CBM-P)"; 
+    else if (pos ==  9+96) return "(SHIFT-POUND)"; 
+    else if (pos == 26+96) return "(SHIFT-@)"; 
+    else if (pos == 95) return "(BACK-TRIANGLE)"; 
+    else if (pos == 102) return "(CBM-PLUS)"; // try 
+
+    else if (pos >= 128+1 && pos <=128+26) return ""+(char) (pos-128); // not encoded! but we need the CTRL code //try
 
     if (ch!=0) return ""+(char) ch;
     else return "@"; // not valid
@@ -1359,6 +1374,7 @@ if (verbose) { System.out.printf("print char %d\n",num); }
         } else if (cS.equals("mathpi")) { theChar = (char) (94);
 
         } else if (cS.equals("SHIFT-POUND")) { theChar = (char) (9 + 96);
+        } else if (cS.equals("SHIFT-@")) { theChar = (char) (26 + 96);
         } else if (cS.equals("SHIFT-PLUS")) { theChar = (char) (91);
         } else if (cS.equals("-")) { theChar = (char) (64); // "(-)"
         } else if (cS.equals("left")) { 
@@ -1411,6 +1427,7 @@ if (verbose) { System.out.printf("print char %d\n",num); }
           }
         } else if (cS.equals("CR")) {
         // same as println()
+          reverse = false; // try - think this should be here 
           if (cursY < maxY - 1) {
             cursY++;
           } else {
@@ -1420,6 +1437,7 @@ if (verbose) { System.out.printf("print char %d\n",num); }
               scrolldelay();
           }
           cursX = 0;
+          print_quotes_on=false; //try - think i need to add it here too
           continue;
         } else {
         // we dont know what it is so print the whole thing
@@ -1435,21 +1453,13 @@ if (verbose) { System.out.printf("print char %d\n",num); }
         }
       } else if (theChar == '\"') {
         print_quotes_on=!print_quotes_on; // toggle it
-      } else if ((int) (theChar & 0xFF) == 10) {
-        println();              // is it okay to put it in here?     
+      } else if ((int) (theChar & 0xFF) == 10) { // && !print_quotes_on) {   // try ignoring if quotes on - breaks other things - do this later
+        println();              // is it okay to put it in here?       //try, no
         print_quotes_on=false; // cancel it
         continue;
       } else if (theChar == PETSCII_ENTER || theChar == PETSCII_SHIFTENTER) {
         println();
         print_quotes_on=false; // cancel it
-        continue;
-      } else if (theChar == PETSCII_SWITCH_LOWER) {
-        // case down?
-        changeCharSet(1);
-        continue;
-      } else if (theChar == PETSCII_SWITCH_UPPER) {
-        // case up?
-        changeCharSet(0);
         continue;
       } else if (theChar == EXTENDSCII_END) {
         /* dont quote this */
@@ -1471,16 +1481,33 @@ if (verbose) { System.out.printf("print char %d\n",num); }
         /* dont quote this */
         backspace(-1);
         continue;
-      } else if (theChar == PETSCII_INST) {        // backspace or move left 0x08 // 157 left move // 20 leftdel
+      } else if (theChar == PETSCII_INST && !print_quotes_on) {        // backspace or move left 0x08 // 157 left move // 20 leftdel
         /* dont quote this */
         if(!insertchars) insertspace();  // if you are already inserting chars - dont do this
         continue;
+
+      } else if (print_quotes_on && (int) (theChar) >=0 && (int) (theChar) <=27) { // try this
+          theChar = (char) (128+theChar); // got a non-specified CTRL code
+          if (verbose) System.out.printf("got a non-specified CTRL code\n");
+
+      } else if (theChar == PETSCII_SWITCH_LOWER) {
+        // case down?
+        changeCharSet(1);
+        continue;
+      } else if (theChar == PETSCII_SWITCH_UPPER) {
+        // case up?
+        changeCharSet(0);
+        continue;
+
       } else if (theChar == '\r') {
         println();              // is it okay to put it in here?     
         continue;
 // same as metacodes worked out here - but it has been worked out elsewhere
 
 // I dont think this is actually used except if you printchr$(xx)
+      } else if (print_quotes_on && theChar >= 128 && theChar <= 159) {
+        // technical hardly used
+        theChar = (char) (theChar + 64);
       } else if (theChar == PETSCII_BLACK) {
         if (!print_quotes_on) { setcursColour((short) 0); continue; }
       } else if (theChar == PETSCII_WHITE) {
@@ -1490,45 +1517,44 @@ if (verbose) { System.out.printf("print char %d\n",num); }
         if (print_quotes_on) theChar = (char) (128 + PETSCII_RED);
         else { setcursColour((short) 2); continue; }
       } else if (theChar == PETSCII_CYAN) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) theChar = (char) (PETSCII_CYAN); // technical hardly used
         else { setcursColour((short) 3); continue; }
       } else if (theChar == PETSCII_PURPLE) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) theChar = (char) (PETSCII_PURPLE); //technical hardly used
         else { setcursColour((short) 4); continue; }
       } else if (theChar == PETSCII_GREEN) {
-        if (print_quotes_on) theChar = (char) (128 + 30);
+        if (print_quotes_on) theChar = (char) (128 + PETSCII_GREEN);
         else { setcursColour((short) 5); continue; }
       } else if (theChar == PETSCII_BLUE) {
-        if (print_quotes_on) theChar = (char) (128 + 31);
+        if (print_quotes_on) theChar = (char) (128 + PETSCII_BLUE);
         else { setcursColour((short) 6); continue; }
       } else if (theChar == PETSCII_YELLOW) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; //theChar = (char) (PETSCII_YELLOW); //technical hardly used
         else { setcursColour((short) 7); continue; }
       } else if (theChar == PETSCII_ORANGE) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; //theChar = (char) (PETSCII_ORANGE); //technical hardly used
         else { setcursColour((short) 8); continue; }
       } else if (theChar == PETSCII_BROWN) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; // theChar = (char) (); //technical hardly used
         else { setcursColour((short) 9); continue; }
       } else if (theChar == PETSCII_LTRED) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; // theChar = (char) (128 + 5); //technical hardly used
         else { setcursColour((short) 10); continue; }
       } else if (theChar == PETSCII_GREY1) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; // theChar = (char) (128 + 5); //technical hardly used
         else { setcursColour((short) 11); continue; }
       } else if (theChar == PETSCII_GREY2) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; // theChar = (char) (128 + 5); //technical hardly used
         else { setcursColour((short) 12); continue; }
       } else if (theChar == PETSCII_LTGREEN) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; // theChar = (char) (128 + 5); //technical hardly used
         else { setcursColour((short) 13); continue; }
       } else if (theChar == PETSCII_LTBLUE) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; // theChar = (char) (128 + 5); //technical hardly used
         else { setcursColour((short) 14); continue; }
       } else if (theChar == PETSCII_GREY3) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; // theChar = (char) (128 + 5); //technical hardly used
         else { setcursColour((short) 15); continue; }
-        
       } else if ((int) (theChar & 0xFF) == PETSCII_HOME) {
           if (print_quotes_on) theChar = (char) (128+PETSCII_HOME);
           else {
@@ -1584,6 +1610,10 @@ if (verbose) { System.out.printf("print char %d\n",num); }
             continue;
           }
 
+      } else if ((int) (theChar) >=0 && (int) (theChar) <=27) { // try this
+          if (verbose) System.out.printf("got a non-specified CTRL code unquoted - ignoring\n");
+          continue;
+
       } else {
         theChar = petconvert(theChar);
       }
@@ -1636,6 +1666,7 @@ if (verbose) { System.out.printf("print char %d\n",num); }
     cursX = 0;
 
   // now signal it to be redrawn
+    print_quotes_on=false; // try
     repaint();
   }
 
@@ -1655,6 +1686,7 @@ if (verbose) { System.out.printf("print char %d\n",num); }
     cursX = 0;
 
   // now signal it to be redrawn
+    print_quotes_on=false; // try
     repaint();
   }
 
@@ -2535,6 +2567,10 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
         }
       } else if (tabdown && keybuf[keybuftop] >= '0' && keybuf[keybuftop] <= '9') {
         keybuf[keybuftop] += 256;
+      } else if (tabdown && keybuf[keybuftop] >= 'a' && keybuf[keybuftop] <= 'z') {
+        keybuf[keybuftop] = (char)(keybuf[keybuftop]-'a'+1); // try this
+      } else if (tabdown && keybuf[keybuftop] >= '@' && keybuf[keybuftop] <= '[') {
+        keybuf[keybuftop] = (char)(keybuf[keybuftop]-'A'+1); // try this
       }
       keybuftop++;
       if (keybuftop >= keybufmax) {
@@ -2611,6 +2647,7 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
       } else if (ch==EXTENDSCII_PGDN || ch==EXTENDSCII_PGUP) {
         print(ch+"");
       } else if (
+          //(ch>=1 && ch<=26) || //try this
            ch==PETSCII_UP 
         || ch==PETSCII_DOWN 
         || ch==PETSCII_LEFT 

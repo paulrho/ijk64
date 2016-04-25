@@ -584,6 +584,9 @@ class evaluate {
           int v=(int)stknum[upto-1];
           if (v>=193&&v<=218) v=v-128; 
           else if (v>=65&&v<=90) v=v+32; 
+
+          else if (v>=97&&v<=122) v=v-32;   // quick test try
+
           else if (v>=97&&v<=122) v=v+96; 
           else if (v==95) v=96; 
           else if (v==96) v=95; 
@@ -612,7 +615,7 @@ class evaluate {
           stkstring[upto-2]=""+(char)stknum[upto-1];
 	    }
         return;
-      } else if (function.equals("petconvert")) {
+      } else if (function.equals("petconvert") || function.equals("petcnv") ) {
 		if (using_machine!=null) {
           stktype[upto-2]=ST_NUM;
           stknum[upto-2]=using_machine.asc1((int)stknum[upto-1]);
@@ -622,7 +625,7 @@ class evaluate {
 	    }
         if (verbose) { System.out.printf("calculating the ascii of %s to be %f\n",stkstring[upto-1],stknum[upto-2]); }
         return;
-      } else if (function.equals("petunconvert")) {
+      } else if (function.equals("petunconvert") || function.equals("petuncnv")) {
 		if (using_machine!=null) {
           stktype[upto-2]=ST_NUM;
           stknum[upto-2]=using_machine.chrD1((int)stknum[upto-1]);

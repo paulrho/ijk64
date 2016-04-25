@@ -226,10 +226,18 @@ public class Machine {
 
   GenericType getvariable(String variable) {
     if (builtinvariables) {
-      if (variable.equals("ti$")) {
-        return new GenericType((double)(int)(System.currentTimeMillis()/1000.0));
-      } else if (variable.equals("ti")) {
-        return new GenericType((double)(int)((System.currentTimeMillis()/16.66666666)%1073741824));
+      if (variable.startsWith("ti")) {
+        if (variable.equals("ti$") || variable.equals("time$")) {
+          java.text.SimpleDateFormat localDateFormat = new java.text.SimpleDateFormat("HHmmss");
+          return new GenericType(
+            localDateFormat.format( System.currentTimeMillis())
+          );
+        } else if (variable.equals("ti$") || variable.equals("time$")) {
+          return new GenericType((double)(int)(System.currentTimeMillis()/1000.0));
+        } else if (variable.equals("ti")) {
+          return new GenericType((double)(int)((System.currentTimeMillis()/16.66666666)%1073741824));
+        } else if (variable.equals("tisec")) 
+          return new GenericType((double)(int)(System.currentTimeMillis()/1000.0));
       } else if (variable.equals("st")) {
         return new GenericType(0.0);
       } else if (variable.equals("mathpi")) {
@@ -846,6 +854,9 @@ public class Machine {
 
     try {
       FileInputStream fis = new FileInputStream(filename);
+        if (true) { // want message
+          print("loading");
+        }
       int x= fis.available();
       byte b[]= new byte[x];
       fis.read(b);
@@ -857,6 +868,9 @@ public class Machine {
 //        InputStream is = java.util.FileUtils.class.getResourceAsStream(filename);
 //        InputStream is = getClass().getResourceAsStream(filename);
         InputStream is = getClass().getResourceAsStream("basic/"+filename);
+        if (true) { // want message
+          print("loading");
+        }
         int x= is.available();
         byte b[]= new byte[x];
         is.read(b);
@@ -869,7 +883,8 @@ public class Machine {
     return content;
   }
   
-  static String read_http(String urlstring) throws BasicException {
+//  static  // need to be static?
+String read_http(String urlstring) throws BasicException {
     String content="";
 
     try {
@@ -879,6 +894,10 @@ public class Machine {
             url.openStream()));
 
       String inputLine;
+
+        if (true) { // want message
+          print("loading");
+        }
 
       while ((inputLine = in.readLine()) != null)
        //   System.out.println(inputLine);
@@ -1213,9 +1232,17 @@ void chewcr() {
           printnewline();
         }
         if (filename.toLowerCase().contains("http:")) {
+          //if (false) { // want message
+            //print("\n");
+            //print("searching for "+filename+"\n");
+          //}
           programText=read_http(filename);
-        } else
+        } else {
+          //if (false) { // want message
+            //print("\n");
+          //}
           programText=read_a_file(filename);
+        }
         // fix CR LF issue, just remove CR LF and replace with (unix) LF
         if (programText.contains("\r\n")) {
           programText=programText.replaceAll("\r\n","\n");
