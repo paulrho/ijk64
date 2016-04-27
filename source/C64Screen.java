@@ -2532,38 +2532,38 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
       if (e.isAltDown()) {
         keybuf[keybuftop] += 128;
       } else if (e.isControlDown() && keybuf[keybuftop] >= '0' && keybuf[keybuftop] <= '9') {
-        keybuf[keybuftop] += 128;
+        keybuf[keybuftop] += 128+64; // move these to another place now!
       } else if (e.isControlDown()) {
         //keybuf[keybuftop] += 'a' + 128 - 1;
         // try this -> map to correct
         switch(keybuf[keybuftop]) {
           // note to clear the 128+digit bit, we use the shifted (apart from B)
-          case 1: keybuf[keybuftop] = 176+64; break;
+          case 1: keybuf[keybuftop] = 176+64*0; break;
           case 2: keybuf[keybuftop] = 191; break;
-          case 3: keybuf[keybuftop] = 188+64; break;
-          case 4: keybuf[keybuftop] = 172+64; break;
-          case 5: keybuf[keybuftop] = 177+64; break;
-          case 6: keybuf[keybuftop] = 187+64; break;
-          case 7: keybuf[keybuftop] = 185+64; break;
-          case 8: keybuf[keybuftop] = 180+64; break;
-          case 9: keybuf[keybuftop] = 162+64; break;
-          case 10: keybuf[keybuftop] = 181+64; break;
-          case 11: keybuf[keybuftop] = 161+64; break;
-          case 12: keybuf[keybuftop] = 182+64; break;
-          case 13: keybuf[keybuftop] = 167+64; break;
-          case 14: keybuf[keybuftop] = 170+64; break;
-          case 15: keybuf[keybuftop] = 185+64; break;
-          case 16: keybuf[keybuftop] = 175+64; break;
-          case 17: keybuf[keybuftop] = 171+64; break;
-          case 18: keybuf[keybuftop] = 178+64; break;
-          case 19: keybuf[keybuftop] = 174+64; break;
-          case 20: keybuf[keybuftop] = 163+64; break;
-          case 21: keybuf[keybuftop] = 184+64; break;
-          case 22: keybuf[keybuftop] = 190+64; break;
-          case 23: keybuf[keybuftop] = 179+64; break;
-          case 24: keybuf[keybuftop] = 189+64; break;
-          case 25: keybuf[keybuftop] = 183+64; break;
-          case 26: keybuf[keybuftop] = 173+64; break;
+          case 3: keybuf[keybuftop] = 188+64*0; break;
+          case 4: keybuf[keybuftop] = 172+64*0; break;
+          case 5: keybuf[keybuftop] = 177+64*0; break;
+          case 6: keybuf[keybuftop] = 187+64*0; break;
+          case 7: keybuf[keybuftop] = 185+64*0; break;
+          case 8: keybuf[keybuftop] = 180+64*0; break;
+          case 9: keybuf[keybuftop] = 162+64*0; break;
+          case 10: keybuf[keybuftop] = 181+64*0; break;
+          case 11: keybuf[keybuftop] = 161+64*0; break;
+          case 12: keybuf[keybuftop] = 182+64*0; break;
+          case 13: keybuf[keybuftop] = 167+64*0; break;
+          case 14: keybuf[keybuftop] = 170+64*0; break;
+          case 15: keybuf[keybuftop] = 185+64*0; break;
+          case 16: keybuf[keybuftop] = 175+64*0; break;
+          case 17: keybuf[keybuftop] = 171+64*0; break;
+          case 18: keybuf[keybuftop] = 178+64*0; break;
+          case 19: keybuf[keybuftop] = 174+64*0; break;
+          case 20: keybuf[keybuftop] = 163+64*0; break;
+          case 21: keybuf[keybuftop] = 184+64*0; break;
+          case 22: keybuf[keybuftop] = 190+64*0; break;
+          case 23: keybuf[keybuftop] = 179+64*0; break;
+          case 24: keybuf[keybuftop] = 189+64*0; break;
+          case 25: keybuf[keybuftop] = 183+64*0; break;
+          case 26: keybuf[keybuftop] = 173+64*0; break;
           default:
             keybuf[keybuftop] += 'a' + 128 - 1;
         }
@@ -2641,7 +2641,7 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
       } else if (ch >= 256 + '0' && ch <= 256 + '9') {
         if (insertchars && print_quotes_on) insertspace();
         print("("+colourname_alias[(short) ((ch-1) % 16)]+")");
-      } else if (ch >= 128 + '0' && ch <= 128 + '9') {
+      } else if (ch >= 128+64 + '0' && ch <= 128+64 + '9') {
         if (insertchars && print_quotes_on) insertspace();
         print("("+colourname_alias[(short) ((ch + 8 -1) % 16)]+")");
       } else if (ch==EXTENDSCII_DELETE || ch==PETSCII_DEL || ch==EXTENDSCII_END) {
