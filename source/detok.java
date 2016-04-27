@@ -33,7 +33,7 @@ class detok
 
   String tokens0[] = { "","","","","","(wht)","","","","" // starts 0
     /*10*/ ,"","","","","","","","(down)","(rvon)","(home)"
-    /*20*/ ,"","","","","","","","","(red)","(rght)"
+    /*20*/ ,"(del)","","","","","","","","(red)","(rght)" // del is not implemented in ijk64
     /*30*/ ,"(grn)","(blu)"," ","","","","","","","" };
 
   String tokens1[] = { "end", "for" // starting at 128

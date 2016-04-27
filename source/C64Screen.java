@@ -1841,8 +1841,10 @@ if (verbose) System.out.printf("insertspace (new)\n\r");
 
         /* if we started at the end of the line -assume we will want to extend it */
         if (contmark[y]==0 && (screenchar[x][y]!=' ' || ox==x && oy==y)) {
-           if (y==oy && (oy==0 || contmark[oy-1]==0 || contmarks_infinite)) {
-            contmark[oy]=1; /* done by scroll down anyway ??*/
+           //if (y==oy && (oy==0 || contmark[oy-1]==0 || contmarks_infinite)) {
+           if (true) {  // I think 
+            //contmark[oy]=1; /* done by scroll down anyway ??*/
+            contmark[y]=1; /* done by scroll down anyway ??*/
             /* scroll the lines below down! */
             if (y==maxY-1) { // we need to scroll up - and change all our variables
               scrollscreen();
