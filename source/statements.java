@@ -1841,6 +1841,7 @@ boolean checkMetaCode()
       else if (metatest.equals("clr")) metaCode=(char)(147);
       else if (metatest.equals("rvon")) metaCode=(char)(18);
       else if (metatest.equals("rvof")) metaCode=(char)(146);
+      else if (metatest.equals("SHIFT-SPACE")) metaCode=(char)(160);
 
       else if (metatest.equals("blk")) metaCode=(char)(144);
       else if (metatest.equals("wht")) metaCode=(char)(5);

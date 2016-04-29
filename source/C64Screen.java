@@ -1152,6 +1152,7 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
     else if (pos == PETSCII_SHIFT_SPACE) return "(BLOCK)"; // not really BLOCK any more - just a shift space
 
     else if (pos == 94) return "(mathpi)";
+    else if (pos == 96) return "(SHIFT-SPACE)";
     //if (pos == 97) return "(CBM-A)"; // try this first of the set...
     //if (pos >= 97 && pos <=97+26) return "(CBM-"+(char)('A'+pos-97)+")";
     else if (pos == 11+96) return "(CBM-Q)"; 
@@ -1182,6 +1183,8 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
     else if (pos == 10+96) return "(CBM-N)"; 
     else if (pos == 25+96) return "(CBM-O)"; 
     else if (pos == 15+96) return "(CBM-P)"; 
+    else if (pos ==    92) return "(LEFT-CHECK)";  // CBM -
+    else if (pos ==  8+96) return "(BOT-CHECK)";   // CBM POUND
     else if (pos ==  9+96) return "(SHIFT-POUND)"; 
     else if (pos == 26+96) return "(SHIFT-@)"; 
     else if (pos == 95) return "(BACK-TRIANGLE)"; 
@@ -1324,6 +1327,9 @@ if (verbose) { System.out.printf("print char %d\n",num); }
         } else if (cS.equals("UPP-RIGHT-LINE")) { theChar = (char) ('n');
         } else if (cS.equals("LOW-LEFT-LINE")) { theChar = (char) ('m');
         } else if (cS.equals("LOW-RIGHT-LINE")) { theChar = (char) (']' + 32);
+        } else if (cS.equals("LEFT-CHECK")) { theChar = (char) (92);
+        } else if (cS.equals("BOT-CHECK")) { theChar = (char) (104);
+        } else if (cS.equals("SHIFT-SPACE")) { theChar = (char) (96);
         } else if (cS.equals("VLINE")) { theChar = (char) (']');
         } else if (cS.equals("HLINE")) { 
                //theChar = petconvert('C'); // was this wrong?
@@ -2424,6 +2430,12 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
         else
           addkey2buf(PETSCII_ENTER);
         return;
+
+      case 32:
+        if (e.isShiftDown()) {
+          addkey2buf(PETSCII_SHIFT_SPACE);
+          return;
+        }
     }
     
     if (e.getKeyCode() == 36) {
