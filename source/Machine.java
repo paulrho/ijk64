@@ -73,6 +73,10 @@
 
 // for reading a file
 import java.io.*;
+import java.util.Arrays; // for dir sorted
+// for dir sorted
+import java.util.Comparator;
+import java.text.SimpleDateFormat; // for DIR
 
 import java.net.*; // for reading from http
 
@@ -105,20 +109,20 @@ import java.net.*; // for reading from http
 <PRE>
    Object interdependance :
 
-                  ,----> C64Screen           (precreated)
-                 / ,<--> C64PopupMenu        (precreated)               {<->links back to machine}
+                  ,----+ C64Screen           (precreated)
+                 / ,+--+ C64PopupMenu        (precreated)               {+-+links back to machine}
                 / /
-   C64-> Machine 
-                 -> FStack                   {internal}
-                 -> GStack                   {internal}
-                 -> PText                    {internal, including execution/data/save points}
-                 -> LCache                   {internal}
-                 -> DCache                   {internal}
-           -> Variables                      (Variable Store (VStore))
-           <-> evaluate                      (evaluate engine)          [ could be renamed : ExpressionEvaluator ]
-                 interpret_string ( string )                            {<->links back to machine}
-           <-> statements ( string )         (parse the program/direct) [ could be renamed : CxxParser ]
-               [instansiated each time]                                 {<->links back to machine}
+   C64-+ Machine 
+                 -+ FStack                   {internal}
+                 -+ GStack                   {internal}
+                 -+ PText                    {internal, including execution/data/save points}
+                 -+ LCache                   {internal}
+                 -+ DCache                   {internal}
+           -+ Variables                      (Variable Store (VStore))
+           +-+ evaluate                      (evaluate engine)          [ could be renamed : ExpressionEvaluator ]
+                 interpret_string ( string )                            {+-+links back to machine}
+           +-+ statements ( string )         (parse the program/direct) [ could be renamed : CxxParser ]
+               [instansiated each time]                                 {+-+links back to machine}
   
    Passing datatype : GenericType
    Exceptions       : BasicException and EvaluateException
@@ -771,7 +775,7 @@ public class Machine {
     return false;
   }
 
-  /** checks whether the ControlC flag has been set **/
+  // checks whether the ControlC flag has been set 
   boolean hasControlC()
   {
     return machinescreen.hasControlC();
@@ -846,9 +850,8 @@ public class Machine {
     variables_clr();    
   };
 
-  /** reads the program basic text file 
-  **/
-  /*static  why?*/
+  // reads the program basic text file 
+  // was static  why?
   String read_a_file(String filename) throws BasicException {
     String content="";
 
@@ -1101,6 +1104,7 @@ int hs;
        ,"SCREEN","GPRINT","BEGINFRAME","END","CLS","LINE","FSET","SLEEP","ALERT","RECT","FILES"
        ,"LSET"
        ,"IMAGELOAD","DRAWIMAGE","DESTROYIMAGE"
+       ,"CIRCLE"
        ,"HELP"
     };
   String got;
@@ -1206,7 +1210,6 @@ void chewcr() {
   if (n==0) out+=linesep;
 
   }
-/****/
   
   boolean loadProgram(String filename) //throws BasicException
   {
@@ -1302,6 +1305,45 @@ void chewcr() {
         }
     }
   }
+  void doCHDIR(String newDir) {
+    System.setProperty("user.dir", newDir);
+  }
+  void listDIR(boolean datesort) {
+    File dir = new File(".");
+  
+    File[] files = dir.listFiles();
+    if (datesort) {
+       Arrays.sort(files, new Comparator<File>(){
+       public int compare(File f1, File f2)
+       {
+           return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
+       } });
+    } else {
+       Arrays.sort(files, new Comparator<File>(){
+       public int compare(File f1, File f2)
+       {
+           return f1.getName().compareTo(f2.getName());
+       } });
+    }
+
+    //if (children == null) {
+        //// Either dir does not exist or is not a directory
+    //} else {
+        print("directory = "+dir.getAbsolutePath()+"\n");
+        for (int i=0; i<files.length; i++) {
+            // Get filename of file or directory
+            String filename = files[i].getName();
+            if (filename.contains(".basic")) {
+              
+              filename=filename.replaceFirst("\\.basic","");
+              filename=("\""+filename+"\"                      ").substring(0,22);
+
+   	      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH.mm");
+              print(syntaxHighlight(filename+":"+sdf.format(files[i].lastModified())+"\n"));
+            }
+        }
+    //}
+  }
 
   boolean contProgram() throws BasicException // not used now (see below)
   {
@@ -1346,7 +1388,7 @@ void chewcr() {
     return true;
   }
 
-  /** this function not used yet **/
+  // this function not used yet 
   boolean contProgram(int restartat) throws BasicException
   {
     if (verbose) {
@@ -1379,8 +1421,7 @@ void chewcr() {
     return true;
   }
 
-  /** inserts a line if new, or replaces a line of the same number (first one it finds)
-  **/
+  // inserts a line if new, or replaces a line of the same number (first one it finds)
   boolean insertLine(String line) // throws Exception
   {
     // do this until it is really implemented

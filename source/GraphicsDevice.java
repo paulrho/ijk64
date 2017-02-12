@@ -109,6 +109,16 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
      if (!inframe) doupdate();
    }
          
+   public void command_CIRCLE(int x1, int y1, int r, int col, int fill) {
+     newoffGraphics.setColor(colorindex[col]);
+     if (fill!=0) {
+       newoffGraphics.fillOval(x1,y1+tby,r,r);
+     } else {
+       newoffGraphics.drawOval(x1,y1+tby,r,r);
+     }
+     if (!inframe) doupdate();
+   }
+
    public void command_RECT(int x1, int y1, int x2, int y2, int col) {
      newoffGraphics.setColor(colorindex[col]);
      newoffGraphics.fillRect(x1,y1+tby,x2-x1,y2-y1);

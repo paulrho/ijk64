@@ -149,6 +149,14 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         submenu2.addActionListener(this);
         popup.add(submenu2);
 
+        menuItem = new JMenuItem("C= [Ctrl]");
+        menuItem.addItemListener(this);
+        submenu2.add(menuItem);
+
+        menuItem = new JMenuItem("CTRL [Tab]");
+        menuItem.addItemListener(this);
+        submenu2.add(menuItem);
+
         menuItem = new JMenuItem("CLR (clear screen) [CTRL HOME]");
         menuItem.addItemListener(this);
         submenu2.add(menuItem);
@@ -190,6 +198,15 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         menuItem.addItemListener(this);
         submenu2.add(menuItem);
 
+        submenu2.addSeparator();
+
+        menuItem = new JMenuItem("[CTRL]+[SHIFT]+C - copy");
+        menuItem.addItemListener(this);
+        submenu2.add(menuItem);
+
+        menuItem = new JMenuItem("[CTRL]+[SHIFT]+V - paste");
+        menuItem.addItemListener(this);
+        submenu2.add(menuItem);
 
         submenu2 = new JMenu("Screen...");
         submenu2.setMnemonic(KeyEvent.VK_F);
@@ -835,7 +852,7 @@ if (false) {
         return classString.substring(dotIndex+1);
     }
 
-    /** Returns an ImageIcon, or null if the path was invalid. */
+    // Returns an ImageIcon, or null if the path was invalid. 
     protected static ImageIcon createImageIcon(String path) {
         java.net.URL imgURL = C64PopupMenu.class.getResource(path);
         if (imgURL != null) {

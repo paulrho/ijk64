@@ -205,28 +205,28 @@ class evaluate {
     // all setup ready
   } // end func
 
-   /** show_state displays the state of the machine stack.
-    * It is only printed in verbose mode
-    * <PRE>
-    * 
-    *              D_NUM   D_OP
-    *            +-------+------+-------+
-    *            |  num  |  op  |  func |
-    *            +-------+------+-------+
-    *           0|  5.3  |  +   |  N/A  |
-    *           1|  1.6  |  /   |  N/A  |
-    *           2|  N/A  |  (   |  sin  |
-    * upto=4 -> 3|  0.3  | N/A  |  N/A  |
-    *            +-------+------+-------+
-    *              doing=D_OP^
-    *  state of machine is defined by
-    *    upto
-    *    doing
-    *    is_function
-    *    [stack] num op func
-    * 
-    * </PRE>
-    ****************************************************************************/
+    // show_state displays the state of the machine stack.
+    // It is only printed in verbose mode
+    // <PRE>
+    // 
+    //              D_NUM   D_OP
+    //            +-------+------+-------+
+    //            |  num  |  op  |  func |
+    //            +-------+------+-------+
+    //           0|  5.3  |  +   |  N/A  |
+    //           1|  1.6  |  /   |  N/A  |
+    //           2|  N/A  |  (   |  sin  |
+    // upto=4 -> 3|  0.3  | N/A  |  N/A  |
+    //            +-------+------+-------+
+    //              doing=D_OP^
+    //  state of machine is defined by
+    //    upto
+    //    doing
+    //    is_function
+    //    [stack] num op func
+    // 
+    // </PRE>
+    //
   void show_state() {
     System.out.printf("%s                D_NUM                 D_OP\n",printprefix);
     System.out.printf("%s              +---------------+------+-----+------------------------------+\n",printprefix);
@@ -768,7 +768,7 @@ class evaluate {
     return;         //return answer; 
   }
 
-/** precedence order of operators **/
+// precedence order of operators 
 
   int prec(String oper) {
     oper=oper.toLowerCase(); //20060204pgs

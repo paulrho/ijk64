@@ -147,7 +147,8 @@ String[] basicTokens={
   "LABEL"
   ,"SCREEN","GPRINT","BEGINFRAME","END","CLS","LINE","FSET","SLEEP","ALERT","RECT","FILES"
   ,"LSET"
-  ,"IMAGELOAD","DRAWIMAGE","DESTROYIMAGE"
+  ,"IMAGELOAD","DRAWIMAGE","DESTROYIMAGE","CIRCLE"
+  ,"DIR","PWD","CHDIR","MKDIR"
   ,"ON"
   ,"DEF","LET"
   ,"HELP"
@@ -215,12 +216,18 @@ static final int ST_IMAGELOAD=57;
 static final int ST_DRAWIMAGE=58;
 static final int ST_DESTROYIMAGE=59;
 
-static final int ST_ON=60;
+static final int ST_CIRCLE=60;
+static final int ST_DIR=61;
+static final int ST_PWD=62;
+static final int ST_CHDIR=63;
+static final int ST_MKDIR=64;
 
-static final int ST_DEF=61;
-static final int ST_LET=62;
+static final int ST_ON=65;
 
-static final int ST_HELP=63;
+static final int ST_DEF=66;
+static final int ST_LET=67;
+
+static final int ST_HELP=68;
 
 
 String line;
@@ -768,7 +775,7 @@ boolean ReadStatement() throws BasicException
         machine.print("?help: try this (and press [");
         machine.print("enter])\n");
         machine.print("load\"$\",8   :rem loads internal dir\n");
-        machine.print("load\"$$\",8  :rem loads web directory\n");
+        machine.print("load\"%\",8  :rem loads cloud directory\n");
         machine.print("list\n");
         return true;
         //break;
@@ -824,6 +831,14 @@ boolean ReadStatement() throws BasicException
         GraphicsDevice.command_SLEEP((int)machine.evaluate(keepExpression).num());
         return true;
 
+      case ST_CHDIR:
+        ReadExpression();
+        machine.doCHDIR(keepExpression);
+        return true;
+      case ST_DIR:
+        ReadExpression();
+        machine.listDIR(keepExpression.startsWith("-"));
+        return true;
       case ST_FILES:
         machine.listFiles();
         return true;
@@ -871,6 +886,25 @@ boolean ReadStatement() throws BasicException
         }
         break;
 
+
+      case ST_CIRCLE:
+        if (machine.graphicsDevice!=null) {
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          if (gt.gttop==5) {
+              if (verbose) System.out.printf("about to draw circle\n");
+              machine.graphicsDevice.command_CIRCLE(
+                (int)gt.gtlist[0].num(),
+                (int)gt.gtlist[1].num(),
+                (int)gt.gtlist[2].num(),
+                (int)gt.gtlist[3].num(),
+                (int)gt.gtlist[4].num()
+               );
+              return true;
+          } else
+            throw new BasicException("ILLEGAL QUANTITY ERROR"); // wrong number params
+        }
+        break;
 
       case ST_RECT:
         if (machine.graphicsDevice!=null) {
@@ -1011,11 +1045,9 @@ boolean RSTinitted=false;
 int catop[]=new int[30];
 int chainarray[][]=new int[30][10];
 
-/** 
-    ReadStatementToken will identify a token from the current "pnt" in the basic text.
-    It is very inefficient and should be re-written.
-    A significant portion of the time gets spent in here.
-**/
+    // ReadStatementToken will identify a token from the current "pnt" in the basic text.
+    // It is very inefficient and should be re-written.
+    // A significant portion of the time gets spent in here.
     
 boolean ReadStatementToken() {
   if (!RSTinitted) {
@@ -1966,9 +1998,9 @@ boolean ReadAssignment()
     }
 }
 
-/** for now will read a line number that has a space after it - 
-    will change this to allow no space in the future
-**/
+    // for now will read a line number that has a space after it - 
+    // will change this to allow no space in the future
+
 boolean ReadLineNo() {
     int at=0;
     int chewspace=0;

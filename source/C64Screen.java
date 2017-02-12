@@ -1067,9 +1067,8 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
     return (char) pos;
   }
 
-/** converts a pet screen code back to a pc code
-    this needs more work 
-    **/
+// converts a pet screen code back to a pc code this needs more work 
+
   public char petunconvert(char pos) {
     int ch = 0;
     // new turn 0 into 64
@@ -1203,7 +1202,6 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
    /**
    * This method print a string to the machine screen
    * @param line pet-meta-encoded string
-   * @exception None.
    */
   public void print(String line) { // this is where the strings with quotes around are taken to be the encoded value and printed as such i.e. "(down)" shows as " then a reversed Q then another "
     int i;
