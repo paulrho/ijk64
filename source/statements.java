@@ -148,6 +148,7 @@ String[] basicTokens={
   ,"SCREEN","GPRINT","BEGINFRAME","END","CLS","LINE","FSET","SLEEP","ALERT","RECT","FILES"
   ,"LSET"
   ,"IMAGELOAD","DRAWIMAGE","DESTROYIMAGE","CIRCLE"
+  ,"IMAGESAVE"
   ,"DIR","PWD","CHDIR","MKDIR"
   ,"ON"
   ,"DEF","LET"
@@ -217,17 +218,18 @@ static final int ST_DRAWIMAGE=58;
 static final int ST_DESTROYIMAGE=59;
 
 static final int ST_CIRCLE=60;
-static final int ST_DIR=61;
-static final int ST_PWD=62;
-static final int ST_CHDIR=63;
-static final int ST_MKDIR=64;
+static final int ST_IMAGESAVE=61;
+static final int ST_DIR=62;
+static final int ST_PWD=63;
+static final int ST_CHDIR=64;
+static final int ST_MKDIR=65;
 
-static final int ST_ON=65;
+static final int ST_ON=66;
 
-static final int ST_DEF=66;
-static final int ST_LET=67;
+static final int ST_DEF=67;
+static final int ST_LET=68;
 
-static final int ST_HELP=68;
+static final int ST_HELP=69;
 
 
 String line;
@@ -812,17 +814,34 @@ boolean ReadStatement() throws BasicException
         return true;
 
       case ST_SCREEN:
-        ReadExpression();
-        if (machine.graphicsDevice==null) {
-          machine.graphicsDevice = new GraphicsDevice();
-        } else {
-          // just to make sure it is all reset
-          machine.graphicsDevice.resetDevice();
-          // and make sure it is visible again (in case you closed it)
-          machine.graphicsDevice.setVisible(true);
-          //if (true) machine.machinescreen.setVisible(true);
+        { 
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          if (gt.gttop==3) {
+            if (machine.graphicsDevice==null) {
+              machine.graphicsDevice = new GraphicsDevice(
+                (int)gt.gtlist[1].num(),(int)gt.gtlist[2].num());
+            } else {
+              // just to make sure it is all reset
+              machine.graphicsDevice.resetDevice(
+                (int)gt.gtlist[1].num(),(int)gt.gtlist[2].num());
+              // and make sure it is visible again (in case you closed it)
+              machine.graphicsDevice.setVisible(true);
+              //if (true) machine.machinescreen.setVisible(true);
+            }
+          } else {
+            if (machine.graphicsDevice==null) {
+              machine.graphicsDevice = new GraphicsDevice();
+            } else {
+              // just to make sure it is all reset
+              machine.graphicsDevice.resetDevice();
+              // and make sure it is visible again (in case you closed it)
+              machine.graphicsDevice.setVisible(true);
+              //if (true) machine.machinescreen.setVisible(true);
+            }
+          }
+          return true;
         }
-        return true;
 
       case ST_SLEEP:
         ReadExpression();
@@ -935,7 +954,8 @@ boolean ReadStatement() throws BasicException
                 (int)gt.gtlist[8].num()
                );
               return true;
-          } 
+          } else
+            throw new BasicException("ILLEGAL QUANTITY ERROR"); // wrong number params
         }
         break;
 
@@ -953,7 +973,8 @@ boolean ReadStatement() throws BasicException
                 (int)gt.gtlist[3].num()
                );
               return true;
-          } 
+          } else
+            throw new BasicException("ILLEGAL QUANTITY ERROR"); // wrong number params
         }
         break;
 
@@ -982,6 +1003,21 @@ boolean ReadStatement() throws BasicException
                );
                // special case here! so if it works
               machine.assignment("imgno="+imgno);
+              return true;
+          } else throw new BasicException("INCORRECT PARAMETERS");
+
+        }
+        break;
+
+      case ST_IMAGESAVE:
+        if (machine.graphicsDevice!=null) {
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          if (gt.gttop==1) {
+              if (verbose) System.out.printf("load the image to reference\n");
+              machine.graphicsDevice.command_SAVEIMAGE(
+                gt.str()
+               );
               return true;
           } else throw new BasicException("INCORRECT PARAMETERS");
 

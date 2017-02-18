@@ -21,11 +21,24 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 //  int sizex=1000; 
 //  int sizey=1000;
   int tby=30;
-  int sizex=768;   
-  int sizey=1004+tby;
+  final int default_sizex=768;
+  final int default_sizey=1004+tby;
+  int sizex=default_sizex;   
+  int sizey=default_sizey;
+  
    
-  GraphicsDevice() {
-	super("ijk64 graphics");
+  public GraphicsDevice(int x, int y) {
+    super("ijk64 graphics");
+    initDevice(x,y);
+  }
+  public GraphicsDevice() {
+    super("ijk64 graphics");
+    initDevice(sizex,sizey-tby);
+  }
+  
+  void initDevice(int x, int y) {
+    sizex=x;
+    sizey=tby+y;
     setSize(sizex,sizey);
     setVisible(true); // start AWT painting.
     addMouseListener(this);
@@ -35,14 +48,37 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
     if (true) newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
   }
       
+  void save(String filename) {
+    //Graphics2D cg = newoffImage.createGraphics();
+    try {
+      if (ImageIO.write((BufferedImage)newoffImage, "png", new File(filename+".png"))) {
+        System.out.println("-- saved");
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
   void createDisplay() {
 	   // assumed
   }
 
-  public void resetDevice() {
+  public void resetDevice(int x, int y) {
+    if (x!=sizex || y!=sizey+tby) {
+      // weve changed the size - we need to reset it
+      initDevice(x,y);
+      //sizex=x;
+      //sizey=tby+y;
+      //setSize(sizex,sizey); // should really clear it too?
+      //setVisible(true); // start AWT painting.
+      System.out.printf("Setting graphics size %d %d\n",sizex,sizey);
+    }
     command_ENDFRAME();
     fsize=16;
     topimage=0; //reset this back
+  }
+  public void resetDevice() {
+    resetDevice(default_sizex,default_sizey-tby);
   }
    
   void doupdate() {
@@ -187,7 +223,15 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
    int topimage=0;
    BufferedImage[] imgarray= new BufferedImage[20]; // bad hard code at moment
    
+   public void command_SAVEIMAGE(String filename) {
+       save(filename);
+   }
+
    public int command_LOADIMAGE(String filename) {
+     if (filename.startsWith("+")) { //temp
+       save(filename.substring(1));
+       return -1;
+     }
 	 if (topimage+1==20) return -1;
      try {
        imgarray[topimage] = ImageIO.read(new File(filename));
