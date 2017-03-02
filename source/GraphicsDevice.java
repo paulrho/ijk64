@@ -64,7 +64,7 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
   }
 
   public void resetDevice(int x, int y) {
-    if (x!=sizex || y!=sizey+tby) {
+    if (x!=sizex || y+tby!=sizey) {
       // weve changed the size - we need to reset it
       initDevice(x,y);
       //sizex=x;

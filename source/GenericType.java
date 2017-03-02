@@ -10,7 +10,7 @@
 // Add EVAL$ function
 // Fix insertspace etc modes - they were buggy
 //
-// Revision 1.7  2006/02/15 01:54:04  citecpgs
+// Revision 1.7  2006/02/15 01:54:04  ctpgs
 // Standard header
 //
 //

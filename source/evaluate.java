@@ -43,7 +43,7 @@
 // Add atn() as a the function atan.
 // Add the string trying to interpret to the syntax error 001 & 002 lines
 //
-// Revision 1.22  2006/02/17 07:03:10  citecpgs
+// Revision 1.22  2006/02/17 07:03:10  ctpgs
 // Add the ability to define functions and use defined functions
 //
 // Revision 1.21  2006/02/15 21:19:34  pgs
@@ -54,7 +54,7 @@
 // Also, allow partial matches of expressions when flagged
 // and stop parsing at that point (setting the position of the next bit in an accessible variable)
 //
-// Revision 1.20  2006/02/15 01:52:47  citecpgs
+// Revision 1.20  2006/02/15 01:52:47  ctpgs
 // Standard header
 //
 //

@@ -53,7 +53,7 @@
 // variable and the stack is squished up.
 // this allows for un-nexted fori forj fork fori nexti nextk nextj to work properly
 //
-// Revision 1.22  2006/02/16 05:53:51  citecpgs
+// Revision 1.22  2006/02/16 05:53:51  ctpgs
 // Correctly check the loop finish test depending on whether +ve or -ve step value
 //
 // Revision 1.21  2006/02/15 22:49:09  pgs
@@ -63,7 +63,7 @@
 // Add a evaluate_partial which simply calls
 // evaluate.interpret_string_partial
 //
-// Revision 1.19  2006/02/15 01:54:46  citecpgs
+// Revision 1.19  2006/02/15 01:54:46  ctpgs
 // Standard header
 //
 //

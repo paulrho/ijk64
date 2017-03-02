@@ -58,10 +58,10 @@
 // date: 2007/03/24 01:07:51;  author: pgs;  state: Exp;  lines: +9 -1
 // Modifications for popup menu
 
-// Revision 1.18  2006/02/21 06:05:18  citecpgs
+// Revision 1.18  2006/02/21 06:05:18  ctpgs
 // Use a print instead of a println in list
 //
-// Revision 1.17  2006/02/20 07:36:02  citecpgs
+// Revision 1.17  2006/02/20 07:36:02  ctpgs
 // Comment on background only
 //
 // Revision 1.16  2006/02/19 22:26:19  pgs
@@ -70,7 +70,7 @@
 // Revision 1.15  2006/02/17 14:05:51  pgs
 // Quick change of transparency and frame
 //
-// Revision 1.14  2006/02/15 01:50:33  citecpgs
+// Revision 1.14  2006/02/15 01:50:33  ctpgs
 // Standard header
 //
 //

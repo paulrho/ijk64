@@ -59,15 +59,15 @@
 // Revision 1.24.1.3.1.2  2006/02/21 22:24:16  pgs
 // More changes for the special test version
 //
-// Revision 1.24.1.3.1.1  2006/02/21 06:04:26  citecpgs
+// Revision 1.24.1.3.1.1  2006/02/21 06:04:26  ctpgs
 // New sub-sub-version experimenting with quoting
 //
-// Revision 1.24.1.3  2006/02/20 07:36:41  citecpgs
+// Revision 1.24.1.3  2006/02/20 07:36:41  ctpgs
 // Allow stetched (scaley) characters to simulate 80x25 mode to an extent
 // Correctly rezero (new) the screen buffer when changing anything with transparent mode
 // (the transparent attribute needs to be cleared)
 //
-// Revision 1.24.1.2  2006/02/15 04:58:06  citecpgs
+// Revision 1.24.1.2  2006/02/15 04:58:06  ctpgs
 // Remove the last screen CLEARed pscreenchar on Reshape screen - it was leaving things behind
 // I think this was not correct to do this, it now appears to work okay.  More research probably required.
 //
@@ -116,34 +116,34 @@
 // Enhancements for meta characters in println strings
 //---
 //
-// Revision 1.20.1.7  2006/02/13 04:36:24  citecpgs
+// Revision 1.20.1.7  2006/02/13 04:36:24  ctpgs
 // Allow character set selection from with running program
 // Flash time now a variable and set down to 250ms (from 500ms) which is similar to the real (emulated version)
 // Add (home) keyword
 // Make cursor do revese char (like the real) instead of just a block
 //
-// Revision 1.20.1.6  2006/02/09 01:23:46  citecpgs
+// Revision 1.20.1.6  2006/02/09 01:23:46  ctpgs
 // Enable scale=3 to allow screens three times wider than standard (using new _3 files too)
 //
-// Revision 1.20.1.5  2006/02/07 23:16:34  citecpgs
+// Revision 1.20.1.5  2006/02/07 23:16:34  ctpgs
 // Allow control C break and experiment with lower case graphics
 //
-// Revision 1.20.1.4  2006/02/06 06:01:20  citecpgs
+// Revision 1.20.1.4  2006/02/06 06:01:20  ctpgs
 // Changes to allow input a line work correctly
 //
-// Revision 1.20.1.3  2006/02/03 21:17:48  citecpgs
+// Revision 1.20.1.3  2006/02/03 21:17:48  ctpgs
 // More changes for detokenised file and making printing chars print the right ones
 //
-// Revision 1.20.1.2  2006/02/03 12:40:04  citecpgs
+// Revision 1.20.1.2  2006/02/03 12:40:04  ctpgs
 // More changes to allow reading of detokenised basic program from another source
 //
-// Revision 1.20.1.1  2006/02/03 06:09:07  citecpgs
+// Revision 1.20.1.1  2006/02/03 06:09:07  ctpgs
 // Branched version, to make changes for C64 (JEBI).
 // Allows different escape character for special chars (keywords) uses round brackets
 // instead of square  (as well) as to allow for the version of genesdt that was detokenised
 // by another program in a different way
 //
-// Revision 1.20  2005/06/16 06:09:27  citecpgs
+// Revision 1.20  2005/06/16 06:09:27  ctpgs
 // Resubmitted version - appears to be that last version of C64Screen used with GenesJCPmA (but was never checked in)
 // The is also the latest untouched version, before changes were made for C64 (JEBI)
 //
@@ -622,7 +622,8 @@ class C64Screen extends JFrame
         int cx=(e.getX()-25*scale)/(8*scale);
         int cy=(e.getY()-25*scaley-topY)/(8*scaley);      
         if (cx>=0 && cx<maxX && cy>=0 && cy<maxY)
-          gotoXY(cx,cy);
+          gotoXY(cx,cy); 
+          print_quotes_on=false; // if we move the cursor - just cancel this mode
           /* better - if nothing is on the line, then move to the start - not implemented yet */          
       }
     }
@@ -1792,6 +1793,8 @@ if (verbose) System.out.printf("backspacing (new)\n\r");
         x=cursX;
         y=cursY;
 
+        //if (screenchar[x][y]=='"') print_quotes_on=!print_quotes_on;
+        if (screenchar[x][y]=='"') print_quotes_on=false; // no just always clear it
         while (true) {
           nx=x+1; ny=y; if (nx==maxX) { if (contmark[y]==1) { nx=0; ny++; } else { ny=maxY; } }
           if (ny==maxY) { 

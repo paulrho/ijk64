@@ -53,14 +53,14 @@
 // Fixup end of file - exit nicely
 // fixup syntax error reporting
 //
-// Revision 1.22.1.1  2006/02/24 04:43:53  citecpgs
+// Revision 1.22.1.1  2006/02/24 04:43:53  ctpgs
 // Testing an alternative reading method
 //
 // Revision 1.22  2006/02/21 22:24:38  pgs
 // Changes related to pre-tokenising text within strings.
 // This has not been made into a subversion, as it could be switched on and off easily with a boolean (not yet, but could be).
 //
-// Revision 1.21  2006/02/20 07:38:31  citecpgs
+// Revision 1.21  2006/02/20 07:38:31  ctpgs
 // Add META-SCALEY and META-BGTRANS keywords
 //
 // Revision 1.20  2006/02/19 22:33:35  pgs
@@ -70,7 +70,7 @@
 // Fixed for loop, chew up spaces before variable.
 // New print method that allows partial evaluation of expressions.
 //
-// Revision 1.18  2006/02/15 01:55:18  citecpgs
+// Revision 1.18  2006/02/15 01:55:18  ctpgs
 // Standard header
 //
 //
@@ -840,6 +840,7 @@ boolean ReadStatement() throws BasicException
               //if (true) machine.machinescreen.setVisible(true);
             }
           }
+          if (true) machine.machinescreen.setVisible(true); // refocus on main
           return true;
         }
 
