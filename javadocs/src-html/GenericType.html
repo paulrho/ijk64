@@ -1,0 +1,210 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/////////////////////////////////////////////////////////////////////////////////<a name="line.1"></a>
+<span class="sourceLineNo">002</span>//<a name="line.2"></a>
+<span class="sourceLineNo">003</span>// $Id: GenericType.java,v 1.9 2012/04/18 06:07:53 pgs Exp $<a name="line.3"></a>
+<span class="sourceLineNo">004</span>//<a name="line.4"></a>
+<span class="sourceLineNo">005</span>// $Log: GenericType.java,v $<a name="line.5"></a>
+<span class="sourceLineNo">006</span>// Revision 1.9  2012/04/18 06:07:53  pgs<a name="line.6"></a>
+<span class="sourceLineNo">007</span>// Adding graphics capability<a name="line.7"></a>
+<span class="sourceLineNo">008</span>//<a name="line.8"></a>
+<span class="sourceLineNo">009</span>// Revision 1.8  2011/07/03 23:00:20  pgs<a name="line.9"></a>
+<span class="sourceLineNo">010</span>// Add EVAL$ function<a name="line.10"></a>
+<span class="sourceLineNo">011</span>// Fix insertspace etc modes - they were buggy<a name="line.11"></a>
+<span class="sourceLineNo">012</span>//<a name="line.12"></a>
+<span class="sourceLineNo">013</span>// Revision 1.7  2006/02/15 01:54:04  ctpgs<a name="line.13"></a>
+<span class="sourceLineNo">014</span>// Standard header<a name="line.14"></a>
+<span class="sourceLineNo">015</span>//<a name="line.15"></a>
+<span class="sourceLineNo">016</span>//<a name="line.16"></a>
+<span class="sourceLineNo">017</span>/////////////////////////////////////////////////////////////////////////////////<a name="line.17"></a>
+<span class="sourceLineNo">018</span><a name="line.18"></a>
+<span class="sourceLineNo">019</span>class GenericType {<a name="line.19"></a>
+<span class="sourceLineNo">020</span><a name="line.20"></a>
+<span class="sourceLineNo">021</span>  static final int ST_NUM=0;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>  static final int ST_STRING=1;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>  static final int ST_LIST=10; // these are comma separated (possible mixed) values<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>  int type;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>  double aval;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>  String astring;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>  GenericType gtlist[]; // an array of generic types<a name="line.28"></a>
+<span class="sourceLineNo">029</span>  int gttop=1; // normally is initialised as a singleton<a name="line.29"></a>
+<span class="sourceLineNo">030</span><a name="line.30"></a>
+<span class="sourceLineNo">031</span>  GenericType(GenericType base)<a name="line.31"></a>
+<span class="sourceLineNo">032</span>  {<a name="line.32"></a>
+<span class="sourceLineNo">033</span>    type=base.type;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>    aval=base.aval;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>    if (type==ST_STRING) astring=new String(base.astring);<a name="line.35"></a>
+<span class="sourceLineNo">036</span>  }<a name="line.36"></a>
+<span class="sourceLineNo">037</span><a name="line.37"></a>
+<span class="sourceLineNo">038</span>  GenericType()<a name="line.38"></a>
+<span class="sourceLineNo">039</span>  { //default<a name="line.39"></a>
+<span class="sourceLineNo">040</span>    type=ST_NUM;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>    aval=0.0;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>    //astring="";<a name="line.42"></a>
+<span class="sourceLineNo">043</span>  }<a name="line.43"></a>
+<span class="sourceLineNo">044</span><a name="line.44"></a>
+<span class="sourceLineNo">045</span>  GenericType(String thestring) {<a name="line.45"></a>
+<span class="sourceLineNo">046</span>    type=ST_STRING;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>    astring=thestring;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>  }<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span>  GenericType(double val) {<a name="line.50"></a>
+<span class="sourceLineNo">051</span>    type=ST_NUM;<a name="line.51"></a>
+<span class="sourceLineNo">052</span>    aval=val;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>  }<a name="line.53"></a>
+<span class="sourceLineNo">054</span><a name="line.54"></a>
+<span class="sourceLineNo">055</span>  // here we add to a list<a name="line.55"></a>
+<span class="sourceLineNo">056</span>  void add(double val) {<a name="line.56"></a>
+<span class="sourceLineNo">057</span>    //add a generic type<a name="line.57"></a>
+<span class="sourceLineNo">058</span>   if (gttop==1) {<a name="line.58"></a>
+<span class="sourceLineNo">059</span>     gtlist=new GenericType[50]; // empty types // funny way to do this - watch that this doesnt get blown<a name="line.59"></a>
+<span class="sourceLineNo">060</span>     gtlist[0]=new GenericType(this); // duplicate this generic type and put it on the list<a name="line.60"></a>
+<span class="sourceLineNo">061</span>   }<a name="line.61"></a>
+<span class="sourceLineNo">062</span>   // add to list<a name="line.62"></a>
+<span class="sourceLineNo">063</span>   gtlist[gttop]=new GenericType(val);<a name="line.63"></a>
+<span class="sourceLineNo">064</span>   gttop++;<a name="line.64"></a>
+<span class="sourceLineNo">065</span>  }<a name="line.65"></a>
+<span class="sourceLineNo">066</span><a name="line.66"></a>
+<span class="sourceLineNo">067</span>  void add(String thestring) {<a name="line.67"></a>
+<span class="sourceLineNo">068</span>    //add a generic type<a name="line.68"></a>
+<span class="sourceLineNo">069</span>   if (gttop==1) {<a name="line.69"></a>
+<span class="sourceLineNo">070</span>     gtlist=new GenericType[50]; // empty types // dont forget this one too!<a name="line.70"></a>
+<span class="sourceLineNo">071</span>     gtlist[0]=new GenericType(this); // duplicate this generic type and put it on the list<a name="line.71"></a>
+<span class="sourceLineNo">072</span>   }<a name="line.72"></a>
+<span class="sourceLineNo">073</span>   // add to list<a name="line.73"></a>
+<span class="sourceLineNo">074</span>   gtlist[gttop]=new GenericType(thestring);<a name="line.74"></a>
+<span class="sourceLineNo">075</span>   gttop++;<a name="line.75"></a>
+<span class="sourceLineNo">076</span>  }<a name="line.76"></a>
+<span class="sourceLineNo">077</span><a name="line.77"></a>
+<span class="sourceLineNo">078</span>  boolean isNum() {<a name="line.78"></a>
+<span class="sourceLineNo">079</span>    if (type==ST_NUM) { return true; } else { return false; }<a name="line.79"></a>
+<span class="sourceLineNo">080</span>  }<a name="line.80"></a>
+<span class="sourceLineNo">081</span><a name="line.81"></a>
+<span class="sourceLineNo">082</span>  double num() {<a name="line.82"></a>
+<span class="sourceLineNo">083</span>    return aval;<a name="line.83"></a>
+<span class="sourceLineNo">084</span>  }<a name="line.84"></a>
+<span class="sourceLineNo">085</span><a name="line.85"></a>
+<span class="sourceLineNo">086</span>  String str() {<a name="line.86"></a>
+<span class="sourceLineNo">087</span>    return astring;<a name="line.87"></a>
+<span class="sourceLineNo">088</span>  }<a name="line.88"></a>
+<span class="sourceLineNo">089</span><a name="line.89"></a>
+<span class="sourceLineNo">090</span>  // interesting puzzle here -<a name="line.90"></a>
+<span class="sourceLineNo">091</span>  // this is GenericType and printing it could be any format so desired<a name="line.91"></a>
+<span class="sourceLineNo">092</span>  // but as I want this in a C64 format, we will use that<a name="line.92"></a>
+<span class="sourceLineNo">093</span>  // perhaps there should be multiple output formats available?<a name="line.93"></a>
+<span class="sourceLineNo">094</span>  String print() {<a name="line.94"></a>
+<span class="sourceLineNo">095</span>    if (isNum()) {<a name="line.95"></a>
+<span class="sourceLineNo">096</span>      // if it is an interger, return no trailing decimal<a name="line.96"></a>
+<span class="sourceLineNo">097</span>      //return new Double(aval).toString();<a name="line.97"></a>
+<span class="sourceLineNo">098</span>      if (aval-(int)aval==0) {<a name="line.98"></a>
+<span class="sourceLineNo">099</span>        if (aval&gt;=0.0) {<a name="line.99"></a>
+<span class="sourceLineNo">100</span>          return " "+new Integer((int)aval).toString()+" ";<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        } else {<a name="line.101"></a>
+<span class="sourceLineNo">102</span>          return new Integer((int)aval).toString()+" ";<a name="line.102"></a>
+<span class="sourceLineNo">103</span>        }<a name="line.103"></a>
+<span class="sourceLineNo">104</span><a name="line.104"></a>
+<span class="sourceLineNo">105</span>      } else {<a name="line.105"></a>
+<span class="sourceLineNo">106</span>        // just for now - put it in lower case (e)<a name="line.106"></a>
+<span class="sourceLineNo">107</span>        if (aval&gt;=0.0) {<a name="line.107"></a>
+<span class="sourceLineNo">108</span>          return " "+new Double(aval).toString().toLowerCase()+" ";<a name="line.108"></a>
+<span class="sourceLineNo">109</span>        } else {<a name="line.109"></a>
+<span class="sourceLineNo">110</span>          return new Double(aval).toString().toLowerCase()+" ";<a name="line.110"></a>
+<span class="sourceLineNo">111</span>        }<a name="line.111"></a>
+<span class="sourceLineNo">112</span>      }<a name="line.112"></a>
+<span class="sourceLineNo">113</span>    } else if (type==ST_STRING) {<a name="line.113"></a>
+<span class="sourceLineNo">114</span>      if (false) { System.out.printf("Returning a String\n"); }<a name="line.114"></a>
+<span class="sourceLineNo">115</span>      return astring;<a name="line.115"></a>
+<span class="sourceLineNo">116</span>    } else if (type==ST_LIST) {<a name="line.116"></a>
+<span class="sourceLineNo">117</span>      // in turn, separated by commas, display all:<a name="line.117"></a>
+<span class="sourceLineNo">118</span>      String building="";<a name="line.118"></a>
+<span class="sourceLineNo">119</span>      for (int i=0; i&lt;gttop; ++i) {<a name="line.119"></a>
+<span class="sourceLineNo">120</span>        if (i!=0) { building+=","; }<a name="line.120"></a>
+<span class="sourceLineNo">121</span>        building+=gtlist[i].print();<a name="line.121"></a>
+<span class="sourceLineNo">122</span>      }<a name="line.122"></a>
+<span class="sourceLineNo">123</span>      return building;<a name="line.123"></a>
+<span class="sourceLineNo">124</span>    } else {<a name="line.124"></a>
+<span class="sourceLineNo">125</span>      return "";<a name="line.125"></a>
+<span class="sourceLineNo">126</span>    }<a name="line.126"></a>
+<span class="sourceLineNo">127</span>  }<a name="line.127"></a>
+<span class="sourceLineNo">128</span><a name="line.128"></a>
+<span class="sourceLineNo">129</span>  boolean equals(double val) {<a name="line.129"></a>
+<span class="sourceLineNo">130</span>    if (isNum()) { <a name="line.130"></a>
+<span class="sourceLineNo">131</span>      return val==aval;<a name="line.131"></a>
+<span class="sourceLineNo">132</span>    } else { return false; }<a name="line.132"></a>
+<span class="sourceLineNo">133</span>  }<a name="line.133"></a>
+<span class="sourceLineNo">134</span>}<a name="line.134"></a>
+<span class="sourceLineNo">135</span><a name="line.135"></a>
+<span class="sourceLineNo">136</span>/////////<a name="line.136"></a>
+<span class="sourceLineNo">137</span>// END //<a name="line.137"></a>
+<span class="sourceLineNo">138</span>/////////<a name="line.138"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

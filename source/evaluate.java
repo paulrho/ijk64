@@ -490,7 +490,7 @@ class evaluate {
         
       } else if (function.equals("pos")) {
         // tap into the machine - I think this gives the position on the screen?
-k        // we need to talk to the machine to get the current cursor setting
+        // we need to talk to the machine to get the current cursor setting
         int cursx=0;
         if (using_machine!=null) {
           cursx=using_machine.machinescreen.cursX;
