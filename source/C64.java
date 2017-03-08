@@ -58,10 +58,10 @@
 // date: 2007/03/24 01:07:51;  author: pgs;  state: Exp;  lines: +9 -1
 // Modifications for popup menu
 
-// Revision 1.18  2006/02/21 06:05:18  pgs
+// Revision 1.18  2006/02/21 06:05:18  ctpgs
 // Use a print instead of a println in list
 //
-// Revision 1.17  2006/02/20 07:36:02  pgs
+// Revision 1.17  2006/02/20 07:36:02  ctpgs
 // Comment on background only
 //
 // Revision 1.16  2006/02/19 22:26:19  pgs
@@ -70,7 +70,7 @@
 // Revision 1.15  2006/02/17 14:05:51  pgs
 // Quick change of transparency and frame
 //
-// Revision 1.14  2006/02/15 01:50:33  pgs
+// Revision 1.14  2006/02/15 01:50:33  ctpgs
 // Standard header
 //
 //
@@ -99,6 +99,7 @@ class C64 {
 
   public C64(String args[]) {
     boolean runImmediate=false;
+    boolean specialGOTO=false;
     boolean exitImmediate=false;
 
     // transparent background
@@ -114,6 +115,7 @@ class C64 {
 
     boolean blankscreen=false;
     String filename="";
+    String specialcommand="";
 
     for (int i=0; i<args.length; ++i) {
       if (args[i].length()>=2 && args[i].substring(0,1).equals("-")) {
@@ -123,14 +125,22 @@ class C64 {
           System.out.printf("Version = %s\n", version.programVersion);
         } else if (args[i].substring(0,2).equals("-r")) {
           runImmediate=true;
+        } else if (args[i].length()>=3 && args[i].substring(0,2).startsWith("-a")) {
+            specialGOTO=true;
+            specialcommand=args[i].substring(2);
         } else if (args[i].substring(0,2).equals("-h")) {
           System.out.printf("program [options] [filename]\n");
+          System.out.printf("  -b : blank screen - no banner\n");
+          System.out.printf("  -c : centre screen\n");
           System.out.printf("  -h : help\n");
           System.out.printf("  -n : no frame\n");
-          System.out.printf("  -b : blank screen - no banner\n");
           System.out.printf("  -r : run immediately\n");
+          System.out.printf("  -a\"commands\" : autotest run:commands\n");
           System.out.printf("  -t : transparent background\n");
+          System.out.printf("  -v : version\n");
           System.out.printf("  -x : exit immediately\n");
+          System.out.printf("  -2 : double size\n");
+          System.out.printf("  -3 : triple size\n");
         } else if (args[i].substring(0,2).equals("-b")) {
           blankscreen=true;
         } else if (args[i].substring(0,2).equals("-n")) {
@@ -139,6 +149,14 @@ class C64 {
           C64Screen.static_bgtrans=true;
         } else if (args[i].substring(0,2).equals("-x")) {
           exitImmediate=true;
+        } else if (args[i].substring(0,2).equals("-2")) {
+          C64Screen.static_scale=2;
+        } else if (args[i].substring(0,2).equals("-3")) {
+          //screen.setScale(3);
+          C64Screen.static_scale=3;
+        } else if (args[i].substring(0,2).equals("-c")) {
+          //screen.setLocationRelativeTo(null); 
+          C64Screen.static_centre=true;
         }
       } else {
         if (args[i].length()>=1 && !args[i].substring(0,1).equals("-")) {
@@ -149,7 +167,14 @@ class C64 {
 
 //    machine=new Machine(screen=new C64Screen("C64")); // new way of attaching screen
     machine=new Machine(screen=new C64Screen("ijk64")); // new way of attaching screen
+    C64Screen.static_centre=false;
     C64PopupMenu pop=new C64PopupMenu(machine,screen); // keep a reference to it for returning things
+
+    // post initialise
+    //for (int i=0; i<args.length; ++i) {
+      //if (args[i].length()>=2 && args[i].substring(0,1).equals("-")) {
+      //}
+    //}
 
     // set the icon (doesnt work with ico but does with png
     //    java.net.URL url = ClassLoader.getSystemResource("images/c64.ico");
@@ -161,11 +186,27 @@ class C64 {
     //machine.runOS // gets a line and executes it (including running program)
 
     if (!blankscreen) screen.startupscreen(); else screen.startupscreen_blank();
-    if (filename.length()>=1) machine.loadProgram(filename); // load it in
-    if (runImmediate) {
-      machine.runProgram(); // we now execute the statements upon a machine
-    }
-
+    for (int i=0; i<args.length; ++i) 
+      if (args[i].length()>=1 && !args[i].substring(0,1).equals("-")) {
+        filename=args[i];
+        if (filename.length()>=1) machine.loadProgram(filename); // load it in
+        if (runImmediate) {
+          machine.runProgram(); // we now execute the statements upon a machine
+        }
+        if (specialGOTO) {
+          // used for autotesting, will think of more eligant soln
+          try {
+          screen.println("[CR]ready.");
+          //machine.contProgram("5000"); // we now execute the statements upon a machine
+          // machine.runImmediate("goto5000"); // and again, upon a machine
+          machine.runImmediate(specialcommand); // and again, upon a machine
+          } catch(Exception e) { System.out.printf("GOTO5000 failed\n"); }
+          //if (!blankscreen) screen.startupscreen(); else screen.startupscreen_blank();
+          // really should reset machine
+          String command="new:meta-charset0:meta-rows25:meta-cols40:meta-scale1:meta-scaley1:print\"(clr)\"";
+          machine.runImmediate(command.trim()); // and again, upon a machine
+        }
+      } 
     // this has now become the IMMEDIATE interpreter
     boolean displayReady=true;
     while (!exitImmediate) {

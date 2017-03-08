@@ -1,0 +1,321 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/////////////////////////////////////////////////////////////////////////////////<a name="line.1"></a>
+<span class="sourceLineNo">002</span>//<a name="line.2"></a>
+<span class="sourceLineNo">003</span>// $Id: ev.java,v 1.17 2007/04/18 09:37:19 pgs Exp $<a name="line.3"></a>
+<span class="sourceLineNo">004</span>//<a name="line.4"></a>
+<span class="sourceLineNo">005</span>// $Log: ev.java,v $<a name="line.5"></a>
+<span class="sourceLineNo">006</span>// Revision 1.17  2007/04/18 09:37:19  pgs<a name="line.6"></a>
+<span class="sourceLineNo">007</span>// More refactoring with regards to creating program/immediate modes<a name="line.7"></a>
+<span class="sourceLineNo">008</span>//<a name="line.8"></a>
+<span class="sourceLineNo">009</span>// Revision 1.16  2007/04/17 09:22:33  pgs<a name="line.9"></a>
+<span class="sourceLineNo">010</span>// Adding ability to restart with CONT<a name="line.10"></a>
+<span class="sourceLineNo">011</span>// moved all statments into statements/Machine engine<a name="line.11"></a>
+<span class="sourceLineNo">012</span>//<a name="line.12"></a>
+<span class="sourceLineNo">013</span>// Revision 1.15  2007/04/16 21:31:00  pgs<a name="line.13"></a>
+<span class="sourceLineNo">014</span>// Complete exception creation, ratify error messages, refactor code<a name="line.14"></a>
+<span class="sourceLineNo">015</span>// to use exceptions (makes code clearer)<a name="line.15"></a>
+<span class="sourceLineNo">016</span>//<a name="line.16"></a>
+<span class="sourceLineNo">017</span>// Revision 1.14  2007/04/13 08:59:01  pgs<a name="line.17"></a>
+<span class="sourceLineNo">018</span>// fix verbose display for assign too<a name="line.18"></a>
+<span class="sourceLineNo">019</span>//<a name="line.19"></a>
+<span class="sourceLineNo">020</span>// Revision 1.13  2007/04/11 20:12:33  pgs<a name="line.20"></a>
+<span class="sourceLineNo">021</span>// Added the option of running a Machine attached (stored variables etc)<a name="line.21"></a>
+<span class="sourceLineNo">022</span>//<a name="line.22"></a>
+<span class="sourceLineNo">023</span>// Revision 1.12  2007/04/11 17:57:58  pgs<a name="line.23"></a>
+<span class="sourceLineNo">024</span>// clearing verbose stack display (to the same as comment in code)<a name="line.24"></a>
+<span class="sourceLineNo">025</span>//<a name="line.25"></a>
+<span class="sourceLineNo">026</span>// Revision 1.10  2007/04/06 23:34:20  pgs<a name="line.26"></a>
+<span class="sourceLineNo">027</span>// move comment<a name="line.27"></a>
+<span class="sourceLineNo">028</span>//<a name="line.28"></a>
+<span class="sourceLineNo">029</span>// Revision 1.9  2007/04/06 23:32:48  pgs<a name="line.29"></a>
+<span class="sourceLineNo">030</span>// comments<a name="line.30"></a>
+<span class="sourceLineNo">031</span>//<a name="line.31"></a>
+<span class="sourceLineNo">032</span>// Revision 1.8  2007/04/06 23:30:18  pgs<a name="line.32"></a>
+<span class="sourceLineNo">033</span>// help comment<a name="line.33"></a>
+<span class="sourceLineNo">034</span>//<a name="line.34"></a>
+<span class="sourceLineNo">035</span>// Revision 1.7  2007/04/06 23:29:31  pgs<a name="line.35"></a>
+<span class="sourceLineNo">036</span>// Fix iterations (it was actually doing it twice for single and 101 for 100)<a name="line.36"></a>
+<span class="sourceLineNo">037</span>//<a name="line.37"></a>
+<span class="sourceLineNo">038</span>// Revision 1.6  2007/04/06 23:25:07  pgs<a name="line.38"></a>
+<span class="sourceLineNo">039</span>// More options and help listing<a name="line.39"></a>
+<span class="sourceLineNo">040</span>//<a name="line.40"></a>
+<span class="sourceLineNo">041</span>// Revision 1.5  2006/02/15 01:53:25  ctpgs<a name="line.41"></a>
+<span class="sourceLineNo">042</span>// Standard header<a name="line.42"></a>
+<span class="sourceLineNo">043</span>//<a name="line.43"></a>
+<span class="sourceLineNo">044</span>//<a name="line.44"></a>
+<span class="sourceLineNo">045</span>/////////////////////////////////////////////////////////////////////////////////<a name="line.45"></a>
+<span class="sourceLineNo">046</span><a name="line.46"></a>
+<span class="sourceLineNo">047</span>/**<a name="line.47"></a>
+<span class="sourceLineNo">048</span>     evaluate test harness<a name="line.48"></a>
+<span class="sourceLineNo">049</span>       // 100 x  82 equations = about 40 seconds, is : 205 equations per second on yoink &lt;BR&gt;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>       // 100 x  72 equations  non verbose = about 2.0 seconds, is : 3600 equations per second on sirius &lt;BR&gt;<a name="line.50"></a>
+<span class="sourceLineNo">051</span>       // 101 x  84 equations  non verbose = about 3.79 seconds, is : 2238 equations per second on sirius &lt;BR&gt;<a name="line.51"></a>
+<span class="sourceLineNo">052</span>&lt;PRE&gt;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>       1000 x 84 on sirius 20070407<a name="line.53"></a>
+<span class="sourceLineNo">054</span>         real    0m29.499s<a name="line.54"></a>
+<span class="sourceLineNo">055</span>         user    0m17.571s<a name="line.55"></a>
+<span class="sourceLineNo">056</span>         sys     0m7.324s<a name="line.56"></a>
+<span class="sourceLineNo">057</span>       --------------<a name="line.57"></a>
+<span class="sourceLineNo">058</span>       2.255s (with no stdout about 9sec with std out!)<a name="line.58"></a>
+<span class="sourceLineNo">059</span>       84000 equations = 37,333 equations per second!<a name="line.59"></a>
+<span class="sourceLineNo">060</span>       ~ 25us per equations<a name="line.60"></a>
+<span class="sourceLineNo">061</span><a name="line.61"></a>
+<span class="sourceLineNo">062</span>&lt;/PRE&gt;<a name="line.62"></a>
+<span class="sourceLineNo">063</span> **/<a name="line.63"></a>
+<span class="sourceLineNo">064</span><a name="line.64"></a>
+<span class="sourceLineNo">065</span>class ev {<a name="line.65"></a>
+<span class="sourceLineNo">066</span><a name="line.66"></a>
+<span class="sourceLineNo">067</span>  ev(String[] args) throws EvaluateException<a name="line.67"></a>
+<span class="sourceLineNo">068</span>  {<a name="line.68"></a>
+<span class="sourceLineNo">069</span>    evaluate evaluate_engine;<a name="line.69"></a>
+<span class="sourceLineNo">070</span>    boolean use_machine=false;<a name="line.70"></a>
+<span class="sourceLineNo">071</span><a name="line.71"></a>
+<span class="sourceLineNo">072</span>    for (int i=0; i&lt;args.length; ++i) {<a name="line.72"></a>
+<span class="sourceLineNo">073</span>      if (args[i].substring(0,1).equals("-")) {<a name="line.73"></a>
+<span class="sourceLineNo">074</span>        if (args[i].length()&gt;=2 &amp;&amp; args[i].substring(0,2).equals("-m")) {<a name="line.74"></a>
+<span class="sourceLineNo">075</span>          use_machine=true;<a name="line.75"></a>
+<span class="sourceLineNo">076</span>        }<a name="line.76"></a>
+<span class="sourceLineNo">077</span>      }<a name="line.77"></a>
+<span class="sourceLineNo">078</span>    }<a name="line.78"></a>
+<span class="sourceLineNo">079</span>    if (!use_machine) {<a name="line.79"></a>
+<span class="sourceLineNo">080</span>      evaluate_engine = new evaluate();  // create engine<a name="line.80"></a>
+<span class="sourceLineNo">081</span>    } else {<a name="line.81"></a>
+<span class="sourceLineNo">082</span>      Machine machine=new Machine();<a name="line.82"></a>
+<span class="sourceLineNo">083</span>      evaluate_engine = machine.evaluate_engine; // done inside initialise_engines - which is done now on creation of the machine<a name="line.83"></a>
+<span class="sourceLineNo">084</span>     <a name="line.84"></a>
+<span class="sourceLineNo">085</span>      // to make equivalent to stand alone<a name="line.85"></a>
+<span class="sourceLineNo">086</span>      evaluate_engine.interpret_string_with_assignment("x=7");<a name="line.86"></a>
+<span class="sourceLineNo">087</span>      evaluate_engine.interpret_string_with_assignment("a=1");<a name="line.87"></a>
+<span class="sourceLineNo">088</span>      evaluate_engine.interpret_string_with_assignment("pi=mathpi");<a name="line.88"></a>
+<span class="sourceLineNo">089</span>    }<a name="line.89"></a>
+<span class="sourceLineNo">090</span>    boolean has_parameter=false;<a name="line.90"></a>
+<span class="sourceLineNo">091</span>    boolean do_many=false;<a name="line.91"></a>
+<span class="sourceLineNo">092</span>    boolean is_assignment=false;<a name="line.92"></a>
+<span class="sourceLineNo">093</span>    int iterations=1;<a name="line.93"></a>
+<span class="sourceLineNo">094</span><a name="line.94"></a>
+<span class="sourceLineNo">095</span>    // switch or negative number???<a name="line.95"></a>
+<span class="sourceLineNo">096</span>    for (int i=0; i&lt;args.length; ++i) {<a name="line.96"></a>
+<span class="sourceLineNo">097</span>      if (args[i].length()&gt;=2 &amp;&amp; args[i].substring(0,1).equals("-")) {<a name="line.97"></a>
+<span class="sourceLineNo">098</span>        if (args[i].substring(0,2).equals("-v")) {<a name="line.98"></a>
+<span class="sourceLineNo">099</span>          evaluate_engine.verbose=true;<a name="line.99"></a>
+<span class="sourceLineNo">100</span>        } else if (args[i].substring(0,2).equals("-q")) {<a name="line.100"></a>
+<span class="sourceLineNo">101</span>          evaluate_engine.verbose=false;<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        } else if (args[i].substring(0,2).equals("-a")) {<a name="line.102"></a>
+<span class="sourceLineNo">103</span>          is_assignment=true;<a name="line.103"></a>
+<span class="sourceLineNo">104</span>        } else if (args[i].substring(0,2).equals("-e")) {<a name="line.104"></a>
+<span class="sourceLineNo">105</span>          is_assignment=false;<a name="line.105"></a>
+<span class="sourceLineNo">106</span>        } else if (args[i].length()&gt;=3 &amp;&amp; args[i].substring(0,3).equals("-tt")) {<a name="line.106"></a>
+<span class="sourceLineNo">107</span>          iterations=1000;<a name="line.107"></a>
+<span class="sourceLineNo">108</span>        } else if (args[i].substring(0,2).equals("-t")) {<a name="line.108"></a>
+<span class="sourceLineNo">109</span>          iterations=100;<a name="line.109"></a>
+<span class="sourceLineNo">110</span>        } else if (args[i].substring(0,2).equals("-h")) {<a name="line.110"></a>
+<span class="sourceLineNo">111</span>          System.out.printf("evaluate test harness : ev : version $Id: ev.java,v 1.17 2007/04/18 09:37:19 pgs Exp $\n");<a name="line.111"></a>
+<span class="sourceLineNo">112</span>          System.out.printf("  -a : assignment\n");<a name="line.112"></a>
+<span class="sourceLineNo">113</span>          System.out.printf("  -e : evaluate only - no assignment (default)\n");<a name="line.113"></a>
+<span class="sourceLineNo">114</span>          System.out.printf("  -h : help\n");<a name="line.114"></a>
+<span class="sourceLineNo">115</span>          System.out.printf("  -m : machine attached (to store variables) - dont run test with this\n");<a name="line.115"></a>
+<span class="sourceLineNo">116</span>          System.out.printf("  -q : quiet\n");<a name="line.116"></a>
+<span class="sourceLineNo">117</span>          System.out.printf("  -t : timing tests (100 iterations)\n");<a name="line.117"></a>
+<span class="sourceLineNo">118</span>          System.out.printf("  -tt : timing test with 1000 iterations\n");<a name="line.118"></a>
+<span class="sourceLineNo">119</span>          System.out.printf("  -v : verbose (default)\n");<a name="line.119"></a>
+<span class="sourceLineNo">120</span>          System.exit(0);<a name="line.120"></a>
+<span class="sourceLineNo">121</span>        }<a name="line.121"></a>
+<span class="sourceLineNo">122</span>      } else {<a name="line.122"></a>
+<span class="sourceLineNo">123</span>        has_parameter=true;<a name="line.123"></a>
+<span class="sourceLineNo">124</span>        // parameter // do it immediately<a name="line.124"></a>
+<span class="sourceLineNo">125</span>        if (is_assignment) {<a name="line.125"></a>
+<span class="sourceLineNo">126</span>          evaluate_engine.interpret_string_with_assignment(args[i]);<a name="line.126"></a>
+<span class="sourceLineNo">127</span>        } else {<a name="line.127"></a>
+<span class="sourceLineNo">128</span>          evaluate_engine.interpret_string(args[i]);<a name="line.128"></a>
+<span class="sourceLineNo">129</span>        }<a name="line.129"></a>
+<span class="sourceLineNo">130</span>      }<a name="line.130"></a>
+<span class="sourceLineNo">131</span>    }<a name="line.131"></a>
+<span class="sourceLineNo">132</span><a name="line.132"></a>
+<span class="sourceLineNo">133</span>    if (!has_parameter) {<a name="line.133"></a>
+<span class="sourceLineNo">134</span><a name="line.134"></a>
+<span class="sourceLineNo">135</span>    for (int i=0; i&lt;iterations; ++i) {<a name="line.135"></a>
+<span class="sourceLineNo">136</span>    evaluate_engine.interpret_string("a&gt;mxorb&lt;3",-1.0);<a name="line.136"></a>
+<span class="sourceLineNo">137</span>    evaluate_engine.interpret_string("-3/-4",0.75);<a name="line.137"></a>
+<span class="sourceLineNo">138</span>    evaluate_engine.interpret_string("-sin(x)",-0.656986598718);<a name="line.138"></a>
+<span class="sourceLineNo">139</span>    evaluate_engine.interpret_string("0 or 2 and 0",0.0);<a name="line.139"></a>
+<span class="sourceLineNo">140</span>    evaluate_engine.interpret_string("1 or 2 and 0",1.0);<a name="line.140"></a>
+<span class="sourceLineNo">141</span>    evaluate_engine.interpret_string("1 and 2 or 0",0.0);<a name="line.141"></a>
+<span class="sourceLineNo">142</span>    evaluate_engine.interpret_string("1 or 2",3.0);<a name="line.142"></a>
+<span class="sourceLineNo">143</span>    evaluate_engine.interpret_string("1or2",3.0);<a name="line.143"></a>
+<span class="sourceLineNo">144</span>    evaluate_engine.interpret_string("1and2",0.0);<a name="line.144"></a>
+<span class="sourceLineNo">145</span>    evaluate_engine.interpret_string("1and0",0.0);<a name="line.145"></a>
+<span class="sourceLineNo">146</span>    evaluate_engine.interpret_string("1or0",1.0);<a name="line.146"></a>
+<span class="sourceLineNo">147</span><a name="line.147"></a>
+<span class="sourceLineNo">148</span>    if (false) { // these now fail on purpose<a name="line.148"></a>
+<span class="sourceLineNo">149</span>      // errors on purpose<a name="line.149"></a>
+<span class="sourceLineNo">150</span>      evaluate_engine.interpret_string("1+2)*3+1",10.0); //syntax wrong, but calculator wise definable<a name="line.150"></a>
+<span class="sourceLineNo">151</span>      evaluate_engine.interpret_string("1+2*(3+1",9.0); //syntax wrong, but calculator wise definable<a name="line.151"></a>
+<span class="sourceLineNo">152</span>    } else {<a name="line.152"></a>
+<span class="sourceLineNo">153</span>      evaluate_engine.interpret_string("(1+2)*3+1",10.0); //syntax corrected<a name="line.153"></a>
+<span class="sourceLineNo">154</span>      evaluate_engine.interpret_string("1+2*(3+1)",9.0); //syntax corrected<a name="line.154"></a>
+<span class="sourceLineNo">155</span>    }<a name="line.155"></a>
+<span class="sourceLineNo">156</span><a name="line.156"></a>
+<span class="sourceLineNo">157</span>    // should work<a name="line.157"></a>
+<span class="sourceLineNo">158</span>    //interpret_string("exp(10)",0.0);<a name="line.158"></a>
+<span class="sourceLineNo">159</span>    evaluate_engine.interpret_string("100+(1+(2+(3+(4+(5+(6+(7+8)))))))",100+1+2+3+4+5+6+7+8);<a name="line.159"></a>
+<span class="sourceLineNo">160</span>    evaluate_engine.interpret_string("7+(2*3+1+4*4)",7+(2*3+1+4*4));<a name="line.160"></a>
+<span class="sourceLineNo">161</span>    evaluate_engine.interpret_string("sin(1)",0.841471);<a name="line.161"></a>
+<span class="sourceLineNo">162</span>    evaluate_engine.interpret_string("(1+1)/(5+2)",2.0/7.0);<a name="line.162"></a>
+<span class="sourceLineNo">163</span>    evaluate_engine.interpret_string("(1+1)",2);<a name="line.163"></a>
+<span class="sourceLineNo">164</span>    evaluate_engine.interpret_string("+7*3*x^2-4*x^3-5*x^4",-12348);<a name="line.164"></a>
+<span class="sourceLineNo">165</span>    evaluate_engine.interpret_string("3+2*3^1+3",3+2*3+3);<a name="line.165"></a>
+<span class="sourceLineNo">166</span>    evaluate_engine.interpret_string("+1*2*3^2-2*3^1-3*3^3",2*9-2*3-3*27);<a name="line.166"></a>
+<span class="sourceLineNo">167</span>    evaluate_engine.interpret_string("+0.07*3*x^2-0.1*4*x^3-0.1*5*x^4",-1327.410000);<a name="line.167"></a>
+<span class="sourceLineNo">168</span>    evaluate_engine.interpret_string("7-4*1^1-5",+7-4*1-5);<a name="line.168"></a>
+<span class="sourceLineNo">169</span>    // need to work out the answer to this and set the corresponding expectation<a name="line.169"></a>
+<span class="sourceLineNo">170</span>    //interpret_string("+0.7+0.1*2*x+0.07*3*x^2-0.1*4*x^3-0.1*5*x^4-0.09*6*x^5-0.02*x^6-0.001*8*x^7",0);<a name="line.170"></a>
+<span class="sourceLineNo">171</span>    evaluate_engine.interpret_string("1-4*3+2",1-4*3+2);<a name="line.171"></a>
+<span class="sourceLineNo">172</span>    evaluate_engine.interpret_string("1-4*x+2",1-4*7+2);<a name="line.172"></a>
+<span class="sourceLineNo">173</span>    evaluate_engine.interpret_string("1-4+2",1-4+2);<a name="line.173"></a>
+<span class="sourceLineNo">174</span>    evaluate_engine.interpret_string("+7+14+75-144*x-2",+7+14+75-144*7-2);<a name="line.174"></a>
+<span class="sourceLineNo">175</span>    // interpret_string("+0.743809523809524+0.1421825*2*x+0.07555555*3*x^2-0.1447222*4*x^3-2",-186.717828);<a name="line.175"></a>
+<span class="sourceLineNo">176</span>    // interpret_string("+0.743809523809524+0.1421825*2*x+0.07555555*3*x^2-0.1447222*4*x^3",0.0);<a name="line.176"></a>
+<span class="sourceLineNo">177</span>    // interpret_string("+0.743809523809524+0.1421825*2*x+0.07555555*3*x^2-0.1447222*4*x^3-0.19777*5*x^4",-2558.946678);<a name="line.177"></a>
+<span class="sourceLineNo">178</span>    // interpret_string("+0.743809523809524+0.1421825*2*x+0.07555555*3*x^2-0.1447222*4*x^3",0.0);<a name="line.178"></a>
+<span class="sourceLineNo">179</span>    // interpret_string("-0.19777*5*x^4",0.0);<a name="line.179"></a>
+<span class="sourceLineNo">180</span>    evaluate_engine.interpret_string("+0.743809523809524+0.1421825*2*x+0.07555555*3*x^2-0.1447222*4*x^3-0.19777*5*x^4-0.095555*6*x^5-0.02158*7*x^6-0.001904761*8*x^7",-42516.182634);<a name="line.180"></a>
+<span class="sourceLineNo">181</span>    evaluate_engine.interpret_string("6.6732e-11*1000000000000",6.6732e-11*1000000000000.0);<a name="line.181"></a>
+<span class="sourceLineNo">182</span>    evaluate_engine.interpret_string("5.98e24",5.98e24);<a name="line.182"></a>
+<span class="sourceLineNo">183</span>    evaluate_engine.interpret_string("(41.3-23.45)/(42.3+56.4)",(41.3-23.45)/(42.3+56.4));<a name="line.183"></a>
+<span class="sourceLineNo">184</span>    evaluate_engine.interpret_string("sqrt(4^2+3^2)+10",15);<a name="line.184"></a>
+<span class="sourceLineNo">185</span>    evaluate_engine.interpret_string("sqrt(4^2+3^2)+10",15);<a name="line.185"></a>
+<span class="sourceLineNo">186</span>    evaluate_engine.interpret_string("sqrt(4^2+3^2)",5);<a name="line.186"></a>
+<span class="sourceLineNo">187</span>    evaluate_engine.interpret_string("0.5*1.23*5^2*a",0.5*1.23*5*5);<a name="line.187"></a>
+<span class="sourceLineNo">188</span>    evaluate_engine.interpret_string("pi",Math.PI);<a name="line.188"></a>
+<span class="sourceLineNo">189</span>    evaluate_engine.interpret_string("2*pi",2*Math.PI);<a name="line.189"></a>
+<span class="sourceLineNo">190</span>    evaluate_engine.interpret_string("1-1.3",1-1.3);<a name="line.190"></a>
+<span class="sourceLineNo">191</span>    evaluate_engine.interpret_string("1--1",2);<a name="line.191"></a>
+<span class="sourceLineNo">192</span>    evaluate_engine.interpret_string("4.4+3.7",4.4+3.7);<a name="line.192"></a>
+<span class="sourceLineNo">193</span>    evaluate_engine.interpret_string("(1)+(2)+(3)",1+2+3);<a name="line.193"></a>
+<span class="sourceLineNo">194</span>    evaluate_engine.interpret_string("1+(5)^2",26);<a name="line.194"></a>
+<span class="sourceLineNo">195</span>    evaluate_engine.interpret_string("sin(1)+1",1.841471);<a name="line.195"></a>
+<span class="sourceLineNo">196</span>    evaluate_engine.interpret_string("sin(1)*2",2*0.841471);<a name="line.196"></a>
+<span class="sourceLineNo">197</span>    evaluate_engine.interpret_string("1+sin(1)",1.841471);<a name="line.197"></a>
+<span class="sourceLineNo">198</span>    evaluate_engine.interpret_string("2*sin(1)",2*0.841471);<a name="line.198"></a>
+<span class="sourceLineNo">199</span>    evaluate_engine.interpret_string("sin(1)",0.841471);<a name="line.199"></a>
+<span class="sourceLineNo">200</span>    evaluate_engine.interpret_string("sin(1)",0.841471);<a name="line.200"></a>
+<span class="sourceLineNo">201</span>    evaluate_engine.interpret_string("sin(1)+cos(2)+tan(3)",0.282777605186476321819);<a name="line.201"></a>
+<span class="sourceLineNo">202</span>    evaluate_engine.interpret_string("(1)+(2)",3);<a name="line.202"></a>
+<span class="sourceLineNo">203</span>    evaluate_engine.interpret_string("(1+4)+(2+9)",(1+4)+(2+9));<a name="line.203"></a>
+<span class="sourceLineNo">204</span>    evaluate_engine.interpret_string("17+12",17+12);<a name="line.204"></a>
+<span class="sourceLineNo">205</span>    evaluate_engine.interpret_string("4+5*2^2",4+5*4);<a name="line.205"></a>
+<span class="sourceLineNo">206</span>    evaluate_engine.interpret_string("(1+2+3+4+5+6)*4",4*(1+2+3+4+5+6));<a name="line.206"></a>
+<span class="sourceLineNo">207</span>    evaluate_engine.interpret_string("(1+2+3+4+5+6)*4",4*(1+2+3+4+5+6));<a name="line.207"></a>
+<span class="sourceLineNo">208</span>    evaluate_engine.interpret_string("(5)^2+1",26);<a name="line.208"></a>
+<span class="sourceLineNo">209</span>    evaluate_engine.interpret_string("1+(5)^2",26);<a name="line.209"></a>
+<span class="sourceLineNo">210</span>    evaluate_engine.interpret_string("(1)+(2*3)*4+(5)^2",1+2*3*4+25);<a name="line.210"></a>
+<span class="sourceLineNo">211</span>    evaluate_engine.interpret_string("1+(5)",6);<a name="line.211"></a>
+<span class="sourceLineNo">212</span>    evaluate_engine.interpret_string("(2*3)*4+(5)",(2*3)*4+5);<a name="line.212"></a>
+<span class="sourceLineNo">213</span>    evaluate_engine.interpret_string("(1)+(2*3)*4+(5)",1+2*3*4+5);<a name="line.213"></a>
+<span class="sourceLineNo">214</span>    evaluate_engine.interpret_string("(4+3*3)/2^3-7",-5.37500000000000000000);<a name="line.214"></a>
+<span class="sourceLineNo">215</span>    evaluate_engine.interpret_string("1+1",2);<a name="line.215"></a>
+<span class="sourceLineNo">216</span>    evaluate_engine.interpret_string("(1+1)",2);<a name="line.216"></a>
+<span class="sourceLineNo">217</span>    evaluate_engine.interpret_string("((1+1))",2);<a name="line.217"></a>
+<span class="sourceLineNo">218</span>    evaluate_engine.interpret_string("1+2*3^4",1+2*3*3*3*3);<a name="line.218"></a>
+<span class="sourceLineNo">219</span>    evaluate_engine.interpret_string("3^4*2+1",1+2*3*3*3*3);<a name="line.219"></a>
+<span class="sourceLineNo">220</span>    evaluate_engine.interpret_string("3^4+2^3",3*3*3*3+8);<a name="line.220"></a>
+<span class="sourceLineNo">221</span>    evaluate_engine.interpret_string("2*3",2*3);<a name="line.221"></a>
+<span class="sourceLineNo">222</span>    evaluate_engine.interpret_string("2^3",8);<a name="line.222"></a>
+<span class="sourceLineNo">223</span>    evaluate_engine.interpret_string("2*(3+4)",2*(3+4));<a name="line.223"></a>
+<span class="sourceLineNo">224</span>    evaluate_engine.interpret_string("(3+4)*2",2*(3+4));<a name="line.224"></a>
+<span class="sourceLineNo">225</span>    evaluate_engine.interpret_string("2+(3*4)",2+(3*4));<a name="line.225"></a>
+<span class="sourceLineNo">226</span>    evaluate_engine.interpret_string("(3*4)+2",2+(3*4));<a name="line.226"></a>
+<span class="sourceLineNo">227</span>    evaluate_engine.interpret_string("(3+4)/2",(3+4)/2.0);<a name="line.227"></a>
+<span class="sourceLineNo">228</span>    evaluate_engine.interpret_string("1+1+1",3);<a name="line.228"></a>
+<span class="sourceLineNo">229</span>    evaluate_engine.interpret_string("1+1+1+1",4);<a name="line.229"></a>
+<span class="sourceLineNo">230</span>    evaluate_engine.interpret_string("1+2*3*4",1+2*3*4);<a name="line.230"></a>
+<span class="sourceLineNo">231</span>    evaluate_engine.interpret_string("1+2*3*4+5",1+2*3*4+5);<a name="line.231"></a>
+<span class="sourceLineNo">232</span>    evaluate_engine.interpret_string("(1)+(2*3)*4+(5)",1+2*3*4+5);<a name="line.232"></a>
+<span class="sourceLineNo">233</span>    evaluate_engine.interpret_string("(1)+(2*3)*4+(5^2)",1+2*3*4+25);<a name="line.233"></a>
+<span class="sourceLineNo">234</span>    evaluate_engine.interpret_string("(1+2+3+4+5+6)",1+2+3+4+5+6);<a name="line.234"></a>
+<span class="sourceLineNo">235</span>    evaluate_engine.interpret_string("4*(1+2+3+4+5+6)",4*(1+2+3+4+5+6));<a name="line.235"></a>
+<span class="sourceLineNo">236</span>    evaluate_engine.interpret_string("(1+2+3+4+5+6)*4",4*(1+2+3+4+5+6));<a name="line.236"></a>
+<span class="sourceLineNo">237</span>    }<a name="line.237"></a>
+<span class="sourceLineNo">238</span>    }<a name="line.238"></a>
+<span class="sourceLineNo">239</span>  } // end func<a name="line.239"></a>
+<span class="sourceLineNo">240</span><a name="line.240"></a>
+<span class="sourceLineNo">241</span>  public static void main(String[] args) throws EvaluateException {<a name="line.241"></a>
+<span class="sourceLineNo">242</span>    if (false) { System.out.printf("Mello Word\n"); }<a name="line.242"></a>
+<span class="sourceLineNo">243</span>    new ev(args);<a name="line.243"></a>
+<span class="sourceLineNo">244</span>  }<a name="line.244"></a>
+<span class="sourceLineNo">245</span>}<a name="line.245"></a>
+<span class="sourceLineNo">246</span><a name="line.246"></a>
+<span class="sourceLineNo">247</span>/////////<a name="line.247"></a>
+<span class="sourceLineNo">248</span>// END //<a name="line.248"></a>
+<span class="sourceLineNo">249</span>/////////<a name="line.249"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

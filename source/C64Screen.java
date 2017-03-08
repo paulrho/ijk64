@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 //
 // $Id: C64Screen.java,v 1.24.1.3.1.22 2012/09/04 11:22:38 pgs Exp $
 //                                                               
@@ -59,15 +59,15 @@
 // Revision 1.24.1.3.1.2  2006/02/21 22:24:16  pgs
 // More changes for the special test version
 //
-// Revision 1.24.1.3.1.1  2006/02/21 06:04:26  pgs
+// Revision 1.24.1.3.1.1  2006/02/21 06:04:26  ctpgs
 // New sub-sub-version experimenting with quoting
 //
-// Revision 1.24.1.3  2006/02/20 07:36:41  pgs
+// Revision 1.24.1.3  2006/02/20 07:36:41  ctpgs
 // Allow stetched (scaley) characters to simulate 80x25 mode to an extent
 // Correctly rezero (new) the screen buffer when changing anything with transparent mode
 // (the transparent attribute needs to be cleared)
 //
-// Revision 1.24.1.2  2006/02/15 04:58:06  pgs
+// Revision 1.24.1.2  2006/02/15 04:58:06  ctpgs
 // Remove the last screen CLEARed pscreenchar on Reshape screen - it was leaving things behind
 // I think this was not correct to do this, it now appears to work okay.  More research probably required.
 //
@@ -116,34 +116,34 @@
 // Enhancements for meta characters in println strings
 //---
 //
-// Revision 1.20.1.7  2006/02/13 04:36:24  pgs
+// Revision 1.20.1.7  2006/02/13 04:36:24  ctpgs
 // Allow character set selection from with running program
 // Flash time now a variable and set down to 250ms (from 500ms) which is similar to the real (emulated version)
 // Add (home) keyword
 // Make cursor do revese char (like the real) instead of just a block
 //
-// Revision 1.20.1.6  2006/02/09 01:23:46  pgs
+// Revision 1.20.1.6  2006/02/09 01:23:46  ctpgs
 // Enable scale=3 to allow screens three times wider than standard (using new _3 files too)
 //
-// Revision 1.20.1.5  2006/02/07 23:16:34  pgs
+// Revision 1.20.1.5  2006/02/07 23:16:34  ctpgs
 // Allow control C break and experiment with lower case graphics
 //
-// Revision 1.20.1.4  2006/02/06 06:01:20  pgs
+// Revision 1.20.1.4  2006/02/06 06:01:20  ctpgs
 // Changes to allow input a line work correctly
 //
-// Revision 1.20.1.3  2006/02/03 21:17:48  pgs
+// Revision 1.20.1.3  2006/02/03 21:17:48  ctpgs
 // More changes for detokenised file and making printing chars print the right ones
 //
-// Revision 1.20.1.2  2006/02/03 12:40:04  pgs
+// Revision 1.20.1.2  2006/02/03 12:40:04  ctpgs
 // More changes to allow reading of detokenised basic program from another source
 //
-// Revision 1.20.1.1  2006/02/03 06:09:07  pgs
+// Revision 1.20.1.1  2006/02/03 06:09:07  ctpgs
 // Branched version, to make changes for C64 (JEBI).
 // Allows different escape character for special chars (keywords) uses round brackets
 // instead of square  (as well) as to allow for the version of genesdt that was detokenised
 // by another program in a different way
 //
-// Revision 1.20  2005/06/16 06:09:27  pgs
+// Revision 1.20  2005/06/16 06:09:27  ctpgs
 // Resubmitted version - appears to be that last version of C64Screen used with GenesJCPmA (but was never checked in)
 // The is also the latest untouched version, before changes were made for C64 (JEBI)
 //
@@ -188,6 +188,7 @@ class C64Screen extends JFrame
   boolean cursVisible = false;
   boolean cursEnabled = false;
   boolean verbose = false; // only recent
+  boolean verbosePrint = false;
   boolean shiftbgimage = true; // now true
 //int flashtimems=500;
   int flashtimems = 330; // was 250, C64 is 333
@@ -246,12 +247,15 @@ class C64Screen extends JFrame
   short[] contmark = new short[MAXmaxY];
   boolean faint = false;
   boolean bgtrans = true;
-  boolean bgtrans_ability = true;
+  boolean bgtrans_ability = true; /*TEST_ONLY*/
   boolean bgshadow = true;
   boolean slowdown = false;
 
   static boolean static_bgtrans = true; // for a dodgy initialisation
   static boolean static_handles = false;        // for a dodgy initialisation
+  static boolean static_centre = false;        // for a dodgy initialisation
+  static int static_scale = 1;        // for a dodgy initialisation
+
   boolean sendToBack = false;
 
   int SLOW_INPUT_MS=1; // amout to slow down GETa$
@@ -279,7 +283,7 @@ class C64Screen extends JFrame
   final static char PETSCII_GREEN        =  30;
   final static char PETSCII_BLUE         =  31;
   final static char PETSCII_SPACE        =  32;
-  final static char PETSCII_SHIFT_AT     =  96;
+  final static char PETSCII_SHIFT_STAR   =  96;  // screen -32
   final static char PETSCII_PI           = 126;
   final static char PETSCII_ORANGE       = 129;
   final static char PETSCII_F1           = 133;
@@ -310,10 +314,10 @@ class C64Screen extends JFrame
   final static char PETSCII_CYAN         = 159;
   final static char PETSCII_SHIFT_SPACE  = 160;
 
-  final static char EXTENDSCII_DELETE    = 127; // probably 128 is better
+  final static char EXTENDSCII_DELETE    = 128; //127; // probably 128 is better
   final static char EXTENDSCII_END       = 130; 
-  final static char EXTENDSCII_PGDN      = 250; // random - is okay?
-  final static char EXTENDSCII_PGUP      = 251; // random - is okay?
+  final static char EXTENDSCII_PGDN      = 131; //250; // random - is okay?
+  final static char EXTENDSCII_PGUP      = 132; //251; // random - is okay?
 // CODES192-223 same as 96-127
 // COES 224-254 same as 160-190
 // CODE 255 same as 126
@@ -338,8 +342,14 @@ class C64Screen extends JFrame
 //    BufferedImage bgBuffImage =     new BufferedImage(8 * 40 * 3 + 200, 150 * 8 * 3 + 200, BufferedImage.TYPE_INT_ARGB);        //here
 //  } else {
     // 1920 x 1080
-    BufferedImage screenBuffImage = new BufferedImage(2000, 2000, BufferedImage.TYPE_INT_ARGB);    //here
-    BufferedImage bgBuffImage =     new BufferedImage(2000, 2000, BufferedImage.TYPE_INT_ARGB);        //here
+
+    //BufferedImage screenBuffImage = new BufferedImage(2000, 2000, BufferedImage.TYPE_INT_ARGB);    //here
+    /*TEST_ONLY*/
+    //BufferedImage screenBuffImage = new BufferedImage(2, 2, BufferedImage.TYPE_INT_ARGB);    //here
+    //BufferedImage screenBuffImage = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB);    //here
+    BufferedImage screenBuffImage = new BufferedImage(1280, 1100, BufferedImage.TYPE_INT_ARGB);    //here
+
+    //BufferedImage bgBuffImage =     new BufferedImage(2000, 2000, BufferedImage.TYPE_INT_ARGB);        //here  // BUG 20150210 !
 //  }
   Image newoffImage;
 
@@ -354,6 +364,9 @@ class C64Screen extends JFrame
 
     bgtrans = static_bgtrans;
     bgshadow = static_bgtrans;
+
+    scale = static_scale;
+    scaley = static_scale;
   //bgtrans_ability=static_bgtrans;
   //reshapeScreen();
   //if (bgtrans_ability) { setUndecorated(true); }
@@ -445,12 +458,18 @@ class C64Screen extends JFrame
 
     reshapeScreen();
 
+    if (static_centre) { setLocationRelativeTo(null); }
     setVisible(true);
+    //setMaximizedBounds(new Rectangle(1280, 1100)); //PGS
 
     create_screen_updater();
 
     if (bgtrans_ability) {
-      newoffImage = createImage(8 * 40 * 2 + 200 + 1600, 150 * 8 * 2 + 200 + 1200);
+      //newoffImage = createImage(8 * 40 * 2 + 200 + 1600, 150 * 8 * 2 + 200 + 1200);
+      /*TEST_ONLY*/
+      //newoffImage = createImage(2, 2);
+      //newoffImage = createImage(500, 500);
+      newoffImage = createImage(1280, 1100);
     }
     if (bgtrans_ability) {
       newoffGraphics = (Graphics2D) newoffImage.getGraphics();
@@ -488,7 +507,7 @@ class C64Screen extends JFrame
                    else if (x<=maxX*0.34&&scale>2) setScale(scale-2);
                    else if (x<=maxX*0.75&&scale>1) setScale(scale-1);
                    else {
-					  if (x<40) x=40; if (y<25) y=25;
+					  if (x<20) x=20; if (y<20) y=20;
 					  if (x>MAXmaxX) x=MAXmaxX;
 					  if (y>MAXmaxY) y=MAXmaxY;
 					  
@@ -497,7 +516,7 @@ class C64Screen extends JFrame
                    //else setColsRows(maxX,maxY); // reset it back
 			    } else  {
                   //print("resized "+x+" "+y);
-                  if (x<40) x=40; if (y<25) y=25;
+                  if (x<20) x=20; if (y<20) y=20;
                   if (x>MAXmaxX) x=MAXmaxX;
                   if (y>MAXmaxY) y=MAXmaxY;
                   
@@ -603,7 +622,8 @@ class C64Screen extends JFrame
         int cx=(e.getX()-25*scale)/(8*scale);
         int cy=(e.getY()-25*scaley-topY)/(8*scaley);      
         if (cx>=0 && cx<maxX && cy>=0 && cy<maxY)
-          gotoXY(cx,cy);
+          gotoXY(cx,cy); 
+          print_quotes_on=false; // if we move the cursor - just cancel this mode
           /* better - if nothing is on the line, then move to the start - not implemented yet */          
       }
     }
@@ -723,7 +743,19 @@ boolean hasFocus=false;
   //borderColour = fullcolour[0];     // for test 5
   ///pgs - force it black ///
 
-    setSize(scale * maxX * 8 + 50 * scale, scaley * maxY * 8 + 50 * scaley + topY);
+    //setSize(scale * maxX * 8 + 50 * scale, scaley * maxY * 8 + 50 * scaley + topY);
+    /*TEST_ONLY*/
+    //setSize(2,2);
+    //setSize(500,500);
+    // only do this if it actually changes size
+    //if (getSize().width!=scale * maxX * 8 + 50 * scale || 
+        //getSize().height!=scaley * maxY * 8 + 50 * scaley + topY)
+
+     if (scale * maxX * 8 + 50 * scale>1280) { maxX=(1280-50*scale)/8/scale; setExtendedState(JFrame.NORMAL); }
+     if (scaley * maxY * 8 + 50 * scaley + topY>1100) { maxY=(1100-topY-50*scaley)/8/scale; setExtendedState(JFrame.NORMAL); }
+
+     setSize(scale * maxX * 8 + 50 * scale, scaley * maxY * 8 + 50 * scaley + topY);
+
     offGraphics = (Graphics2D) screenBuffImage.getGraphics();
     if (!bgtrans) {             // here
       offGraphics.setColor(new Color(borderColour, true));
@@ -751,6 +783,12 @@ boolean hasFocus=false;
     if (true) { // try invalidating the entire "printed" char map, meaning it repaints the LOT
       redrawScreen();
     }
+
+    // now done in redrawScreen
+    if (bgtrans) {
+        screenBuffImage = new BufferedImage(1280,1100, BufferedImage.TYPE_INT_ARGB);
+    }
+
     repaint();
   }
 
@@ -764,7 +802,8 @@ boolean hasFocus=false;
     for (int j = 0; j < MAXmaxY; ++j) { //last screen was CLEARed
       for (int i = 0; i < MAXmaxX; ++i) {
       //pscreenchar[i][j]='X'; should
-        pscreenchar[i][j] = (char)(screenchar[i][j]^1); // to make sure it is always different
+        //pscreenchar[i][j] = (char)(screenchar[i][j]^1); // to make sure it is always different  !! wrong!!
+        pscreenchar[i][j] = (char)(screenchar[i][j]^255); // to make sure it is always different
         pscreencharColour[i][j] = 0;
       }
     }
@@ -779,7 +818,7 @@ boolean hasFocus=false;
   }
 
   public boolean setColsRows(int cols, int rows) {
-    if (rows >= 25 && rows <= MAXmaxY && cols >= 40 && cols <= MAXmaxX) {
+    if (rows >= 20 && rows <= MAXmaxY && cols >= 20 && cols <= MAXmaxX) {
     //// this will clear existing rows!
       if (C64Screen.maxY < rows) {
       // we are growing the screen
@@ -808,6 +847,7 @@ boolean hasFocus=false;
       C64Screen.maxY = rows;
       maxX = cols;
       reshapeScreen();
+      if (static_centre) setLocationRelativeTo(null); // command line option
       return true;
     }
     return false;
@@ -824,8 +864,9 @@ boolean hasFocus=false;
     if (scale >= 1 && scale <= 3) {
       this.scale = scale;
       this.scaley = scale;
-      if (bgtrans) { setBackgroundTransparent(bgtrans); } // to get a new zerod background
+      //if (bgtrans) { setBackgroundTransparent(bgtrans); } // to get a new zerod background
       reshapeScreen();
+      if (static_centre) setLocationRelativeTo(null); // command line option
       return true;
     }
     return false;
@@ -835,8 +876,9 @@ boolean hasFocus=false;
   public boolean setScaleY(int scaley) {
     if (this.scale >= 1 && this.scale <= 1 & scaley >= 1 && scaley <= 2) {
       this.scaley = scaley;
-      if (bgtrans) { setBackgroundTransparent(bgtrans); } // to get a new zerod background
+      //if (bgtrans) { setBackgroundTransparent(bgtrans); } // to get a new zerod background
       reshapeScreen();
+      if (static_centre) setLocationRelativeTo(null); // command line option
       return true;
     }
     return false;
@@ -961,6 +1003,7 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
 // converts a keyboard (PC) character to the best "PETASCII" char
   public char petconvert(char ch) {
     int pos = 0;
+
     if (ch >= 'a' && ch <= 'z')
       pos = 1 + (ch - 'a');
     else if (ch >= 'A' && ch <= 'Z')
@@ -968,7 +1011,8 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
     else if (ch >= 'a' + 128 && ch <= 'z' + 128)
       pos = 1 + (ch - 'a') - 32;
     else if (ch == ' ' + 128)
-      pos = PETSCII_SPACE + 128;           // reversed block
+      //pos = PETSCII_SPACE + 128;           // reversed block  // no - this was wrong! it is still a space
+      pos = 96;  // shift space
     else if (ch >= '0' && ch <= '9' || ch >= ' ' && ch <= '?')
       pos = (ch);
 
@@ -1008,31 +1052,51 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
 // new stuff
     else if (ch >= 'A' + 128 && ch <= 'Z' + 128)
       pos = 1 + (ch - 'A' - 64);
+    // try these to fill the zero gaps (20160326)
+    else if (ch ==179) pos=91; //try this 20160326
+    else if (ch ==171) pos=92; //try this 20160326
+    else if (ch >=161 && ch <=191) pos=(ch-64);
+    else if (ch ==192) pos=64;
+    else if (ch ==127) pos=95;
+    else if (ch >=219 && ch<=224) pos=ch-128;
+    else if (ch >=251 && ch<=254) pos=ch-128;
+    else if (ch ==255) pos=94;
 
     if (pos >= 256)
       pos = 0;
+//System.err.printf("PET=%d\n",pos);
     return (char) pos;
   }
 
-/** converts a pet screen code back to a pc code
-    this needs more work 
-    **/
+// converts a pet screen code back to a pc code this needs more work 
+
   public char petunconvert(char pos) {
     int ch = 0;
     // new turn 0 into 64
     if (pos==0) ch= 64;
-    if (pos > 0 && pos <= 26)
+    else if (pos > 0 && pos <= 26)
       //ch = 'A' + pos - 1;
       ch = 'a' + pos - 1; // to make equivalent ???
-    if (pos >= 32 && pos < 64)
+    else if (pos >= 32 && pos < 64)
       ch = pos;
-    if (pos >= 64 && pos <= 26 + 64)
+    else if (pos > 64 && pos <= 26 + 64)
       //ch = 'a' + pos - 1 - 64; // switch this around
       ch = 'A' + pos - 1 - 64;
-    if (pos == 30) ch='^'; // not pos==94
-    else if (pos == 31) ch='`'; // new translations
     else if (pos == 115) ch='{'; // new translations
     else if (pos == 107) ch='}'; // new translations
+
+    else if (pos >= 27 && pos<=30) ch=pos+64; // technical - not normally used
+    else if (pos == 31) ch='`'; // 96
+    else if (pos == 64) ch='_'; // to match petconvert
+    else if (pos == 93) ch='|'; // to match petconvert  124
+    else if (pos == 94) ch=126; // to match petconvert  
+    else if (pos == 95) ch=127; // to match petconvert  
+    //else if (pos == 27) ch=91; // technical - not normally used
+    //else if (pos == 28) ch=92; // technical - not normally used
+    //else if (pos == 29) ch=93; // technical - not normally used
+    //else if (pos == 30) ch='^'; // not pos==94
+    //else if (pos == 31) ch='`'; // new translations
+
     return (char) ch;
   }
 
@@ -1052,36 +1116,82 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
     else if (pos == 31) ch='`'; // new translations
     else if (pos == 115) ch='{'; // new translations
     else if (pos == 107) ch='}'; // new translations
+    else if (pos == 91) return "(SHIFT-PLUS)"; // try override
+    else if (pos == 91) ch=pos; // try
+    //else if (pos == 93) ch=pos; // try
+    else if (pos == 93) ch=124; // try
+    else if (pos == 27 || pos == 29 || pos==28) ch=pos+64; // try [] add pound
+
     if (pos == PETSCII_BLACK  +64) return "(blk)";
-    if (pos == PETSCII_WHITE +128) return "(wht)";
-    if (pos == PETSCII_RED   +128) return "(red)";
-    if (pos == PETSCII_CYAN   +64) return "(cyn)";
-    if (pos == PETSCII_PURPLE +64) return "(pur)";
-    if (pos == PETSCII_GREEN +128) return "(grn)";
-    if (pos == PETSCII_BLUE  +128) return "(blu)";
-    if (pos == PETSCII_YELLOW +64) return "(yel)";
-    if (pos == PETSCII_ORANGE +64) return "(orng)";
-    if (pos == PETSCII_BROWN  +64) return "(brn)";
-    if (pos == PETSCII_LTRED  +64) return "(lred)";
-    if (pos == PETSCII_GREY1  +64) return "(gry1)";
-    if (pos == PETSCII_GREY2  +64) return "(gry2)";
-    if (pos == PETSCII_LTGREEN+64) return "(lgrn)";
-    if (pos == PETSCII_LTBLUE +64) return "(lblu)";
-    if (pos == PETSCII_GREY3  +64) return "(gry3)";
+    else if (pos == PETSCII_WHITE +128) return "(wht)";
+    else if (pos == PETSCII_RED   +128) return "(red)";
+    else if (pos == PETSCII_CYAN   +64) return "(cyn)";
+    else if (pos == PETSCII_PURPLE +64) return "(pur)";
+    else if (pos == PETSCII_GREEN +128) return "(grn)";
+    else if (pos == PETSCII_BLUE  +128) return "(blu)";
+    else if (pos == PETSCII_YELLOW +64) return "(yel)";
+    else if (pos == PETSCII_ORANGE +64) return "(orng)";
+    else if (pos == PETSCII_BROWN  +64) return "(brn)";
+    else if (pos == PETSCII_LTRED  +64) return "(lred)";
+    else if (pos == PETSCII_GREY1  +64) return "(gry1)";
+    else if (pos == PETSCII_GREY2  +64) return "(gry2)";
+    else if (pos == PETSCII_LTGREEN+64) return "(lgrn)";
+    else if (pos == PETSCII_LTBLUE +64) return "(lblu)";
+    else if (pos == PETSCII_GREY3  +64) return "(gry3)";
 
-    if (pos == PETSCII_LEFT +64) return "(left)";
-    if (pos == PETSCII_RGHT+128) return "(rght)";
-    if (pos == PETSCII_UP   +64) return "(up)";
-    if (pos == PETSCII_DOWN+128) return "(down)";
-    if (pos == PETSCII_HOME+128) return "(home)";
-    if (pos == PETSCII_CLR  +64) return "(clr)";
-    if (pos == PETSCII_RVON+128) return "(rvon)";
-    if (pos == PETSCII_RVOF +64) return "(rvof)";
+    else if (pos == PETSCII_LEFT +64) return "(left)";
+    else if (pos == PETSCII_RGHT+128) return "(rght)";
+    else if (pos == PETSCII_UP   +64) return "(up)";
+    else if (pos == PETSCII_DOWN+128) return "(down)";
+    else if (pos == PETSCII_HOME+128) return "(home)";
+    else if (pos == PETSCII_CLR  +64) return "(clr)";
+    else if (pos == PETSCII_RVON+128) return "(rvon)";
+    else if (pos == PETSCII_RVOF +64) return "(rvof)";
 
-    if (pos == PETSCII_SHIFT_AT-32) return "(-)";
+    else if (pos == PETSCII_SHIFT_STAR-32) return "(-)";
+    else if (pos == PETSCII_SHIFT_SPACE) return "(BLOCK)"; // not really BLOCK any more - just a shift space
 
-    if (pos == 94) return "(mathpi)";
-    
+    else if (pos == 94) return "(mathpi)";
+    else if (pos == 96) return "(SHIFT-SPACE)";
+    //if (pos == 97) return "(CBM-A)"; // try this first of the set...
+    //if (pos >= 97 && pos <=97+26) return "(CBM-"+(char)('A'+pos-97)+")";
+    else if (pos == 11+96) return "(CBM-Q)"; 
+    else if (pos == 19+96) return "(CBM-W)"; 
+    else if (pos == 17+96) return "(CBM-E)"; 
+    else if (pos == 18+96) return "(CBM-R)"; 
+    else if (pos == 3+96) return "(CBM-T)"; 
+    else if (pos == 23+96) return "(CBM-Y)"; 
+    else if (pos == 24+96) return "(CBM-U)"; 
+    else if (pos == 2+96) return "(CBM-I)"; 
+    else if (pos == 4+96) return "(CBM-@)"; 
+    else if (pos == 16+96) return "(CBM-A)"; 
+    else if (pos == 14+96) return "(CBM-S)"; 
+    else if (pos == 27+96) return "(CBM-F)"; 
+    else if (pos == 13+96) return "(CBM-Z)"; 
+    else if (pos == 29+96) return "(CBM-X)"; 
+    else if (pos == 28+96) return "(CBM-C)"; 
+    else if (pos == 30+96) return "(CBM-V)"; 
+
+    else if (pos == 31+96) return "(CBM-B)"; 
+    else if (pos == 12+96) return "(CBM-D)"; 
+    else if (pos ==  5+96) return "(CBM-G)"; 
+    else if (pos == 20+96) return "(CBM-H)"; 
+    else if (pos == 21+96) return "(CBM-J)"; 
+    else if (pos ==  1+96) return "(CBM-K)"; 
+    else if (pos == 22+96) return "(CBM-L)"; 
+    else if (pos ==  7+96) return "(CBM-M)"; 
+    else if (pos == 10+96) return "(CBM-N)"; 
+    else if (pos == 25+96) return "(CBM-O)"; 
+    else if (pos == 15+96) return "(CBM-P)"; 
+    else if (pos ==    92) return "(LEFT-CHECK)";  // CBM -
+    else if (pos ==  8+96) return "(BOT-CHECK)";   // CBM POUND
+    else if (pos ==  9+96) return "(SHIFT-POUND)"; 
+    else if (pos == 26+96) return "(SHIFT-@)"; 
+    else if (pos == 95) return "(BACK-TRIANGLE)"; 
+    else if (pos == 102) return "(CBM-PLUS)"; // try 
+
+    else if (pos >= 128+1 && pos <=128+26) return ""+(char) (pos-128); // not encoded! but we need the CTRL code //try
+
     if (ch!=0) return ""+(char) ch;
     else return "@"; // not valid
   }
@@ -1093,21 +1203,50 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
    /**
    * This method print a string to the machine screen
    * @param line pet-meta-encoded string
-   * @exception None.
    */
   public void print(String line) { // this is where the strings with quotes around are taken to be the encoded value and printed as such i.e. "(down)" shows as " then a reversed Q then another "
     int i;
     char theChar;
+    if (verbosePrint) {
+      System.out.printf("%s",line);
+    }
     for (i = 0; i < line.length(); ++i) {
     // allow "special" characters
     // backslash followed by [ is a real /
       theChar = line.charAt(i);
+if (verbose) System.err.printf("[o:%d]",(int)theChar);
       if (theChar == '\\') {
         if (i + 1 < line.length() && (line.charAt(i + 1) == '(' || line.charAt(i + 1) == '[')) {        // just for now
           theChar = line.charAt(i + 1); // just for now
           i++;
         }
         theChar = petconvert(theChar);
+      } else if (theChar == '{' && i<line.length()-2 && Character.isDigit(line.charAt(i+1))) {    // just for now //try
+if (verbose) { System.out.printf("looking for {n}\n"); }
+        boolean matched = false;
+        String cS="";
+        for (i++; i < line.length(); ++i) {
+           if (line.charAt(i)=='}') {
+             matched=true; 
+             break;
+           }
+           if (!Character.isDigit(line.charAt(i))) {
+             break;
+           } else cS+=line.charAt(i);
+        }
+        int num=(-1);
+        try { 
+          num = Integer.parseInt(cS);
+        } catch(Exception e) {
+        }
+        if (num>=0 && num<=255) {
+          print(""+petconvert((char)num));
+if (verbose) { System.out.printf("print char %d\n",num); }
+          continue;
+        } else {
+          print(cS);
+          continue;
+        }
       } else if (theChar == '(' || theChar == '[') {    // just for now
       // now read until the next ']'
         String cS;
@@ -1115,6 +1254,10 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
         boolean matched = false;
         // if we hit a double quote or new line - finish reading (maybe even a space or another ( or [! // could this become an issue?
         for (i++; i < line.length(); ++i)
+          if (line.charAt(i) == '(') { // nested!
+             i--; // rewind so we are at the bracket again
+             break; 
+          } else
           if (line.charAt(i) != ')' && line.charAt(i) != ']' && line.charAt(i) != '\"' && line.charAt(i) != '\n' && line.charAt(i) != '\r') { // just for now
             cS = cS + line.charAt(i);
           } else { 
@@ -1183,34 +1326,61 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
         } else if (cS.equals("UPP-RIGHT-LINE")) { theChar = (char) ('n');
         } else if (cS.equals("LOW-LEFT-LINE")) { theChar = (char) ('m');
         } else if (cS.equals("LOW-RIGHT-LINE")) { theChar = (char) (']' + 32);
+        } else if (cS.equals("LEFT-CHECK")) { theChar = (char) (92);
+        } else if (cS.equals("BOT-CHECK")) { theChar = (char) (104);
+        } else if (cS.equals("SHIFT-SPACE")) { theChar = (char) (96);
         } else if (cS.equals("VLINE")) { theChar = (char) (']');
         } else if (cS.equals("HLINE")) { 
                //theChar = petconvert('C'); // was this wrong?
                theChar = (char) (64);
 
-        } else if (cS.equals("CBM-Q")) { theChar = (char) (11 + 96);
-        } else if (cS.equals("CBM-W")) { theChar = (char) (19 + 96);
-        } else if (cS.equals("CBM-E")) { theChar = (char) (17 + 96);
-        } else if (cS.equals("CBM-R")) { theChar = (char) (18 + 96);
-        } else if (cS.equals("CBM-T")) { theChar = (char) (3 + 96);
-        } else if (cS.equals("CBM-Y")) { theChar = (char) (23 + 96);
-        } else if (cS.equals("CBM-U")) { theChar = (char) (24 + 96);
-        } else if (cS.equals("CBM-I")) { theChar = (char) (2 + 96);
+        } else if (cS.startsWith("CBM-")) { 
+          if (cS.equals("CBM-Q")) { theChar = (char) (11 + 96);
+          } else if (cS.equals("CBM-W")) { theChar = (char) (19 + 96);
+          } else if (cS.equals("CBM-E")) { theChar = (char) (17 + 96);
+          } else if (cS.equals("CBM-R")) { theChar = (char) (18 + 96);
+          } else if (cS.equals("CBM-T")) { theChar = (char) (3 + 96);
+          } else if (cS.equals("CBM-Y")) { theChar = (char) (23 + 96);
+          } else if (cS.equals("CBM-U")) { theChar = (char) (24 + 96);
+          } else if (cS.equals("CBM-I")) { theChar = (char) (2 + 96);
+  
+          } else if (cS.equals("CBM-@")) { theChar = (char) (4 + 96);
+  
+          } else if (cS.equals("CBM-A")) { theChar = (char) (16 + 96);
+          } else if (cS.equals("CBM-S")) { theChar = (char) (14 + 96);
+          } else if (cS.equals("CBM-F")) { theChar = (char) (27 + 96);
+  
+          } else if (cS.equals("CBM-Z")) { theChar = (char) (13 + 96);
+          } else if (cS.equals("CBM-X")) { theChar = (char) (29 + 96);
+          } else if (cS.equals("CBM-C")) { theChar = (char) (28 + 96);
+          } else if (cS.equals("CBM-V")) { theChar = (char) (30 + 96);
 
-        } else if (cS.equals("CBM-@")) { theChar = (char) (4 + 96);
-
-        } else if (cS.equals("CBM-A")) { theChar = (char) (16 + 96);
-        } else if (cS.equals("CBM-S")) { theChar = (char) (14 + 96);
-        } else if (cS.equals("CBM-F")) { theChar = (char) (27 + 96);
-
-        } else if (cS.equals("CBM-Z")) { theChar = (char) (13 + 96);
-        } else if (cS.equals("CBM-X")) { theChar = (char) (29 + 96);
-        } else if (cS.equals("CBM-C")) { theChar = (char) (28 + 96);
-        } else if (cS.equals("CBM-V")) { theChar = (char) (30 + 96);
+          } else if (cS.equals("CBM-B")) { theChar = (char) (31 + 96);
+          } else if (cS.equals("CBM-D")) { theChar = (char) (12 + 96);
+          } else if (cS.equals("CBM-G")) { theChar = (char) (5 + 96);
+          } else if (cS.equals("CBM-PLUS")) { theChar = (char) (6 + 96);
+          } else if (cS.equals("CBM-POUND")) { theChar = (char) (8 + 96);
+          } else if (cS.equals("CBM-H")) { theChar = (char) (20 + 96);
+          } else if (cS.equals("CBM-J")) { theChar = (char) (21 + 96);
+          } else if (cS.equals("CBM-K")) { theChar = (char) (1 + 96);
+          } else if (cS.equals("CBM-L")) { theChar = (char) (22 + 96);
+          } else if (cS.equals("CBM-M")) { theChar = (char) (7 + 96);
+          } else if (cS.equals("CBM-N")) { theChar = (char) (10 + 96);
+          } else if (cS.equals("CBM-O")) { theChar = (char) (25 + 96);
+          } else if (cS.equals("CBM-P")) { theChar = (char) (15 + 96);
+          } else { 
+            // we are committed, just 
+            print("\\(");           // this should be the [ or ( as original
+            if (!cS.equals("")) { print(cS); }           // slight recursion
+            print(")");           // and matching closing
+            continue;
+          }
 // try this
         } else if (cS.equals("mathpi")) { theChar = (char) (94);
 
         } else if (cS.equals("SHIFT-POUND")) { theChar = (char) (9 + 96);
+        } else if (cS.equals("SHIFT-@")) { theChar = (char) (26 + 96);
+        } else if (cS.equals("SHIFT-PLUS")) { theChar = (char) (91);
         } else if (cS.equals("-")) { theChar = (char) (64); // "(-)"
         } else if (cS.equals("left")) { 
           if (print_quotes_on) theChar = (char) (PETSCII_LEFT + 64); 
@@ -1262,6 +1432,7 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
           }
         } else if (cS.equals("CR")) {
         // same as println()
+          reverse = false; // try - think this should be here 
           if (cursY < maxY - 1) {
             cursY++;
           } else {
@@ -1271,29 +1442,29 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
               scrolldelay();
           }
           cursX = 0;
+          print_quotes_on=false; //try - think i need to add it here too
           continue;
         } else {
         // we dont know what it is so print the whole thing
-          print("\\(");           // this should be the [ or ( as original
+          //print("\\(");           // this should be the [ or ( as original
+          print("\\"+theChar);
           if (!cS.equals("")) { print(cS); }           // slight recursion
-          print(")");           // and matching closing
+          if (theChar=='(') {
+            print(")");           // and matching closing
+          } else {
+            print("]");           // and matching closing
+          }
           continue;
         }
       } else if (theChar == '\"') {
         print_quotes_on=!print_quotes_on; // toggle it
-      } else if ((int) (theChar & 0xFF) == 10) {
-        println();              // is it okay to put it in here?     
+      } else if ((int) (theChar & 0xFF) == 10) { // && !print_quotes_on) {   // try ignoring if quotes on - breaks other things - do this later
+        println();              // is it okay to put it in here?       //try, no
         print_quotes_on=false; // cancel it
         continue;
       } else if (theChar == PETSCII_ENTER || theChar == PETSCII_SHIFTENTER) {
         println();
         print_quotes_on=false; // cancel it
-        continue;
-      } else if (theChar == PETSCII_SWITCH_LOWER) {
-        // case down?
-        continue;
-      } else if (theChar == PETSCII_SWITCH_UPPER) {
-        // case up?
         continue;
       } else if (theChar == EXTENDSCII_END) {
         /* dont quote this */
@@ -1315,16 +1486,33 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
         /* dont quote this */
         backspace(-1);
         continue;
-      } else if (theChar == PETSCII_INST) {        // backspace or move left 0x08 // 157 left move // 20 leftdel
+      } else if (theChar == PETSCII_INST && !print_quotes_on) {        // backspace or move left 0x08 // 157 left move // 20 leftdel
         /* dont quote this */
         if(!insertchars) insertspace();  // if you are already inserting chars - dont do this
         continue;
+
+      } else if (print_quotes_on && (int) (theChar) >=0 && (int) (theChar) <=27) { // try this
+          theChar = (char) (128+theChar); // got a non-specified CTRL code
+          if (verbose) System.out.printf("got a non-specified CTRL code\n");
+
+      } else if (theChar == PETSCII_SWITCH_LOWER) {
+        // case down?
+        changeCharSet(1);
+        continue;
+      } else if (theChar == PETSCII_SWITCH_UPPER) {
+        // case up?
+        changeCharSet(0);
+        continue;
+
       } else if (theChar == '\r') {
         println();              // is it okay to put it in here?     
         continue;
 // same as metacodes worked out here - but it has been worked out elsewhere
 
 // I dont think this is actually used except if you printchr$(xx)
+      } else if (print_quotes_on && theChar >= 128 && theChar <= 159) {
+        // technical hardly used
+        theChar = (char) (theChar + 64);
       } else if (theChar == PETSCII_BLACK) {
         if (!print_quotes_on) { setcursColour((short) 0); continue; }
       } else if (theChar == PETSCII_WHITE) {
@@ -1334,45 +1522,44 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
         if (print_quotes_on) theChar = (char) (128 + PETSCII_RED);
         else { setcursColour((short) 2); continue; }
       } else if (theChar == PETSCII_CYAN) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) theChar = (char) (PETSCII_CYAN); // technical hardly used
         else { setcursColour((short) 3); continue; }
       } else if (theChar == PETSCII_PURPLE) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) theChar = (char) (PETSCII_PURPLE); //technical hardly used
         else { setcursColour((short) 4); continue; }
       } else if (theChar == PETSCII_GREEN) {
-        if (print_quotes_on) theChar = (char) (128 + 30);
+        if (print_quotes_on) theChar = (char) (128 + PETSCII_GREEN);
         else { setcursColour((short) 5); continue; }
       } else if (theChar == PETSCII_BLUE) {
-        if (print_quotes_on) theChar = (char) (128 + 31);
+        if (print_quotes_on) theChar = (char) (128 + PETSCII_BLUE);
         else { setcursColour((short) 6); continue; }
       } else if (theChar == PETSCII_YELLOW) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; //theChar = (char) (PETSCII_YELLOW); //technical hardly used
         else { setcursColour((short) 7); continue; }
       } else if (theChar == PETSCII_ORANGE) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; //theChar = (char) (PETSCII_ORANGE); //technical hardly used
         else { setcursColour((short) 8); continue; }
       } else if (theChar == PETSCII_BROWN) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; // theChar = (char) (); //technical hardly used
         else { setcursColour((short) 9); continue; }
       } else if (theChar == PETSCII_LTRED) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; // theChar = (char) (128 + 5); //technical hardly used
         else { setcursColour((short) 10); continue; }
       } else if (theChar == PETSCII_GREY1) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; // theChar = (char) (128 + 5); //technical hardly used
         else { setcursColour((short) 11); continue; }
       } else if (theChar == PETSCII_GREY2) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; // theChar = (char) (128 + 5); //technical hardly used
         else { setcursColour((short) 12); continue; }
       } else if (theChar == PETSCII_LTGREEN) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; // theChar = (char) (128 + 5); //technical hardly used
         else { setcursColour((short) 13); continue; }
       } else if (theChar == PETSCII_LTBLUE) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; // theChar = (char) (128 + 5); //technical hardly used
         else { setcursColour((short) 14); continue; }
       } else if (theChar == PETSCII_GREY3) {
-        if (print_quotes_on) theChar = (char) (128 + 5);
+        if (print_quotes_on) ; // theChar = (char) (128 + 5); //technical hardly used
         else { setcursColour((short) 15); continue; }
-        
       } else if ((int) (theChar & 0xFF) == PETSCII_HOME) {
           if (print_quotes_on) theChar = (char) (128+PETSCII_HOME);
           else {
@@ -1428,11 +1615,16 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
             continue;
           }
 
+      } else if ((int) (theChar) >=0 && (int) (theChar) <=27) { // try this
+          if (verbose) System.out.printf("got a non-specified CTRL code unquoted - ignoring\n");
+          continue;
+
       } else {
         theChar = petconvert(theChar);
       }
     /* normal processing */
-      screenchar[cursX][cursY] = (char) (theChar + (reverse ? 128 : 0));        // for reverse
+//System.err.printf("<sA:%d%s>",(int)theChar,reverse?"|128":"");
+      screenchar[cursX][cursY] = (char) (theChar ^ (reverse ? 128 : 0));        // for reverse
       screencharColour[cursX][cursY] = cursColour;
       if (cursX == maxX - 1) {  // same as in println
 
@@ -1466,7 +1658,7 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
   public void println(String line) {
 
     print(line);
-
+    if (verbosePrint) { System.out.printf("\n"); }
   // same as println()
     if (cursY < maxY - 1) {
       cursY++;
@@ -1479,10 +1671,12 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
     cursX = 0;
 
   // now signal it to be redrawn
+    print_quotes_on=false; // try
     repaint();
   }
 
   public void println() {
+    if (verbosePrint) { System.out.printf("\n"); }
     reverse = false;            // don't know if this really is the case
   // here we define the line to be written on the screen
   // for now, implement this as an array of lines
@@ -1497,6 +1691,7 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
     cursX = 0;
 
   // now signal it to be redrawn
+    print_quotes_on=false; // try
     repaint();
   }
 
@@ -1598,6 +1793,8 @@ if (verbose) System.out.printf("backspacing (new)\n\r");
         x=cursX;
         y=cursY;
 
+        //if (screenchar[x][y]=='"') print_quotes_on=!print_quotes_on;
+        if (screenchar[x][y]=='"') print_quotes_on=false; // no just always clear it
         while (true) {
           nx=x+1; ny=y; if (nx==maxX) { if (contmark[y]==1) { nx=0; ny++; } else { ny=maxY; } }
           if (ny==maxY) { 
@@ -1651,8 +1848,10 @@ if (verbose) System.out.printf("insertspace (new)\n\r");
 
         /* if we started at the end of the line -assume we will want to extend it */
         if (contmark[y]==0 && (screenchar[x][y]!=' ' || ox==x && oy==y)) {
-           if (y==oy && (oy==0 || contmark[oy-1]==0 || contmarks_infinite)) {
-            contmark[oy]=1; /* done by scroll down anyway ??*/
+           //if (y==oy && (oy==0 || contmark[oy-1]==0 || contmarks_infinite)) {
+           if (true) {  // I think 
+            //contmark[oy]=1; /* done by scroll down anyway ??*/
+            contmark[y]=1; /* done by scroll down anyway ??*/
             /* scroll the lines below down! */
             if (y==maxY-1) { // we need to scroll up - and change all our variables
               scrollscreen();
@@ -1744,6 +1943,7 @@ if (verbose) System.out.printf("%d,%d to %d,%d\n",ox,oy,x,y);
           for (int i = 0; i < maxX; i++) {
 
             if (pscreenchar[i][j] == screenchar[i][j] && pscreencharColour[i][j] == screencharColour[i][j]) {
+//System.out.printf("skipping [%d][%d] %d,%d ",i,j,(int)screenchar[i][j],(int)screencharColour[i][j]);
             } else {
               pscreenchar[i][j] = screenchar[i][j];
               pscreencharColour[i][j] = screencharColour[i][j];
@@ -1751,6 +1951,7 @@ if (verbose) System.out.printf("%d,%d to %d,%d\n",ox,oy,x,y);
               if (scale == 1 && scaley==2) { // new way
                 drawchar2x1(screenchar[i][j], 0 + 25 * scale + i * 8 * scale, j * 8 * scaley + 25 * scaley + topY, screencharColour[i][j]);
               } else if (scale == 1) {
+//System.err.printf("drawchar[%d]",(int)screenchar[i][j]);
                 drawchar(screenchar[i][j], 0 + 25 * scale + i * 8 * scale, j * 8 * scaley + 25 * scaley + topY, screencharColour[i][j]);
               } else if (scale == 2) {
                 drawchar2(screenchar[i][j], 0 + 25 * scale + i * 8 * scale, j * 8 * scaley + 25 * scaley + topY, screencharColour[i][j]);
@@ -1775,6 +1976,7 @@ if (verbose) System.out.printf("%d,%d to %d,%d\n",ox,oy,x,y);
             if (scale == 1 && scaley==2) {
               drawchar2x1((char) (pscreenchar[cursX][cursY]), 0 + 25 * scale + cursX * 8 * scale, cursY * 8 * scaley + 25 * scaley + topY, cursColour);
             } else if (scale == 1) {
+//System.err.printf("drawchar[p%d]",(int)pscreenchar[cursX][cursY]);
               drawchar((char) (pscreenchar[cursX][cursY]), 0 + 25 * scale + cursX * 8 * scale, cursY * 8 * scaley + 25 * scaley + topY, cursColour);
             } else if (scale == 2) {
               drawchar2((char) (pscreenchar[cursX][cursY]), 0 + 25 * scale + cursX * 8 * scale, cursY * 8 * scaley + 25 * scaley + topY, cursColour);
@@ -1830,7 +2032,7 @@ if (verbose) System.out.printf("%d,%d to %d,%d\n",ox,oy,x,y);
   }
 
   public void printstats() {
-    System.out.println("Config: scale=" + scale + " rows=" + maxY);
+    System.out.println("Config: scale=" + scale + " rows=" + maxY + " cols=" + maxX);
     System.out.println("ttime-paintm          = " + ttime_paintm + " ms");
     System.out.println("ttime-paintl (5 lines)= " + ttime_paintl + " ms");
     System.out.println("ttime-paint           = " + ttime_paint + " ms");
@@ -1935,6 +2137,7 @@ if (verbose) System.out.printf("%d,%d to %d,%d\n",ox,oy,x,y);
     int col;
 
     pos = ch;
+//System.err.printf("<%d>(%d)",pos,(int)pscreenchar[cursX][cursY]);
     posx = pos % 32;
     posy = pos / 32;
     col = fullcolour[colour];
@@ -2228,6 +2431,12 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
         else
           addkey2buf(PETSCII_ENTER);
         return;
+
+      case 32:
+        if (e.isShiftDown()) {
+          addkey2buf(PETSCII_SHIFT_SPACE);
+          return;
+        }
     }
     
     if (e.getKeyCode() == 36) {
@@ -2336,11 +2545,47 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
       if (e.isAltDown()) {
         keybuf[keybuftop] += 128;
       } else if (e.isControlDown() && keybuf[keybuftop] >= '0' && keybuf[keybuftop] <= '9') {
-        keybuf[keybuftop] += 128;
+        keybuf[keybuftop] += 128+64; // move these to another place now!
       } else if (e.isControlDown()) {
-        keybuf[keybuftop] += 'a' + 128 - 1;
+        //keybuf[keybuftop] += 'a' + 128 - 1;
+        // try this -> map to correct
+        switch(keybuf[keybuftop]) {
+          // note to clear the 128+digit bit, we use the shifted (apart from B)
+          case 1: keybuf[keybuftop] = 176+64*0; break;
+          case 2: keybuf[keybuftop] = 191; break;
+          case 3: keybuf[keybuftop] = 188+64*0; break;
+          case 4: keybuf[keybuftop] = 172+64*0; break;
+          case 5: keybuf[keybuftop] = 177+64*0; break;
+          case 6: keybuf[keybuftop] = 187+64*0; break;
+          case 7: keybuf[keybuftop] = 185+64*0; break;
+          case 8: keybuf[keybuftop] = 180+64*0; break;
+          case 9: keybuf[keybuftop] = 162+64*0; break;
+          case 10: keybuf[keybuftop] = 181+64*0; break;
+          case 11: keybuf[keybuftop] = 161+64*0; break;
+          case 12: keybuf[keybuftop] = 182+64*0; break;
+          case 13: keybuf[keybuftop] = 167+64*0; break;
+          case 14: keybuf[keybuftop] = 170+64*0; break;
+          case 15: keybuf[keybuftop] = 185+64*0; break;
+          case 16: keybuf[keybuftop] = 175+64*0; break;
+          case 17: keybuf[keybuftop] = 171+64*0; break;
+          case 18: keybuf[keybuftop] = 178+64*0; break;
+          case 19: keybuf[keybuftop] = 174+64*0; break;
+          case 20: keybuf[keybuftop] = 163+64*0; break;
+          case 21: keybuf[keybuftop] = 184+64*0; break;
+          case 22: keybuf[keybuftop] = 190+64*0; break;
+          case 23: keybuf[keybuftop] = 179+64*0; break;
+          case 24: keybuf[keybuftop] = 189+64*0; break;
+          case 25: keybuf[keybuftop] = 183+64*0; break;
+          case 26: keybuf[keybuftop] = 173+64*0; break;
+          default:
+            keybuf[keybuftop] += 'a' + 128 - 1;
+        }
       } else if (tabdown && keybuf[keybuftop] >= '0' && keybuf[keybuftop] <= '9') {
         keybuf[keybuftop] += 256;
+      } else if (tabdown && keybuf[keybuftop] >= 'a' && keybuf[keybuftop] <= 'z') {
+        keybuf[keybuftop] = (char)(keybuf[keybuftop]-'a'+1); // try this
+      } else if (tabdown && keybuf[keybuftop] >= '@' && keybuf[keybuftop] <= '[') {
+        keybuf[keybuftop] = (char)(keybuf[keybuftop]-'A'+1); // try this
       }
       keybuftop++;
       if (keybuftop >= keybufmax) {
@@ -2355,14 +2600,20 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
   // add sync - this fixes the blanked screen on two META-BGTRANS 1 in a row (intermittent)
   public synchronized void setBackgroundTransparent(boolean setbgtrans) {
     bgtrans=setbgtrans;
-    reshapeScreen();
     if (true && bgtrans) {
       // create a NEW buffered image as we want all zeros again (in case it is going to be used transparently // this is a bit of a dogy way to do it
-      if (false)
-        screenBuffImage = new BufferedImage(8 * 40 * 3 + 200, 150 * 8 * 3 + 200, BufferedImage.TYPE_INT_ARGB);
-      else
-        screenBuffImage = new BufferedImage(2000,2000, BufferedImage.TYPE_INT_ARGB);
+      //OLDif (false)
+        //OLDscreenBuffImage = new BufferedImage(8 * 40 * 3 + 200, 150 * 8 * 3 + 200, BufferedImage.TYPE_INT_ARGB);
+      //OLDelse
+        //
+        //screenBuffImage = new BufferedImage(2000,2000, BufferedImage.TYPE_INT_ARGB);
+        /*TEST_ONLY*/
+        //screenBuffImage = new BufferedImage(2,2, BufferedImage.TYPE_INT_ARGB);
+        //screenBuffImage = new BufferedImage(500,500, BufferedImage.TYPE_INT_ARGB);
+        screenBuffImage = new BufferedImage(1280,1100, BufferedImage.TYPE_INT_ARGB);
     }
+    reshapeScreen();
+
     return;
   }
 
@@ -2403,7 +2654,7 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
       } else if (ch >= 256 + '0' && ch <= 256 + '9') {
         if (insertchars && print_quotes_on) insertspace();
         print("("+colourname_alias[(short) ((ch-1) % 16)]+")");
-      } else if (ch >= 128 + '0' && ch <= 128 + '9') {
+      } else if (ch >= 128+64 + '0' && ch <= 128+64 + '9') {
         if (insertchars && print_quotes_on) insertspace();
         print("("+colourname_alias[(short) ((ch + 8 -1) % 16)]+")");
       } else if (ch==EXTENDSCII_DELETE || ch==PETSCII_DEL || ch==EXTENDSCII_END) {
@@ -2411,6 +2662,7 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
       } else if (ch==EXTENDSCII_PGDN || ch==EXTENDSCII_PGUP) {
         print(ch+"");
       } else if (
+          //(ch>=1 && ch<=26) || //try this
            ch==PETSCII_UP 
         || ch==PETSCII_DOWN 
         || ch==PETSCII_LEFT 

@@ -53,7 +53,7 @@
 // variable and the stack is squished up.
 // this allows for un-nexted fori forj fork fori nexti nextk nextj to work properly
 //
-// Revision 1.22  2006/02/16 05:53:51  pgs
+// Revision 1.22  2006/02/16 05:53:51  ctpgs
 // Correctly check the loop finish test depending on whether +ve or -ve step value
 //
 // Revision 1.21  2006/02/15 22:49:09  pgs
@@ -63,7 +63,7 @@
 // Add a evaluate_partial which simply calls
 // evaluate.interpret_string_partial
 //
-// Revision 1.19  2006/02/15 01:54:46  pgs
+// Revision 1.19  2006/02/15 01:54:46  ctpgs
 // Standard header
 //
 //
@@ -73,6 +73,10 @@
 
 // for reading a file
 import java.io.*;
+import java.util.Arrays; // for dir sorted
+// for dir sorted
+import java.util.Comparator;
+import java.text.SimpleDateFormat; // for DIR
 
 import java.net.*; // for reading from http
 
@@ -105,20 +109,20 @@ import java.net.*; // for reading from http
 <PRE>
    Object interdependance :
 
-                  ,----> C64Screen           (precreated)
-                 / ,<--> C64PopupMenu        (precreated)               {<->links back to machine}
+                  ,----+ C64Screen           (precreated)
+                 / ,+--+ C64PopupMenu        (precreated)               {+-+links back to machine}
                 / /
-   C64-> Machine 
-                 -> FStack                   {internal}
-                 -> GStack                   {internal}
-                 -> PText                    {internal, including execution/data/save points}
-                 -> LCache                   {internal}
-                 -> DCache                   {internal}
-           -> Variables                      (Variable Store (VStore))
-           <-> evaluate                      (evaluate engine)          [ could be renamed : ExpressionEvaluator ]
-                 interpret_string ( string )                            {<->links back to machine}
-           <-> statements ( string )         (parse the program/direct) [ could be renamed : CxxParser ]
-               [instansiated each time]                                 {<->links back to machine}
+   C64-+ Machine 
+                 -+ FStack                   {internal}
+                 -+ GStack                   {internal}
+                 -+ PText                    {internal, including execution/data/save points}
+                 -+ LCache                   {internal}
+                 -+ DCache                   {internal}
+           -+ Variables                      (Variable Store (VStore))
+           +-+ evaluate                      (evaluate engine)          [ could be renamed : ExpressionEvaluator ]
+                 interpret_string ( string )                            {+-+links back to machine}
+           +-+ statements ( string )         (parse the program/direct) [ could be renamed : CxxParser ]
+               [instansiated each time]                                 {+-+links back to machine}
   
    Passing datatype : GenericType
    Exceptions       : BasicException and EvaluateException
@@ -152,6 +156,7 @@ public class Machine {
     evaluate_engine = new evaluate(this);  // create engine
     evaluate_engine.verbose=false;
     evaluate_engine.quiet=true;
+    System.setProperty("java.net.useSystemProxies", "true");
   }
   //////////////////////////////////
   // Machine configuration
@@ -160,6 +165,10 @@ public class Machine {
   boolean enabledmovement=true;  // if this is false, we just parse from top to bottom, good for debugging!
   int partialDutyCycle=0;
   public boolean signal_exit=false;
+  boolean hasSyntaxHighlighting=true;
+  boolean crlfText=false;
+
+  boolean basictimer; // passed directly to statements
   
   //////////////////////////////////
   // Machine State
@@ -221,10 +230,18 @@ public class Machine {
 
   GenericType getvariable(String variable) {
     if (builtinvariables) {
-      if (variable.equals("ti$")) {
-        return new GenericType((double)(int)(System.currentTimeMillis()/1000.0));
-      } else if (variable.equals("ti")) {
-        return new GenericType((double)(int)((System.currentTimeMillis()/16.66666666)%1073741824));
+      if (variable.startsWith("ti")) {
+        if (variable.equals("ti$") || variable.equals("time$")) {
+          java.text.SimpleDateFormat localDateFormat = new java.text.SimpleDateFormat("HHmmss");
+          return new GenericType(
+            localDateFormat.format( System.currentTimeMillis())
+          );
+        } else if (variable.equals("ti$") || variable.equals("time$")) {
+          return new GenericType((double)(int)(System.currentTimeMillis()/1000.0));
+        } else if (variable.equals("ti")) {
+          return new GenericType((double)(int)((System.currentTimeMillis()/16.66666666)%1073741824));
+        } else if (variable.equals("tisec")) 
+          return new GenericType((double)(int)(System.currentTimeMillis()/1000.0));
       } else if (variable.equals("st")) {
         return new GenericType(0.0);
       } else if (variable.equals("mathpi")) {
@@ -237,7 +254,8 @@ public class Machine {
   //////////////////////////////////
   // FStack : for loop stack
   //////////////////////////////////
-  static final int MAXFORS=30; // make it break faster
+  //static final int MAXFORS=30; // make it break faster
+  static final int MAXFORS=100; // really need more if combining gosub and for
   int topforloopstack=0;
   int forloopstack[]=new int[MAXFORS];
   String forloopstack_var[]=new String[MAXFORS];
@@ -252,7 +270,7 @@ public class Machine {
     }
   }
   // continue...
-  void createFORloop(int current, String variable, double forto, double forstep)
+  void createFORloop(int current, String variable, double forto, double forstep) throws BasicException
   {
     // I think that if we use an already used variable, we pop off the rest of the stack
     // e.g.  FOR I   FOR J   FOR K ......then FOR I again
@@ -284,6 +302,7 @@ public class Machine {
     forloopstack_var[topforloopstack]=variable;
     forloopstack_to[topforloopstack]=forto;
     forloopstack_step[topforloopstack]=forstep;
+    if (topforloopstack==MAXFORS-1) throw new BasicException("OUT OF MEMORY");
     topforloopstack++;
   }
 
@@ -292,17 +311,11 @@ public class Machine {
     // could be multiple steps?, no, this should be dealt with by the statements parser
     int fl=topforloopstack;
     executionpoint=current;
-    while(true) {
-      if (fl<=0) { 
-        if (verbose) { System.out.printf("No more for loops to match!\n"); }
-
-        topforloopstack=0; // new!!!
-
-        throw new BasicLineNotFoundError("NEXT WITHOUT FOR ERROR");
-        //return false; 
-      }
+    while(fl>0) {
       fl--;
+      if (forloopstack_var[fl].startsWith("_")) break; // matches c64 behavior 
       if (var.equals("") || forloopstack_var[fl].equals(var)) {
+      //if (var.equals("") && !forloopstack_var[fl].startsWith("_") || forloopstack_var[fl].equals(var)) {
         // just pop the last one
         setvariable(forloopstack_var[fl].toLowerCase(),evaluate(forloopstack_var[fl].toLowerCase()+"+"+forloopstack_step[fl]));
         if (verbose) { System.out.printf("about to add to loop at stack location %d %f>%f\n",fl,getvariable(forloopstack_var[fl]).num(),forloopstack_to[fl]); }
@@ -324,7 +337,41 @@ public class Machine {
         }
       }
     }
-    //return false;
+    if (verbose) { System.out.printf("No more for loops to match!\n"); }
+
+    topforloopstack=fl; // new!!!
+
+    throw new BasicLineNotFoundError("NEXT WITHOUT FOR ERROR");
+  }
+
+
+  // repurpose for loop for gosub too
+  void push_fl_gosub(int current) throws BasicException
+  {
+    forloopstack[topforloopstack]=current;
+    forloopstack_var[topforloopstack]="_GOSUB";
+    //forloopstack_to[topforloopstack]=forto;
+    //forloopstack_step[topforloopstack]=forstep;
+    if (topforloopstack==MAXFORS-1) throw new BasicException("OUT OF MEMORY"); // FORMULA TO COMPLEX in c128
+    topforloopstack++;
+  }
+  
+  int pop_fl_gosub() throws BasicException
+  {
+    // search back for most recent gosub
+    if (verbose) { System.out.printf("processing RETURN\n"); }
+    int fl=topforloopstack;
+    //executionpoint=current;
+    while(fl>0) {
+      fl--;
+      if (forloopstack_var[fl].equals("_GOSUB")) {
+          // pop it off, but keep on going, we may be popping off many
+          topforloopstack=fl; // at least one
+          return forloopstack[fl];
+      }
+    }
+    topforloopstack=0; // new!!!
+    throw new BasicException("RETURN WITHOUT GOSUB");
   }
 
   //////////////////////////////////
@@ -411,19 +458,27 @@ public class Machine {
 
   void gosubLine(int lineNo, int pnt) throws BasicException {
     // push on the stack where we are
-    gosubstack[topgosubstack]=pnt;
-    topgosubstack++;
+    if (true) {
+      push_fl_gosub(pnt);
+    } else {
+      gosubstack[topgosubstack]=pnt;
+      topgosubstack++;
+    }
     gotoLine(lineNo);
   }
 
   void popReturn() throws BasicException {
-    if (topgosubstack>0) {
-      topgosubstack--;
-      executionpoint=gosubstack[topgosubstack];
+    if (true) {
+      executionpoint=pop_fl_gosub();
     } else {
-      System.out.printf("?RETURN WITHOUT GOSUB\n");
-      // must throw an error here
-      throw new BasicException("RETURN WITHOUT GOSUB");
+      if (topgosubstack>0) {
+        topgosubstack--;
+        executionpoint=gosubstack[topgosubstack];
+      } else {
+        System.out.printf("?RETURN WITHOUT GOSUB\n");
+        // must throw an error here
+        throw new BasicException("RETURN WITHOUT GOSUB");
+      }
     }
   }
 
@@ -490,8 +545,12 @@ public class Machine {
 
   void gosubLabel(String label, int pnt) throws BasicException {
     // push on the stack where we are
-    gosubstack[topgosubstack]=pnt;
-    topgosubstack++;
+    if (true) {
+      push_fl_gosub(pnt);
+    } else {
+      gosubstack[topgosubstack]=pnt;
+      topgosubstack++;
+    }
     gotoLabel(label);
   }
 
@@ -500,7 +559,9 @@ public class Machine {
     variables.dumpstate();
     forloopdumpstate();
     System.out.printf("Current Line No = %s\n",currentLineNo);
-  }
+   // temp debugging
+    //for (int i=0; i<256; ++i) { System.out.printf("%d =%d\n",i,(int)machinescreen.petconvert((char)i)); }
+  } 
 
   //////////////////////////////////
   // DATA staement DATA STREAM
@@ -533,6 +594,7 @@ public class Machine {
     String building="";
     boolean quoted=false;
     boolean cont=false;
+    boolean preamble=true; // chew all spaces until quote
     for (; uptoDATA<allDATA.length(); ++uptoDATA) {
       String a=allDATA.substring(uptoDATA,uptoDATA+1);
       // this continuation code was a mistake, it was actually implemented in a basic program!
@@ -551,6 +613,7 @@ public class Machine {
       } else if (quoted && a.equals(""+(char)127)) {
         // it looks like a continuation character
         // really must be followed by close quote and end of line!
+	preamble=false; //?
         cont=true;
       } else if (!quoted && a.equals(":")) {
         // chew up rest of line
@@ -565,10 +628,13 @@ public class Machine {
       } else if (!quoted && a.equals(",")) {
         uptoDATA++;
         break;
+      } else if (preamble && a.equals(" ")) {
+        // chew
       } else if (a.equals("\"")) {
         quoted=!quoted;
+	preamble=false;
         //building+=a; - no, chew this up!
-      } else { building+=a; }
+      } else { building+=a; preamble=false; }
     }
     if (verbose) { System.out.printf("Returning DATA >>>%s<<<\n",building); }
     return new GenericType(building);
@@ -580,10 +646,21 @@ public class Machine {
   //////////////////////////////////
 
   int peek(int val) {
-    if (val==1024 || val>=1030 && val<=1033) 
-      if (graphicsDevice!=null) {
+
+    if (graphicsDevice!=null && (val==1024 || val>=1030 && val<=1033)) { 
         return graphicsDevice.command_PEEK(val);
-      }
+    }
+    if (val>=1024 && val<1024+1000) {
+      int x=(val-1024)%40;
+      int y=(val-1024)/40;
+      return (int)machinescreen.screenchar[x][y];
+
+    } else if (val>=55296 && val<55296+1000) {
+      int x=(val-55296)%40;
+      int y=(val-55296)/40;
+      return (int)machinescreen.screencharColour[x][y];
+    }
+    if (val==648) return 4; // screen page
     if (val==197) {
       if (machinescreen.hasinput()) 
         return 22; // made up number just to make it NOT 64
@@ -627,7 +704,9 @@ public class Machine {
 
   void performPOKE(int memloc, int memval) {
     // the background and border may be round the wrong way, cant remember
-    if (memloc==198) {
+    if (memloc==40000) {
+      PlaySound a = new PlaySound("test.wav");
+    } else if (memloc==198) {
       // clear the key buffer if you get this
     } else if (memloc==53281) {
       // background
@@ -696,7 +775,7 @@ public class Machine {
     return false;
   }
 
-  /** checks whether the ControlC flag has been set **/
+  // checks whether the ControlC flag has been set 
   boolean hasControlC()
   {
     return machinescreen.hasControlC();
@@ -736,6 +815,7 @@ public class Machine {
   
   String program_name="";         // this is to keep a reference to what we save/loaded this program as
   boolean program_modified=false;
+  boolean program_running=false; // true if NOT in direct mode PGS20150210
   
   boolean performExit(boolean checkprogram) throws BasicException {
     if (checkprogram) {
@@ -765,18 +845,21 @@ public class Machine {
     programText=""; // NEW program
     program_modified=false;
     program_name=""; // clear this too
+    crlfText=false;
     machinescreen.setTitle(baseTitle); // try this
     variables_clr();    
   };
 
-  /** reads the program basic text file 
-  **/
-  /*static  why?*/
+  // reads the program basic text file 
+  // was static  why?
   String read_a_file(String filename) throws BasicException {
     String content="";
 
     try {
       FileInputStream fis = new FileInputStream(filename);
+        if (true) { // want message
+          print("loading");
+        }
       int x= fis.available();
       byte b[]= new byte[x];
       fis.read(b);
@@ -788,6 +871,9 @@ public class Machine {
 //        InputStream is = java.util.FileUtils.class.getResourceAsStream(filename);
 //        InputStream is = getClass().getResourceAsStream(filename);
         InputStream is = getClass().getResourceAsStream("basic/"+filename);
+        if (true) { // want message
+          print("loading");
+        }
         int x= is.available();
         byte b[]= new byte[x];
         is.read(b);
@@ -800,7 +886,8 @@ public class Machine {
     return content;
   }
   
-  static String read_http(String urlstring) throws BasicException {
+//  static  // need to be static?
+String read_http(String urlstring) throws BasicException {
     String content="";
 
     try {
@@ -811,6 +898,10 @@ public class Machine {
 
       String inputLine;
 
+        if (true) { // want message
+          print("loading");
+        }
+
       while ((inputLine = in.readLine()) != null)
        //   System.out.println(inputLine);
        content+=inputLine+"\n";
@@ -819,7 +910,8 @@ public class Machine {
         //}
     
     } catch (Exception e) { 
-      throw new BasicException("FILE NOT FOUND");
+      System.out.println(e);
+      throw new BasicException("FILE NOT FOUND 404");
       // return null; 
     }
 
@@ -836,7 +928,8 @@ public class Machine {
 		out = new FileOutputStream(filename);
 		// Connect print stream to the output stream
 		p = new PrintStream( out );
-		p.print (programText);
+		if (crlfText) p.print (programText.replaceAll("\n","\r\n"));
+		else p.print (programText);
 		p.close();
 	}
 	catch (Exception e)
@@ -848,6 +941,50 @@ public class Machine {
     return true;
   }
 
+    boolean post_http(String filename) throws BasicException {
+
+        String charset = "UTF-8"; 
+        //String url = "http://localhost/test2.php";
+        //String url = "http://www.futex.com.au/basic/uploader.php";
+        String url = "http://test.futex.com.au/basic/uploader.php";
+        try {
+          String boundary = Long.toHexString(System.currentTimeMillis()); // Just generate some unique random value.
+
+          String CRLF = "\r\n"; // Line separator required by multipart/form-data.
+          URLConnection connection = new URL(url).openConnection();
+          connection.setDoOutput(true);
+          connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+          
+              OutputStream output = connection.getOutputStream();
+              PrintWriter writer = new PrintWriter(new OutputStreamWriter(output, charset), true);
+
+              // Send text file.
+              writer.append("--" + boundary).append(CRLF);
+              // append .txt so we can just GET it back  - no, now done in php uploader
+              writer.append("Content-Disposition: form-data; name=\"userfile\"; filename=\"" + filename + "\"").append(CRLF);
+              writer.append("Content-Type: text/plain; charset=" + charset).append(CRLF); // Text file itself must be saved in this charset!
+              writer.append(CRLF).flush();
+              writer.append(programText);
+              //Files.copy(textFile.toPath(), output);
+              //output.flush(); // Important before continuing with writer!
+              writer.append(CRLF).flush(); // CRLF is important! It indicates end of boundary.
+          
+              // End of multipart/form-data.
+              writer.append("--" + boundary + "--").append(CRLF).flush();
+
+              int responseCode = ((HttpURLConnection) connection).getResponseCode();
+              if (responseCode == HttpURLConnection.HTTP_OK) {
+                //System.out.printf("Response = %d\n",status);
+	      } else {
+                throw new BasicException("ERROR "+responseCode+" POSTING");
+              }
+	} catch (IOException e)
+	{ 
+	    e.printStackTrace();	// should do real exception handling
+            return false;
+	}
+        return true;
+    }
   ///
   /// new additions for keeping the program text in the machine
   ///
@@ -856,15 +993,30 @@ public class Machine {
     return programText;
   }
 
-  String listProgram(int from, int to)
+  void listProgram(int from, int to) throws BasicException
   {
     boolean printing;
+    if (machinescreen.backgroundColour == 0xFFFFFFFF) {
+      //11
+      //d1="(blk)";
+      //d2="(lblu)";
+      //d8="(cyn)";
+      d1="(blk)";
+      d2="(blu)";
+      d8="(lblu)";
+      d5="(lred)";
+    } else {
+      d1="(wht)";
+      d2="(cyn)";
+      d8="(yel)";
+      d5="(lgrn)";
+    }
+    short keepcolor=machinescreen.cursColour;
     /* need some inspection to split to lines now! */
     /* and to simplify - need to return it as a string! */
-    String subset="";
     if (verbose) System.out.printf("Listing from %d to %d\n",from,to);
     if (from==-1 && program_name!="") {
-      subset+="rem program = "+program_name.toLowerCase()+(program_modified?"*":"")+"\n";
+      print(syntaxHighlight("rem program = "+program_name.toLowerCase()+(program_modified?"*":"") /*+"\n"*/));
     }
     String lines[] = programText.split("\\r?\\n");
     printing=false; if (from==-1) printing=true;
@@ -885,18 +1037,190 @@ public class Machine {
 	  }
       if (lineno!=-2 && !printing && lineno>=from) printing=true;
       if (lineno!=-2 && printing && (lineno>to && to!=-1)) { printing=false; from=999999; }
-      if (printing) subset+=lines[i]+"\n"; 
+      if (printing) { print(syntaxHighlight(lines[i] /*+"\n"*/)); }
+      if (hasControlC()) {
+        print("\n");
+        currentLineNo=""; // For breaking a program, then running interactive
+        throw new BasicException("BREAK"); 
+      }
       //System.out.printf("this line %d\n",lineno);
     }
-    return subset;
+    print("\n");
+    machinescreen.setcursColour(keepcolor);
+    return;
+  }
+
+
+/****************************/
+String t;
+String out="";
+int p;
+int n;
+int f;
+
+/*
+String colourname_alias[] = { "blk", "wht", "red", "cyn", "pur", "grn",
+    "blu", "yel", "orng", "brn", "lred", "gry1",
+    "gry2", "lgrn", "lblu", "gry3"
+*/
+
+
+String d1="(wht)"; //"^[[31m";  /* line# */
+String d2="(cyn)"; //"^[[32m";  /* statement keyword */
+//String d3="(red)"; //"^[[33m";  /* string (pink) */ // was pur
+String d3="(orng)"; //"^[[33m";  /* string (pink) */ // was pur
+String d4="(grn)"; //"^[[34m";  /* expression */
+//String d6="(blu)"; //"^[[35m";  /* comment */
+String d6="(gry2)"; //"^[[35m";  /* comment */
+String d5="(lgrn)"; //"^[[36m"; /* assignment */
+//String d7="(lred)"; //"^[[37m"; /* text */ unused
+String d8="(yel)"; /* if/then */
+String d9="(pur)"; //"^[[37m"; /* and/or/not */
+String d0="(lblu)"; //"^[[0m";  /* normal */
+//String sepchar=" ";
+String sepchar="";
+String linesep="";
+//String sepchar="";
+//String linesep=" ";
+int hs;
+
+     String[] token={
+       "REM",
+       "GOTO","GOSUB","THEN",
+       "TO","STEP",
+       "IF","FOR","NEXT","RETURN","PRINT#","PRINT","ENDFRAME","DIM",
+       "AND","OR","NOT",
+       "ON",
+       "GET#5,",
+       "POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST",
+       "META-VERBOSE",
+       "SYS","CLR",
+       "META-SCALEY","META-ROWS",
+       "FAST","GET",
+       "META-CHARSET","LOAD","META-DUMPSTATE","META-COLS","META-BGTRANS","META-SCALE","META-TIMING",
+       "NEW","SAVE","CONT","STOP",
+       "EXIT",
+       "LABEL"
+       ,"SCREEN","GPRINT","BEGINFRAME","END","CLS","LINE","FSET","SLEEP","ALERT","RECT","FILES"
+       ,"LSET"
+       ,"IMAGELOAD","DRAWIMAGE","DESTROYIMAGE"
+       ,"CIRCLE"
+       ,"HELP"
+    };
+  String got;
+  String syntaxHighlight(String line) {
+    /* takes a line at a time, and highlights the syntax */
+/* should try and get this from "statements" */
+
+  char a;
+  int i;
+  int nest;
+  t=line;
+
+  if (!hasSyntaxHighlighting) { return line+"\n"; }
+  p=0; /* pointer into text t */
+  n=0; /* node that lexer is at */
+  f=0;
+  nest=0;
+  t=t+'\000'; /* null */
+  out="";
+
+   outerloop:
+   while (true) {
+    /* chewloop */
+    hs=0;
+    while (t.charAt(p)==' ') { p++; out+=" "; hs++; }
+    f=p;
+    while(true) {
+      a=t.charAt(p);
+
+      if (a==0)                                 { if(n!=0) cs();                       break outerloop; }
+      if (a==13 || a==10)                       {      cs(); p++; n=0;                 break; }
+      if (n==5 && !Character.isDigit(a) && f==p )                 n=1;
+      if (n==0 && !Character.isDigit(a))        {      cs();      n=1;                 break; }
+      if (n==1 && a==' ')                       { p++; cs();      n=2;                 break; }
+      if (n==1 && a=='=')                       { p++; cs();      n=2;                 break; }
+      if (n==1 || n==4)            if (findtoken())             /*n=0,2,5*/            break;
+      if (n!=3 && a==':')                       {      cs(); p++; n=1; out=out+a;      break; }
+      if (n==3 && a=='"')                       { p++; cs();      n=4; nest=0;         break; }
+      if (n==4 && (a==',' || a==';') && nest>0) {      cs(); p++; n=2; out=out+a;      break; }
+      if (n==4 && a=='"')                       {      cs();      n=3; f=p; }
+      else if ((n==2||n==1) && a=='"')          {                 n=3; } // n==1 special case DIR
+      else if (n==2)                            {                 n=4; nest=0; continue; }
+      else if (n==4 && a=='(')                  { nest++; }
+      else if (n==4 && a==')')                  { nest--; }
+      p++;
+    }
+  }
+
+  if (false) {
+    System.err.printf("STRING:\n");
+    System.err.printf("%s\n",out);
+    for (i=0; i<out.length(); ++i) {
+      System.err.printf("%d,",(int)out.charAt(i));
+    }
+    System.err.printf("STRINGEND\n");
+  }
+  return out;
+    
+  }
+
+
+boolean findtoken() {
+  int i;
+  int gotlen;
+      for (i=0; i<token.length; ++i) { 
+        got=token[i]; gotlen=got.length();
+        if (n==1 && p==f && t.length()>=f+gotlen && t.substring(f,f+gotlen).equalsIgnoreCase(got) ||
+            n==4 && (i<=5||i>=14&&i<=16) && t.length()>=p+gotlen && t.substring(p,p+gotlen).equalsIgnoreCase(got)) {
+          if (i==0) { out+=d6; out+=sepchar; n=0; chewcr(); return true; }
+          if (n==4) cs();
+          p+=gotlen;
+          //if (hs==0) out+=" ";
+          if (i==3 || i==6 || i==17) { out+=sepchar+d8+got.toLowerCase()+d0+sepchar; }
+          else if (i==14 || i==15 || i==16) { out+=sepchar+d9+got.toLowerCase()+d0+sepchar; }
+          else { out+=sepchar+d2+got.toLowerCase()+d0+sepchar; }
+          if (i<=3) n=5; else n=2;
+          return true;
+        }
+      }
+  return false;
+}
+
+void chewcr() {
+  int i;
+  while( t.charAt(p)!=13 && t.charAt(p)!=10 && t.charAt(p)!=0) p++;
+  while( t.charAt(p)==13 || t.charAt(p)==10) p++;  /* jump new line */
+  for (i=f; i<p; ++i) if(t.charAt(i)!=10) out+=t.charAt(i);
+  out+=d0;
+}
+//unused//void chew() {
+  //unused//while (t.charAt(p)==' ') { p++; out+=" "; }
+//unused//}
+
+  void cs() {
+ int i;
+  if (n==0) out+="\n"+d1;
+  if (n==1) out+=sepchar+d5;
+  if (n==3) out+=d3;
+  if (n==4) out+=d4;
+  if (n==5) out+=d1;
+  for (i=f; i<p; ++i) out+=t.charAt(i);
+  out+=d0;
+  if (n==0) out+=linesep;
+
   }
   
   boolean loadProgram(String filename) //throws BasicException
   {
 
     try {
-      // if it ends in jpg or png or bmp - read the background image
-      if (filename.toLowerCase().contains(".png") || filename.toLowerCase().contains(".jpg") || filename.toLowerCase().contains(".bmp")) {
+      // if it ends in au or wav play it
+      if (filename.toLowerCase().endsWith(".au") || filename.toLowerCase().endsWith(".wav") || filename.toLowerCase().endsWith(".mp3")) {
+        PlaySound sound = new PlaySound(filename);
+        return true;
+      } else
+      if (filename.toLowerCase().endsWith(".png") || filename.toLowerCase().endsWith(".jpg") || filename.toLowerCase().endsWith(".bmp")) {
         machinescreen.load_bgimage(filename);
         return true;
       } else {
@@ -911,9 +1235,23 @@ public class Machine {
           printnewline();
         }
         if (filename.toLowerCase().contains("http:")) {
+          //if (false) { // want message
+            //print("\n");
+            //print("searching for "+filename+"\n");
+          //}
           programText=read_http(filename);
-        } else
+        } else {
+          //if (false) { // want message
+            //print("\n");
+          //}
           programText=read_a_file(filename);
+        }
+        // fix CR LF issue, just remove CR LF and replace with (unix) LF
+        if (programText.contains("\r\n")) {
+          programText=programText.replaceAll("\r\n","\n");
+          crlfText=true; // use this to convert back on save!
+          if (verbose) System.out.printf("Flagging as crlf (and stripping)\n");
+        } else crlfText=false;
       }
     } catch (BasicException basicerror) {
        System.out.printf("Basic Error: %s\n",basicerror.getMessage());
@@ -933,7 +1271,12 @@ public class Machine {
   {
     boolean ret;
     try {
-      ret=save_a_file(filename);
+      if(filename.startsWith("%")) {
+        filename=filename.replaceFirst("%","");
+        ret=post_http(filename);
+      } else {
+        ret=save_a_file(filename);
+      }
     } catch (BasicException basicerror) {
        System.out.printf("Basic Error: %s\n",basicerror.getMessage());
        print("\n?"+basicerror.getMessage().toLowerCase()); // took off "[CR]"
@@ -962,8 +1305,47 @@ public class Machine {
         }
     }
   }
+  void doCHDIR(String newDir) {
+    System.setProperty("user.dir", newDir);
+  }
+  void listDIR(boolean datesort) {
+    File dir = new File(".");
+  
+    File[] files = dir.listFiles();
+    if (datesort) {
+       Arrays.sort(files, new Comparator<File>(){
+       public int compare(File f1, File f2)
+       {
+           return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
+       } });
+    } else {
+       Arrays.sort(files, new Comparator<File>(){
+       public int compare(File f1, File f2)
+       {
+           return f1.getName().compareTo(f2.getName());
+       } });
+    }
 
-  boolean contProgram() throws BasicException
+    //if (children == null) {
+        //// Either dir does not exist or is not a directory
+    //} else {
+        print("directory = "+dir.getAbsolutePath()+"\n");
+        for (int i=0; i<files.length; i++) {
+            // Get filename of file or directory
+            String filename = files[i].getName();
+            if (filename.contains(".basic")) {
+              
+              filename=filename.replaceFirst("\\.basic","");
+              filename=("\""+filename+"\"                      ").substring(0,22);
+
+   	      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH.mm");
+              print(syntaxHighlight(filename+":"+sdf.format(files[i].lastModified())+"\n"));
+            }
+        }
+    //}
+  }
+
+  boolean contProgram() throws BasicException // not used now (see below)
   {
     if (verbose) {
       System.out.printf("wanting to continue program : program_saved_executionpoint=%d\n",program_saved_executionpoint);
@@ -972,12 +1354,41 @@ public class Machine {
       throw new BasicException("CAN'T CONTINUE ERROR");
     }
     // not the interpretted immediate line!
+    program_running=true;
     new statements(programText, this, program_saved_executionpoint); // passing along the machine too
     program_saved_executionpoint=save_executionpoint; // only done on running a program
+    program_running=false;
     return true;
   }
 
-  /** this function not used yet **/
+  boolean contProgram(String lineNo) throws BasicException
+  {
+    if (verbose) {
+      System.out.printf("wanting to continue program : program_saved_executionpoint=%d\n",program_saved_executionpoint);
+    }
+    if (lineNo != null) {
+      // not the interpretted immediate line!
+      program_running=true;
+
+      // assumes lines have been cached
+      //gotoLine(lineNo);
+      new statements(programText, this, executionpoint,lineNo);
+      program_saved_executionpoint=save_executionpoint; // only done on running a program
+      program_running=false;
+    } else {
+      if (program_saved_executionpoint<0) {
+        throw new BasicException("CAN'T CONTINUE ERROR");
+      }
+      // not the interpretted immediate line!
+      program_running=true;
+      new statements(programText, this, program_saved_executionpoint); // passing along the machine too
+      program_saved_executionpoint=save_executionpoint; // only done on running a program
+      program_running=false;
+    }
+    return true;
+  }
+
+  // this function not used yet 
   boolean contProgram(int restartat) throws BasicException
   {
     if (verbose) {
@@ -987,15 +1398,19 @@ public class Machine {
       throw new BasicException("CAN'T CONTINUE ERROR");
     }
     // not the interpretted immediate line!
+    program_running=true;
     new statements(programText, this, restartat); // passing along the machine too
     program_saved_executionpoint=save_executionpoint; // only done on running a program
+    program_running=false;
     return true;
   }
 
   boolean runProgram()
   {
+    program_running=true;
     new statements(programText, this); // passing along the machine too
     program_saved_executionpoint=save_executionpoint; // only done on running a program
+    program_running=false;
     return true;
   }
 
@@ -1006,8 +1421,7 @@ public class Machine {
     return true;
   }
 
-  /** inserts a line if new, or replaces a line of the same number (first one it finds)
-  **/
+  // inserts a line if new, or replaces a line of the same number (first one it finds)
   boolean insertLine(String line) // throws Exception
   {
     // do this until it is really implemented
@@ -1204,18 +1618,30 @@ class BasicBREAK extends BasicException {
 }
 
 class BasicRUNrestart extends BasicException {
+    public String lineNo;
     BasicRUNrestart() {
     }
     BasicRUNrestart(String msg) {
         super(msg);
     }
+    BasicRUNrestart(String msg, String lineNo) {
+        super(msg);
+        this.lineNo=lineNo;
+    }
 }
 
 class BasicCONTrestart extends BasicException {
+    public String lineNo;
+    private String statementToken;
     BasicCONTrestart() {
     }
     BasicCONTrestart(String msg) {
         super(msg);
+        this.lineNo=null;
+    }
+    BasicCONTrestart(String msg, String token, String lineNo) {
+        super(msg);
+        this.lineNo=lineNo;
     }
 }
 

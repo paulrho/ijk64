@@ -12,13 +12,13 @@
 // Revision 1.5  2007/04/19 08:28:24  pgs
 // Refactoring and simplifying/formatting code especially in Machine
 //
-// Revision 1.4  2006/02/17 01:35:57  pgs
+// Revision 1.4  2006/02/17 01:35:57  ctpgs
 // Added trap and resume (guessed it is resume)
 //
-// Revision 1.3  2006/02/13 00:56:24  pgs
+// Revision 1.3  2006/02/13 00:56:24  ctpgs
 // RCS...
 //
-// Revision 1.2  2006/02/13 00:55:04  pgs
+// Revision 1.2  2006/02/13 00:55:04  ctpgs
 // Setting up RCS
 //
 //
@@ -29,10 +29,12 @@ import java.io.*;
 class detok
 {
 
+  boolean c64sx=false;
+
   String tokens0[] = { "","","","","","(wht)","","","","" // starts 0
     /*10*/ ,"","","","","","","","(down)","(rvon)","(home)"
-    /*20*/ ,"","","","","","","","","(red)","(rght)"
-    /*30*/ ,"(grn)","","","","","","","","(red)","(rght)" };
+    /*20*/ ,"(del)","","","","","","","","(red)","(rght)" // del is not implemented in ijk64
+    /*30*/ ,"(grn)","(blu)"," ","","","","","","","" };
 
   String tokens1[] = { "end", "for" // starting at 128
     /*130*/ ,"next", "data", "input#", "input", "dim", "read", "let", "goto", "run", "if"
@@ -42,15 +44,25 @@ class detok
     /*170*/ ,"+", "-", "*", "/", "^", "and", "or", ">", "=", "<"
     /*180*/ ,"sgn", "int", "abs", "usr", "fre", "pos", "sqr", "rnd", "log", "exp"
     /*190*/ ,"cos", "sin", "tan", "atn", "peek", "len", "str$", "val", "asc", "chr$"
-    /*200*/ ,"left$", "right$", "mid$", "go","","","","","",""
-    /*210*/ ,"", "err$", "instr", "", "resume", "trap"
+    /*200*/ ,"left$", "right$", "mid$", "go","rgr","rclr","rlum","joy","rdot","dec"
+    /*210*/ ,"hex$", "err$", "instr", "else", "resume", "trap"
+    /*   */ ,"tron", "troff", "sound", "vol", "auto", "pudef", "graphic", "paint"
+            ,"char","box","circle","gshape","sshape","draw","locate","color"
+            ,"scnclr","scale","help","do","loop","exit","directory","dsave"
+            ,"dload","header","scratch","collect","copy","rename","backup","delete"
+            ,"renumber","key","monitor","using","until","while" /*fd*/
   };
 
+  String tokens64sx[] = { // starting at 204
+    /*204*/ "key","graphic","scnclr","cicle",
+    /*208*/ "draw","region","color","point","sound","char","paint","rpot",
+    /*216*/ "rpen","rsnd","rcolr","rgr","rjoy","rdot"
+  };
   String tokensExtended[] = {
-    /*  0*/  "", "", "", "", "", "", "", "", "", ""
-    /* 10*/ ,"", "", "", "", "", "", "", "", "", ""
-    /* 20*/ ,"", "", "", "", "", "", "", "", "", ""
-    /* 30*/ ,"", "", "", "", "", "", "", "fast", "", ""
+    /*  0*/  "", "", "bank", "filter", "play", "tempo", "movspr", "sprite", "sprcolor", "rreg"
+    /* 10*/ ,"envelope", "sleep", "catalog", "dopen", "append", "dclose","bsave", "bload", "record", "concat"
+    /* 20*/ ,"dverify", "dclear", "sprsav", "collision", "begin", "bend", "window", "boot", "width", ""
+    /* 30*/ ,"quit", "stash", "", "fetch", "", "swap", "off", "fast", "slow", ""
     /* 40*/ ,"", "", "", "", "", "", "", "", "", ""
     /* 50*/ ,"", "", "", "", "", "", "", "", "", ""
     /* 60*/ ,"", "", "", "", "", "", "", "", "", ""
@@ -59,10 +71,10 @@ class detok
     /* 90*/ ,"", "", "", "", "", "", "", "", "", ""
     /*100*/ ,"", "", "", "", "", "", "", "", "", ""
     /*110*/ ,"", "", "", "", "", "", "", "", "", ""
-    /*120*/ ,"", "", "", "", "", "", "", "", "", ""
-    /*130*/ ,"graphic", "", "", "", "", "", "", "", "", ""
-    /*140*/ ,"", "", "", "", "", "", "", "", "", ""
-    /*150*/ ,"", "", "", "", "", "", "", "", "", ""
+    /*120*/ ,"", "", "", "", "", "", "", "", "key", "color" // c64superexpander
+    /*130*/ ,"graphic", "scnclr", "locate", "scale", "box", "circle", "char", "draw", "gshape", "paint"
+    /*140*/ ,"sshape", "tune", "filter", "sprdef", "tempo", "movspr", "sprcol", "sprite", "colint", "sprsav"
+    /*150*/ ,"rbump", "rclr", "rdot", "rgr", "rjoy", "rpen", "rpot", "rspcol", "rsppos", "rspr"
     /*160*/ ,"", "", "", "", "", "", "", "", "", ""
     /*170*/ ,"", "", "", "", "", "", "", "", "", ""
     /*180*/ ,"", "", "", "", "", "", "", "", "", ""
@@ -72,20 +84,25 @@ class detok
     /*220*/ ,"", "", "", "", "", "", "", "", "", ""
     /*230*/ ,"", "", "", "", "", "", "", "", "", ""
     /*240*/ ,"", "", "", "", "", "", "", "", "", ""
-    /*250*/ ,"", "", "", "", ""
+    /*250*/ ,"", "", "", "", "", ""
   };
+
+ //String colourname_alias[] = { "blk", "wht", "red", "cyn", "pur", "grn",
+    //"blu", "yel", "orng", "brn", "lred", "gry1",
+    //"gry2", "lgrn", "lblu", "gry3"
+  //};                      
 
   String tokens1quoted[] = { "", "(orng)" // starting at 128
     /*130*/ ,"", "", "", "(F1)", "", "", "", "", "", ""
     /*140*/ ,"", "", "", "", "(blk)", "(up)", "(rvof)", "(clr)", "", "(brn)"
-    /*150*/ ,"(lred)", "", "(gry2)", "(lgrn)", "(lblu)", "", "(pur)", "(left)", "(yel)", "(cyn)"
-    /*160*/ ,"($a0)", "", "(CBM-I)", "", "(CBM-@)", "", "", "", "", "(SHIFT-POUND)"
-    /*170*/ ,"", "", "", "(CBM-Z)", "(CBM-S)", "", "(CBM-A)", "", "", ""
-    /*180*/ ,"", "", "", "(CBM-Y)", "", "", "", "(CBM-F)", "(CBM-C)", "(CBM-X)"
-    /*190*/ ,"(CBM-V)", "", "(HLINE)", "", "", "", "", "", "", ""   // HLINE did have - // then A-G
+    /*150*/ ,"(lred)", "(gry1)", "(gry2)", "(lgrn)", "(lblu)", "(gry3)", "(pur)", "(left)", "(yel)", "(cyn)"
+    /*160*/ ,"(BLOCK)", "(CBM-K)", "(CBM-I)", "(CBM-T)", "(CBM-@)", "(CBM-G)", "(CBM-PLUS)", "(CBM-M)", "(CBM-POUND)", "(SHIFT-POUND)"
+    /*170*/ ,"(CBM-N)", "(CBM-Q)", "(CBM-D)", "(CBM-Z)", "(CBM-S)", "(CBM-P)", "(CBM-A)", "(CBM-E)", "(CBM-R)", "(CBM-W)"
+    /*180*/ ,"(CBM-H)", "(CBM-J)", "(CBM-L)", "(CBM-Y)", "(CBM-U)", "(CBM-O)", "(SHIFT-@)", "(CBM-F)", "(CBM-C)", "(CBM-X)"
+    /*190*/ ,"(CBM-V)", "(CBM-B)", "(HLINE)", "", "", "", "", "", "", ""   // HLINE did have - // then A-G
     /*200*/ ,"", "", "", "", "", "", "", "", "", "" // H-Q
-    /*210*/ ,"", "", "", "", "", "", "", "", "", "" // R-Z 
-    /*220*/ ,"", "]", "", "_", "", "", "", "", "", ""
+    /*210*/ ,"", "", "", "", "", "", "", "", "", "(SHIFT-PLUS)" // R-Z 
+    /*220*/ ,"", "|", "", "(BACK-TRIANGLE)", "", "", "", "", "", ""  // 223 was _
     /*230*/ ,"", "", "", "", "", "", "", "", "", ""
   };
 
@@ -177,14 +194,21 @@ class detok
         } else {
           System.out.printf("%s",changebracket(tokens1quoted[tok]));
         }
-      } else if (!quoted && (int)(a&0xff)>=128 && (int)(a&0xff)<=212) { // ! quoted
+      } else if (c64sx && !quoted && (int)(a&0xff)>=204 && (int)(a&0xff)<=221) { // ! quoted
+        int tok=(int)(a&0xff)-204;
+        if (tokens64sx[tok].equals("")) {
+          System.out.printf("{%d}",(int)(a&0xff));
+        } else {
+          System.out.printf("%s",tokens64sx[tok]);
+        }
+      } else if (!quoted && (int)(a&0xff)>=128 && (int)(a&0xff)<=253 /*212*/) { // ! quoted
         int tok=(int)(a&0xff)-128;
         if (tokens1[tok].equals("")) {
           System.out.printf("{%d}",(int)(a&0xff));
         } else {
           System.out.printf("%s",tokens1[tok]);
         }
-      } else if ((int)(a&0xff)>=1 && (int)(a&0xff)<=30) {
+      } else if ((int)(a&0xff)>=1 && (int)(a&0xff)<=31) {
         int tok=(int)(a&0xff)-0;
         if (tokens0[tok].equals("")) {
           System.out.printf("{%d}",(int)(a&0xff));
@@ -195,11 +219,15 @@ class detok
         System.out.printf("%c",a);
         quoted=!quoted;
       } else if ((int)(a&0xff)==255) {
-        System.out.printf("{pi}");
+        /*System.out.printf("{pi}");*/
+        System.out.printf("(mathpi)");
       } else if ((int)(a&0xff)==92) {
         System.out.printf("|",a);
+      } else if ((int)(a&0xff)==91) {
+        System.out.printf("[",a); // should be this
       } else if ((int)(a&0xff)==93) {
-        System.out.printf("}",a);
+        //System.out.printf("}",a);
+        System.out.printf("]",a); // should be this
       } else if ((int)(a&0xff)==94) {
         System.out.printf("~",a);
       } else if (a=='>'||a=='#'||a=='*'||a=='&'||a=='<'||a=='+'||a=='/'||a=='@'||a=='!'||a=='-'
