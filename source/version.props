@@ -1,10 +1,10 @@
 #build number and date
-#Wed, 08 Mar 2017 23:05:58 +1000
+#Wed, 08 Mar 2017 23:11:25 +1000
 #Tue Sep 04 23:24:04 EST 2012
-build-date=20170308-2305
-rev=0
+build-date=20170308-2311
+rev=3
 build.user.name=pi
 major=3
 build.computer=${env.HOSTNAME}
-minor=3
-build-number=1223
+minor=4
+build-number=1224
