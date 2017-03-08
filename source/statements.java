@@ -770,9 +770,15 @@ boolean ReadStatement() throws BasicException
 //        machine.print("?help! help! try this: load\"$\",8 [enter]");
 //        machine.print("?help! try this: load\"$\",8 [enter]");
         machine.print("tokens: version "+version.programVersion+"\n");
-        for (int tok=0; tok<basicTokens.length; ++tok) {
-          machine.print(basicTokens[tok].toLowerCase()+",");
-		}
+        { String collect=""; int x=0;
+          for (int tok=0; tok<basicTokens.length; ++tok) {
+            x+=basicTokens[tok].length()+1;
+            if (x>=machine.machinescreen.maxX-2) {  x=basicTokens[tok].length()+1; collect+="\n"; }
+            collect+=basicTokens[tok].toLowerCase()+":";
+            if (basicTokens[tok].toLowerCase().equals("rem")) { collect+="\n"; x=0; }
+          }
+          machine.print(machine.syntaxHighlight(collect));
+        }
         machine.print("\n");
         machine.print("?help: try this (and press [");
         machine.print("enter])\n");

@@ -1,3 +1,9 @@
+/////////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+/////////////////////////////////////////////////////////////////////////////////
+
 // just doxx did it
 import java.awt.image.*; // for Image
 import java.util.*;
@@ -163,7 +169,7 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 
    public void command_FILL(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, int col) {
      int xpoints[]= {x1, x2, x3, x4, x1};
-     int ypoints[]= {y1, y2, y3, y4, y1};
+     int ypoints[]= {y1+tby, y2+tby, y3+tby, y4+tby, y1+tby};
      if (col<16) 
        newoffGraphics.setColor(colorindex[col]);
      else
@@ -246,8 +252,10 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 //       tx.translate(x,y+(double)tby/scale); // was but scales the x,y too
        tx.translate(x/scale,(y+(double)tby)/scale);
        if (rotation!=0.0) tx.rotate(rotation); 
-       AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-       newoffGraphics.drawImage(imgarray[imgno],tx,null);
+       //AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+       AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BICUBIC);
+       //newoffGraphics.drawImage(imgarray[imgno],tx,null);
+       newoffGraphics.drawImage(imgarray[imgno],op,0,0);
 
      if (!inframe) doupdate();
    }
