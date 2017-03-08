@@ -1,0 +1,6 @@
+10 print "the answer my friends"
+15 fori=1to100
+20 a=rnd(0)
+30 x=x+a
+40 nexti
+50 print x

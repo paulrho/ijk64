@@ -1,0 +1,14 @@
+10 g=117380.96+4838.73*2
+20 t=34104+1406.00*2
+50 print "gross   =";int(g)
+60 print "tax paid= ";t
+70 ct=17550+(g-80000)*0.37
+75 ct=ct+0.015*g
+80 print "tax due = ";int(ct)
+90 r= t-ct
+95 s=4841.54+201.69*2
+100 if (r<0) then?"liable=";
+110 if (r>=0)then?  "refund=";
+120 print  int(r)
+130 print "net = ";int(g-ct-s)
+140 print "month=";int((g-ct-s)/12)

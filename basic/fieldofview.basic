@@ -1,0 +1,6 @@
+10 print"length of field in meters?"
+20 inputa$:a=val(a$)
+30 b=45/180*mathpi:rem field of vision
+40 h=a/2/tan(b/2)
+50 print"to get entire field in view"
+60 print "height in feet = ";int(h/.305)

@@ -1,0 +1,9 @@
+10 geta$:ifa$=""then10
+20 forj=0to255:ifa$<>chr$(j)thennextj
+22 print asc(a$);
+25 ifj<256then50
+30 print"could not find char"
+40 goto 10
+45 ifasc(a$)<>jthenprint"asc="asc(a$)
+50 print"character = chr$("j") = "a$
+60 goto 10

@@ -1,0 +1,5 @@
+10 pi=mathpi
+20 r=5.0
+30 a=pi*r^2
+40 print "radius = ";r
+50 print "area = "a

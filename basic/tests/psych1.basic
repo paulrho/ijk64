@@ -1,0 +1,11 @@
+1 rem pschycodelic pattern testing the
+2 rem speed of writing to the screen
+10 meta-timing
+15 start=ti
+20 forl=1to900:a=a+1:b=int(rnd(0)*16):ifa>255thena=0
+30 fori=0to999:poke1024+i,a              :next
+40 fori=0to999:poke55296+i,b             :next
+50 nextl
+55 print"(clr)"
+57 print(ti-start)/60"seconds"
+60 meta-timingl

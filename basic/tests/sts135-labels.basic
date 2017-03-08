@@ -1,0 +1,94 @@
+15 print"(rvof)";
+20 load"../images/backgrounds/lcd4.png"
+30 meta-charset 1
+90 print"(clr)";
+100 rem -------------------------------------
+110 gosub "display.hardware"
+200 rem ------------initialise---------------
+210 delay=1000:gosub"delay.ms"
+220 gosub"clear.display"
+230 p$="Hello Mia":gosub"printout"
+240 delay=2000:gosub"delay.ms"
+245 rem -------------------------------------
+250 label "main.loop"
+260 gosub "read.keys"
+270 ifkey$="a"goto"mode.next"
+280 offset=1310131840+7200-240+6+138-900000*0:gosub"get.tminus"
+290 p$="(down)"+re$:gosub"printout"
+300 p$="STS135   ":gosub"printout"
+320 offset=36000:gosub"get.hms"
+330 x=x+1:p$="(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)"+re$:gosub"printout"
+340 offset=-3600*4:gosub"get.hms"
+350 x=x+1:p$="(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)"+re$:gosub"printout"
+360 offset=0:gosub"get.hms"
+370 p$="(up)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)Z"+re$:gosub"printout"
+490 goto "main.loop"
+500 rem -------------------------------------
+510 label"mode.next"
+520 p$="next mode":gosub"printout"
+530 label"mode.next.loop"
+540 gosub "read.keys"
+550 ifkey$="a"goto"main.loop"
+590 goto"mode.next.loop"
+990 end
+999 rem -------------------------------------
+1000 label "display.hardware"
+1002 print"(rvon)(blk)                          (rvof)"
+1005 print"(rvon)  (rvof)(gry2)+--------------------+(rvon)(blk)  (gry1) "
+1010 print"(blk)(rvon)  (gry2)(rvof)I(gry1)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(gry2)I(rvon)(blk)  (gry1) "
+1020 print"(blk)(rvon)  (gry2)(rvof)I(gry1)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(gry2)I(rvon)(blk)  (gry1) "
+1030 print"(blk)(rvon)  (gry2)(rvof)+--------------------+(rvon)(blk)  (gry1) "
+1040 print"(rvon)(blk)                          (gry1) (rvof)"
+1050 print"(rvon)(blk)        (gry1)1(blk)  (gry1)2(blk)  (gry1)3(blk)  (gry1)A(blk)        (gry1) (rvof)"
+1060 print"(rvon)(blk)                          (gry1) (rvof)"
+1070 print"(rvon)(blk)        (gry1)4(blk)  (gry1)5(blk)  (gry1)6(blk)  (gry1)B(blk)        (gry1) "
+1080 print"(rvon)(blk)                          (gry1) (rvof)"
+1090 print"(rvon)(blk)        (gry1)7(blk)  (gry1)8(blk)  (gry1)9(blk)  (gry1)C(blk)        (gry1) "
+1100 print"(rvon)(blk)                          (gry1) (rvof)"
+1110 print"(rvon)(blk)        (gry1)#(blk)  (gry1)0(blk)  (gry1).(blk)  (gry1)D(blk)        (gry1) "
+1120 print"(rvon)(blk)                          (gry1) (rvof)"
+1130 print" (rvon)(gry1)                          (rvof)"
+1190 return
+1200 label"clear.display"
+1210 p$="                    ":gosub"printout"
+1220 p$="(down)                    ":gosub"printout"
+1240 return
+2000 label "read.keys"
+2010 getkey$
+2020 ifkey$=""thengetkey$
+2030 ifkey$=""thengetkey$
+2040 ifkey$=""thengetkey$
+2050 ifkey$=""thengetkey$
+2060 ifkey$=""thengetkey$
+2070 ifkey$=""thengetkey$
+2090 return
+3000 label"printout":print"(home)(down)(down)(rght)(rght)(rght)";
+3005 print"(gry1)";
+3010 printp$
+3090 return
+4000 label"delay.ms":rem millisecond delay
+4010 rem use the fact that key get is forced 10ms wait
+4020 fori=1todelay/10:geta$:next
+4030 return
+4099 :
+4100 label "get.hms":rem ti$ to HH:MM:SS
+4110 tt=ti$+offset
+4115 rem test time tt=1310131840+7200-240+36000+6
+4120 day=int(tt/86400.0):tt=tt-day*86400.0
+4130 hr=int(tt/3600):tt=tt-hr*3600
+4140 mn=int(tt/60):tt=tt-mn*60
+4150 sc=int(tt)
+4160 re$=mid$(str$(100+hr),3,2)+":"+mid$(str$(100+mn),3,2)+":"+mid$(str$(100+sc),3,2)
+4170 return
+4199 :
+4200 label"get.tminus":rem differential ti$ to HH:MM:SS
+4210 tt=ti$-offset
+4212 sn$="L+"
+4215 iftt<0thentt=-tt:sn$="L-"
+4220 day=int(tt/86400.0):tt=tt-day*86400.0
+4222 ifday>0thensn$=mid$(str$(day),2)+"d"
+4230 hr=int(tt/3600):tt=tt-hr*3600
+4240 mn=int(tt/60):tt=tt-mn*60
+4250 sc=int(tt)
+4260 re$=sn$+mid$(str$(100+hr),3,2)+":"+mid$(str$(100+mn),3,2)+":"+mid$(str$(100+sc),3,2)
+4270 return

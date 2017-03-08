@@ -1,0 +1,10 @@
+5 print"(clr)hello mia!!"
+10 x=int(rnd(0)*10)+1
+20 y=int(rnd(0)*10)+1
+30 printx"x"y"= ";
+50 inputa$
+60 print
+65 an=val(a$)
+70 ifan=x*ythenprint"correct!":goto10
+80 print"no :-( try again"
+90 goto 30

@@ -1,0 +1,23 @@
+5 print"(clr)";
+10 print "Hello, let me tell you about Vesta."
+20 print "                             ***** "
+30 print
+40 print"How high can you jump (meters)? ";
+50 input howhigh$
+52 s=val(howhigh$)
+55 a=9.8
+60 rem s=ut+1/2at^2
+70 rem v=u+at
+80 rem v2=u2+2as
+90 v=sqrt(2*a*s)
+95 t=v/a *2
+100 print "Initial velocity=";int(v*100)/100;"m/s"
+110 print "in ";int(t*100)/100;"seconds"
+120 print "(";int(60/t*100)/100;"bpm)"
+200 a=0.22
+210 s=v^2/2/a
+220 t=v/a* 2
+250 print
+255 print "On Vesta: a=";int(a*100)/100;"m/s/s"
+260 print "Height of jump=";int(s*100)/100;"m"
+270 print "Time of jump";int(t*100)/100;"seconds"

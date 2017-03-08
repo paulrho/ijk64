@@ -1,0 +1,3 @@
+ 50010 for i=1to21STEP3
+ 50020 print i
+ 50030 next

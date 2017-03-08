@@ -1,0 +1,35 @@
+5 print"planet=";:inputp$:p=val(p$)
+10 print "initial velocity ";
+20 input v$:v=val(v$)
+30 rem print v
+40 print "initial angle ";
+50 input a$:a=val(a$)
+60 rem print a
+65 comp=0.5 : rem the amount we compress
+67 hc=comp*sin(a/180*(mathpi))
+70 rem vertical velocity
+80 vy=sin(a/180*(mathpi))*v
+90 rem horizontal velocity
+100 vx=cos(a/180*(mathpi))*v
+110 print"vx=";vx:print"vy=";vy
+115 rem p=0
+120 ifp=0theng=9.8:planet$="Earth"
+122 ifp=1theng=0.22:planet$="Vesta"
+123 ifp=2theng=0.0001:planet$="Itokowi"
+124 ifp=3theng=0.0059:planet$="Eros"
+125 print "Gravity = ";planet$
+130 rem v=u+at
+140 t=vy/g:rem time to top
+145 rem s=ut+1/2at^2
+147 h=vy*t+0.5*g*t^2
+150 s=vx*(t+t2)+comp*cos(a/180*(mathpi)): rem total distance travelled
+151 t2=sqrt(2*(hc+h)/g)
+152 print"hc=";hc
+153 print"h=";h
+155 at=comp/v
+157 print "accelerate time = ";at;"sec"
+160 print "total dist=";int(s*100)/100;"m"
+164 print "time up       =";int(t*100)/100;"s"
+166 print "time back down=";int(t2*100)/100;"s"
+170 print "max height=";int(h*100)/100;"m"
+180 print "total time=";int((at+t+t2)*10)/10;"s"

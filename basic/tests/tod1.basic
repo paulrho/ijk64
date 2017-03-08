@@ -1,0 +1,13 @@
+5 print"(clr)";
+10 t=ti$: y=int(t/86400/365.25+1970)
+20 day=int(t/86400-(365.25*(y-1970)))
+30 h=(t/86400-int(t/86400))*24
+35 m=(h-int(h))*60
+37 s=(m-int(m))*60
+40 print"(home)";
+50 print"(blu)Day(gry1)"day;"of"y;int(h)":"int(m)":"int(s+0.1)"  "
+60 rem this relise on the "feature" of get that does a sleep(10ms)
+62 rem this feature may be removed or changed in the future
+63 rem and so this would have to be done differently
+70 fori=1to100:geta$:nexti: remsleep 1
+80 goto 10

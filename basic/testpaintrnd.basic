@@ -1,0 +1,3 @@
+10 fori=0to999:poke1024+i,int(rnd(0)*256):next
+20 fori=0to999:poke55296+i,int(rnd(0)*16):next
+30 goto 10

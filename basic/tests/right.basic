@@ -1,0 +1,2 @@
+5 A$="ABCD"
+10 print right$(A$,len(A$)-1)

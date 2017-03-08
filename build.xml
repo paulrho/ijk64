@@ -1,0 +1,247 @@
+<?xml version="1.0"?>
+
+<project name="C64" default="dist" basedir=".">
+    <description>
+        The build/run file for C64
+    </description>
+  <!-- set global properties for this build -->
+  <property name="source" location="source"/>
+  <property name="build" location="run"/>
+  <property name="dist"  location="jar"/>
+  <property name="javadocs"  location="javadocs"/>
+  <property name="version.props"  location="${source}/version.props"/>
+
+  <!-- Load environment variables (for computer name) -->
+  <property environment="env"/>
+  <!-- Capture the computer name in a cross-platform manner -->
+  <property name="env.COMPUTERNAME" value="${env.HOSTNAME}" />
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+  </target>
+
+  <!--description="Update version only on changes"-->
+  <target name="version"
+          depends="build.uptodate?"
+          unless="build.uptodate"
+          description="Maintain build-number and build-date properties.">
+    <propertyfile file="${version.props}"
+             comment="build number and date">
+      <entry key="build-number" type="int" operation="+" pattern="0000" default="0000"/>
+      <entry key="build-date" type="date" value="now" pattern="yyyyMMdd-HHmm" />
+      <entry key="build.user.name" value="${user.name}"/>
+      <!-- COMPUTERNAME on windows? -->
+      <entry key="build.computer" value="${env.COMPUTERNAME}"/>
+    </propertyfile>
+    <property file="${source}/version.props"/>
+    <replaceregexp file="${source}/version.java"
+                         match="programVersion = (.*)"
+                         replace="programVersion = &#34;${major}.${minor}.${rev}_b${build-number}&#34;;"
+                         byline="true" />
+    <echo message="Updated the build number"/>
+  </target>
+
+  <target name="compile" depends="init,version"
+        description="compile the source " >
+    <buildnumber file="${source}/build.num"/>
+    <!-- Compile the java code from ${source} into ${build}  and line number debugging!
+      this wont work because it uses printf!
+      source="1.4"
+      target="1.4"
+    -->
+    <javac srcdir="${source}" destdir="${build}"
+      debug="true" debuglevel="lines,vars,source"
+      source="1.5"
+      target="1.5"
+    />
+  </target>
+
+  <target name="dist" depends="compile,javadocs"
+        description="generate the distribution" >
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}"/>
+
+    <mkdir dir="${build}/images"/>
+    <copy todir="${build}/images">
+      <fileset dir="images">
+        <include name="**/*.jpg" />
+        <include name="**/*.gif" />
+        <include name="**/*.png" />
+        <exclude name="**/old/" />
+        <exclude name="**/backgrounds/" />
+        <exclude name="**/refimages/" />
+        <exclude name="**/workinprogress/" />
+      </fileset>
+    </copy>
+
+    <mkdir dir="${build}/basic"/>
+    <copy todir="${build}/basic">
+      <fileset dir="basicjar">
+        <include name="**/*.basic" />
+      </fileset>
+    </copy>
+
+    <!--echo message="the dist thing is running"/-->
+    <!-- read in this file-->
+    <property file="${source}/version.props"/>
+
+    <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
+    <!--jar jarfile="${dist}/jar/C64-${DSTAMP}.jar" basedir="${build}" -->
+    <jar jarfile="${dist}/ijk64.jar" basedir="${build}">
+      <manifest>
+        <attribute name="Built-By" value="${user.name}"/>
+        <attribute name="Main-Class" value="C64"/>
+	<!-- This line puts your username into the manifest.
+			Maybe you don't want to do that. -->
+			<!--attribute name="Built-By" value="${build.user.name}"/-->
+			<attribute name="Built-On" value="${build-date} @${build.computer}"/>
+			<!-- This property was set by the svn-info task -->
+			<!--attribute name="Revision" value="${svnrevision}"/-->
+			<!-- This property comes from the build.properties file -->
+			<attribute name="Version" value="${major}.${minor}.${rev}_b${build-number}"/>
+			<attribute name="Implementation-Version" value="${major}.${minor}.${rev}_b${build-number}"/>
+      </manifest> 
+    </jar>
+  </target>
+
+  <!-- autodoc is no longer used - better done by a conditional javadocs -->
+  <target name="autodoc" description="Generate javadoc documentation." depends="compile">
+    <mkdir dir="autodoc"/>
+     <javadoc destdir="autodoc" private="true" linksource="yes"> <!-- source="1.4"-->
+        <fileset dir="${source}" includes="*.java"/>
+     </javadoc>
+  </target>
+
+  <!-- spawn="yes" would be good - but we see no output!-->
+  <!-- normal "run" is transparent and no frames - this now requires command line options -->
+  <target name="run" description="run the program" depends="dist">
+    <java jar="${dist}/ijk64.jar" fork="true" maxmemory="128m" dir="basic">
+       <arg value="-t"/>
+       <arg value="-n"/>
+       <arg value="-b"/>
+    </java>
+  </target>
+
+  <!-- spawn="yes" would be good - but we see no output!-->
+  <!-- normal "run" is transparent and no frames - this now requires command line options -->
+  <target name="runnormal" description="run the program in normal mode" depends="dist">
+    <java jar="${dist}/ijk64.jar" fork="true" maxmemory="128m" dir="basic">
+    </java>
+  </target>
+
+  <!-- spawn="yes" would be good - but we see no output!-->
+  <!-- normal "run" is transparent and no frames - this now requires command line options -->
+  <target name="runfree" description="run the program in normal mode" depends="dist">
+    <java jar="${dist}/ijk64.jar" fork="true" dir="basic">
+    </java>
+  </target>
+
+  <target name="timingjar" description="timing test the program using the jar (no profiling)" depends="dist">
+    <java jar="${dist}/ijk64.jar" dir="basic" fork="true"
+      maxmemory="128m"
+    >
+       <arg value="../basic/tests/mp2.basic"/>
+       <arg value="-r"/>
+       <arg value="-x"/>
+    </java>
+  </target>
+
+  <target name="timingjar_profile" description="timing test the program using the jar with profiling" depends="dist">
+    <java jar="${dist}/ijk64.jar" dir="basic" fork="true"
+      maxmemory="128m"
+    >
+       <jvmarg value="-Xrunhprof:cpu=samples,interval=1,depth=10,thread=y" />
+       <arg value="../basic/tests/mp2.basic"/>
+       <arg value="-r"/>
+       <arg value="-x"/>
+    </java>
+  </target>
+
+  <target name="timing" description="timing test the program (no profiling)" depends="dist">
+    <java dir="${build}" fork="true" classname="C64"
+      maxmemory="128m"
+    >
+       <arg value="../basic/tests/mp2.basic"/>
+       <arg value="-r"/>
+       <arg value="-x"/>
+    <!-- (cd ../run && java -Xmx128m -Xrunhprof:cpu=samples,interval=1,depth=10 C64 /media/disk/JEBI/basic/tests/mp2.basic -r -x ) -->
+    </java>
+  </target>
+
+  <target name="timing_profile" description="timing test the program with profiling" depends="dist">
+    <java dir="${build}" fork="true" classname="C64"
+      maxmemory="128m"
+    >
+       <jvmarg value="-Xrunhprof:cpu=samples,interval=1,depth=10,thread=y" />
+       <arg value="../basic/tests/mp2.basic"/>
+       <arg value="-r"/>
+       <arg value="-x"/>
+    <!-- (cd ../run && java -Xmx128m -Xrunhprof:cpu=samples,interval=1,depth=10 C64 /media/disk/JEBI/basic/tests/mp2.basic -r -x ) -->
+    </java>
+  </target>
+
+  <target name="test" description="test the program" depends="dist">
+    <java dir="${build}" fork="true" classname="ev" />
+  </target>
+
+  <target name="clean"
+        description="clean up" >
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+    <delete dir="autodoc"/>
+    <delete dir="${javadocs}"/>
+  </target>
+
+
+  <!-- This is a dodgy way to update the build version only on
+       sourcecode change -->
+  <target name="build.uptodate?">
+    <uptodate property="build.uptodate"
+              targetfile="${javadocs}/index.html">
+      <srcfiles dir="${source}" includes="**/*.java,
+                                    **/version.props,
+                                    **/package.html,
+                                    **/doc-files/**" />
+    </uptodate>
+
+    <!-- All this to print "true" or "false" for the property value -->
+    <condition property="build-uptodate-value" value="false">
+      <equals arg1="${build.uptodate}" arg2="$${build.uptodate}" />
+    </condition>
+    <property name="build-uptodate-value" value="true" />
+    <echo message="build-uptodate = ${build-uptodate-value}" />
+  </target>
+  <!-- .................................................. -->
+
+  <target name="javadocs"
+          description="Generate javadoc documentation."
+          depends="javadocs.uptodate?,compile"
+          unless="javadocs.uptodate">
+    <javadoc destdir="${javadocs}"
+             private="true" linksource="yes"> <!-- source="1.4"-->
+        <fileset dir="${source}" includes="*.java"/>
+    </javadoc>
+  </target>
+
+  <target name="javadocs.uptodate?">
+    <mkdir dir="${javadocs}" />
+    <uptodate property="javadocs.uptodate"
+              targetfile="${javadocs}/index.html">
+      <srcfiles dir="${source}" includes="**/*.java,
+                                    **/package.html,
+                                    **/doc-files/**" />
+    </uptodate>
+
+    <!-- All this to print "true" or "false" for the property value -->
+    <condition property="javadocs-uptodate-value" value="false">
+      <equals arg1="${javadocs.uptodate}" arg2="$${javadocs.uptodate}" />
+    </condition>
+    <property name="javadocs-uptodate-value" value="true" />
+    <echo message="javadocs-uptodate = ${javadocs-uptodate-value}" />
+  </target>
+
+</project>

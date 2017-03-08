@@ -1,0 +1,12 @@
+10 k=10000:rem atmos kg/m2
+20 d=0.10:rem diam of cuboid
+30 l=5
+100 w=d*d*l*1000
+110 p=w/(d*d)
+200 print "(clr)"
+210 print "inputs"
+220 print "d="d"m"
+230 print "l="l"m"
+300 print "w="w"kg"
+310 print "press"p"kg/m2"
+320 print "press"p/k"atmos"

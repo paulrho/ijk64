@@ -1,0 +1,15 @@
+0  rem "calculator.basic"
+10  print"(clr)";
+20  rem setup colours/format etc
+30 fgc$="(wht)":fgc$="(cyn)"
+90 print"(home)";
+100 printfgc$;
+110 inputa$
+120 print "                                      ": rem clear the line
+125 print "
+130 print "(up)";
+135 print "(up)";
+140 print eval$(a$)
+150 if everr$<>"" then print"(red)";everr$:goto100
+155 remprint"(up)";
+160 goto 100

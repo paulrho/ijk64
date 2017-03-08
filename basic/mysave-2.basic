@@ -1,0 +1,14 @@
+5 print"(clr)(lblu)"
+10 print"what is the longest program"
+20 print"written on a new basic simulator"
+30 print"not emulator"
+100 print"what is your name?"
+110 input a$
+120 print"hello "a$" how are you?"
+130 gosub1000
+140 print"(wht)i am finished talking now"
+990 end
+1000 input a$
+1010 if a$="good" then print "thats good to hear"
+1020 if a$="bad" then print "thats no good"
+1090 return

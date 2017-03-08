@@ -1,0 +1,3 @@
+10 for a= 1 to 100
+20   print "(blu)"a"(gry1)";sqrt(a+a-a*a/a^a)
+30 nexta

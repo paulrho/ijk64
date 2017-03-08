@@ -1,0 +1,11 @@
+ 10 n6=5:nv=4
+ 20 pv%(1)=2
+ 30 pv%(2)=4
+ 40 pv%(3)=3
+ 50 pv%(4)=7
+ 60 pv%(5)=7
+ 5170 x=int(rnd(it)*nv)+1
+ 5172 forj=1ton6:ifpv%(j)=xthen5170
+ 5175 print "j="j;"x="x
+ 5180 nextj
+

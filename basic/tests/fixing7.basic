@@ -1,0 +1,4 @@
+   98 print"entering junction descriptions"
+   99 jn=1
+  100 jn(p5)=jn:ex(p5)=ex:lj(p5)=lj:wc(p5)=wc:la(p5)=la:p5=1:pl=1:p6=pl+10000: print "jn.0-1p5=";jn(0);" ";jn(1)
+  101 rem jn=jn(p5):ex=ex(p5):lj=lj(p5):wc=wc(p5):la=la(p5)
