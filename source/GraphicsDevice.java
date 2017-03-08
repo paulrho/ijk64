@@ -371,7 +371,6 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 
 } /* class */
 
-/*******
- * END *
- *******/
-
+/////////
+// END //
+/////////
