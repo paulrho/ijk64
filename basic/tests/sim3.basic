@@ -1,0 +1,57 @@
+15 print"(rvof)";
+20 load"../images/backgrounds/lcd4.png"
+30 meta-charset 1
+90 print"(clr)";
+110 rem print"+---------------------+"
+120 rem print"G                     G"
+130 rem print"+---------------------+"
+200 gosub 1000:rem display hardware
+201 delay=1000:gosub4000:rem millisecond
+202 p$="                    ":gosub3000:rem print string
+203 p$="(down)                    ":gosub3000:rem print string
+205 p$="Hello Mia":gosub3000:rem print string
+207 delay=2000:gosub4000:rem millisecond
+210 gosub 2000:rem read keys
+220 p$=ti:gosub3000:rem print string
+230 rem x=x+1:p$="(down)"+str$(x)+"x"+str$(ti$):gosub3000:rem print string
+235 offset=36000:gosub4100:rem get HMS
+240 x=x+1:p$="(down)"+re$:gosub3000:rem print string
+250 offset=-3600*4:gosub4100:rem get HMS
+260 x=x+1:p$="(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)"+re$:gosub3000:rem print string
+290 goto210
+990 end
+1000 print"(rvon)(blk)                          (rvof)"
+1005 print"(rvon)  (rvof)(gry2)+--------------------+(rvon)(blk)  (gry1) "
+1010 print"(blk)(rvon)  (gry2)(rvof)I(gry1)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(gry2)I(rvon)(blk)  (gry1) "
+1020 print"(blk)(rvon)  (gry2)(rvof)I(gry1)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(mathpi)(gry2)I(rvon)(blk)  (gry1) "
+1030 print"(blk)(rvon)  (gry2)(rvof)+--------------------+(rvon)(blk)  (gry1) "
+1040 print"(rvon)(blk)                          (gry1) (rvof)"
+1050 print"(rvon)(blk)        (gry1)1(blk)  (gry1)2(blk)  (gry1)3(blk)  (gry1)A(blk)        (gry1) (rvof)"
+1060 print"(rvon)(blk)                          (gry1) (rvof)"
+1070 print"(rvon)(blk)        (gry1)4(blk)  (gry1)5(blk)  (gry1)6(blk)  (gry1)B(blk)        (gry1) "
+1080 print"(rvon)(blk)                          (gry1) (rvof)"
+1090 print"(rvon)(blk)        (gry1)7(blk)  (gry1)8(blk)  (gry1)9(blk)  (gry1)C(blk)        (gry1) "
+1100 print"(rvon)(blk)                          (gry1) (rvof)"
+1110 print"(rvon)(blk)        (gry1)#(blk)  (gry1)0(blk)  (gry1).(blk)  (gry1)D(blk)        (gry1) "
+1120 print"(rvon)(blk)                          (gry1) (rvof)"
+1130 print" (rvon)(gry1)                          (rvof)"
+1190 return
+2000 rem read keys
+2010 geta$
+2090 return
+3000 print"(home)(down)(down)(rght)(rght)(rght)";
+3005 print"(gry1)";
+3010 printp$
+3090 return
+4000 rem millisecond delay
+4010 rem use the fact that key get is forced 10ms wait
+4020 fori=1todelay/10:geta$:next
+4030 return
+4100 rem ti$ to HH:MM:SS
+4110 tt=ti$+offset
+4120 day=int(tt/86400.0):tt=tt-day*86400.0
+4130 hr=int(tt/3600):tt=tt-hr*3600
+4140 mn=int(tt/60):tt=tt-mn*60
+4150 sc=int(tt)
+4160 re$=mid$(str$(100+hr),3,2)+":"+mid$(str$(100+mn),3,2)+":"+mid$(str$(100+sc),3,2)
+4170 return

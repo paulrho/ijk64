@@ -1088,7 +1088,7 @@ boolean RSTinitted=false;
 int catop[]=new int[30];
 int chainarray[][]=new int[30][10];
 
-    // ReadStatementToken will identify a token from the current "pnt" in the basic text.
+   // ReadStatementToken will identify a token from the current "pnt" in the basic text.
     // It is very inefficient and should be re-written.
     // A significant portion of the time gets spent in here.
     

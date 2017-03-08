@@ -1,0 +1,9 @@
+10 a=int(rnd(0)*10)+1
+20 b=int(rnd(0)*10)+1
+30 print a;"x";b;"= ";
+100 print"R";
+110 geta$:ifa$=""then110
+120 x= asc(a$)
+130 ifx=-56thenprint"(left) (left)(left)";:goto100
+180 print"(left)";a$;
+190 goto 100

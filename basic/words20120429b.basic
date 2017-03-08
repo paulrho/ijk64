@@ -1,0 +1,66 @@
+1 WSEC=0
+5 DIMW$(200)
+6 DIMD(200)
+10 SCREEN1
+12 DEFFN PK(A)=PEEK(A)+PEEK(A+1)*256
+15 POKE1024,0
+20 CLS
+30 FSET"Helvetica",80
+40 FSET"Futura-Medium",120
+50 READWR$:IFWR$="xx"THENREADSEC:GOTO50
+51 printWR$
+55 IFSEC=WSEC OR WSEC=0 THENW$(N)=WR$:N=N+1
+60 IFWR$<>""THEN50
+70 DID=0
+100 BEGINFRAME:CLS
+102 RECT0,0,1000,1005,11
+103 IFDID=NTHENDID=0:FORI=0TON-1:D(I)=0:NEXT:ALERT4
+105 LR=R:R=INT(RND(0)*N):IFLR=RTHEN105
+107 IFD(R)=1THEN105
+108 DID=DID+1:D(R)=D(R)+1
+110 WR$=W$(R)
+115 IFWR$=""THENRESTORE:GOTO105
+117 FSET"Futura-Medium",120
+118 X1=RND(0)*100:Y1=RND(0)*100:X1=0:Y1=0
+119 RECT100+X1,300+Y1,700+X1,550+Y1,0
+120 GPRINTWR$,150+X1,450+Y1,4
+130 ENDFRAME
+150 GOSUB 3000:IFT<>0ANDX<100ANDY<100THENR=LR:GOTO110
+151 IFT<>3ANDT<>11ORY<600THEN150
+152 FSET"Futura-Medium",12
+153 BEGINFRAME:GPRINT"x"+STR$(T),X+100,Y,1:ENDFRAME
+170 SLEEP1
+190 GOTO100
+990 SLEEP10000
+1000 DATA"xx",1
+1005 data"I","in","a","it","and","is","be","the","to","am"
+1010 data"at","are","we","for","but","of","was","that","all","he"
+1020 data"as","so","are","not","her","on","his","have","had","one"
+1030 data"an","with","by","they","do","said","go","me","you","if"
+1035 data"my","him","no","our","or","who","up","from","big","much"
+1040 data"can","out","did","back","get","into","had","over","new","went"
+1050 data"now","two","off","been","old","just","see","them","she","call"
+1055 data"came","well","down","here","like","make","made","come","this","when"
+1060 data"were","about","must","look","only","some","will","then","your","what"
+1070 data"before","first","more","right","want","there","other","which","could","where"
+1090 DATA"xx",4
+1100 data"after","red","eat","name","little","away","take","under","work","say"
+1110 data"again","think","give","too","long","each","their","ball","would","until"
+1120 data"any","another","good","near","man","kind","three","ear","also","because"
+1130 data"boy","dear","how","run","many","never","us","last","colour","end"
+1140 data"day","house","know","tree","put","saw","very","next","home","leave"
+1150 data"night","book","left","white","let","sure","should","tell","black","pretty"
+1160 data"school","four","seem","both","open","wish","way","why","found","than"
+1170 data"upon","may","use","friend","shall","box","own","bring","people","these"
+1180 data"best","play","better","men","five","girl","soon","got","stand","year"
+1190 data"far","such","find","please","live","present","where","morning","while","hand"
+2090 DATA""
+3000 REM [SUB READ USER TAP]
+3010 REMDEF FN PK(A)=PEEK(A)+PEEK(A+1)*256
+3020 XT=1030
+3030 YT=1032
+3050 T=PEEK(1024):IF T = 0 THEN GOTO 3050
+3055 POKE1024,0
+3060 X = FN PK(XT) : Y = FN PK(YT)
+3070 RETURN
+8000 FORI=1TO20:PRINTINT(RND(TI)*12+1);"x";INT(RND(TI)*12+1):NEXT

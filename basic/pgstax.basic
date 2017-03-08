@@ -1,0 +1,6 @@
+10 g=117380.96+4838.73*2
+20 t=34104+1406.00*2
+50 print "gross   =";int(g)
+60 print "tax paid= ";t
+70 ct=17550+(g-80000)*0.37
+80 print "tax due = ";int(ct)

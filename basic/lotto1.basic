@@ -1,0 +1,2 @@
+10 fori=1to6:printint(rnd(0)*45)+1;" ";
+20 nexti

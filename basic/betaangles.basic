@@ -1,0 +1,10 @@
+10 print "beta angles"
+15 fori=0to30step0.5
+20 sundec=-23.0:sunra=(17+9/60)*15+i
+30 inc=51.4
+40 om=187.64-5.33*i
+60 dr=180.0/(mathpi)
+80 rem iss :om=349.23-5.33*i
+100 s=cos(sundec/dr)*sin(inc/dr)*sin((om-sunra)/dr)+sin(sundec/dr)*cos(inc/dr)
+110 print"date ";i+11;tab(15);asin(s)*dr
+120 next

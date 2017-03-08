@@ -1,0 +1,9 @@
+10 INPUT#1,A$
+20 PRINT A$
+30 X=VAL(A$)
+40 PRINT X
+100 mx=300
+ 6010 open1,0:input#1,a$:close1:print
+ 6020 x=val(a$):ifx>mxorx<-mxthenprint"no-way":goto100
+6030 print "got here"
+

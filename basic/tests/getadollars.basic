@@ -1,0 +1,4 @@
+10 geta$
+20 ifa$=chr$(10)thenprint"10"
+30 ifa$=chr$(13)thenprint"13"
+40 goto10

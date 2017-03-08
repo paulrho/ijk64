@@ -1,0 +1,146 @@
+0 rem  
+0 rem  Astrophysical Speed Test : mp2
+0 rem  
+0 rem   AUTHOR        : Paul Salanitri
+0 rem  REVISION      : 2.02
+0 rem   REVISION DATE : 2 November 1996
+0 rem   NOTES         : For Unix systems - define USE_TIME
+0 rem                   Will now loop until timer ticks over (on PCs too)
+0 rem  
+0 rem  MODIFICATIONS :
+0 rem            2.03 : Test timing overhead
+0 rem            2.02 : fix spelling of Astrophysical!
+0 rem            2.01 : First release - tested on Sun and Sequent (mods)
+0 rem            1.00 : Source Code Lost!!!!
+0 rem  *********************************************************************/
+0 rem VERSION "2.03"
+0 rem calc_moon((double)2450000.0 + (double)count);
+0 mathPI=3.141592653589793
+0 dt=180.0/mathPI
+0 AU=1.0
+10 META-CHARSET 1
+100 sl=0
+110 print"Calculating solution..."
+120 META-TIMING
+125 rem fori=1to140:JD=2450000.0:gosub1000:next
+127 COUNT=1400
+130 fori=1toCOUNT:JD=2450000.0:gosub1000:next
+140 META-TIMING COUNT
+150 sl=1: rem print a solution now for checking!
+160 JD=2450000.0:gosub1000
+199 end
+1000 rem  The new harmonic solution to the position of the moon 
+1010  JD=JD-2415020.0: rem  move to Jan 0.5 1900 
+1020  t=(JD/36525.0): t2=t*t:
+1030  m1=2.732158213e1: m2=3.652596407e2:
+1040  m3=2.755455094e1: m4=2.953058868e1:
+1040  m5=2.721222039e1: m6=6.798363307e3:
+1040  q=JD: m1=q/m1: m2=q/m2:
+1040  m3=q/m3: m4=q/m4: m5=q/m5: m6=q/m6:
+1040  m1=360.0*(m1-int(m1))
+1040  m2=360.0*(m2-int(m2))
+1040  m3=360.0*(m3-int(m3))
+1040  m4=360.0*(m4-int(m4))
+1040  m5=360.0*(m5-int(m5))
+1040  m6=360.0*(m6-int(m6))
+1040  ml=2.70434164e2+m1-(1.133e-3-1.9e-6*t)*t2:
+1040  ms=3.58475833e2+m2-(1.5e-4+3.3e-6*t)*t2:
+1040  md=2.96104608e2+m3+(9.192e-3+1.44e-5*t)*t2:
+1040  me=3.50737486e2+m4-(1.436e-3-1.9e-6*t)*t2:
+1040  mf=11.250889+m5-(3.211e-3+3e-7*t)*t2:
+1040  na=2.59183275e2-m6+(2.078e-3+2.2e-6*t)*t2:
+1040  a=(51.2+20.2*t)/dt: s1=sin(a): s2=sin(na/dt):
+1040  b=346.56+(132.87-9.1731e-3*t)*t:
+1040  s3=3.964e-3*sin(b/dt):
+1040  c=(na+275.05-2.3*t)/dt:  s4=sin(c):
+1040  ml=ml+2.33e-4*s1+s3+1.964e-3*s2:
+1040  ms=ms-1.778e-3*s1:
+1040  md=md+8.17e-4*s1+s3+2.541e-3*s2:
+1040  mf=mf+s3-2.4691e-2*s2-4.328e-3*s4:
+1040  me=me+2.011e-3*s1+s3+1.964e-3*s2:
+1040  e=1-(2.495e-3+7.52e-6*t)*t: e2=e*e:
+1040  ml=ml/dt: ms=ms/dt: na=na/dt:
+1040  me=me/dt: mf=mf/dt: md=md/dt:
+1040  l=6.28875*sin(md)+1.274018*sin(2.0*me-md):
+1040  l=l+6.58309e-1*sin(2.0*me)+2.13616e-1*sin(2.0*md):
+1040  l=l-e*1.85596e-1*sin(ms)-1.14336e-1*sin(2.0*mf):
+1040  l=l+5.8793e-2*sin(2.0*(me-md)):
+1040  l=l+5.7212e-2*e*sin(2.0*me-ms-md)+5.332e-2*sin(2.0*me+md):
+1040  l=l+4.5874e-2*e*sin(2.0*me-ms)+4.1024e-2*e*sin(md-ms):
+1040  l=l-3.4718e-2*sin(me)-e*3.0465e-2*sin(ms+md):
+1040  l=l+1.5326e-2*sin(2.0*(me-mf))-1.2528e-2*sin(2.0*mf+md):
+1040  l=l-1.098e-2*sin(2.0*mf-md)+1.0674e-2*sin(4.0*me-md):
+1040  l=l+1.0034e-2*sin(3.0*md)+8.548e-3*sin(4.0*me-2.0*md):
+1040  l=l-e*7.91e-3*sin(ms-md+2.0*me)-e*6.783e-3*sin(2.0*me+ms):
+1040  l=l+5.162e-3*sin(md-me)+e*5e-3*sin(ms+me):
+1040  l=l+3.862e-3*sin(4.0*me)+e*4.049e-3*sin(md-ms+2.0*me):
+1040  l=l+3.996e-3*sin(2.0*(md+me))+3.665e-3*sin(2.0*me-3.0*md):
+1040  l=l+e*2.695e-3*sin(2.0*md-ms)+2.602e-3*sin(md-2.0*(mf+me)):
+1040  l=l+e*2.396e-3*sin(2.0*(me-md)-ms)-2.349e-3*sin(md+me):
+1040  l=l+e2*2.249e-3*sin(2.0*(me-ms))-e*2.125e-3*sin(2.0*md+ms):
+1040  l=l-e2*2.079e-3*sin(2.0*ms)+e2*2.059e-3*sin(2.0*(me-ms)-md):
+1040  l=l-1.773e-3*sin(md+2.0*(me-mf))-1.595e-3*sin(2.0*(mf+me)):
+1040  l=l+e*1.22e-3*sin(4.0*me-ms-md)-1.11e-3*sin(2.0*(md+mf)):
+1040  l=l+8.92e-4*sin(md-3.0*me)-e*8.11e-4*sin(ms+md+2.0*me):
+1040  l=l+e*7.61e-4*sin(4.0*me-ms-2.0*md):
+1040  l=l+e2*7.04e-4*sin(md-2.0*(ms+me)):
+1040  l=l+e*6.93e-4*sin(ms-2.0*(md-me)):
+1040  l=l+e*5.98e-4*sin(2.0*(me-mf)-ms):
+1040  l=l+5.5e-4*sin(md+4.0*me)+5.38e-4*sin(4.0*md):
+1040  l=l+e*5.21e-4*sin(4.0*me-ms)+4.86e-4*sin(2.0*md-me):
+1040  l=l+e2*7.17e-4*sin(md-2.0*ms):
+1040  mm=ml+l/dt: tp=6.283185308:
+1700 ifmm<0.0thenmm=mm+tp:goto1700
+1710 ifmm>tpthenmm=mm-tp:goto1700
+1800  g=5.128189*sin(mf)+2.80606e-1*sin(md+mf):
+1800  g=g+2.77693e-1*sin(md-mf)+1.73238e-1*sin(2.0*me-mf):
+1800  g=g+5.5413e-2*sin(2.0*me+mf-md)+4.6272e-2*sin(2.0*me-mf-md):
+1800  g=g+3.2573e-2*sin(2.0*me+mf)+1.7198e-2*sin(2.0*md+mf):
+1800  g=g+9.267e-3*sin(2.0*me+md-mf)+8.823e-3*sin(2.0*md-mf):
+1800  g=g+e*8.247e-3*sin(2.0*me-ms-mf)+4.323e-3*sin(2.0*(me-md)-mf):
+1800  g=g+4.2e-3*sin(2.0*me+mf+md)+e*3.372e-3*sin(mf-ms-2.0*me):
+1800  g=g+e*2.472e-3*sin(2.0*me+mf-ms-md):
+1800  g=g+e*2.222e-3*sin(2.0*me+mf-ms):
+1800  g=g+e*2.072e-3*sin(2.0*me-mf-ms-md):
+1800  g=g+e*1.877e-3*sin(mf-ms+md)+1.828e-3*sin(4.0*me-mf-md):
+1800  g=g-e*1.803e-3*sin(mf+ms)-1.75e-3*sin(3.0*mf):
+1800  g=g+e*1.57e-3*sin(md-ms-mf)-1.487e-3*sin(mf+me):
+1800  g=g-e*1.481e-3*sin(mf+ms+md)+e*1.417e-3*sin(mf-ms-md):
+1800  g=g+e*1.35e-3*sin(mf-ms)+1.33e-3*sin(mf-me):
+1800  g=g+1.106e-3*sin(mf+3.0*md)+1.02e-3*sin(4.0*me-mf):
+1800  g=g+8.33e-4*sin(mf+4.0*me-md)+7.81e-4*sin(md-3.0*mf):
+1800  g=g+6.7e-4*sin(mf+4.0*me-2.0*md)+6.06e-4*sin(2.0*me-3.0*mf):
+1800  g=g+5.97e-4*sin(2.0*(me+md)-mf):
+1800  g=g+e*4.92e-4*sin(2.0*me+md-ms-mf)+4.5e-4*sin(2.0*(md-me)-mf):
+1800  g=g+4.39e-4*sin(3.0*md-mf)+4.23e-4*sin(mf+2.0*(me+md)):
+1800  g=g+4.22e-4*sin(2.0*me-mf-3.0*md)-e*3.67e-4*sin(ms+mf+2.0*me-md):
+1800  g=g-e*3.53e-4*sin(ms+mf+2.0*me)+3.31e-4*sin(mf+4.0*me):
+1800  g=g+e*3.17e-4*sin(2.0*me+mf-ms+md):
+1800  g=g+e2*3.06e-4*sin(2.0*(me-ms)-mf)-2.83e-4*sin(md+3.0*mf):
+1800  w1=4.664e-4*cos(na):  w2=7.54e-5*cos(c):
+1800  bm=g/dt*(1.0-w1-w2):
+1800  pm=9.50724e-1+5.1818e-2*cos(md)+9.531e-3*cos(2.0*me-md):
+1800  pm=pm+7.843e-3*cos(2.0*me)+2.824e-3*cos(2.0*md):
+1800  pm=pm+8.57e-4*cos(2.0*me+md)+e*5.33e-4*cos(2.0*me-ms):
+1800  pm=pm+e*4.01e-4*cos(2.0*me-md-ms):
+1800  pm=pm+e*3.2e-4*cos(md-ms)-2.71e-4*cos(me):
+1800  pm=pm-e*2.64e-4*cos(ms+md)-1.98e-4*cos(2.0*mf-md):
+1800  pm=pm+1.73e-4*cos(3.0*md)+1.67e-4*cos(4.0*me-md):
+1800  pm=pm-e*1.11e-4*cos(ms)+1.03e-4*cos(4.0*me-2.0*md):
+1800  pm=pm-8.4e-5*cos(2.0*md-2.0*me)-e*8.3e-5*cos(2.0*me+ms):
+1800  pm=pm+7.9e-5*cos(2.0*me+2.0*md)+7.2e-5*cos(4.0*me):
+1800  pm=pm+e*6.4e-5*cos(2.0*me-ms+md)-e*6.3e-5*cos(2.0*me+ms-md):
+1800  pm=pm+e*4.1e-5*cos(ms+me)+e*3.5e-5*cos(2.0*md-ms):
+1800  pm=pm-3.3e-5*cos(3.0*md-2.0*me)-3e-5*cos(md+me):
+1800  pm=pm-2.9e-5*cos(2.0*(mf-me))-e*2.9e-5*cos(2.0*md+ms):
+1800  pm=pm+e2*2.6e-5*cos(2.0*(me-ms))-2.3e-5*cos(2.0*(mf-me)+md):
+1800  pm=pm+e*1.9e-5*cos(4.0*me-ms-md):
+1800  pm=pm/dt:
+1800  r=6378.14/sin(pm)/AU:
+3000  ifsl=0then3050
+3010  print"Solution for JD=";JD+2415020.0
+3020  print"  mm=";mm
+3030  print"  bm=";bm
+3040  print"  pm=";pm
+3050  rem continue
+3990  return

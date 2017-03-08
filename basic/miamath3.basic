@@ -1,0 +1,27 @@
+10 ne=50:rem number of questions
+20 c=0
+30 f=0
+40 print"(clr)hello mia!!"
+50 print"hit a key when you are ready!"
+60 geta$:ifa$=""then60
+60 t0=ti
+100 ifc=nethen400
+110 c=c+1
+120 x=int(rnd(0)*10)+1
+130 y=int(rnd(0)*10)+1
+140 t=0
+200 printx"x"y"= ";
+210 inputa$
+220 print
+230 an=val(a$)
+240 ifan=x*ythenprint"(up)(up)"tab(15)"(lgrn)correct!(lblu)(down)":goto300
+250 print"(up)(up)"tab(13)"(red)V no :-( (lblu)try again(down)"
+280 t=t+1
+290 goto 200
+300 ift=0thenf=f+1
+390 goto100
+400 print"you have finished!"
+410 print"questions="c
+420 print"correct first go="f
+430 tt=int((ti-t0)/60*10)/10
+440 print"total time="tt"seconds"

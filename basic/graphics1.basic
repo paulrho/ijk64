@@ -1,0 +1,4 @@
+10 screen
+20 cls
+100 linernd(0)*1000,rnd(0)*1000,rnd(0)*1000,rnd(0)*1000,rnd(0)*16
+200 goto100

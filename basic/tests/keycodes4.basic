@@ -1,0 +1,4 @@
+10 geta$
+15 ifa$=""then10
+20 printa$;asc(a$)
+30 goto10

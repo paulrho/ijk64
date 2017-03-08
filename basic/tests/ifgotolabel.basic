@@ -1,0 +1,10 @@
+10 print"Sdgsgd"
+15 ifa$=""then 50
+20 ifa$=""thengosub"littlesub"
+25 if a$="" goto "overthere"
+30 end
+50 label"overthere"
+60 print"sdgsdg"
+90 end
+100 label"littlesub"
+190 return

@@ -1,0 +1,6 @@
+10 print "this is a program"
+20 print "what is your name?"
+30 input a$
+40 print "hello ";a$;", how are you?"
+50 input a$
+60 print "interesting to hear that you are ";a$

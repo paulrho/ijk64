@@ -1,0 +1,40 @@
+    1 poke53280,0:poke53281,0:goto40000
+    2 mx=300:nc=2:rn=int(rnd(ti)*1000):a=rnd(-rn)
+    5 print"(wht)";
+    7 print"(clr)";
+   10 dimlg%(mx,nc),rg%(mx,nc),t(50),d%(mx),le%(mx),al%(mx),pm%(mx),pf%(mx)
+   12 print"do you want to bypass the generating    proceedures? (y/n):"
+   14 geta$:ifa$=""then14
+   16 ifa$="y"thenprint"<?> for help":goto100
+   18 print"o.k.generating creatures.  (seed";rn;")"
+   20 forip=1to20:fork=0tonc:forj=0to14
+   22 ifk<>1orj<>11thenlg%(ip,k)=lg%(ip,k)or(2^j*(int(rnd(rn)*2)))
+   24 rg%(ip,k)=rg%(ip,k)or(2^j*(int(rnd(rn)*2)))
+   26 nextj,k
+   28 s9=1:nx=ip:a=0:b=0:gosub450:s9=0
+   30 nextip
+   40 print"waiting 15 days.":formm=1to15:gosub5100:nextmm:print"finished.":nd%=0
+   99 s9=0
+
+  100 open1,0:input#1,a$:close1:print
+  101 goto5000:ifa$=""thenprint"(up)";:goto300
+  102 ifa$=""thenprint"(up)";:goto300   103 a=val(a$):ifa<1ora>mxthenprint"(up)(up)":goto100
+  104 ifal%(a)=0thenprint"no such one.":goto100
+  200 x=a:xr=x:gosub10000:goto100
+
+  300 print"male,female:";
+  301 open1,0:input#1,a$,b$:close1:print
+  302 if a$="x"then100
+  303 a=val(a$):b=val(b$):ifa<1orb<0ora>mxorb>mxthen100
+  305 ifabs(al%(a))<>1orabs(al%(b)<>1)thenprint"must all be alive!":goto300
+  310 x=a:gosub10000:ifsx<>1thenprint"male first":goto300
+  312 ifam=9thenprint"the male has no ability to mate.":goto300
+  350 x=b:gosub10000:ifsx<>2thenprint"female second":goto300
+  351 ifam=9thenprint"the female has no ability to mate.":goto300
+  352 ifd%(a)<14thenprint"male too young.":goto300
+  354 ifd%(b)<10thenprint"female too young.":goto300
+  360 fori=1tomx:ifal%(i)=0thennx=i:goto400
+  362 next:remprint"(up)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)looking for dead bug"
+  370 fori=1tomx:ifd%(i)>260andal%(i)=2thennx=i:goto400
+  371 next:print"--=======--":fori=1tomx:ifal%(i)=2thennx=i:goto400
+

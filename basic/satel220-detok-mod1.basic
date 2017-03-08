@@ -1,0 +1,498 @@
+    0 mathpi=3.1415
+    1 ap$="ell.1":s3(1)=55:s3(2)=60:s3(3)=85:dimtr%(60):ld=384500e3:sd=149e9:sc=1
+    2 gosub9200:sp$="                                                ":sp$=sp$+sp$
+    4 ifsxthen:{254,129}0,1,2,3,0:{254,144}20
+    5 r0=1:w=180/mathpi:dimn(40),n$(40):ifsxthen:graphic1
+    6 ifsxthen:remcircle2,80,100,40*7/8*sc,64*sc:paint2,80,100:graphic0
+    7 rr$="(home){6}o3t7u9scrc":poke53280,0:poke53281,0:print"(wht)";
+    8 g$="(left)       ":g2$="     "
+    9 ww$="(home){6}o3t7u9sbrbrbrbrb"
+   10 mn$="(home){6}o5t7u9sa":k9=3:kp=-.6:ol=1738e3:os=696e6
+   12 print"(clr)";:ty=1:up(1)=2
+   20 d=6375000:h=3.9885716e14:hl=4.9061366e12:hd=1.3262e20
+   25 dimy(40),x(40),xv(40),yv(40),da%(40),fk(40),th(40)
+   32 da%(1)=1:dims%(50):fori=1to100:reads%(i):ifs%(i)=0thenvv=i-1:goto40
+   34 next
+   36 data1,2,3,4,10,7,11,12,0:remdata1,2,3,4,5,7,0
+   40 dimt$(20),dw(20),fu(20),fr(20),cn(20)
+   42 fori=1to12:readt$(i),dw(i),fu(i),fr(i),cn(i):next
+   50 data"saturn ic   ",131250,2141477,33375000,13111.89
+   52 data"saturn ii   ",36326,418219,4450000,996.81
+   54 data"saturn ivb  ",11363,107056,906816,203.129
+   56 data"service mod.",5227,17954,91225,20.435
+   60 data"command mod.",5568,122.7,0,0
+   62 data"saturn ii x2",72652,836438,8900000,1993.62
+   64 data"lunar ascent",2179,2356,15575,5.6
+   66 data"v.2- rocket ",4000,10727,244750,136.364
+   68 data"v.2- warhead",1018,0,0,0
+   70 data"observatory ",27200,2412,91225,20.435
+   72 data"package 1.  ",760,0,0,0
+   73 data"package 2.  ",722,59,15575,5.6
+   80 jn(1)=0:fori=2to50:u=s%(i):jn(1)=jn(1)+dw(u)+fu(u):nexti:k=1:s=-11
+   82 q5=s%(1):wr=240:x(1)=d:y(1)=0:ds(1)=d:v(1)=0:f(1)=0:l2(1)=l(1):up(k)=1
+   84 l(1)=fu(q5):j(1)=dw(q5):f(1)=0:m(1)=cn(q5)
+   90 gosub5000
+   92 la=1e30:p7=0
+   98 fori=0to9:s(i)=-17:next
+  100 data0,10,23,40,57,87,99,117,129,142,166,183.5
+  102 data206,232,242,265,283,304.5,324,350,-1
+  110 fori=1to1000:readn(i):ifn(i)=-1thenjk=i-1:goto150
+  112 next
+  150 tr%(1)=1:tr%(12)=1
+  151 fori=1tojk:readn$(i):next
+  152 dataalpha launch,sth alpha launch,north vernox,vernox landscape,south vernox
+  154 datahesville,hesport,observation delta,administration,brandon
+  156 datasth border reserve,reserve,telemoss,raymar,nth raymar,incetna
+  158 datamission,quiet landscape,asimov,nth alpha launch
+  180 up(1)=2:n0=0:gi=0:au=0:n0=0
+  200 :
+  202 fori=1tovv:s(i)=s(i)-1*(da%(i)>-1)*r0:ifda%(i)<>1thengoto250
+  206 g=h/(ds(i)*ds(i)):g(i)=g:p=fr(s%(i))
+  208 cc=g/ds(i):xv(i)=xv(i)-x(i)*cc*r0:yv(i)=yv(i)-y(i)*cc*r0
+  210 t(i)=l(i)+j(i)+jn(i)
+  212 ifuuthenf(i)=0
+  213 ifgitheng3=s3(i)+ae(i):g3=g3-(g3<0)*360+(g3>=360)*360
+  214 ifgiand(f(i)<>0orkz)theng4=g3-an(i):g4=g4+180*(g4>180)-180*(g4<=-180)
+  216 ifgiand(f(i)<>0orkz)theng5=(g4-sgn(g4))*-(abs(g4)<1)+sgn(g4):an(i)=an(i)+g5
+  217 ifq5=k9thenifl(q5)/fu(s%(q5))<kpthenf(q5)=0
+  220 ifpthenl(i)=l(i)-m(i)*f(i)/p*r0
+  230 ifl(i)<0thenf(i)=0:l(i)=0:printww$:ifauthengosub4000
+  240 e(i)=f(i)/t(i):xv(i)=xv(i)+e(i)*cos(an(i)/w)*r0
+  242 yv(i)=yv(i)+e(i)*sin(an(i)/w)*r0:y(i)=y(i)+yv(i)*r0:x(i)=x(i)+xv(i)*r0
+  243 ww(i)=ds(i)-db(i):db(i)=ds(i):ds(i)=sqr(x(i)^2+y(i)^2)
+  244 w2(i)=ds(i)-db(i)
+  245 ifds(i)<=dthenxv(i)=0:x(i)=x(i)*(d/ds(i)):y(i)=y(i)*(d/ds(i)):yv(i)=0:gosub9900
+  246 v(i)=sqr(xv(i)*xv(i)+yv(i)*yv(i))
+  247 an=an(i):gosub3000:ae(i)=ae:an(i)=an
+  248 gosub9300:ifsxthenq7={254,153}(0):q9=1:ifq7<>0thenq9=2
+  249 ifsxthenq9=3-({254,153}(0)+1):{254,137}3,(x(i)/160000*7/8*sc+80)*q9,y(i)/100000*sc+100
+  250 nexti:ifz$="s"thengosub5000
+  251 ifsxandpp=0thenif{254,153}(0)=0thengosub1000
+  252 ifpp=0andsx=0thengosub1000
+  260 getz$:ifz$=""then290
+  261 printmn$
+  262 ifz$="d"ands%(k+1)<>0andl(k)-m(k)<0anduu=0thenk=k+1:da%(k)=1:gosub2000
+  263 ifz$="D"ands%(k+1)<>0anduu=0thenk=k+1:da%(k)=1:gosub2000
+  264 ifz$="+"thenan(ty)=an(ty)-1
+  265 ifz$="{172}"ands%(k+1)<>0anduu=0thenda%(k+1)=1:gosub4000
+  266 ifz$="-"thenan(ty)=an(ty)+1
+  268 ifz$="0"thenan(ty)=an(ty)-5
+  269 ifz$="a"thenau=1
+  270 ifz$="|"thenan(ty)=an(ty)+5
+  271 ifz$="A"thenau=0
+  272 ifz$="w"thenpoke53280,0:re=1
+  273 ifz$="W"thenre=0
+  274 ifz$="g"andsxthen:graphic1
+  275 ifz$="(CBM-@)"thengi=0
+  276 ifz$="b"andsxthen:graphic0
+  277 ifz$="_"thengi=1
+  278 ifz$="(clr)"andsxthen:graphic1,1:{254,135}2,80,100,40*7/8*sc,64*sc:{254,139}2,80,100
+  279 ifz$=":"thenpp=1
+  280 ifz$=";"thenpp=0
+  281 ifz$=""orz$="o"thenf(ty)=0
+  282 ifz$="i"thenifl(ty)>0andda%(ty)=1thenf(ty)=fr(s%(ty))
+  288 ifz$="."thenifl(ty)>0andda%(ty)=1thenf(ty)=fr(s%(ty))/4
+  290 gosub4100:goto200
+ 1000 :
+ 1002 :
+ 1004 ifsg<>0then6000
+ 1006 print"(home)vel:";int(v(ty));g$
+ 1007 a9=v(ty)-a5(ty):a5(ty)=v(ty)
+ 1008 print"acc:";int((a9/r0)*1000);g$
+ 1010 print"vsu:";int((ds(ty)-db(ty))/r0);g$
+ 1018 print"uac:";int((w2(ty)-ww(ty))*1000/r0);g$
+ 1020 print"thr:";int(e(ty)*100)/100;g$
+ 1030 print"grv:";int(g(ty)*100)/100;g$
+ 1040 print"abg:";int(ds(ty)-d)/1000;g$
+ 1045 ifgtthengosub22000:goto1060
+ 1050 print"tme:";s(ty);g$
+ 1060 print"wgt:";int(t(ty))/1000;g$
+ 1070 print"ang:";int(an(ty)*10)/10;g$
+ 1072 print"ane:";int(ae(ty)*1000)/1000;g$
+ 1076 print"stg:";ty;"(left):";t$(s%(ty))
+ 1080 iff(ty)=0andre=0thenpoke53280,14
+ 1082 iff(ty)<>0thenpoke53280,0
+ 1100 x0=fu(s%(ty)):ifx0thenprint"fu%:";int(l(ty)/x0*1000)/10;g$
+ 1101 ifx0=0thenprint"(down)"
+ 1102 ifx0thenprint"eng: ";
+ 1110 a$="off":iff(ty)>0thena$="on"+str$(int(f(ty)/fr(s%(ty))*100))+"%"
+ 1120 ifx0thenprinta$;g2$
+ 1130 print"aut: ";
+ 1132 a$="off      ":ifau=1thena$="activated"
+ 1134 printa$
+ 1140 print"sft: ";
+ 1142 a$="off        ":ifuuthena$="activated"
+ 1144 printa$
+ 1150 print"dao: ";
+ 1152 a$="off        ":ifdathena$="activated"
+ 1154 printa$
+ 1160 print"gui: ";
+ 1162 a$="off        ":ifgithena$="activated"
+ 1164 printa$
+ 1165 print"set:";s3(ty);"(left)      "
+ 1167 ifk9=tythenprint"cut:";kp;"(left)      "
+ 1170 print"mnv: ";
+ 1172 a$="off        ":ifkzthena$="activated"
+ 1174 printa$:return
+ 1176 print"sun:";int((dd(ty)-os)/1e3)/1e3;g$
+ 1178 print"mon:";int((dl(ty)-ol))/1000;g$
+ 1999 return
+ 2000 gosub5000:q5=s%(k):f(k)=fr(q5):l(k)=fu(q5):j(k)=dw(q5):m(k)=cn(q5)
+ 2001 re=0:f(k)=0:l2(k)=l(k):x(k)=x(k-1):y(k)=y(k-1):xv(k)=xv(k-1):yv(k)=yv(k-1)
+ 2002 ds(k)=ds(k-1):v(k)=v(k-1):up(k)=up(k-1):da%(k)=1:an(k)=an(k-1)
+ 2003 jn(k)=jn(k-1)-dw(q5)-fu(q5):jn(k-1)=0
+ 2004 printrr$
+ 2010 return
+ 3000 x=x(i):y=y(i):ae=90-180*(y<0):ifxthenae=atn(y/x)*w
+ 3002 ae=ae-180*(x<0):ae=ae-360*(ae<0)
+ 3004 an=an-360*(an<0)+360*(an>360)
+ 3099 return
+ 3100 aa=90-180*(y<0):ifxthenaa=atn(y/x)*w
+ 3102 aa=aa-180*(x<0):aa=aa-360*(aa<0):return
+ 4000 ifs%(k+1)<>0thenk=k+1:gosub2000
+ 4002 ifl(k)>0thenf(k)=fr(s%(k))
+ 4010 return
+ 4100 ifz$=""then4200
+ 4110 ifz$="t"thenifl(ty)>0thenf(ty)=fr(s%(ty)):s(ty)=0
+ 4112 ifz$="u"thenuu=1
+ 4113 ifz$="U"thenda=1
+ 4114 ifz$="y"thenuu=0
+ 4115 ifz$="Y"thenda=0
+ 4120 ifz$="z"thenifl(ty)>0thenf(ty)=fr(s%(ty))*1.5
+ 4122 ifz$="c"andsxthen:graphic0:gosub5200
+ 4123 ifz$="c"andsx=0thengosub5200
+ 4124 ifz$="h"thenha(ty)=0
+ 4125 ifz$="H"thenhp(ty)=1:ha(ty)=0
+ 4126 ifz$="l"thenla(ty)=1e30
+ 4127 ifz$="L"thenlp(ty)=1:la(ty)=1e30
+ 4128 ifz$="@"thensg=1:print"(clr)"
+ 4130 ifz$="*"thensg=0:print"(clr)":gosub5000
+ 4132 ifz$="r"thengosub7100:print"(clr)"
+ 4134 ifz$="R"thenpv=1:gosub7200:gosub7100:print"(clr)"
+ 4140 ifz$="p"thengosub7000:print"(clr)"
+ 4142 ifz$="m"thenvp=0:pp%=0:gosub7200
+ 4144 ifz$="{167}"thenvp=0:pp%=0:gosub7300
+ 4150 ifz$="?"thengosub8000:print"(clr)"
+ 4152 ifz$="="thengosub8200:print"(clr)"
+ 4154 ifz$="{219}"thens3(ty)=s3(ty)-1
+ 4156 ifz$="]"thens3(ty)=s3(ty)+1
+ 4160 ifz$="f"thengoto20100
+ 4161 ifz$="F"thenj9=1:goto20100
+ 4162 ifz$=" "thengt=1-gt
+ 4200 fori=1tovv:l=ds(i)-d:ifda%(i)<>1thennexti:goto4210
+ 4201 ifl<ha(i)andhp(i)=1thenpv=1:pp%=1:gosub7200:gosub7150:gosub9000:hp(i)=0:gosub4400
+ 4202 ifl>la(i)andlp(i)=1thenpv=1:pp%=1:gosub7200:gosub7170:gosub9000:lp(i)=0:gosub4500
+ 4203 ifl<=la(i)thenla(i)=l:hl(i)=s(i):ln(i)=ae(i):vl(i)=v(i)
+ 4204 ifl>=ha(i)thenha(i)=l:ht(i)=s(i):hn(i)=ae(i):vh(i)=v(i)
+ 4206 nexti
+ 4210 ss=s/wr:if(ss-int(ss)=0ands<>0)orz$="}"thenzz$=ap$:gosub8100
+ 4300 ifval(z$)<>0thenty=val(z$)
+ 4400 lp(i)=1:la(i)=1e30:return
+ 4490 return
+ 4500 hp(i)=1:ha(i)=0:return
+ 4990 return
+ 5000 print"(home)";spc(20);
+ 5010 fori1=1to10:ifs%(i1)=0then5090
+ 5012 ifk>i1thenprint"(lred)";
+ 5014 i$=mid$(str$(i1),2):i$=left$("  ",2-len(i$))+i$
+ 5020 q5=s%(i1):print"(rght)(rght)(rght)(rght)";i$;":";t$(q5):printspc(20);"(wht)";
+ 5030 nexti1
+ 5090 return
+ 5200 print"(clr)co-ordinate info:(down)"
+ 5210 print"x position         ,";x(ty):print"y position         ,";y(ty)
+ 5211 print"x velocity         ,";xv(ty)
+ 5212 print"y velocity         ,";yv(ty)
+ 5214 print"time in seconds    ,";s(ty)
+ 5220 print"fuel (l)           ,";l(ty):print"dead weight (j)    ,";j(ty)
+ 5230 print"possible thrust (p),";fr(s%(ty)):print"thrust (f)         ,";f(ty)
+ 5240 print"angle              ,";an(ty)
+ 5242 print"guidence angle     ,";s3(ty)
+ 5244 print"stage number (k)   ,";k(ty)
+ 5245 print"manouver (yes=1)   ,";kz
+ 5246 print"spaces before print,";p7:print"printing time      ,";wr
+ 5247 print"no print outs  (n0),";n0:print"end,(up)"
+ 5260 open1,0:printspc(20)"(up)";:poke198,1:poke631,17:input#1,a$,b$:close1:print
+ 5261 ifa$="end"thenprint"(clr)":return
+ 5262 i=0:x$=left$(a$,3):xx=val(b$)
+ 5264 ifx$="x p"thenremx(ty)=xx:i=1
+ 5266 ifx$="y p"thenremy(ty)=xx:i=1
+ 5268 ifx$="x v"thenremxv(ty)=xx:i=1
+ 5270 ifx$="y v"thenremyv(ty)=xx:i=1
+ 5272 ifx$="fue"thenreml(ty)=xx:i=1
+ 5274 ifx$="dea"thenremj(ty)=xx:i=1
+ 5276 ifx$="pos"thenremp(ty)=xx:i=1
+ 5278 ifx$="thr"thenremf(ty)=xx:i=1
+ 5280 ifx$="ang"thenan(ty)=xx:i=1
+ 5281 ifx$="no "thenn0=xx:i=1
+ 5282 ifx$="gui"thens3(ty)=xx:i=1
+ 5283 ifx$="man"thenkz=sgn(xx):i=1
+ 5284 ifx$="tim"thens(ty)=xx:i=1
+ 5285 ifx$="spa"thenp7=xx:i=1
+ 5286 ifx$="sta"thenk=xx:i=1
+ 5287 ifx$="pri"thenwr=xx:i=1
+ 5288 l2(ty)=fu(s%(ty)):m(ty)=cn(s%(ty)):gosub9100
+ 5290 ifi=1thenprint"(up)";spc(20);xx
+ 5292 goto5260
+ 5298 print"(clr)":return
+ 6000 :
+ 6008 print"(home)apo:";int(ha(ty)*1000)/1000;g$
+ 6010 print"atm:";ht(ty);g$
+ 6012 print"eap:";hn(ty);g$
+ 6014 print"vap:";vh(ty);g$
+ 6016 print"app:";hp(ty);g$
+ 6020 print"(down)per:";int(la(ty)*1000)/1000;g$
+ 6030 print"ptm:";hl(ty);g$
+ 6032 print"epr:";ln(ty);g$
+ 6034 print"vpr:";vl(ty);g$
+ 6036 print"prp:";lp(ty);g$
+ 6040 print"(down)tme:";s(ty);g$
+ 6042 print"(down)ane:";ae(ty);g$
+ 6044 print"(down)stg:";ty;g$
+ 6999 return
+ 7000 ifn0thenreturn
+ 7001 open6,4,6:print#6,chr$(22):close6:open4,4:cmd4:yt=ty
+ 7002 f$=left$("                                                            ",p7)
+ 7010 printf$;"x position         :";x(yt):printf$;"y position         :";y(yt)
+ 7020 printf$;"x velocity         :";xv(yt)
+ 7030 printf$;"y velocity         :";yv(yt)
+ 7035 printf$;"time in seconds    :";s(yt)
+ 7040 printf$;"fuel (l)           :";l(yt):printf$;"dead weight (j)    :";j(yt)
+ 7042 printf$;"possible thrust (p):";fr(s%(yt)):printf$;"thrust (f)         :";f(yt)
+ 7044 printf$;"angle              :";an(yt)
+ 7046 printf$;"junk on top (jn)   :";jn(yt)
+ 7050 printf$;"stage number (k)   :";k
+ 7060 print#4:close4:return
+ 7100 ifn0thenreturn
+ 7101 open6,4,6:print#6,chr$(22):close6:open4,4:i=ty
+ 7102 f$=left$("                                                            ",p7)
+ 7110 print#4,f$;"apogee :";ha(i)
+ 7112 print#4,f$;"apgtime:";ht(i)
+ 7114 print#4,f$;"apgangl:";hn(i)
+ 7116 print#4,f$;"apgvel :";vh(i)
+ 7120 print#4,f$;"perigee:";la(i)
+ 7122 print#4,f$;"pertime:";hl(i)
+ 7124 print#4,f$;"perangl:";ln(i)
+ 7126 print#4,f$;"pervel :";vl(i)
+ 7128 print#4,f$;"stg    :";i
+ 7130 print#4:close4:return
+ 7150 ifn0thenreturn
+ 7151 open6,4,6:print#6,chr$(22):close6:open4,4
+ 7152 f$=left$("                                                            ",p7)
+ 7160 print#4,f$;"apogee :";ha(i)
+ 7162 print#4,f$;"apgtime:";ht(i)
+ 7164 print#4,f$;"apgangl:";hn(i)
+ 7166 print#4,f$;"apgvel :";vh(i)
+ 7167 print#4,f$;"stg    :";i
+ 7168 print#4:close4:return
+ 7170 ifn0thenreturn
+ 7171 open6,4,6:print#6,chr$(22):close6:open4,4
+ 7172 f$=left$("                                                            ",p7)
+ 7180 print#4,f$;"perigee:";la(i)
+ 7182 print#4,f$;"pertime:";hl(i)
+ 7184 print#4,f$;"perangl:";ln(i)
+ 7186 print#4,f$;"pervel :";vl(i)
+ 7187 print#4,f$;"stg    :";i
+ 7188 print#4:close4:return
+ 7199 iftr%(up)=0thenreturn
+ 7200 ifn0thenreturn
+ 7202 open6,4,6:print#6,chr$(22):close6:open4,4
+ 7205 yt=ty:ifvporpp%thenyt=i:pp%=0
+ 7207 i$=str$(yt)+"."+t$(s%(yt))
+ 7210 print#4,left$(sp$,p7);ap$;":";i$:ss=abs(s(yt))
+ 7215 ifvpthenn$=n$(vp):vp=0:print#4,left$(sp$,p7);n$
+ 7217 pp$=left$(sp$,p7)
+ 7220 as=int(ss/3600):ss=ss-3600*as
+ 7222 hh$=mid$(str$(int(as)),2)
+ 7224 as=int(ss/60):ss=ss-60*as
+ 7226 mm$=mid$(str$(int(as)),2)
+ 7227 mm$=left$("0",2-len(mm$))+mm$
+ 7228 ss$=mid$(str$(int(ss+.1)),2):sv=ss
+ 7229 ss$=left$("0",2-len(ss$))+ss$
+ 7232 dd$="report: "+hh$+":"+mm$+":"+ss$:print#4,pp$;dd$
+ 7235 print#4,pp$;"at :";ae(yt)
+ 7240 print#4,pp$;"abg:";ds(yt)-d;"(down)m (up)a(down)bove(up)"
+ 7242 print#4,pp$;"vel:";v(yt);"(down)m (up)s(down)ec-1(up)"
+ 7244 print#4,pp$;"vsu:";(ds(yt)-db(yt))/r0;"(down)m (up)s(down)ec-1(up)":goto7250
+ 7245 ms=dw(yt)+fu(yt)
+ 7246 print#4,pp$;"mas:";ms;"(down)kg(up)":ms=1
+ 7247 print#4,pp$;"ene:";ms*v(yt)^2-ms*h/ds(yt);"(up)j(down)oules(up)"
+ 7248 print#4,pp$;"enl:";ms*v(yt)^2-ms*hl/dl(yt);"(up)j(down)oules(up)"
+ 7249 print#4,pp$;"ens:";ms*v(yt)^2-ms*hd/dd(yt);"(up)j(down)oules(up)"
+ 7250 ifpv=0thenprint#4
+ 7252 pv=0
+ 7299 close4:return
+ 7300 ifn0thenreturn
+ 7302 open6,4,6:print#6,chr$(22):close6:open4,4
+ 7305 yt=ty:ifvporpp%thenyt=i:pp%=0
+ 7307 i$=str$(yt)+"."+t$(s%(yt))
+ 7310 print#4,left$(sp$,p7);ap$;":";i$:ss=abs(s(yt))
+ 7315 ifvpthenn$=n$(vp):vp=0:print#4,left$(sp$,p7);n$
+ 7317 pp$=left$(sp$,p7)
+ 7320 as=int(ss/3600):ss=ss-3600*as
+ 7322 hh$=mid$(str$(int(as)),2)
+ 7324 as=int(ss/60):ss=ss-60*as
+ 7326 mm$=mid$(str$(int(as)),2)
+ 7327 mm$=left$("0",2-len(mm$))+mm$
+ 7328 ss$=mid$(str$(int(ss+.1)),2):sv=ss
+ 7329 ss$=left$("0",2-len(ss$))+ss$
+ 7332 dd$="status: "+hh$+":"+mm$+":"+ss$:print#4,pp$;dd$
+ 7335 ms=dw(yt)+fu(yt)
+ 7340 print#4,pp$;"mas:";ms;"(down)kg(up)":ms=1
+ 7342 print#4,pp$;"vel:";v(yt);"(down)m (up)s(down)ec-1(up)"
+ 7346 print#4,pp$;"ead:";ds(yt);"(down)m(up)"
+ 7347 print#4,pp$;"ene:";ms*v(yt)^2-ms*h/ds(yt);"(up)j(down)oules(up)"
+ 7348 print#4,pp$;"lnd:";dl(yt);"(down)m(up)"
+ 7350 print#4,pp$;"enl:";ms*v(yt)^2-ms*hl/dl(yt);"(up)j(down)oules(up)"
+ 7352 print#4,pp$;"sld:";dd(yt);"(down)m(up)"
+ 7355 print#4,pp$;"ens:";ms*v(yt)^2-ms*hd/dd(yt);"(up)j(down)oules(up)"
+ 7360 ifpv=0thenprint#4
+ 7362 pv=0
+ 7399 close4:return
+ 8000 print"(clr)(rvon) save save save"
+ 8001 print"enter name (save):":open1,0:input#1,zz$:close1:print
+ 8002 ifzz$=""thenreturn
+ 8010 print"are you sure?"
+ 8020 geta$:ifa$=""then8020
+ 8030 ifa$<>"y"thenreturn
+ 8100 open8,8,8,"@0:rock/"+zz$+",s,w"
+ 8105 print#8,vv:fori=1tovv
+ 8120 print#8,x(i):print#8,y(i):print#8,xv(i):print#8,yv(i)
+ 8122 print#8,s(i):print#8,l(i):print#8,j(i)
+ 8124 print#8,f(i):print#8,an(i):print#8,jn(i):print#8,da%(i):print#8,ds(i)
+ 8126 print#8,la(i):print#8,ha(i):print#8,hp(i):print#8,lp(i):print#8,hl(i)
+ 8127 print#8,ht(i):print#8,ln(i):print#8,hn(i):print#8,vl(i):print#8,vh(i)
+ 8128 print#8,m(i):nexti:print#8,k
+ 8130 close8:return
+ 8200 print"(clr)enter name (load):":open1,0:input#1,zz$:close1:print
+ 8202 ifzz$=""thenreturn
+ 8210 open8,8,8,"rock/"+zz$+",s,r"
+ 8215 input#8,vv:fori=1tovv
+ 8220 input#8,x(i):input#8,y(i):input#8,xv(i):input#8,yv(i)
+ 8221 input#8,s(i):input#8,l(i):input#8,j(i)
+ 8222 input#8,f(i):input#8,an(i):input#8,jn(i):input#8,da%(i):input#8,ds(i)
+ 8223 input#8,la(i):input#8,ha(i):input#8,hp(i):input#8,lp(i):input#8,hl(i)
+ 8224 input#8,ht(i):input#8,ln(i):input#8,hn(i):input#8,vl(i):input#8,vh(i)
+ 8225 input#8,m(i):nexti:input#8,k
+ 8226 l2(k)=fu(s%(k)):m(k)=cn(s%(k))
+ 8228 ha=0:la=1e30
+ 8230 close8:fori=1tovv:up(i)=0:nexti:gosub9100:gosub9400:return
+ 9000 hp=1:ha=0:la=1e30:lp=1:return
+ 9100 up=1:gosub3000
+ 9101 ifae<n(up)thenreturn
+ 9102 up=up+1:ifup>jkthenup=1:return
+ 9104 goto9101
+ 9200 i=32768:ifpeek(i)=9andpeek(i+1)=128andpeek(i+2)=124thensx=1
+ 9202 n0=1:return
+ 9300 ae=ae(i):up=up(i):nn=n(up)
+ 9305 ifae>=n(up)and(ae<n(jk)orup<>1)thenvp=up:gosub7199:up=up+1:ifup>jkthenup=1
+ 9307 ifup>jkthenup=1
+ 9310 ifae>=n(up)and(ae<n(jk)orup<>1)then9305
+ 9320 up(i)=up:return
+ 9400 fori=1tovv:gosub3000:ae(i)=ae
+ 9402 ae=ae(i):up=up(i):nn=n(up)
+ 9405 ifae>=n(up)and(ae<n(jk)orup<>1)thenup=up+1:ifup>jkthenup=1
+ 9407 ifup>jkthenup=1
+ 9410 ifae>=n(up)and(ae<n(jk)orup<>1)then9405
+ 9420 up(i)=up:nexti:return
+ 9500 return:lo=s(i)/2360621:so=s(i)/31556926
+ 9502 lo=(lo-int(lo))*360
+ 9504 so=(so-int(so))*360
+ 9506 xl=cos(lo/w)*ld:yl=sin(lo/w)*ld
+ 9508 xs=cos(so/w)*sd:ys=sin(so/w)*sd
+ 9510 x=xl-x(i):y=yl-y(i):gosub3100:ds=sqr(x*x+y*y)
+ 9511 ifds<olthenda%(i)=-2
+ 9512 g=hl/(ds*ds):dl(i)=ds:gl(i)=g:al(i)=aa
+ 9514 xv(i)=xv(i)+cos(aa/w)*g*r0:yv(i)=yv(i)+sin(aa/w)*g*r0
+ 9530 x=xs-x(i):y=ys-y(i):gosub3100:ds=sqr(x*x+y*y)
+ 9531 ifds<osthenda%(i)=-2
+ 9532 g=hd/(ds*ds):dd(i)=ds:gs(i)=g:as(i)=aa
+ 9534 xv(i)=xv(i)+cos(aa/w)*g*r0:yv(i)=yv(i)+sin(aa/w)*g*r0
+ 9599 return
+ 9900 ifdathenda%(i)=-1
+ 9902 return
+10000 {254,141}9,0,0,0,0,0:{254,144}13
+10010 a$="{6}v2t0 v1t0 o3qfv2fgv1av2hav1o4icdqco3v2av1iagv2qav1iafv2qf"
+10020 a$=a$+"v1idfqgv2g v1igav2qo4c"
+10990 printa$
+11000 print"{6}o4icq$eicqficq$gg"
+11010 print"{6}icq$eicqficqg$g"
+11020 print"{6}icq$eicqficq$ggo5co4hgqi$gf$eqccwrrv0t0qv2t0qv1t0q"
+11030 print"{6}v1gv2ev0c{6}";:return
+11032 print"{6}v1gv2bv0d{6}";:return
+11034 print"{6}v1dv2#fv0a{6}";:return
+11036 print"{6}v1dv2fv0a{6}";:return
+11038 print"{6}v1fv2av0c{6}";:return
+12000 geta$:ifa$=""then12000
+12010 onval(a$)gosub11030,11032,11034,11036,11038
+12090 goto12000
+18000 end
+20000 r1=9067437.34:r2=8741289.82:w=180/mathpi
+20010 a1=(    20.3189265)/w:a2=(    55.8215802)/w
+20020 o1= 3.862967854/w:o2= 9.12642832/w
+20025 r2=7675318.79:a2=(    149.201346)/w:o2= 5.141525376/w
+20030 a7=a1:a8=a2:o7=o1:o8=o2:a1=a1/w:a2=a2/w:o1=o1/w:o2=o2/w
+20035 x=r2*sin(a2)-r1*sin(a1)+r1*cos(a1)*tan(o1+a1)-r2*cos(a2)*tan(o2+a2)
+20040 x=x/(tan(o1+a1)-tan(o2+a2))
+20050 y=tan(o1+a1)*x-r1*cos(a1)*tan(o1+a1)+r1*sin(a1)
+20060 remy2=tan(o2+a2)*x-r2*cos(a2)*tan(o2+a2)+r2*sin(a2)
+20070 a1=a7:a2=a8:o1=o7:o2=o8
+20090 return
+20100 print"(clr)orbital calculation mode (ocm)"
+20102 d=6375000:h=3.9885716e14
+20110 print"first data:"
+20112 print"at (d) :"
+20115 open1,0:input#1,a$:close1:print:a1=val(a$)
+20120 print"abg (m):"
+20125 open1,0:input#1,a$:close1:print:r1=val(a$)+6375000
+20130 print"vel(m/s):"
+20135 open1,0:input#1,a$:close1:print:v1=val(a$)
+20140 print"vsu(m/s):":w=180/mathpi
+20145 open1,0:input#1,a$:close1:print:v=val(a$)/v1:o1=-2*atn(v/sqr(-v*v+1))*w
+20210 print"(down)second data:"
+20212 print"at (d) :"
+20215 open1,0:input#1,a$:close1:print:a2=val(a$)
+20220 print"abg (m):"
+20225 open1,0:input#1,a$:close1:print:r2=val(a$)+6375000
+20230 print"vel(m/s):"
+20235 open1,0:input#1,a$:close1:print:v2=val(a$)
+20240 print"vsu(m/s):"
+20245 open1,0:input#1,a$:close1:print:v=val(a$)/v2:o2=-2*atn(v/sqr(-v*v+1))*w
+20260 gosub20030
+20270 cd=sqr(x*x+y*y)/2:ifj9thenopen4,4:cmd4
+20300 print"c=";cd;"(m)"
+20310 print"lr";atn(y/x)*w;"(degrees)"
+20320 print"energy (case 1):";
+20330 e1=.5*v1^2-h/r1:printe1;"(j/kg)"
+20332 print"energy (case 2):";
+20334 e2=.5*v2^2-h/r2:printe2;"(j/kg)"
+20340 k1=-h/(2*e1):k2=-h/(2*e2) :rem a
+20342 t1=2*mathpi*h*((-1/(2*e1))^(3/2))
+20344 t2=2*mathpi*h*((-1/(2*e2))^(3/2))
+20350 u1=cd/k1:u2=cd/k2:rem ecc
+20352 print"ecc 1:";u1
+20355 print"ecc 2:";u2
+20360 print"a1:";k1
+20362 print"a2:";k2
+20365 print"period 1:";t1
+20367 print"period 2:";t2
+20370 print"perigee 1:";k1*(1-u1)
+20372 print"perigee 2:";k2*(1-u2)
+20374 print"apogee  1:";k1*(1+u1)
+20376 print"apogee  2:";k2*(1+u2)
+20380 print"(case1) b=";k1*sqr(1-u1*u1)
+20382 print"(case2) b=";k2*sqr(1-u2*u2)
+20490 ifj9thenprint#4:close4:j9=0
+20500 poke198,0:print"(rvon) (rvof)(left)";
+20502 geta$:ifa$=""then20502
+20504 print"(clr)";:goto4162
+20600 return
+21000 end
+22000 ss=s(ty):as=int(ss/3600):ss=ss-3600*as
+22010 hh$=mid$(str$(as),2)
+22020 as=int(ss/60):ss=ss-60*as
+22030 mm$=mid$(str$(as),2)
+22040 mm$=left$("0",2-len(mm$))+mm$
+22050 ss$=mid$(str$(int(ss+.1)),2):sv=ss
+22060 ss$=left$("0",2-len(ss$))+ss$
+22070 print"get: "+hh$+":"+mm$+":"+ss$;"     ":return
+60000 open15,8,15:input#15,a$,b$,c$,d$:close15:printa$;b$:end

@@ -1,0 +1,28 @@
+15 print"(rvof)";
+20 load"../images/backgrounds/lcd4.png"
+30 meta-charset 1
+90 print"(clr)";
+110 rem print"+---------------------+"
+120 rem print"G                     G"
+130 rem print"+---------------------+"
+200 gosub 1000
+210 gosub 2000:rem read keys
+290 goto210
+990 end
+1000 print"+---------------------+
+1010 print"I hjshgjhsdjgh wejhh  I
+1020 print"I wekgjk wejkjweg kjw I
+1030 print"+---------------------+
+1040 print"(rvon)                       (rvof)"
+1050 print"(rvon)      1  2  3  A       (rvof)"
+1060 print"(rvon)                       (rvof)"
+1070 print"(rvon)      4  5  6  B       "
+1080 print"(rvon)                       (rvof)"
+1090 print"(rvon)      7  8  9  C       "
+1100 print"(rvon)                       (rvof)"
+1110 print"(rvon)      #  0  .  D       "
+1120 print"(rvon)                       (rvof)"
+1190 return
+2000 rem read keys
+2010 geta$
+2090 return

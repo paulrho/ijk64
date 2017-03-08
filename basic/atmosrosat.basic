@@ -1,0 +1,6 @@
+80 print"f10=";:inputa$:f10=val(a$)
+82 print"h=";:inputa$:h=val(a$)
+100 sh=(900+2.5*(f10-70)+1.5*ap)/(27-0.012*(h-200))
+110 dn=6e-10*exp(-(h-175)/sh)
+200 print "sh = "sh
+210 print "density = "dn:rem*1000000000000

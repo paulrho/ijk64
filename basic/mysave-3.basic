@@ -1,0 +1,11 @@
+5 print"which one <1-...>"
+10 inputa$
+30 ifa$="1"then101
+31 ifa$="2"then102
+32 ifa$="3"then103
+80 print"could not find"
+90 end
+101 a=1/-3: rem okay
+102 a=1-/3: rem bad
+103 a=1^^3: rem bad
+900 print a

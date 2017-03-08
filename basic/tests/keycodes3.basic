@@ -1,0 +1,2 @@
+10 geta$:ifa$=""then10
+20 printasc(a$);:goto10
