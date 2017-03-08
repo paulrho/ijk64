@@ -43,7 +43,7 @@
 // Add atn() as a the function atan.
 // Add the string trying to interpret to the syntax error 001 & 002 lines
 //
-// Revision 1.22  2006/02/17 07:03:10  pgs
+// Revision 1.22  2006/02/17 07:03:10  ctpgs
 // Add the ability to define functions and use defined functions
 //
 // Revision 1.21  2006/02/15 21:19:34  pgs
@@ -54,7 +54,7 @@
 // Also, allow partial matches of expressions when flagged
 // and stop parsing at that point (setting the position of the next bit in an accessible variable)
 //
-// Revision 1.20  2006/02/15 01:52:47  pgs
+// Revision 1.20  2006/02/15 01:52:47  ctpgs
 // Standard header
 //
 //
@@ -171,6 +171,7 @@ class evaluate {
   boolean quiet=false;
   int parse_restart=0;
   boolean partialmatching=false;
+  boolean stayonline=false;
 
   Machine using_machine=null;
 
@@ -204,28 +205,28 @@ class evaluate {
     // all setup ready
   } // end func
 
-   /** show_state displays the state of the machine stack.
-    * It is only printed in verbose mode
-    * <PRE>
-    * 
-    *              D_NUM   D_OP
-    *            +-------+------+-------+
-    *            |  num  |  op  |  func |
-    *            +-------+------+-------+
-    *           0|  5.3  |  +   |  N/A  |
-    *           1|  1.6  |  /   |  N/A  |
-    *           2|  N/A  |  (   |  sin  |
-    * upto=4 -> 3|  0.3  | N/A  |  N/A  |
-    *            +-------+------+-------+
-    *              doing=D_OP^
-    *  state of machine is defined by
-    *    upto
-    *    doing
-    *    is_function
-    *    [stack] num op func
-    * 
-    * </PRE>
-    ****************************************************************************/
+    // show_state displays the state of the machine stack.
+    // It is only printed in verbose mode
+    // <PRE>
+    // 
+    //              D_NUM   D_OP
+    //            +-------+------+-------+
+    //            |  num  |  op  |  func |
+    //            +-------+------+-------+
+    //           0|  5.3  |  +   |  N/A  |
+    //           1|  1.6  |  /   |  N/A  |
+    //           2|  N/A  |  (   |  sin  |
+    // upto=4 -> 3|  0.3  | N/A  |  N/A  |
+    //            +-------+------+-------+
+    //              doing=D_OP^
+    //  state of machine is defined by
+    //    upto
+    //    doing
+    //    is_function
+    //    [stack] num op func
+    // 
+    // </PRE>
+    //
   void show_state() {
     System.out.printf("%s                D_NUM                 D_OP\n",printprefix);
     System.out.printf("%s              +---------------+------+-----+------------------------------+\n",printprefix);
@@ -440,6 +441,7 @@ class evaluate {
           building+="(rght)";
         }
         stkstring[upto-2]=building;
+        stayonline=true; 
         return;
       } else if (function.equals("spc")) { // they probably are different
         stktype[upto-2]=ST_STRING;
@@ -448,6 +450,7 @@ class evaluate {
           building+="(rght)";
         }
         stkstring[upto-2]=building;
+        stayonline=true; 
         return;
 
       } else if (function.equals("eval$")) { // recursive!! - will this work?
@@ -487,8 +490,53 @@ class evaluate {
         
       } else if (function.equals("pos")) {
         // tap into the machine - I think this gives the position on the screen?
+        // we need to talk to the machine to get the current cursor setting
+        int cursx=0;
+        if (using_machine!=null) {
+          cursx=using_machine.machinescreen.cursX;
+        }
         stktype[upto-2]=ST_NUM;
-        stknum[upto-2]=0.0; // just for now - not implemented
+        stknum[upto-2]=cursx;
+        return;
+      } else if (function.equals("fre")) {
+          int param=(int)stknum[upto-1];
+          /* Returns the maximum amount of memory available to 
+             the Java Virtual Machine set by the '-mx' or '-Xmx' flags. */
+          long maxMemory = Runtime.getRuntime().maxMemory();
+
+          /* Returns the total memory allocated from the system 
+             (which can at most reach the maximum memory value 
+             returned by the previous function). */
+          long totalMemory = Runtime.getRuntime().totalMemory();
+
+          /* Returns the free memory *within* the total memory 
+             returned by the previous function. */
+          long freeMemory = Runtime.getRuntime().freeMemory();
+          long allocatedMemory = (Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory());
+          long presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
+        stktype[upto-2]=ST_NUM;
+        switch(param) {
+          case 1:
+            stknum[upto-2]=freeMemory;
+            break;
+          case 2:
+            stknum[upto-2]=allocatedMemory;
+            break;
+          case 3:
+            stknum[upto-2]=totalMemory;
+            break;
+          case 4:
+            stknum[upto-2]=maxMemory;
+            break;
+          //case 0:
+          default:
+            stknum[upto-2]=presumableFreeMemory;
+        }
+        //if (using_machine!=null) {
+        //} else {
+          //stktype[upto-2]=ST_NUM;
+          //stknum[upto-2]=0.0;
+        //}
         return;
       } else if (function.equals("peek")) {
         if (using_machine!=null) {
@@ -512,10 +560,15 @@ class evaluate {
           if (stkstring[upto-1]=="") throw new EvaluateException("ILLEGAL QUANTITY");
           int v=(int)((stkstring[upto-1].charAt(0))&0xFF);
           if (v>=65&&v<=90) stknum[upto-2]=v+128; 
+          else if (v>=65&&v<=90) stknum[upto-2]=v+32;  //try 2
           else if (v>=97&&v<=122) stknum[upto-2]=v-32; 
           else if (v>=193&&v<=218) stknum[upto-2]=v-96; 
           else if (v==95) stknum[upto-2]=96; 
           else if (v==96) stknum[upto-2]=95; 
+          else if (v==123) stknum[upto-2]=179; else if (v==179) stknum[upto-2]=123;  //try this
+          else if (v==124) stknum[upto-2]=125; 
+          else if (v==125) stknum[upto-2]=171; 
+          else if (v==171) stknum[upto-2]=124;  
           else          
             stknum[upto-2]=v;
           
@@ -532,9 +585,16 @@ class evaluate {
           int v=(int)stknum[upto-1];
           if (v>=193&&v<=218) v=v-128; 
           else if (v>=65&&v<=90) v=v+32; 
+
+          //else if (v>=97&&v<=122) v=v-32;   // quick test try
+
           else if (v>=97&&v<=122) v=v+96; 
           else if (v==95) v=96; 
           else if (v==96) v=95; 
+          else if (v==123) v=179; else if (v==179) v=123;  //try this
+          else if (v==124) v=171; 
+          else if (v==125) v=124; 
+          else if (v==171) v=125;  
           stkstring[upto-2]=""+(char)v;
             
 	    } else {
@@ -556,7 +616,7 @@ class evaluate {
           stkstring[upto-2]=""+(char)stknum[upto-1];
 	    }
         return;
-      } else if (function.equals("petconvert")) {
+      } else if (function.equals("petconvert") || function.equals("petcnv") ) {
 		if (using_machine!=null) {
           stktype[upto-2]=ST_NUM;
           stknum[upto-2]=using_machine.asc1((int)stknum[upto-1]);
@@ -566,7 +626,7 @@ class evaluate {
 	    }
         if (verbose) { System.out.printf("calculating the ascii of %s to be %f\n",stkstring[upto-1],stknum[upto-2]); }
         return;
-      } else if (function.equals("petunconvert")) {
+      } else if (function.equals("petunconvert") || function.equals("petuncnv")) {
 		if (using_machine!=null) {
           stktype[upto-2]=ST_NUM;
           stknum[upto-2]=using_machine.chrD1((int)stknum[upto-1]);
@@ -594,12 +654,20 @@ class evaluate {
         if (parameters==3) {
           if (verbose) { System.out.printf("Calculating mid$\n"); }
           stktype[upto-2]=ST_STRING;
-          stkstring[upto-2]=stkstring[upto-1].substring((int)stknum[upto]-1,(int)stknum[upto]-1+(int)stknum[upto+1]);
+          try {          
+            stkstring[upto-2]=stkstring[upto-1].substring((int)stknum[upto]-1,(int)stknum[upto]-1+(int)stknum[upto+1]);
+          } catch(Exception e) {
+            throw new EvaluateException("BAD SUBSTRING INDEX");              
+          }
           return;
         } else if (parameters==2) {
           if (verbose) { System.out.printf("Calculating mid$\n"); }
           stktype[upto-2]=ST_STRING;
-          stkstring[upto-2]=stkstring[upto-1].substring((int)stknum[upto]-1,stkstring[upto-1].length());
+          try {          
+            stkstring[upto-2]=stkstring[upto-1].substring((int)stknum[upto]-1,stkstring[upto-1].length());
+          } catch(Exception e) {
+            throw new EvaluateException("BAD SUBSTRING INDEX");              
+          }
           return;
         } else {
           System.out.printf("?WRONG NUMBER PARAMETERS\n");
@@ -700,15 +768,16 @@ class evaluate {
     return;         //return answer; 
   }
 
-/** precedence order of operators **/
+// precedence order of operators 
 
   int prec(String oper) {
     oper=oper.toLowerCase(); //20060204pgs
          if (oper.equals(",")) { return 1; } // allows me to use setOp without changing code!
     else if (oper.equals("===")) { return 2; } // or should this be lower than , ??
-    else if (oper.equals("or")) { return 6; }
-    else if (oper.equals("xor")) { return 6; }
-    else if (oper.equals("and")) { return 7; }
+    else if (oper.equals("or")) { return 4; }
+    else if (oper.equals("xor")) { return 5; }
+    else if (oper.equals("and")) { return 6; }
+    else if (oper.equals("not")) { return 7; }
     else if (oper.equals(">")) { return 8; }
     else if (oper.equals("<")) { return 8; }
     else if (oper.equals("<=")) { return 8; }
@@ -723,8 +792,8 @@ class evaluate {
     else if (oper.equals("-")) { return 9; }
     else if (oper.equals("*")) { return 10; }
     else if (oper.equals("/")) { return 10; }
-    else if (oper.equals("^")) { return 11; }
-    else if (oper.equals("-ve")) { return 12; }
+    else if (oper.equals("-ve")) { return 11; } // note -reversing the order!! this might break things
+    else if (oper.equals("^")) { return 12; }
     else if (oper.equals("X")) { return 0; }
     else if (oper.equals("(")) { return 0; }
     else if (oper.equals("")) { return 0; }
@@ -776,6 +845,7 @@ class evaluate {
          if (oper.equals("or")) { answer=(double)(((int)(left)) | ((int)(right))); }
     else if (oper.equals("xor")) { answer=(double)(((int)(left)) ^ ((int)(right))); }
     else if (oper.equals("and")) { answer=(double)(((int)(left)) & ((int)(right))); }
+    else if (oper.equals("not")) { answer=(double)(~(int)(right)); }
     else if (oper.equals(">")) { answer=(left>right)?-1.0:0.0; }
     else if (oper.equals("<")) { answer=(left<right)?-1.0:0.0; }
     else if (oper.equals("<=")) { answer=(left<=right)?-1.0:0.0; }
@@ -873,6 +943,17 @@ class evaluate {
         break; // go no further that the brackets or the ","
       }
       calc_and_pop(); //overhead of func passed too
+    }
+    // try this
+    if (partialmatching && op==OP_COMMA && (upto==1 || upto==2 && stkop[upto-2].equals("==="))) {
+      if (verbose) { System.out.printf("I think we should bomb out here\n"); }
+      if (!partialmatching) {
+        /* ... */
+        throw new EvaluateException("TOP LEVEL COMMA ERROR");
+      } else {
+        parse_restart=ispnt; // because we are currently on the next invalid char
+        return;
+      }
     }
     stkop[upto-1]=op;
     doing=D_NUM;
@@ -985,6 +1066,22 @@ class evaluate {
   void readString() {
           boolean using_defined_function=false;
           String building=a;
+            //System.out.printf("About to test for NOT, a=\"%s\" intstring=\"%s\" ispnt=%d\n",a,intstring,ispnt,(ispnt<intstring.length()-3)?"true":"false");
+            if (a.equalsIgnoreCase("n") && ispnt<intstring.length()-2 && intstring.substring(ispnt,ispnt+3).equalsIgnoreCase("not")) {
+              //note, if we find an imbedded or or and, we must pop it off, and stop processing!
+              if(doing==D_OP) {
+                // this is wrong - error out, not sure if this is right spot!
+                //throw new EvaluateException("SYNTAX ERROR : INCORRECT NOT PLACEMENT");
+                if (verbose) { System.out.printf("NOT in wrong spot\n"); }
+                return;
+              }
+              pushOp("not");
+              building="";
+              if (verbose) { System.out.printf("Got the **not** operator\n"); }
+              ispnt+=2; // is this right?
+              // and do we continue into the while?
+              return;
+            }
           while (ispnt<intstring.length()-1) {
             // expensive - think of a better way! - trying to make it a bit better - dont know if it helps
             a=intstring.substring(ispnt+1,ispnt+2);
@@ -1020,6 +1117,11 @@ class evaluate {
             }
             if (a.equalsIgnoreCase("a") && ispnt<intstring.length()-3 && intstring.substring(ispnt+1,ispnt+4).equalsIgnoreCase("and")) {
               //note, if we find an imbedded or or and, we must pop it off, and stop processing!
+              break;
+            }
+            if (a.equalsIgnoreCase("n") && ispnt<intstring.length()-3 && intstring.substring(ispnt+1,ispnt+4).equalsIgnoreCase("not")) {
+              //note, if we find an imbedded or or and, we must pop it off, and stop processing!
+              // this is an error!!!!
               break;
             }
             // not sure if this ignore case is right
@@ -1106,6 +1208,7 @@ class evaluate {
 
   GenericType interpret_string_partial(String intstring_param) throws EvaluateException {
     partialmatching=true;
+    stayonline=false;
     return interpret_string(intstring_param, false, 0.0, false);
   }
 
@@ -1259,7 +1362,14 @@ boolean dontallowextraclosingbrackets=true; // here for now
         } else if (a.equals(OP_COMMA)) {
           // comma separators allowed within brackets, when you hit a comma, calculate everything back to the
           // brackets, note, I'm using setOp to do this and if prec of , is lower than all else it will do what I want
+          parse_restart=(-1);
           setOp(OP_COMMA);
+           /** COMMA **/
+          if (parse_restart>=0) {
+            /* can only get here if setOp flagged it as bad */
+            break; /* ? */
+          }
+          
         // allow also multi charactor operators OR and AND
         } else if (a.compareToIgnoreCase("a")>=0 && a.compareToIgnoreCase("z")<=0) {
           int save_ispnt=ispnt;
@@ -1323,6 +1433,7 @@ boolean dontallowextraclosingbrackets=true; // here for now
           // we can now list assignment targets
           setOp("===,"); // note, we now change this to be a series of ===s (to differentiate from index ,s
                          // yet another which means assignment, with a comma
+           /** COMMA **/
         } else {
           // we have a problem
           System.out.printf("?ASSIGNMENT ERROR\n");
@@ -1587,6 +1698,8 @@ void ProcessAssignment() throws EvaluateException {
           parameters=1;
           stackvar=stackp;
         } else if (stkop[stackp].equals(OP_COMMA)) {
+          /** COMMA **/
+          /* should this be checked for the open bracket, e.g. if paraeters is 0 now, then this is wrong ?? */
           parameters++;
         }
       }

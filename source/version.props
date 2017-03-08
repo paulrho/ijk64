@@ -1,9 +1,10 @@
 #build number and date
+#Wed, 08 Mar 2017 23:11:25 +1000
 #Tue Sep 04 23:24:04 EST 2012
-build-date=20120904-2324
-rev=0
-build.user.name=pgs
+build-date=20170308-2311
+rev=3
+build.user.name=pi
 major=3
-build.computer=sirius.futex-home.com.au
-minor=3
-build-number=1221
+build.computer=${env.HOSTNAME}
+minor=4
+build-number=1224

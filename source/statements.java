@@ -53,14 +53,14 @@
 // Fixup end of file - exit nicely
 // fixup syntax error reporting
 //
-// Revision 1.22.1.1  2006/02/24 04:43:53  pgs
+// Revision 1.22.1.1  2006/02/24 04:43:53  ctpgs
 // Testing an alternative reading method
 //
 // Revision 1.22  2006/02/21 22:24:38  pgs
 // Changes related to pre-tokenising text within strings.
 // This has not been made into a subversion, as it could be switched on and off easily with a boolean (not yet, but could be).
 //
-// Revision 1.21  2006/02/20 07:38:31  pgs
+// Revision 1.21  2006/02/20 07:38:31  ctpgs
 // Add META-SCALEY and META-BGTRANS keywords
 //
 // Revision 1.20  2006/02/19 22:33:35  pgs
@@ -70,7 +70,7 @@
 // Fixed for loop, chew up spaces before variable.
 // New print method that allows partial evaluation of expressions.
 //
-// Revision 1.18  2006/02/15 01:55:18  pgs
+// Revision 1.18  2006/02/15 01:55:18  ctpgs
 // Standard header
 //
 //
@@ -109,7 +109,8 @@ class statements {
     verbose=machine.verbose; // inherit this now
     // except if we are CONTinuing
     machine.clearMachineState(); // clears the line cache and the forloops etc
-    interpret_string(interpstring, 0);
+    basictimer=machine.basictimer;
+    interpret_string(interpstring, 0, "");
   }
 
   statements(String interpstring, Machine themachine, int startat)
@@ -117,7 +118,17 @@ class statements {
     machine=themachine;
     verbose=machine.verbose; // inherit this now
      // dont clearmachinestate - as we are continueing
-    interpret_string(interpstring, startat);
+    basictimer=machine.basictimer;
+    interpret_string(interpstring, startat, "");
+  }
+
+  statements(String interpstring, Machine themachine, int startat, String lineNo)
+  {
+    machine=themachine;
+    verbose=machine.verbose; // inherit this now
+     // dont clearmachinestate - as we are continueing
+    basictimer=machine.basictimer;
+    interpret_string(interpstring, startat, lineNo);
   }
 
 int MAXTOKENS=100;
@@ -136,7 +147,11 @@ String[] basicTokens={
   "LABEL"
   ,"SCREEN","GPRINT","BEGINFRAME","END","CLS","LINE","FSET","SLEEP","ALERT","RECT","FILES"
   ,"LSET"
-  ,"IMAGELOAD","DRAWIMAGE","DESTROYIMAGE"
+  ,"IMAGELOAD","DRAWIMAGE","DESTROYIMAGE","CIRCLE"
+  ,"IMAGESAVE"
+  ,"DIR","PWD","CHDIR","MKDIR"
+  ,"ON"
+  ,"DEF","LET"
   ,"HELP"
 };
 static final int ST_FOR=0;
@@ -202,7 +217,19 @@ static final int ST_IMAGELOAD=57;
 static final int ST_DRAWIMAGE=58;
 static final int ST_DESTROYIMAGE=59;
 
-static final int ST_HELP=60;
+static final int ST_CIRCLE=60;
+static final int ST_IMAGESAVE=61;
+static final int ST_DIR=62;
+static final int ST_PWD=63;
+static final int ST_CHDIR=64;
+static final int ST_MKDIR=65;
+
+static final int ST_ON=66;
+
+static final int ST_DEF=67;
+static final int ST_LET=68;
+
+static final int ST_HELP=69;
 
 
 String line;
@@ -267,8 +294,13 @@ boolean ReadPart() throws BasicException
 
   // when changing String a= to chars, it took the same amount of time (in timingjar)
 
+          if (basictimer) { // here!!!!! save this
+            basictimer_thispnt=pnt;
+          }
     while (pnt<linelength) {
       String a=line.substring(pnt,pnt+1);
+      //if (partType==PT_NEWLINE && a.equals("\r")) continue; // try this to allow CRLF
+      //else 
       if (partType==PT_NEWLINE && a.compareTo("0")>=0 && a.compareTo("9")<=0) {
         // just read it here like the token thing
         if (ReadLineNo()) {
@@ -278,6 +310,9 @@ boolean ReadPart() throws BasicException
           // but wait, lets keep going...
           if (verbose) { System.out.printf("On Line %s\n",keepLine); }
           // not for now /// machine.currentLineNo=keepLine; // only added for error tracking - might slow things down
+          if (basictimer) { // here!!!!! save this
+            basictimer_thispnt=pnt;
+          }
 
         } else {
           // we have a problem
@@ -297,6 +332,15 @@ boolean ReadPart() throws BasicException
           partType=PT_TOKEN;
           // gotToken already set
           // pnt+=at; already done
+          if (gotToken==ST_DEF || gotToken==ST_LET) { // this adds a bit EVERY statement...
+            if (ReadStatementToken()) {
+              partType=PT_TOKEN;
+              return true;
+            } else {
+              partType=PT_ASSIGN;
+              return true;
+            }
+          }
           return true;
         } else {
           // have to assume this is an assignment
@@ -330,6 +374,8 @@ void precache_all_lines()
 {
   // read_all_lines
   // read the line# first
+  // should clear all cached lines first
+  machine.toplinecache=0;
   pnt=0;
   while (true) {
     SkipSpaces();
@@ -421,7 +467,67 @@ void precache_all_data()
 //boolean newline; // this is a bit of a work around, when we change the execution point to a new line
 //hmm, actually, changing mind, set the line cache to the first statement!
 
-void interpret_string(String passed_line, int startat)
+static int MAXBASICTIMER=30000;
+boolean basictimer=false;
+int basictimer_lastpnt=(-1);
+int basictimer_thispnt;
+long basictimer_lasttime;
+int basictimer_times[]=new int[MAXBASICTIMER];
+int basictimer_count[]=new int[MAXBASICTIMER];
+int basictimer_c=0;
+
+//void clearBasicTimer() {
+  //int i;
+  //for (i=0; i<MAXBASICTIMER; ++i) {
+    //basictimer_times[i]=0;
+    //basictimer_count[i]=0;
+  //}
+  //basictimer_lastpnt=(-1);
+//}
+
+void doBasicTimer(boolean finalprint) {
+    if (basictimer) {
+      long timenow=System.currentTimeMillis(); 
+      if (basictimer_lastpnt>=0) {
+        basictimer_times[basictimer_lastpnt]+=(int)(timenow-basictimer_lasttime);
+        basictimer_count[basictimer_lastpnt]++;
+        //System.out.printf("BASICTIMER: pnt=%d td=%d line=%s\n",basictimer_lastpnt,timenow-basictimer_lasttime,machine.getCurrentLine(basictimer_lastpnt));
+        basictimer_c++;
+        if (basictimer_c>50000 || finalprint) { // need to make this configurable
+          basictimer_c=0;
+          int i;
+          System.out.printf("BASICTIMER SUMMARY----at %d--for %s\n",timenow,machine.program_name);
+          if (false) ; else
+              System.out.printf("  %5s %8s %9s %10s  %5s %s\n","pnt=","t=","c=","tp=","line=","stm=");
+          for (i=0; i<MAXBASICTIMER; ++i) if (basictimer_count[i]>0) {
+            if (false)
+              System.out.printf("  pnt= %5d t= %8d c= %9d tp= %10.3f line= %5s %s\n",
+                i,basictimer_times[i],basictimer_count[i],
+                (double)basictimer_times[i]/(double)basictimer_count[i],
+                 machine.getCurrentLine(i),
+                 (line.substring(i,(i+15>line.length()-1?line.length()-1:i+15))+"...").replaceAll("^[ ]*:","").replaceAll("\\r.*|\\n.*|:.*", "")
+              );
+            else
+              System.out.printf("  %5d %8d %9d %10.3f  %5s %s\n",
+                i,basictimer_times[i],basictimer_count[i],
+                (double)basictimer_times[i]/(double)basictimer_count[i],
+                 machine.getCurrentLine(i),
+                 (line.substring(i,(i+15>line.length()-1?line.length()-1:i+15))+"...").replaceAll("^[ ]*:","").replaceAll("\\r.*|\\n.*|:.*", "")
+              );
+          }
+          System.out.printf("BASICTIMER -----------\n");
+          timenow=System.currentTimeMillis();  // hide the profiling print time!
+        }
+      }
+      int pnt_tmp=basictimer_thispnt;
+      while (pnt_tmp<linelength && line.substring(pnt_tmp,pnt_tmp+1).equals(" ")) { pnt_tmp++; }
+      basictimer_lastpnt=pnt_tmp;
+      basictimer_lasttime=timenow;
+    }
+}
+
+
+void interpret_string(String passed_line, int startat, String lineNo)
 {
   line=passed_line;
   linelength=line.length();
@@ -434,7 +540,17 @@ void interpret_string(String passed_line, int startat)
   precache_all_data();
   if (verbose) { System.out.printf("DATA is:\n%s\n",machine.allDATA); }
 
-  pnt=startat; // 0 usually
+  if (!lineNo.equals("")) {
+    try {
+      machine.gotoLine(lineNo);
+    } catch (BasicException basicerror) {
+      System.out.printf("Basic Error: %s\n",basicerror.getMessage());
+      machine.print("\n"+"?"+basicerror.getMessage().toLowerCase());
+      return;
+    } 
+    pnt=machine.executionpoint;
+  } else
+    pnt=startat; // 0 usually
   // the newline might play havok with CONT
   // read the line# first
   partType=PT_NEWLINE; // we start as though we are on a newline
@@ -443,6 +559,7 @@ void interpret_string(String passed_line, int startat)
   machine.save_executionpoint=(-1); // effectively flagging not restartable
 
   long partcount=0; // will this slow it down
+
   try {
   try {
 
@@ -468,6 +585,7 @@ void interpret_string(String passed_line, int startat)
     if (!ReadPart()) { 
       throw new BasicException("SYNTAX ERROR");
     }
+    if (basictimer) { doBasicTimer(false); }
 
 
     try {
@@ -495,7 +613,7 @@ void interpret_string(String passed_line, int startat)
      // this is a special case where we want to start/restart the program 
      // just like runProgram
      // this way is a bit dodgy - it nests it!
-     machine.contProgram();
+     machine.contProgram(contrestart.lineNo);
      // goes from direct mode to program mode
      // either by NEXT(into prog) RETURN GOTO GOSUB or CONT
   } catch (BasicRUNrestart runrestart) {
@@ -503,19 +621,25 @@ void interpret_string(String passed_line, int startat)
      // just like runProgram
      // this way is a bit dodgy - it nests it!
      machine.variables_clr();
-     machine.runProgram();
+     if (runrestart.lineNo.equals("")) 
+       machine.runProgram();
+     else
+       machine.contProgram(runrestart.lineNo);
   } // nested
 
   } catch (BasicException basicerror) {
      machine.setCurrentLine(pnt);
-     System.out.printf("Basic Error: %s\n",basicerror.getMessage());
-     machine.print("?"+basicerror.getMessage().toLowerCase()+
-       (machine.currentLineNo.equals("")?"":" on line ")+
-       machine.currentLineNo+""); // took off "[CR]"
+     System.out.printf("Basic Error: %s%s\n",basicerror.getMessage(),
+       (machine.program_running && !machine.currentLineNo.equals("")?" on line "+machine.currentLineNo:"")
+     );
+     machine.print("\n"+"?"+basicerror.getMessage().toLowerCase()+
+       (machine.program_running && !machine.currentLineNo.equals("")?" on line "+machine.currentLineNo:"")
+     );
   } 
 
   if (verbose) { machine.dumpstate(); }
   machine.executionpoint=pnt;
+  if (basictimer) { doBasicTimer(true); }
 }
 
 boolean ReadStatement() throws BasicException
@@ -528,6 +652,7 @@ boolean ReadStatement() throws BasicException
       case ST_FOR: if (ProcessFORstatement()) { return true; } break;
       case ST_NEXT: if (ProcessNEXTstatement()) { return true; } break;
       case ST_IF: if (ProcessIFstatement()) { return true; } break;
+      case ST_ON: if (ProcessONstatement()) { return true; } break;
       case ST_GOTO: if (ProcessGOTOstatement()) { return true; } break;
       case ST_GOSUB: if (ProcessGOSUBstatement()) { return true; } break;
       case ST_RETURN: if (ProcessRETURNstatement()) { return true; } break;
@@ -566,8 +691,28 @@ boolean ReadStatement() throws BasicException
         machine.dumpstate();
         return true;
       case ST_META_VERBOSE:
-        verbose=true; machine.verbose=true;
-        machine.evaluate_engine.verbose=true;
+        ReadExpression();
+        if (!keepExpression.equals("")) {
+          int level=(int)machine.evaluate(keepExpression).num();
+          switch(level) {
+            case 1:
+              verbose=true; machine.verbose=true;
+              machine.evaluate_engine.verbose=true;
+              break;
+            case 2:
+              machine.machinescreen.verbosePrint=true;
+              break;
+            case 0:
+            default:
+              verbose=false; 
+              machine.verbose=false;
+              machine.evaluate_engine.verbose=false;
+              machine.machinescreen.verbosePrint=false;
+          }
+        } else {
+          verbose=true; machine.verbose=true;
+          machine.evaluate_engine.verbose=true;
+        }
         return true;
       case ST_META_CHARSET:
         if (ProcessMETACHARSETstatement()) { return true; } break;
@@ -625,13 +770,20 @@ boolean ReadStatement() throws BasicException
 //        machine.print("?help! help! try this: load\"$\",8 [enter]");
 //        machine.print("?help! try this: load\"$\",8 [enter]");
         machine.print("tokens: version "+version.programVersion+"\n");
-        for (int tok=0; tok<basicTokens.length; ++tok) {
-          machine.print(basicTokens[tok].toLowerCase()+",");
-		}
+        { String collect=""; int x=0;
+          for (int tok=0; tok<basicTokens.length; ++tok) {
+            x+=basicTokens[tok].length()+1;
+            if (x>=machine.machinescreen.maxX-2) {  x=basicTokens[tok].length()+1; collect+="\n"; }
+            collect+=basicTokens[tok].toLowerCase()+":";
+            if (basicTokens[tok].toLowerCase().equals("rem")) { collect+="\n"; x=0; }
+          }
+          machine.print(machine.syntaxHighlight(collect));
+        }
         machine.print("\n");
         machine.print("?help: try this (and press [");
         machine.print("enter])\n");
-        machine.print("load\"$\",8\n");
+        machine.print("load\"$\",8   :rem loads internal dir\n");
+        machine.print("load\"%\",8  :rem loads cloud directory\n");
         machine.print("list\n");
         return true;
         //break;
@@ -643,6 +795,10 @@ boolean ReadStatement() throws BasicException
         throw new BasicBREAK("BREAK ON STOP");
         //break;
       case ST_END: 
+        machine.save_executionpoint=pnt; // it is restartable // yes, END is restartable!
+        if (verbose) {
+          System.out.printf("setting save_executionpoint to %d\n",machine.save_executionpoint);
+        }
         MachineEND();
         return true; // just END!
       case ST_EXIT: 
@@ -659,25 +815,56 @@ boolean ReadStatement() throws BasicException
       case ST_ALERT:
         ReadExpression();
         // ignored for now
+       
+        PlaySound sound = new PlaySound("alert"+keepExpression+".wav");
         return true;
 
       case ST_SCREEN:
-        ReadExpression();
-        if (machine.graphicsDevice==null) {
-          machine.graphicsDevice = new GraphicsDevice();
-        } else {
-          // just to make sure it is all reset
-          machine.graphicsDevice.resetDevice();
-          // and make sure it is visible again (in case you closed it)
-          machine.graphicsDevice.setVisible(true);
+        { 
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          if (gt.gttop==3) {
+            if (machine.graphicsDevice==null) {
+              machine.graphicsDevice = new GraphicsDevice(
+                (int)gt.gtlist[1].num(),(int)gt.gtlist[2].num());
+            } else {
+              // just to make sure it is all reset
+              machine.graphicsDevice.resetDevice(
+                (int)gt.gtlist[1].num(),(int)gt.gtlist[2].num());
+              // and make sure it is visible again (in case you closed it)
+              machine.graphicsDevice.setVisible(true);
+              //if (true) machine.machinescreen.setVisible(true);
+            }
+          } else {
+            if (machine.graphicsDevice==null) {
+              machine.graphicsDevice = new GraphicsDevice();
+            } else {
+              // just to make sure it is all reset
+              machine.graphicsDevice.resetDevice();
+              // and make sure it is visible again (in case you closed it)
+              machine.graphicsDevice.setVisible(true);
+              //if (true) machine.machinescreen.setVisible(true);
+            }
+          }
+          if (true) machine.machinescreen.setVisible(true); // refocus on main
+          return true;
         }
-        return true;
 
       case ST_SLEEP:
         ReadExpression();
-        if (machine.graphicsDevice!=null) machine.graphicsDevice.command_SLEEP((int)machine.evaluate(keepExpression).num());
+        //if (machine.graphicsDevice!=null) machine.graphicsDevice.command_SLEEP((int)machine.evaluate(keepExpression).num());
+        // now call static version always
+        GraphicsDevice.command_SLEEP((int)machine.evaluate(keepExpression).num());
         return true;
 
+      case ST_CHDIR:
+        ReadExpression();
+        machine.doCHDIR(keepExpression);
+        return true;
+      case ST_DIR:
+        ReadExpression();
+        machine.listDIR(keepExpression.startsWith("-"));
+        return true;
       case ST_FILES:
         machine.listFiles();
         return true;
@@ -726,6 +913,25 @@ boolean ReadStatement() throws BasicException
         break;
 
 
+      case ST_CIRCLE:
+        if (machine.graphicsDevice!=null) {
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          if (gt.gttop==5) {
+              if (verbose) System.out.printf("about to draw circle\n");
+              machine.graphicsDevice.command_CIRCLE(
+                (int)gt.gtlist[0].num(),
+                (int)gt.gtlist[1].num(),
+                (int)gt.gtlist[2].num(),
+                (int)gt.gtlist[3].num(),
+                (int)gt.gtlist[4].num()
+               );
+              return true;
+          } else
+            throw new BasicException("ILLEGAL QUANTITY ERROR"); // wrong number params
+        }
+        break;
+
       case ST_RECT:
         if (machine.graphicsDevice!=null) {
           ReadExpression();
@@ -740,7 +946,23 @@ boolean ReadStatement() throws BasicException
                 (int)gt.gtlist[4].num()
                );
               return true;
-          } 
+          } else
+          if (gt.gttop==9) {
+              if (verbose) System.out.printf("about to filled quad poly \n");
+              machine.graphicsDevice.command_FILL(
+                (int)gt.gtlist[0].num(),
+                (int)gt.gtlist[1].num(),
+                (int)gt.gtlist[2].num(),
+                (int)gt.gtlist[3].num(),
+                (int)gt.gtlist[4].num(),
+                (int)gt.gtlist[5].num(),
+                (int)gt.gtlist[6].num(),
+                (int)gt.gtlist[7].num(),
+                (int)gt.gtlist[8].num()
+               );
+              return true;
+          } else
+            throw new BasicException("ILLEGAL QUANTITY ERROR"); // wrong number params
         }
         break;
 
@@ -758,7 +980,8 @@ boolean ReadStatement() throws BasicException
                 (int)gt.gtlist[3].num()
                );
               return true;
-          } 
+          } else
+            throw new BasicException("ILLEGAL QUANTITY ERROR"); // wrong number params
         }
         break;
 
@@ -787,6 +1010,21 @@ boolean ReadStatement() throws BasicException
                );
                // special case here! so if it works
               machine.assignment("imgno="+imgno);
+              return true;
+          } else throw new BasicException("INCORRECT PARAMETERS");
+
+        }
+        break;
+
+      case ST_IMAGESAVE:
+        if (machine.graphicsDevice!=null) {
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          if (gt.gttop==1) {
+              if (verbose) System.out.printf("load the image to reference\n");
+              machine.graphicsDevice.command_SAVEIMAGE(
+                gt.str()
+               );
               return true;
           } else throw new BasicException("INCORRECT PARAMETERS");
 
@@ -850,11 +1088,9 @@ boolean RSTinitted=false;
 int catop[]=new int[30];
 int chainarray[][]=new int[30][10];
 
-/** 
-    ReadStatementToken will identify a token from the current "pnt" in the basic text.
-    It is very inefficient and should be re-written.
-    A significant portion of the time gets spent in here.
-**/
+   // ReadStatementToken will identify a token from the current "pnt" in the basic text.
+    // It is very inefficient and should be re-written.
+    // A significant portion of the time gets spent in here.
     
 boolean ReadStatementToken() {
   if (!RSTinitted) {
@@ -993,19 +1229,40 @@ boolean ProcessPRINTstatement() throws BasicException
   if (verbose) { System.out.printf("Processing PRINT statement\n"); }
   ReadExpression();
   if (verbose) { System.out.printf("MachinePrintEvaluate( %s )\n",keepExpression); }
-  if (verbose  ) { System.out.printf("%s",machine.evaluate_partial(keepExpression).print()); }
-  machine.print(machine.evaluate_partial(keepExpression).print());
+  /// if (verbose  ) { System.out.printf("%s",machine.evaluate_partial(keepExpression).print()); }
+  /// machine.print(machine.evaluate_partial(keepExpression).print());
   // this should probably be nicer
-  int x;
+  int x=0;
   String separator="";
-  while ((x=machine.evaluate_engine.parse_restart)>0) {
+  /// while ((x=machine.evaluate_engine.parse_restart)>0) { 
+  do {
     if (verbose) { System.out.printf("More to evaluate!!!! - should resubmit with the remaining string after %d...\n",machine.evaluate_engine.parse_restart); }
     // there is more to evaluate
     String temp=new String(keepExpression);  // do I need to do this?
     keepExpression=temp.substring(x,temp.length());
 
     x=0; // now we are at the start of it again
-    while (x<keepExpression.length() && keepExpression.substring(x,x+1).equals(";")) { x++; separator=";"; } // chew them up // need to include blanks and , too!
+    while (x<keepExpression.length() && 
+      (keepExpression.substring(x,x+1).equals(";") || keepExpression.substring(x,x+1).equals(",") || keepExpression.substring(x,x+1).equals(" ")))
+      { 
+        if (keepExpression.substring(x,x+1).equals(",")) {
+          if (verbose) { System.out.printf("Should space out to next position....(Not impl yet)\n"); }
+          int cursx=machine.machinescreen.cursX;
+          //int tab=cursx-(int)(cursx/10)*10; if (tab>0) tab=10-tab;
+          int tab=cursx-(int)(cursx/10)*10; if (tab>=0) tab=10-tab;
+          if (cursx+tab>=machine.machinescreen.maxX) {
+             machine.print("\n");
+          } else {
+             machine.machinescreen.cursX+=tab;
+             if (verbose) { System.out.printf("adding %d tab\n",tab); }
+          }
+          separator=","; 
+        } else if (keepExpression.substring(x,x+1).equals(";")) {
+          separator=";"; 
+        }
+        x++;
+      } // chew them up // need to include blanks and , too!
+    /// String
     temp=new String(keepExpression);  // do I need to do this?
     keepExpression=temp.substring(x,temp.length());
     if (keepExpression.equals("")) { break; }
@@ -1013,8 +1270,10 @@ boolean ProcessPRINTstatement() throws BasicException
     if (verbose) { System.out.printf("should resubmit with the remaining string after %d will do so with:%s\n",machine.evaluate_engine.parse_restart,keepExpression); }
     machine.print(machine.evaluate_partial(keepExpression).print());
     separator="";
-  }
-  if (!separator.equals(";")) {
+  /// }
+  } while ((x=machine.evaluate_engine.parse_restart)>0);
+  if (machine.evaluate_engine.stayonline && separator.equals("")) separator=";";
+  if (!separator.equals(";") && !separator.equals(",")) {
     if (verbose  ) { System.out.printf("\n"); }
     machine.printnewline();
   }
@@ -1067,6 +1326,55 @@ boolean ProcessIFstatement() throws BasicException
   return true;
 }
 
+boolean ProcessONstatement() throws BasicException
+{
+  ReadExpression();
+  
+  if (verbose) { System.out.printf("MachineEvaluate( %s )\n",keepExpression); }
+  if (verbose) { System.out.printf("  evaluates to %s\n",machine.evaluate(keepExpression).print()); }
+  if (gotToken!=ST_GOTO && gotToken!=ST_GOSUB) {
+    System.out.printf("?SYNTAX ERROR ON WITHOUT GOTO OR GOSUB\n");
+    throw new BasicException("SYNTAX ERROR ON WITHOUT GOTO OR GOSUB");
+  }
+  int offset=(int)machine.evaluate(keepExpression).num();
+  SkipSpaces(); // really - spaces arent good for anything
+  // should contain comma sep array
+  int c=0;
+  while (ReadLineNo()) {
+    c=c+1;
+    if (verbose) { System.out.printf("Got line=%s\n",keepLine); }
+    if (c==offset) { // this is the one
+       // do the gosub or goto
+      if (verbose) { System.out.printf("We need to jump to %d %s\n",c,keepLine); }
+      if (gotToken==ST_GOTO) {
+        machine.gotoLine(keepLine);
+        pnt=machine.executionpoint; // we should now have a different execution point
+        return true;
+      } else {
+        // if we gosub - move to end of line
+        IgnoreRestofStatement();
+        machine.gosubLine(keepLine,pnt);
+        if (verbose) { System.out.printf("gosub, moving to executionpoint %d\n",machine.executionpoint); }
+        pnt=machine.executionpoint; // we should now have a different execution point
+        return true;
+      }
+    }
+    SkipSpaces(); // really - spaces arent good for anything
+    // read out comma
+    if (pnt<linelength && line.substring(pnt,pnt+1).equals(",")) pnt++;
+    SkipSpaces(); // really - spaces arent good for anything
+  }
+  // evaluate it...
+
+    //if (machine.enabledmovement) {
+      //machine.gotoLine(keepLine);
+      //pnt=machine.executionpoint; // we should now have a different execution point
+    //}
+
+  // just ignore and keep going
+  return true;
+}
+
 boolean ProcessGOTOstatement() throws BasicException
 {
   SkipSpaces(); // added this in as there may be leading spaces (probably a better way to do this)
@@ -1074,9 +1382,15 @@ boolean ProcessGOTOstatement() throws BasicException
   // lets go!
   // only with this line will we not do a front to back parse
   if (machine.enabledmovement) {
-    machine.gotoLine(keepExpression);
-    if (verbose) { System.out.printf("goto, moving to executionpoint %d\n",machine.executionpoint); }
-    pnt=machine.executionpoint; // we should now have a different execution point
+    if (machine.program_running) {
+      machine.gotoLine(keepExpression);
+      if (verbose) { System.out.printf("goto, moving to executionpoint %d\n",machine.executionpoint); }
+      pnt=machine.executionpoint; // we should now have a different execution point
+    } else {
+      //BasicCONTrestart
+      if (verbose) System.out.printf("Got a GOTO in direct mode\n");
+      throw new BasicCONTrestart("Just restart the program and continue it","GOTO",keepExpression);
+    }
   }
   ReadColon();
   return true;
@@ -1087,9 +1401,19 @@ boolean ProcessGOSUBstatement() throws BasicException
   SkipSpaces(); // added this in as there may be leading spaces (probably a better way to do this)
   ReadExpression(); // not really, should just be a numberic??? maybe an expression is good
   if (machine.enabledmovement) {
-    machine.gosubLine(keepExpression,pnt);
-    if (verbose) { System.out.printf("gosub, moving to executionpoint %d\n",machine.executionpoint); }
-    pnt=machine.executionpoint; // we should now have a different execution point
+    if (machine.program_running) {
+      machine.gosubLine(keepExpression,pnt);
+      if (verbose) { System.out.printf("gosub, moving to executionpoint %d\n",machine.executionpoint); }
+      pnt=machine.executionpoint; // we should now have a different execution point
+    } else {
+      throw new BasicException("GOSUB NOT IMPLEMENTED IN DIRECT MODE");
+      //nodoesntwork//lets try this
+      //nodoesntwork//machine.gosubLine(keepExpression,pnt);
+      //nodoesntworkint savepnt=pnt;
+      //nodoesntworkmachine.gotoLine(keepExpression);
+      //nodoesntworkmachine.contProgram(keepExpression);
+      //nodoesntworkpnt=savepnt;
+    }
   }
   ReadColon();
   return true;
@@ -1196,6 +1520,14 @@ void IgnoreRestofLine()
   }
   return;
 }
+void IgnoreRestofStatement()
+{
+  // read everthing to the end of line
+  while (pnt<linelength && !line.substring(pnt,pnt+1).equals("\n") && !line.substring(pnt,pnt+1).equals(":")) {
+    pnt++;
+  }
+  return;
+}
 
 boolean ProcessCONTstatement() throws BasicException
 {
@@ -1206,12 +1538,16 @@ boolean ProcessCONTstatement() throws BasicException
 
 boolean ProcessRUNstatement() throws BasicException
 {
+  // now see if there is a line#
+  SkipSpaces(); // added this in as there may be leading spaces (probably a better way to do this)
+  ReadExpression(); // not really, should just be a numberic??? maybe an expression is good
   // IgnoreRestofLine();
 
+  if (verbose) System.out.printf("got a line RUN \"%s\"\n",keepExpression);
   // this is a funny one - we effectively restart the processing, but with the program!
     //machine.variables_clr();
     //machine.runProgram(); // we now execute the statements upon a machine
-  throw new BasicRUNrestart("Just restart the program and rerun it");
+  throw new BasicRUNrestart("Just restart the program and rerun it",keepExpression);
   //return true;
 }
 
@@ -1231,7 +1567,7 @@ int getlineparse(String lineno) {
   return ret;
 }
 
-boolean ProcessLISTstatement()
+boolean ProcessLISTstatement() throws BasicException
 {
   int from,to;
   from=-1; to=-1;
@@ -1250,7 +1586,8 @@ if (verbose)  for (int i=0; i<lineno.length; ++i)
   if (lineno.length==1 && from==-1) { to=-1; }
   else if (lineno.length==1) { to=from; }
   
-  machine.print(machine.listProgram(from,to)); // just prints the program text
+  //machine.print(machine.listProgram(from,to)); // just prints the program text
+  machine.listProgram(from,to); // just prints the program text
   return true;
 }
 
@@ -1299,7 +1636,33 @@ boolean ProcessREADstatement() throws BasicException
 boolean ProcessINPUTstatement(boolean stayonsameline) throws BasicException
 {
   ReadExpression();
+  // simplistic addition to allow string part of INPUT ["string";] x$, y$, z$...
+  // search for semicolon, trim off and print
+  //contains
+  // read partial, see if ends in semicolon???
+  if (keepExpression.contains(";")) {
+        // check if string AND semicolon is next
+    String prompt=machine.evaluate_partial(keepExpression).print();
+    int x=machine.evaluate_engine.parse_restart;
+      // trim spaces not required
+    if(x>=0 && x<keepExpression.length()-1 && keepExpression.substring(x,x+1).equals(";") &&
+      keepExpression.substring(0,x-1).contains("\"")) {
+        // print 
+        if (verbose) { System.out.printf("Got a input with prompt string\n"); }
+        machine.print(prompt);
+        x=x+1;
+        String temp=new String(keepExpression);  // do I need to do this?
+        keepExpression=temp.substring(x,temp.length());
+    }  else 
+      /// / or anything else for that mattter, is a syntax error
+      throw new BasicException("SYNTAX ERROR NEEDS LITERAL");
+  } else if (keepExpression.contains("\"")) {
+    throw new BasicException("SYNTAX ERROR NEEDS ;");
+  }
+
   if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
+  if (!stayonsameline) machine.print("? ");
+
   String got=machine.getline();
   if (verbose) { System.out.printf("got string \"%s\"\n",got.trim()); }
   // it a string so keep it quoted
@@ -1378,9 +1741,44 @@ boolean ProcessLOADstatement() throws BasicException
   }
   String filename=machine.evaluate(keepExpression).str();
   // only add basic if it doesnt have it already
-  machine.print("loading "+filename.toLowerCase()+"...");
-  if (!filename.matches(".*\\.basic")) {
-    filename=filename.toLowerCase()+".basic";
+  if (filename.equals("%")) {
+    machine.print("\n");
+    machine.print("searching for "+filename.toLowerCase()+"\n");
+    //filename=filename.replaceFirst("%","http://www.futex.com.au/basic/dir.php");
+    filename=filename.replaceFirst("%","http://test.futex.com.au/basic/dir.php");
+  } else if (filename.equals("*")) {
+    machine.print("\n");
+    machine.print("searching for "+filename.toLowerCase()+"\n");
+    filename=filename.replaceFirst("\\*","http://test.futex.com.au/basic/dir.php");
+  } else if (filename.startsWith("%")) {
+    machine.print("\n");
+    machine.print("searching for "+filename.toLowerCase()+"\n");
+    //filename=filename.replaceFirst("%","http://www.futex.com.au/c64x");
+    filename=filename.replaceFirst("%","http://test.futex.com.au/cloud/c64x");
+    filename=filename+".basic.txt";
+  } else
+  if (filename.matches(".*\\.au")
+    || filename.matches(".*\\.wav")
+    || filename.matches(".*\\....") // bmp jpg txt etc
+    ) {
+    //filename=filename.toLowerCase();
+  } else {
+    if (filename.startsWith("$$")) {
+      filename=filename.replaceFirst("\\$",":");
+    }
+    machine.print("\n");
+    machine.print("searching for "+filename.toLowerCase()+"\n");
+    //machine.print("loading "+filename.toLowerCase()+"...");
+    if (filename.startsWith(":")) {
+      filename=filename.replaceFirst(":","http://www.futex.com.au/basic/");
+    }
+    if (filename.contains("http:")) {
+      //filename=filename.toLowerCase()+".txt";
+      filename=filename+".txt";
+    } else if (!filename.matches(".*\\.basic")) {
+      //filename=filename.toLowerCase()+".basic";
+      filename=filename+".basic";
+    }
   }
   machine.loadProgram(filename);
   return true;
@@ -1427,10 +1825,13 @@ boolean ProcessMETACOLSstatement() throws BasicException
 
 boolean ProcessMETABGTRANSstatement() throws BasicException
 {
+  int p;
   ReadExpression();
   if (verbose) { machine.dumpstate(); }
+  p=(int)(machine.evaluate(keepExpression).num());
+  if (p==2) machine.machinescreen.shiftbgimage=false;
   machine.machinescreen.setBackgroundTransparent(
-    ((int)(machine.evaluate(keepExpression).num())==1) ?true:false);
+    (p>0) ?true:false);
   return true;
 }
 
@@ -1515,6 +1916,7 @@ boolean checkMetaCode()
       else if (metatest.equals("clr")) metaCode=(char)(147);
       else if (metatest.equals("rvon")) metaCode=(char)(18);
       else if (metatest.equals("rvof")) metaCode=(char)(146);
+      else if (metatest.equals("SHIFT-SPACE")) metaCode=(char)(160);
 
       else if (metatest.equals("blk")) metaCode=(char)(144);
       else if (metatest.equals("wht")) metaCode=(char)(5);
@@ -1639,9 +2041,9 @@ boolean ReadAssignment()
     }
 }
 
-/** for now will read a line number that has a space after it - 
-    will change this to allow no space in the future
-**/
+    // for now will read a line number that has a space after it - 
+    // will change this to allow no space in the future
+
 boolean ReadLineNo() {
     int at=0;
     int chewspace=0;

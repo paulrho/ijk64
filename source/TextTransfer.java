@@ -1,3 +1,9 @@
+/////////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+/////////////////////////////////////////////////////////////////////////////////
+
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.Transferable;
@@ -34,10 +40,8 @@ public final class TextTransfer implements ClipboardOwner {
      //do nothing
    }
 
-  /**
-  * Place a String on the clipboard, and make this class the
-  * owner of the Clipboard's contents.
-  */
+  // Place a String on the clipboard, and make this class the
+  // owner of the Clipboard's contents.
   public void setClipboardContents( String aString ){
     StringSelection stringSelection = new StringSelection( aString );
     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();

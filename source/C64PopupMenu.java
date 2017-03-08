@@ -1,3 +1,8 @@
+/////////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+/////////////////////////////////////////////////////////////////////////////////
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.JPopupMenu;
@@ -149,6 +154,14 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         submenu2.addActionListener(this);
         popup.add(submenu2);
 
+        menuItem = new JMenuItem("C= [Ctrl]");
+        menuItem.addItemListener(this);
+        submenu2.add(menuItem);
+
+        menuItem = new JMenuItem("CTRL [Tab]");
+        menuItem.addItemListener(this);
+        submenu2.add(menuItem);
+
         menuItem = new JMenuItem("CLR (clear screen) [CTRL HOME]");
         menuItem.addItemListener(this);
         submenu2.add(menuItem);
@@ -157,7 +170,7 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         menuItem.addItemListener(this);
         submenu2.add(menuItem);
 
-        menuItem = new JMenuItem("BREAK [CTRL ESC]");
+        menuItem = new JMenuItem("BREAK [SHIFT ESC]");
         menuItem.addItemListener(this);
         submenu2.add(menuItem);
 
@@ -190,6 +203,15 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         menuItem.addItemListener(this);
         submenu2.add(menuItem);
 
+        submenu2.addSeparator();
+
+        menuItem = new JMenuItem("[CTRL]+[SHIFT]+C - copy");
+        menuItem.addItemListener(this);
+        submenu2.add(menuItem);
+
+        menuItem = new JMenuItem("[CTRL]+[SHIFT]+V - paste");
+        menuItem.addItemListener(this);
+        submenu2.add(menuItem);
 
         submenu2 = new JMenu("Screen...");
         submenu2.setMnemonic(KeyEvent.VK_F);
@@ -249,6 +271,10 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         //cbMenuItem.setSelected(true);
         cbMenuItem.addItemListener(this);
         submenu.add(cbMenuItem);
+        cbMenuItem = new JCheckBoxMenuItem("Syntax highlighting");
+        cbMenuItem.setSelected(true);
+        cbMenuItem.addItemListener(this);
+        submenu.add(cbMenuItem);
 
 
 	//------------------------------------------------------------
@@ -258,10 +284,19 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         menuItem.addActionListener(this);
         submenu2.add(submenu);
         menuItem = new JMenuItem("Commodore 128 80x25 monitor mode (double height pixels)");
+        menuItem.addActionListener(this);
         submenu.add(menuItem);
         menuItem = new JMenuItem("Commodore 64 default mode");
+        menuItem.addActionListener(this);
         submenu.add(menuItem);
         menuItem = new JMenuItem("Commodore 64 BIG screen");
+        menuItem.addActionListener(this);
+        submenu.add(menuItem);
+        menuItem = new JMenuItem("Lots of space 80x80");
+        menuItem.addActionListener(this);
+        submenu.add(menuItem);
+        menuItem = new JMenuItem("Vic20");
+        menuItem.addActionListener(this);
         submenu.add(menuItem);
 
         //-------------------------------------------------------------
@@ -390,6 +425,10 @@ public class C64PopupMenu implements ActionListener, ItemListener {
           cbMenuItem.addItemListener(this);
           submenu.add(cbMenuItem);
   
+          cbMenuItem = new JCheckBoxMenuItem("BASIC timing profiling");
+          cbMenuItem.addItemListener(this);
+          submenu.add(cbMenuItem);
+  
           cbMenuItem = new JCheckBoxMenuItem("Evaluate engine verbose");
 	  cbMenuItem.setEnabled(false);
           cbMenuItem.setAccelerator(KeyStroke.getKeyStroke(
@@ -477,25 +516,79 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         submenu = new JMenu("Show commands");
         submenu.setMnemonic(KeyEvent.VK_S);
         popup.add(submenu);
-        menuItem = new JMenuItem("META-CHARSET [0|1]"); submenu.add(menuItem);
-        menuItem = new JMenuItem("META-SCALE [0|1|2]"); submenu.add(menuItem);
-        menuItem = new JMenuItem("META-SCALEY [1|2]"); submenu.add(menuItem);
-        menuItem = new JMenuItem("META-ROWS n"); submenu.add(menuItem);
-        menuItem = new JMenuItem("META-COLS n"); submenu.add(menuItem);
-        menuItem = new JMenuItem("META-BGTRANS [0|1]"); submenu.add(menuItem);
-        menuItem = new JMenuItem("META-VERBOSE"); submenu.add(menuItem);
-        menuItem = new JMenuItem("META-TIMING"); submenu.add(menuItem);
-        menuItem = new JMenuItem("META-DUMPSTATE"); submenu.add(menuItem); menuItem.addActionListener(this);
-        menuItem = new JMenuItem("EXIT"); submenu.add(menuItem);
+
+        JMenu submenu1 = new JMenu("META commands");
+        submenu.add(submenu1);
+          menuItem = new JMenuItem("META-CHARSET [0|1]"); submenu1.add(menuItem);
+          menuItem = new JMenuItem("META-SCALE [0|1|2]"); submenu1.add(menuItem);
+          menuItem = new JMenuItem("META-SCALEY [1|2]"); submenu1.add(menuItem);
+          menuItem = new JMenuItem("META-ROWS n"); submenu1.add(menuItem);
+          menuItem = new JMenuItem("META-COLS n"); submenu1.add(menuItem);
+          menuItem = new JMenuItem("META-BGTRANS [0|1]"); submenu1.add(menuItem);
+          menuItem = new JMenuItem("META-VERBOSE"); submenu1.add(menuItem);
+          menuItem = new JMenuItem("META-TIMING"); submenu1.add(menuItem);
+          menuItem = new JMenuItem("META-DUMPSTATE"); submenu1.add(menuItem); menuItem.addActionListener(this);
+          menuItem = new JMenuItem("EXIT"); submenu1.add(menuItem);
+        submenu2 = new JMenu("GRAPHICS/HAND commands");
+        submenu.add(submenu2);
+          menuItem = new JMenuItem("SCREEN [0|1]"); submenu2.add(menuItem);
+          menuItem = new JMenuItem("GPRINT"); submenu2.add(menuItem);
+          menuItem = new JMenuItem("BEGINFRAME"); submenu2.add(menuItem);
+          menuItem = new JMenuItem("ENDFRAME"); submenu2.add(menuItem);
+          menuItem = new JMenuItem("CLS"); submenu2.add(menuItem);
+          menuItem = new JMenuItem("LINE"); submenu2.add(menuItem);
+          menuItem = new JMenuItem("FSET"); submenu2.add(menuItem);
+          menuItem = new JMenuItem("SLEEP"); submenu2.add(menuItem);
+          menuItem = new JMenuItem("ALERT"); submenu2.add(menuItem);
+          menuItem = new JMenuItem("RECT"); submenu2.add(menuItem);
+          menuItem = new JMenuItem("FILES"); submenu2.add(menuItem);
+          menuItem = new JMenuItem("LSET"); submenu2.add(menuItem);
+          menuItem = new JMenuItem("IMAGELOAD"); submenu2.add(menuItem);
+          menuItem = new JMenuItem("DRAWIMAGE"); submenu2.add(menuItem);
+          menuItem = new JMenuItem("DESTROYIMAGE"); submenu2.add(menuItem);
+        JMenu submenu3 = new JMenu("C64 commands");
+        submenu.add(submenu3);
+          menuItem = new JMenuItem("FOR TO STEP"); submenu3.add(menuItem);
+          menuItem = new JMenuItem("NEXT"); submenu3.add(menuItem);
+          menuItem = new JMenuItem("IF THEN"); submenu3.add(menuItem);
+          menuItem = new JMenuItem("GOTO"); submenu3.add(menuItem);
+          menuItem = new JMenuItem("GOSUB"); submenu3.add(menuItem);
+          menuItem = new JMenuItem("RETURN"); submenu3.add(menuItem);
+          menuItem = new JMenuItem("PRINT"); submenu3.add(menuItem);
+          menuItem = new JMenuItem("DIM"); submenu3.add(menuItem);
+          menuItem = new JMenuItem("GET"); submenu3.add(menuItem);
+          menuItem = new JMenuItem("POKE"); submenu3.add(menuItem);
+          menuItem = new JMenuItem("OPEN"); submenu3.add(menuItem);
+          menuItem = new JMenuItem("INPUT"); submenu3.add(menuItem);
+          menuItem = new JMenuItem("CLOSE"); submenu3.add(menuItem);
+          menuItem = new JMenuItem("DATA"); submenu3.add(menuItem);
+          menuItem = new JMenuItem("READ"); submenu3.add(menuItem);
+          menuItem = new JMenuItem("RESTORE"); submenu3.add(menuItem);
+          menuItem = new JMenuItem("END"); submenu3.add(menuItem);
+          submenu3.addSeparator();
+          menuItem = new JMenuItem("FAST"); submenu3.add(menuItem);
         submenu.addSeparator();
         menuItem = new JMenuItem("LIST"); submenu.add(menuItem);
+        menuItem = new JMenuItem("LOAD"); submenu.add(menuItem);
         menuItem = new JMenuItem("RUN"); submenu.add(menuItem);
+        menuItem = new JMenuItem("CONT"); submenu.add(menuItem);
+        menuItem = new JMenuItem("CLR"); submenu.add(menuItem);
+        menuItem = new JMenuItem("NEW"); submenu.add(menuItem);
         menuItem = new JMenuItem("SYS nnnnn"); submenu.add(menuItem);
+        submenu.addSeparator();
+        menuItem = new JMenuItem("HELP"); submenu.add(menuItem);
 
 	//------------------------------------------------------------
         submenu = new JMenu("Command Line parameters");
         popup.add(submenu);
         menuItem = new JMenuItem("C64 basicfilename.basic ..."); submenu.add(menuItem);
+        menuItem = new JMenuItem("  -c : center on start"); submenu.add(menuItem);
+        menuItem = new JMenuItem("  -[1|2|3] : size of pixels"); submenu.add(menuItem);
+        menuItem = new JMenuItem("  -r : run on startup"); submenu.add(menuItem);
+        menuItem = new JMenuItem("  -b : blank screen no banner"); submenu.add(menuItem);
+        menuItem = new JMenuItem("  -n : no frame"); submenu.add(menuItem);
+        menuItem = new JMenuItem("  -t : transparent background"); submenu.add(menuItem);
+        menuItem = new JMenuItem("  -h : command line help"); submenu.add(menuItem);
 
 	//------------------------------------------------------------
         popup.addSeparator();
@@ -553,6 +646,29 @@ if (false) {
       if (source.getText().equals("80 columns")) {
         System.out.print("Setting to 80 columns...\n");
               screen.setCols(80);
+      } else if (source.getText().equals("Commodore 128 80x25 monitor mode (double height pixels)")) {
+              screen.setColsRows(80,25);
+              screen.setScale(1);
+              screen.setScaleY(2);
+      } else if (source.getText().equals("Commodore 64 default mode")) {
+              screen.setScaleY(1);
+              screen.setColsRows(40,25);
+              machine.performPOKE(53280,14);
+              machine.performPOKE(53281,6);
+      } else if (source.getText().equals("Commodore 64 BIG screen")) {
+              screen.setScaleY(1);
+              screen.setColsRows(40,25);
+              screen.setScale(3);
+      } else if (source.getText().equals("Lots of space 80x80")) {
+              screen.setScaleY(1);
+              screen.setScale(1);
+              screen.setColsRows(80,80);
+      } else if (source.getText().equals("Vic20")) {
+              screen.setScaleY(1);
+              screen.setScale(3);
+              screen.setColsRows(22,23);
+              machine.performPOKE(53281,1);
+              machine.performPOKE(53280,3);
       } else if (source.getText().equals("40 columns")) {
         System.out.print("Setting to 40 columns...\n");
               screen.setCols(40);
@@ -677,6 +793,9 @@ if (false) {
 	} else if (source.getText().equals("Uppercase")) {
 		System.out.print("Setting charset ...\n");
                 screen.changeCharSet( (e.getStateChange() == ItemEvent.SELECTED) ? 0:1);
+	} else if (source.getText().equals("BASIC timing profiling")) {
+		System.out.print("Setting BASIC profiling\n");
+		machine.basictimer=( (e.getStateChange() == ItemEvent.SELECTED) ? true:false);
 	} else if (source.getText().equals("Verbose")) {
                 // not quiet right yet
 		System.out.print("Setting verbosity not quite right yet...\n");
@@ -686,6 +805,12 @@ if (false) {
 	} else if (source.getText().equals("50% duty cycle")) {
                 if (e.getStateChange() == ItemEvent.SELECTED) machine.partialDutyCycle=1;
                 else machine.partialDutyCycle=0;
+	} else if (source.getText().equals("Syntax highlighting")) {
+                if (e.getStateChange() == ItemEvent.SELECTED) machine.hasSyntaxHighlighting=true;
+                else machine.hasSyntaxHighlighting=false;
+		System.out.print("syntaxhighlighting set to ");
+		System.out.print(machine.hasSyntaxHighlighting?"true":"false");
+		System.out.print("\n");
 	} else if (source.getText().equals("Sync background image")) {
 		System.out.print("Setting sendtoback ...\n");
                 if (e.getStateChange() == ItemEvent.SELECTED) screen.shiftbgimage=true;
@@ -732,7 +857,7 @@ if (false) {
         return classString.substring(dotIndex+1);
     }
 
-    /** Returns an ImageIcon, or null if the path was invalid. */
+    // Returns an ImageIcon, or null if the path was invalid. 
     protected static ImageIcon createImageIcon(String path) {
         java.net.URL imgURL = C64PopupMenu.class.getResource(path);
         if (imgURL != null) {
@@ -833,7 +958,7 @@ boolean openFile () {
             "JEBI/C64/ijk64 version "
             + version.programVersion + "\n"  // was 3.0.48
             + "Paul Salanitri, Futex\n"
-            + "Copyright (c) 2001-2007-2012 P. Salanitri";
+            + "Copyright (c) 2001-2007-2012-2016 P. Salanitri";
         String licence =
             "Redistribution and use in source and binary forms, with or\n"
             + "without modification, are permitted provided that the\n"

@@ -1,3 +1,9 @@
+/////////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+/////////////////////////////////////////////////////////////////////////////////
+
 // just doxx did it
 import java.awt.image.*; // for Image
 import java.util.*;
@@ -21,11 +27,24 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 //  int sizex=1000; 
 //  int sizey=1000;
   int tby=30;
-  int sizex=768;   
-  int sizey=1004+tby;
+  final int default_sizex=768;
+  final int default_sizey=1004+tby;
+  int sizex=default_sizex;   
+  int sizey=default_sizey;
+  
    
-  GraphicsDevice() {
-	super("ijk64 graphics");
+  public GraphicsDevice(int x, int y) {
+    super("ijk64 graphics");
+    initDevice(x,y);
+  }
+  public GraphicsDevice() {
+    super("ijk64 graphics");
+    initDevice(sizex,sizey-tby);
+  }
+  
+  void initDevice(int x, int y) {
+    sizex=x;
+    sizey=tby+y;
     setSize(sizex,sizey);
     setVisible(true); // start AWT painting.
     addMouseListener(this);
@@ -35,14 +54,37 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
     if (true) newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
   }
       
+  void save(String filename) {
+    //Graphics2D cg = newoffImage.createGraphics();
+    try {
+      if (ImageIO.write((BufferedImage)newoffImage, "png", new File(filename+".png"))) {
+        System.out.println("-- saved");
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
   void createDisplay() {
 	   // assumed
   }
 
-  public void resetDevice() {
+  public void resetDevice(int x, int y) {
+    if (x!=sizex || y+tby!=sizey) {
+      // weve changed the size - we need to reset it
+      initDevice(x,y);
+      //sizex=x;
+      //sizey=tby+y;
+      //setSize(sizex,sizey); // should really clear it too?
+      //setVisible(true); // start AWT painting.
+      System.out.printf("Setting graphics size %d %d\n",sizex,sizey);
+    }
     command_ENDFRAME();
     fsize=16;
     topimage=0; //reset this back
+  }
+  public void resetDevice() {
+    resetDevice(default_sizex,default_sizey-tby);
   }
    
   void doupdate() {
@@ -94,7 +136,7 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
      doupdate();   
    }
 
-   public void command_SLEEP(int milliseconds) {
+   public static void command_SLEEP(int milliseconds) {
        try {
          Thread.sleep(milliseconds);       // in the extreme slowdown
        }
@@ -105,12 +147,34 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
    public synchronized void command_CLS() { /* try this */
      newoffGraphics.setColor(Color.WHITE);
      newoffGraphics.fillRect(0, 0, sizex,sizey+tby);	   
+     //newoffGraphics.clearRect(0, 0, sizex,sizey+tby);	   
      if (!inframe) doupdate();
    }
          
+   public void command_CIRCLE(int x1, int y1, int r, int col, int fill) {
+     newoffGraphics.setColor(colorindex[col]);
+     if (fill!=0) {
+       newoffGraphics.fillOval(x1,y1+tby,r,r);
+     } else {
+       newoffGraphics.drawOval(x1,y1+tby,r,r);
+     }
+     if (!inframe) doupdate();
+   }
+
    public void command_RECT(int x1, int y1, int x2, int y2, int col) {
      newoffGraphics.setColor(colorindex[col]);
      newoffGraphics.fillRect(x1,y1+tby,x2-x1,y2-y1);
+     if (!inframe) doupdate();
+   }
+
+   public void command_FILL(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, int col) {
+     int xpoints[]= {x1, x2, x3, x4, x1};
+     int ypoints[]= {y1+tby, y2+tby, y3+tby, y4+tby, y1+tby};
+     if (col<16) 
+       newoffGraphics.setColor(colorindex[col]);
+     else
+       newoffGraphics.setColor(new Color(col));
+     newoffGraphics.fillPolygon(xpoints,ypoints,5);
      if (!inframe) doupdate();
    }
 
@@ -126,8 +190,15 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
    }
 
    public void command_LSET(int w, int c) {
-     lsize=w;
-     newoffGraphics.setStroke(new BasicStroke(w));
+     if (c==4) {
+       if (w==0)   // 0,4 off
+         newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+       else        // 1,4 on
+         newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+     } else {
+       lsize=w;
+       newoffGraphics.setStroke(new BasicStroke(w));
+     }
    }
 
 	
@@ -158,7 +229,15 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
    int topimage=0;
    BufferedImage[] imgarray= new BufferedImage[20]; // bad hard code at moment
    
+   public void command_SAVEIMAGE(String filename) {
+       save(filename);
+   }
+
    public int command_LOADIMAGE(String filename) {
+     if (filename.startsWith("+")) { //temp
+       save(filename.substring(1));
+       return -1;
+     }
 	 if (topimage+1==20) return -1;
      try {
        imgarray[topimage] = ImageIO.read(new File(filename));
@@ -173,8 +252,10 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 //       tx.translate(x,y+(double)tby/scale); // was but scales the x,y too
        tx.translate(x/scale,(y+(double)tby)/scale);
        if (rotation!=0.0) tx.rotate(rotation); 
-       AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-       newoffGraphics.drawImage(imgarray[imgno],tx,null);
+       //AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+       AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BICUBIC);
+       //newoffGraphics.drawImage(imgarray[imgno],tx,null);
+       newoffGraphics.drawImage(imgarray[imgno],op,0,0);
 
      if (!inframe) doupdate();
    }
