@@ -52,7 +52,7 @@
       source="1.4"
       target="1.4"
     -->
-    <javac srcdir="${source}" destdir="${build}"
+    <javac includeantruntime="false" srcdir="${source}" destdir="${build}"
       debug="true" debuglevel="lines,vars,source"
       source="1.5"
       target="1.5"
@@ -122,6 +122,8 @@
        <arg value="-t"/>
        <arg value="-n"/>
        <arg value="-b"/>
+       <arg value="-c"/>
+       <arg value="-3"/>
     </java>
   </target>
 
