@@ -253,8 +253,8 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
        tx.translate(x/scale,(y+(double)tby)/scale);
        if (rotation!=0.0) tx.rotate(rotation); 
        //AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-       AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BICUBIC);
        //newoffGraphics.drawImage(imgarray[imgno],tx,null);
+       AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BICUBIC);
        newoffGraphics.drawImage(imgarray[imgno],op,0,0);
 
      if (!inframe) doupdate();
@@ -371,7 +371,6 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 
 } /* class */
 
-/*******
- * END *
- *******/
-
+/////////
+// END //
+/////////
