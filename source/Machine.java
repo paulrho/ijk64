@@ -192,6 +192,8 @@ public class Machine {
     // also clear data
     allDATA="";
     uptoDATA=0;
+    CloseAllFiles();
+    //topHandle=0; // clear open files list // should really close all open nicely!
   }
 
   /** CLeaRs all machine state variables
@@ -204,6 +206,7 @@ public class Machine {
     variables=new Variables();
     variables.verbose=verbosekeep;
     program_saved_executionpoint=(-1); // cant continue any more
+    //!!! should forloopstack be cleared too? // no -statements clears it
   }
 
   //////////////////////////////////
@@ -850,6 +853,74 @@ public class Machine {
     variables_clr();    
   };
 
+ ///////////////////////////////
+ // FILE I/O
+ // vars
+  class FileHandle {
+    int fileno;
+    String filename;
+    int mode;
+    int type;
+    Writer output;
+    FileHandle() { fileno=-1; }; //initialise
+    void newFileHandle(int fh, String filename) {
+      if (true) System.out.printf("new fh = %d\n",topHandle);
+      handleHash[topHandle]=new FileHandle();
+      handleHash[topHandle].fileno=fh;
+      handleHash[topHandle].filename=filename;
+      if (!filename.equals("KB")) {
+    try {
+        handleHash[topHandle].output = new BufferedWriter(new FileWriter(filename, true));
+    } catch (Exception e) { System.out.printf("open exception\n"); }
+      }
+      topHandle++;
+      //handleHash[FileHandle.top].fileno=fh;
+    }
+    int findHandle(int fh) {
+      for (int i=0; i<topHandle; ++i) if (handleHash[i].fileno==fh) return i;
+      return -1;
+    }
+  }
+  static int MAXHandle=20;
+  int topHandle=0;
+  FileHandle handleHash[] = new FileHandle[20];
+  FileHandle dummyhandleHash = new FileHandle();
+  
+ // open file
+  void OpenFile(int fh, String param) {
+     String filename=param+".seq";
+     dummyhandleHash.newFileHandle(fh,filename);
+  }
+  void CloseAllFiles() {
+    try {
+      for (int i=0; i<topHandle; ++i) if (handleHash[i].fileno>=0) handleHash[i].output.close();
+    } catch (Exception e) { System.out.printf("closeall exception\n"); }
+    topHandle=0;
+  }
+ // close file
+  void CloseFile(int fh) {
+    foff=dummyhandleHash.findHandle(fh);
+    try {
+      handleHash[foff].output.close();
+    } catch (Exception e) { System.out.printf("close exception\n"); }
+    handleHash[foff].fileno=-1;
+    handleHash[foff].output=null;
+  }
+ // print to file
+  int foff=-1;
+  void SetFH(int fh) {
+    foff=dummyhandleHash.findHandle(fh);
+  }
+  //void PrintFile(int fh, String raw) {
+  void PrintFile(String raw) {
+    System.out.printf("use = %d raw test = %s\n",foff,raw);
+    try {
+    handleHash[foff].output.append(raw);
+    } catch (Exception e) { System.out.printf("append exception\n"); }
+  }
+ // input from file
+ // get from file
+ ///////////////////////////////
   // reads the program basic text file 
   // was static  why?
   String read_a_file(String filename) throws BasicException {
@@ -1092,7 +1163,7 @@ int hs;
        "AND","OR","NOT",
        "ON",
        "GET#5,",
-       "POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST",
+       "POKE","OPEN","INPUT#,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST",
        "META-VERBOSE",
        "SYS","CLR",
        "META-SCALEY","META-ROWS",

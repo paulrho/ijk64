@@ -136,7 +136,7 @@ int MAXTOKENS=100;
 String[] basicTokens={
   "FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","PRINT#","PRINT","ENDFRAME","DIM",
   "GET#5,",
-  "POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST",
+  "POKE","OPEN","INPUT#","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST",
   "META-VERBOSE",
   "SYS","CLR",
   "META-SCALEY","META-ROWS",
@@ -659,7 +659,7 @@ boolean ReadStatement() throws BasicException
       case ST_PRINT: if (ProcessPRINTstatement()) { return true; } break;
       case ST_REM: if (ProcessREMstatement()) { return true; } break;
       case ST_PRINThash: // because it would have gone elsewhere
-        if (ProcessIGNOREstatement()) { return true; } break;
+        if (ProcessPRINThashstatement()) { return true; } break;
       case ST_FAST:  // I wish
         if (ProcessIGNOREstatement()) { return true; } break;
       case ST_RESTORE: 
@@ -760,8 +760,10 @@ boolean ReadStatement() throws BasicException
         if (ProcessSYSstatement()) { return true; } break;
       case ST_POKE:
         if (ProcessPOKEstatement()) { return true; } break;
-      case ST_OPEN: case ST_CLOSE:
-        if (ProcessIGNOREstatement()) { return true; }
+      case ST_OPEN:
+        if (ProcessOPENstatement()) { return true; } break;
+      case ST_CLOSE:
+        if (ProcessCLOSEstatement()) { return true; }
         break;
       case ST_LIST:
         if (ProcessLISTstatement()) { return true; }
@@ -1280,6 +1282,66 @@ boolean ProcessPRINTstatement() throws BasicException
   ReadColon(); // check
   return true;
 }
+boolean ProcessPRINThashstatement() throws BasicException
+{
+  boolean firstexp=true;
+  if (verbose) { System.out.printf("Processing PRINT statement\n"); }
+  ReadExpression();
+  if (verbose) { System.out.printf("MachinePrintEvaluate( %s )\n",keepExpression); }
+  /// if (verbose  ) { System.out.printf("%s",machine.evaluate_partial(keepExpression).print()); }
+  /// machine.print(machine.evaluate_partial(keepExpression).print());
+  // this should probably be nicer
+  int x=0;
+  String separator="";
+  /// while ((x=machine.evaluate_engine.parse_restart)>0) { 
+  do {
+    if (verbose) { System.out.printf("More to evaluate!!!! - should resubmit with the remaining string after %d...\n",machine.evaluate_engine.parse_restart); }
+    // there is more to evaluate
+    String temp=new String(keepExpression);  // do I need to do this?
+    keepExpression=temp.substring(x,temp.length());
+
+    x=0; // now we are at the start of it again
+    while (x<keepExpression.length() && 
+      (keepExpression.substring(x,x+1).equals(";") || keepExpression.substring(x,x+1).equals(",") || keepExpression.substring(x,x+1).equals(" ")))
+      { 
+        if (keepExpression.substring(x,x+1).equals(",")) {
+          //if (verbose) { System.out.printf("Should space out to next position....(Not impl yet)\n"); }
+          separator=","; 
+          if (!firstexp) machine.PrintFile(" "); // for now just a single space
+          else firstexp=false;
+        } else if (keepExpression.substring(x,x+1).equals(";")) {
+          separator=";"; 
+        }
+        x++;
+      } // chew them up // need to include blanks and , too!
+    /// String
+    temp=new String(keepExpression);  // do I need to do this?
+    keepExpression=temp.substring(x,temp.length());
+    if (keepExpression.equals("")) { break; }
+
+    if (verbose) { System.out.printf("should resubmit with the remaining string after %d will do so with:%s\n",machine.evaluate_engine.parse_restart,keepExpression); }
+    if (firstexp) {
+          // if this is the first time here -> we will have the fh first
+     
+      GenericType gt=machine.evaluate_partial(keepExpression);
+       //   if (gt.gttop==1) {
+      System.out.printf("Hash value = %d\n",//(int)gt.num());
+                (int)gt.num());
+      machine.SetFH((int)gt.num());
+      //firstexp=false;
+    } else {
+      machine.PrintFile(machine.evaluate_partial(keepExpression).print());
+    }
+    separator="";
+  } while ((x=machine.evaluate_engine.parse_restart)>0);
+  if (machine.evaluate_engine.stayonline && separator.equals("")) separator=";";
+  if (!separator.equals(";") && !separator.equals(",")) {
+    if (verbose  ) { System.out.printf("\n"); }
+    machine.PrintFile("\n");
+  }
+  ReadColon(); // check
+  return true;
+}
 
 boolean ProcessIFstatement() throws BasicException
 {
@@ -1640,6 +1702,20 @@ boolean ProcessINPUTstatement(boolean stayonsameline) throws BasicException
   // search for semicolon, trim off and print
   //contains
   // read partial, see if ends in semicolon???
+  if (stayonsameline) {
+    // it must be a input#
+    // read out fh
+    GenericType gt=machine.evaluate_partial(keepExpression);
+    int x=machine.evaluate_engine.parse_restart;
+    if(x>=0 && x<keepExpression.length()-1 && keepExpression.substring(x,x+1).equals(",")) {
+      // all good
+      System.out.printf("fh=%d\n",(int)gt.num());
+      String temp=keepExpression;
+      keepExpression=temp.substring(x+1,temp.length());
+    } else {
+      throw new BasicException("SYNTAX ERROR NEEDS FH & COMMA");
+    }
+  }
   if (keepExpression.contains(";")) {
         // check if string AND semicolon is next
     String prompt=machine.evaluate_partial(keepExpression).print();
@@ -1731,6 +1807,50 @@ boolean ProcessSAVEstatement() throws BasicException
   machine.saveProgram(filename);
   return true;
 }
+//boolean ProcessPRINThashstatementTest() throws BasicException
+//{
+  //ReadExpression();
+  //if (verbose) { machine.dumpstate(); }
+  //GenericType gt=machine.evaluate(keepExpression);
+  //if (gt.gttop==2) {
+     //machine.PrintFile(
+       //(int)gt.gtlist[0].num(),
+       //gt.gtlist[1].str()
+     //);
+     //return true;
+  //} else {
+     //return false;
+  //}
+//}
+boolean ProcessOPENstatement() throws BasicException
+{
+  ReadExpression();
+  if (verbose) { machine.dumpstate(); }
+  GenericType gt=machine.evaluate(keepExpression);
+  if (gt.gttop==4) {
+     machine.OpenFile(
+       (int)gt.gtlist[0].num(),
+       gt.gtlist[3].str()
+     );
+     return true;
+  } else if (gt.gttop==2) {
+     machine.OpenFile(
+       (int)gt.gtlist[0].num(),
+       "KB"
+     );
+     return true;
+  } else {
+     return false;
+  }
+}
+boolean ProcessCLOSEstatement() throws BasicException
+{
+  ReadExpression();
+  GenericType gt=machine.evaluate(keepExpression);
+  machine.CloseFile( (int)gt.num());
+  return true;
+}
+
 boolean ProcessLOADstatement() throws BasicException
 {
   // this will be a bit wierd if actually run from a program itself!

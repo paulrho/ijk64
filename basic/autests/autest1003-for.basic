@@ -1,0 +1,61 @@
+5 print"(clr)";
+10 y=0
+20 fori=1to10
+30 y=y+i
+35 print y
+40 nexti
+45 print "answer="
+50 print y
+100 forx=1to0
+110 print x
+120 nextx
+130 fori=1to10step3:
+140 printi
+150 next
+4000 data32,"#1","-spc-",38
+4010 data32,"#3","-spc-",38
+4020 data32,"#6","-spc-",38
+4030 data32,"#10","-spc-",37
+4040 data32,"#15","-spc-",37
+4050 data32,"#21","-spc-",37
+4060 data32,"#28","-spc-",37
+4070 data32,"#36","-spc-",37
+4080 data32,"#45","-spc-",37
+4090 data32,"#55","-spc-",37
+4100 data"answer=","-spc-",33
+4110 data32,"#55","-spc-",37
+4120 data32,"#1","-spc-",38
+4122 data32,"#1","-spc-",38
+4123 data32,"#4","-spc-",38
+4124 data32,"#7","-spc-",38
+4126 data32,"#10","-spc-",37
+4130 data"-spc-",40
+4140 data"ready."
+4900 dataend
+4990 end
+5000 restore:gosub6000
+5010 print
+5020 meta-verbose 2
+5025 list-1
+5030 ifre=1thenprint"testresult=pass good=";n
+5040 ifre<1thenprint"testresult=fail at row=";int(-re/40)+1;"col=";-re-int(-re/40)*40+1
+5060 print"fin"
+5080 meta-verbose 0
+5085 meta-dumpstate
+5090 end
+6000 rem screen check
+6010 n=0:re=1
+6020 readd$:d=val(d$):ifd$="end"then6050
+6022 ifmid$(d$,1,1)="#"thend=0:d$=mid$(d$,2)
+6025 ifd$="-spc-"thenreadx:gosub6200:n=n-1:goto6038
+6027 ifd$<>"0"andd=0thengosub6300:n=n-1:goto6038
+6030 ifpeek(1024+n)<>dthenre=-n:print"expecting";d;"got";peek(1024+n)
+6038 ifre<1thenreturn
+6040 n=n+1:goto6020
+6050 return
+6200 fori=1tox:ifpeek(1024+n)<>32thenre=-n:return
+6210 n=n+1:next:return
+6300 fori=1tolen(d$):a$=mid$(d$,i,1):d=asc(a$)-64:ifd<0thend=d+64
+6310 ifpeek(1024+n)<>dthenre=-n:print"exp";d;"got";peek(1024+n):return
+6320 n=n+1:next
+6340 return

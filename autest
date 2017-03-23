@@ -1,0 +1,4 @@
+#!/bin/bash
+cd basic/autests
+time java -jar ../../jar/ijk64.jar -r -a"goto5000" -x autest*basic | sed "s/([^)]*)//g" | sed "s/fail/***fail***/g" | sed "s/Basic Error/                                   ***Basic Error***/g"  | egrep --color "rem program = |testresult=|Basic Error" 
+# | sed "s/good/\[\033[01;32m\]good\[\033[00m\]/"
