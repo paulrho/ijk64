@@ -912,6 +912,11 @@ public class Machine {
     foff=dummyhandleHash.findHandle(fh);
   }
   //void PrintFile(int fh, String raw) {
+  void PrintFileFlush() {
+    try {
+    handleHash[foff].output.flush(); // do this for now - but maybe later only flush at end of program or after timed event
+    } catch (Exception e) { System.out.printf("flush exception\n"); }
+  }
   void PrintFile(String raw) {
     System.out.printf("use = %d raw test = %s\n",foff,raw);
     try {

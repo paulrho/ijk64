@@ -1338,6 +1338,7 @@ boolean ProcessPRINThashstatement() throws BasicException
   if (!separator.equals(";") && !separator.equals(",")) {
     if (verbose  ) { System.out.printf("\n"); }
     machine.PrintFile("\n");
+    machine.PrintFileFlush();
   }
   ReadColon(); // check
   return true;
