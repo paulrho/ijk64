@@ -1077,6 +1077,7 @@
 <span class="sourceLineNo">1069</span>      if (verbose) { System.out.printf("MachineVariableSet(variable=%s with evaluate( %s ))\n",keepVariable,keepExpression); }<a name="line.1069"></a>
 <span class="sourceLineNo">1070</span>      // parse the keep variable in the machine to turn X(I+1) into X(42)<a name="line.1070"></a>
 <span class="sourceLineNo">1071</span><a name="line.1071"></a>
+<<<<<<< HEAD
 <span class="sourceLineNo">1072</span>      machine.assignment(keepVariable+"="+keepExpression);<a name="line.1072"></a>
 <span class="sourceLineNo">1073</span><a name="line.1073"></a>
 <span class="sourceLineNo">1074</span>      //machine.setvariable(machine.parse(keepVariable),machine.evaluate(keepExpression));<a name="line.1074"></a>
@@ -1114,6 +1115,45 @@
 <span class="sourceLineNo">1106</span>    }<a name="line.1106"></a>
 <span class="sourceLineNo">1107</span>    RSTinitted=true;<a name="line.1107"></a>
 <span class="sourceLineNo">1108</span>  }<a name="line.1108"></a>
+=======
+<span class="sourceLineNo">1072</span>      //machine.setvariable(machine.parse(keepVariable),machine.evaluate(keepExpression));<a name="line.1072"></a>
+<span class="sourceLineNo">1073</span>      // just change this one for the moment - try new way<a name="line.1073"></a>
+<span class="sourceLineNo">1074</span><a name="line.1074"></a>
+<span class="sourceLineNo">1075</span>      ReadColon();<a name="line.1075"></a>
+<span class="sourceLineNo">1076</span>      return true;<a name="line.1076"></a>
+<span class="sourceLineNo">1077</span>    } else {<a name="line.1077"></a>
+<span class="sourceLineNo">1078</span>      // Did not get token or assignment (was 103:)<a name="line.1078"></a>
+<span class="sourceLineNo">1079</span>      return false;<a name="line.1079"></a>
+<span class="sourceLineNo">1080</span>    }<a name="line.1080"></a>
+<span class="sourceLineNo">1081</span>}<a name="line.1081"></a>
+<span class="sourceLineNo">1082</span><a name="line.1082"></a>
+<span class="sourceLineNo">1083</span>//---------------------------------------------------------------------//<a name="line.1083"></a>
+<span class="sourceLineNo">1084</span>long counter_ReadStatementToken=0;<a name="line.1084"></a>
+<span class="sourceLineNo">1085</span>long timer_ReadStatementToken=0;<a name="line.1085"></a>
+<span class="sourceLineNo">1086</span>char firstchar[]=new char[100];<a name="line.1086"></a>
+<span class="sourceLineNo">1087</span>boolean RSTinitted=false;<a name="line.1087"></a>
+<span class="sourceLineNo">1088</span>int catop[]=new int[30];<a name="line.1088"></a>
+<span class="sourceLineNo">1089</span>int chainarray[][]=new int[30][10];<a name="line.1089"></a>
+<span class="sourceLineNo">1090</span><a name="line.1090"></a>
+<span class="sourceLineNo">1091</span>    // ReadStatementToken will identify a token from the current "pnt" in the basic text.<a name="line.1091"></a>
+<span class="sourceLineNo">1092</span>    // It is very inefficient and should be re-written.<a name="line.1092"></a>
+<span class="sourceLineNo">1093</span>    // A significant portion of the time gets spent in here.<a name="line.1093"></a>
+<span class="sourceLineNo">1094</span>    <a name="line.1094"></a>
+<span class="sourceLineNo">1095</span>boolean ReadStatementToken() {<a name="line.1095"></a>
+<span class="sourceLineNo">1096</span>  if (!RSTinitted) {<a name="line.1096"></a>
+<span class="sourceLineNo">1097</span>    for (int i=0; i&lt;30; ++i) { catop[i]=0; }<a name="line.1097"></a>
+<span class="sourceLineNo">1098</span>    for (int tok=0; tok&lt;basicTokens.length; ++tok) {<a name="line.1098"></a>
+<span class="sourceLineNo">1099</span>      firstchar[tok]=basicTokens[tok].charAt(0);<a name="line.1099"></a>
+<span class="sourceLineNo">1100</span>      //System.out.printf("char is %c\n",firstchar[tok]);<a name="line.1100"></a>
+<span class="sourceLineNo">1101</span>      int index=basicTokens[tok].charAt(0)-'A';<a name="line.1101"></a>
+<span class="sourceLineNo">1102</span>      //System.out.printf("array %d,%d = %d\n",index,catop[index],tok);<a name="line.1102"></a>
+<span class="sourceLineNo">1103</span>      chainarray[index][catop[index]++]=tok;<a name="line.1103"></a>
+<span class="sourceLineNo">1104</span>    }<a name="line.1104"></a>
+<span class="sourceLineNo">1105</span>    RSTinitted=true;<a name="line.1105"></a>
+<span class="sourceLineNo">1106</span>  }<a name="line.1106"></a>
+<span class="sourceLineNo">1107</span><a name="line.1107"></a>
+<span class="sourceLineNo">1108</span>//if (true) { start_timing(TIME_ReadStatementToken); }<a name="line.1108"></a>
+>>>>>>> origin/master
 <span class="sourceLineNo">1109</span><a name="line.1109"></a>
 <span class="sourceLineNo">1110</span>//if (true) { start_timing(TIME_ReadStatementToken); }<a name="line.1110"></a>
 <span class="sourceLineNo">1111</span><a name="line.1111"></a>
