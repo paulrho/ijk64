@@ -1347,9 +1347,12 @@ void chewcr() {
   {
     boolean ret;
     try {
-      if(filename.startsWith("%")) {
+      if(filename.startsWith("%") || filename.startsWith("http://test.futex.com.au/cloud/c64x")) {
         filename=filename.replaceFirst("%","");
+        filename=filename.replaceFirst("http://test.futex.com.au/cloud/c64x","");
+        filename=filename.replaceFirst(".basic.txt",""); // trim trailing txt
         ret=post_http(filename);
+        filename="%"+filename; // put it back! - but only the short version
       } else {
         ret=save_a_file(filename);
       }
