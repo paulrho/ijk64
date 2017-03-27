@@ -246,7 +246,10 @@ public class Machine {
         } else if (variable.equals("tisec")) 
           return new GenericType((double)(int)(System.currentTimeMillis()/1000.0));
       } else if (variable.equals("st")) {
-        return new GenericType(0.0);
+        //return new GenericType(0.0); // start to use it now
+        int st=fileio_ST; fileio_ST=0; // I think we clear on read
+        return new GenericType(st); // start to use it now
+ 
       } else if (variable.equals("mathpi")) {
         return new GenericType(Math.PI);
       }
@@ -862,16 +865,23 @@ public class Machine {
     int mode;
     int type;
     Writer output;
+    BufferedReader input;
     FileHandle() { fileno=-1; }; //initialise
-    void newFileHandle(int fh, String filename) {
+    void newFileHandle(int fh, String filename, char type) {
       if (true) System.out.printf("new fh = %d\n",topHandle);
       handleHash[topHandle]=new FileHandle();
       handleHash[topHandle].fileno=fh;
       handleHash[topHandle].filename=filename;
       if (!filename.equals("KB")) {
-    try {
-        handleHash[topHandle].output = new BufferedWriter(new FileWriter(filename, true));
-    } catch (Exception e) { System.out.printf("open exception\n"); }
+        try {
+          if (type=='R') {
+            if (verbose) { System.out.printf("Read mode\n"); }
+            handleHash[topHandle].input = new BufferedReader(new FileReader( new File(filename)));
+          } else if (type=='W') {
+            if (verbose) { System.out.printf("Write mode\n"); }
+            handleHash[topHandle].output = new BufferedWriter(new FileWriter(filename, true));
+          }
+        } catch (Exception e) { System.out.printf("open exception\n"); }
       }
       topHandle++;
       //handleHash[FileHandle.top].fileno=fh;
@@ -885,11 +895,16 @@ public class Machine {
   int topHandle=0;
   FileHandle handleHash[] = new FileHandle[20];
   FileHandle dummyhandleHash = new FileHandle();
+  int fileio_ST=0;
   
  // open file
   void OpenFile(int fh, String param) {
-     String filename=param+".seq";
-     dummyhandleHash.newFileHandle(fh,filename);
+     char type='R';
+     String[] data = param.split(",");
+     String filename=data[0]+".seq";
+     if (data.length>1 && data[1].equals("w")) { type='W'; }
+     dummyhandleHash.newFileHandle(fh,filename,type);
+     fileio_ST=0;
   }
   void CloseAllFiles() {
     try {
@@ -924,6 +939,38 @@ public class Machine {
     } catch (Exception e) { System.out.printf("append exception\n"); }
   }
  // input from file
+  String InputFile(int fh) {
+    if (verbose) { System.out.printf("inputing fh=%d\n",foff); }
+    try {
+      String line;
+      if (verbose) { System.out.printf("about to read line\n"); }
+      line = handleHash[foff].input.readLine();
+      if (line == null) { 
+        fileio_ST=64; //?
+      } else {
+        //fileio_ST=0;
+      }
+      if (verbose) { System.out.printf("read %s\n",line); }
+      return line;
+    } catch (Exception e) { System.out.printf("input exception\n"); }
+    return null;
+  }
+
+
+			//StringBuffer stringBuffer = new StringBuffer();
+			//String line;
+			//while ((line = bufferedReader.readLine()) != null) {
+				//stringBuffer.append(line);
+				//stringBuffer.append("\n");
+			//}
+			//fileReader.close();
+			////System.out.println("Contents of file:");
+			//System.out.println(stringBuffer.toString());
+		//} catch (IOException e) {
+			//e.printStackTrace();
+		//}
+
+
  // get from file
  ///////////////////////////////
   // reads the program basic text file 

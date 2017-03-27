@@ -1698,6 +1698,7 @@ boolean ProcessREADstatement() throws BasicException
 // can be used for INPUT and READ
 boolean ProcessINPUTstatement(boolean stayonsameline) throws BasicException
 {
+  int fh=-1;
   ReadExpression();
   // simplistic addition to allow string part of INPUT ["string";] x$, y$, z$...
   // search for semicolon, trim off and print
@@ -1710,7 +1711,8 @@ boolean ProcessINPUTstatement(boolean stayonsameline) throws BasicException
     int x=machine.evaluate_engine.parse_restart;
     if(x>=0 && x<keepExpression.length()-1 && keepExpression.substring(x,x+1).equals(",")) {
       // all good
-      System.out.printf("fh=%d\n",(int)gt.num());
+      fh=(int)gt.num();
+      if (verbose) { System.out.printf("fh=%d\n",fh); }
       String temp=keepExpression;
       keepExpression=temp.substring(x+1,temp.length());
     } else {
@@ -1739,8 +1741,18 @@ boolean ProcessINPUTstatement(boolean stayonsameline) throws BasicException
 
   if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
   if (!stayonsameline) machine.print("? ");
-
-  String got=machine.getline();
+  String got;
+  if (fh!=1 && fh>=0) { // just for now - say fh=1 is keyboad! later we read this from device
+    if (verbose) { System.out.printf("we are reading a fh=%d\n",fh); }
+    machine.SetFH(fh);
+    got=machine.InputFile(fh);
+    if (got==null) { got=""; }
+  } else {
+    got=machine.getline();
+    if (stayonsameline) {
+      machine.print("(up)");
+    }
+  }
   if (verbose) { System.out.printf("got string \"%s\"\n",got.trim()); }
   // it a string so keep it quoted
   // still need to separate out the answer to multiple strings!
@@ -1750,9 +1762,6 @@ boolean ProcessINPUTstatement(boolean stayonsameline) throws BasicException
   // change all commas to \",\"
   String processedString = stringQuoteStuff(got.trim().toLowerCase());
   machine.assignment(keepExpression.toLowerCase()+"="+processedString);
-  if (stayonsameline) {
-    machine.print("(up)");
-  }
   if (verbose) { machine.dumpstate(); }
   return true;
 }
