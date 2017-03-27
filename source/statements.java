@@ -1766,13 +1766,21 @@ boolean ProcessINPUTstatement(boolean stayonsameline) throws BasicException
   return true;
 }
 
+// fred,jim,sam  ->  "fred","jim","sam"
+// but
+// "fred,jim",sam must give "fred,jim","sam" 
+// also eat up any existing quotes
 String stringQuoteStuff(String arg)
 {
   //take a string and return it as is appart from , surrounded by \",\" and one single \" before and after the string
   String building="";
+  boolean quoted=false;
   for (int p=0; p<arg.length(); ++p) { 
     String a=arg.substring(p,p+1);
-    if (a.equals(",")) {
+    if (a.equals("\"")) {
+      quoted=!quoted;
+      // just chew up the quote!
+    } else if (!quoted && a.equals(",")) { // technically should include ":" and "," and even CR13
       building+="\",\"";
     } else { building+=a; }
   }
