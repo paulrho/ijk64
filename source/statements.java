@@ -1349,7 +1349,6 @@ boolean ProcessIFstatement() throws BasicException
   ReadExpression();
   
   if (verbose) { System.out.printf("MachineEvaluate( %s )\n",keepExpression); }
-  if (verbose) { System.out.printf("  evaluates to %s\n",machine.evaluate(keepExpression).print()); }
   //ReadStatementToken(); // note MUST be THEN or GOTO
   // implicetly read already with the ReadExpression
   if (gotToken!=ST_GOTO && gotToken!=ST_THEN) {
@@ -1360,7 +1359,9 @@ boolean ProcessIFstatement() throws BasicException
   // IF the evaluated expression is true (non zero), continue...
   // otherwise read out rest of line and skip to new line
   //if (machine.evaluate(keepExpression)==0.0) { // num only returns a num
-  if (machine.evaluate(keepExpression).equals(0.0)) { // num only returns a num
+  GenericType gt=machine.evaluate(keepExpression); // so that verbose works
+  if (verbose) { System.out.printf("  evaluates to %s\n",gt.print()); }
+  if (gt.equals(0.0)) { // num only returns a num
     // read everthing to the end of line
     while (pnt<linelength && !line.substring(pnt,pnt+1).equals("\n")) {
       pnt++;
