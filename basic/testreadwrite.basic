@@ -1,0 +1,9 @@
+5 goto100
+10 open8,8,8,"test4,w"
+20 print#8,"var1"+chr$(13)+"var2"
+30 close8
+100 open8,8,8,"test4,r"
+110 input#8,a$:sr=st:printsr:ifsrthen130
+115 remstop
+120 printa$:goto110
+130 close8

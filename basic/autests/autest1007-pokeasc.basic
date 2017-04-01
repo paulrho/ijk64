@@ -1,0 +1,66 @@
+10 print"(clr)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)";
+20 a1$="@abcdefghijklmnopqrstuvwxyz[\]^`"
+25 a2$=" !"+chr$(34)+"#$%&'()*+,-./0123456789:;<=>?"
+30 a$="(-)ABCDEFGHIJKLMNO"
+40 a$=a$+"PQRSTUVWXYZ(SHIFT-PLUS)(LEFT-CHECK)|(mathpi)(BACK-TRIANGLE)"+chr$(13)+"(SHIFT-SPACE)(CBM-K)(CBM-I)(CBM-T)(CBM-@)(CBM-G)(CBM-PLUS)(CBM-M)(BOT-CHECK)(SHIFT-POUND)"
+45 a$=a$+"(CBM-N)(CBM-Q)(CBM-D)(CBM-Z)(CBM-S)(CBM-P)(CBM-A)(CBM-E)(CBM-R)(CBM-W)(CBM-H)(CBM-J)(CBM-L)(CBM-Y)"
+50 a$=a$+"(CBM-U)(CBM-O)(SHIFT-@)(CBM-F)(CBM-C)(CBM-X)(CBM-V)(CBM-B)"
+90 print"(wht)"a1$
+92 print"(wht)"a2$
+95 print"(wht)"a$
+100 fori=0to255:j=(i/32-int(i/32))*32+int(i/32)*40:poke1024+40+j,i:next:print"(lblu)";
+110 remfori=0to255:printasc(chr$(peek(1024+40+i)));"(left)";:next
+120 fori=0to127:j=(i/32-int(i/32))*32+int(i/32)*40
+125 ifpeek(1024+40+j)<>peek(1024+j+10*40)thenprinti;"(left)";:poke55296+40*10+j,2:poke55296+40+j,7
+130 next
+900 end
+4100 data-spc-,40
+4110 data"@abcdefghijklmnopqrstuvwxyz[\]^`",-spc-,8
+4120 data" !",34,"#$%&'()*+,-./0123456789:;<=>?",-spc-,8
+4130 data64,"ABCDEFGHIJKLMNOPQRSTUVWXYZ",91,92,93,94,95,-spc-,8
+4140 remdata"(SHIFT-SPACE)(CBM-K)(CBM-I)(CBM-T)(CBM-@)(CBM-G)(CBM-PLUS)(CBM-M)(BOT-CHECK)(SHIFT-POUND)(CBM-N)(CBM-Q)(CBM-D)(CBM-Z)(CBM-S)(CBM-P)(CBM-A)(CBM-E)(CBM-R)(CBM-W)(CBM-H)(CBM-J)(CBM-L)(CBM-Y)(CBM-U)(CBM-O)(SHIFT-@)(CBM-F)(CBM-C)(CBM-X)(CBM-V)(CBM-B)",-spc-,8
+4142 data96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,-spc-,8
+4150 data128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144
+4160 data145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,-spc-,8
+4170 data160,161,162,163,164,165,166,167,168,169,170
+4172 data171,172,173,174,175,176,177,178,179,180
+4174 data181,182,183,184,185,186,187,188,189,190
+4176 data191,-spc-,8,192,193,194,195,196,197,198,199,200
+4178 data201,202,203,204,205,206,207,208,209
+4180 data210,211,212,213,214,215,216,217,218,219
+4182 data220,221,222,223,-spc-,8,224,225,226,227,228,229
+4184 data230,231,232,233,234,235,236,237,238,239
+4186 data240,241,242,243,244,245,246,247,248,249
+4188 data250,251,252,253,254,255,-spc-,8
+4200 data-spc-,40
+4210 data"@abcdefghijklmnopqrstuvwxyz[\]^`",-spc-,8
+4220 data" !",34,"#$%&'()*+,-./0123456789:;<=>?",-spc-,8
+4230 data64,"ABCDEFGHIJKLMNOPQRSTUVWXYZ",91,92,93,94,95,-spc-,8
+4242 data96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,-spc-,8
+4990 dataend
+5000 restore:gosub6000
+5010 print
+5020 meta-verbose 2
+5025 list-1
+5030 ifre=1thenprint"testresult=pass good=";n
+5040 ifre<1thenprint"testresult=fail at row=";int(-re/40)+1;"col=";-re-int(-re/40)*40+1
+5060 print"fin"
+5080 meta-verbose 0
+5085 meta-dumpstate
+5090 end
+6000 rem screen check
+6010 n=0:re=1
+6020 readd$:d=val(d$):ifd$="end"then6050
+6025 ifd$="-spc-"thenreadx:gosub6200:n=n-1:goto6038
+6027 ifd$<>"0"andd=0thengosub6300:n=n-1:goto6038
+6030 ifpeek(1024+n)<>dthenre=-n:print"expecting";d;"got";peek(1024+n)
+6038 ifre<1thenreturn
+6040 n=n+1:goto6020
+6050 return
+6200 fori=1tox:ifpeek(1024+n)<>32thenre=-n:return
+6210 n=n+1:next:return
+6300 fori=1tolen(d$):a$=mid$(d$,i,1):d=asc(a$)-64:ifd<0thend=d+64
+6305 ifd>=128andd<=128+26thend=d-64
+6310 ifpeek(1024+n)<>dthenre=-n:print"exp";d;"got";peek(1024+n):return
+6320 n=n+1:next
+6340 return

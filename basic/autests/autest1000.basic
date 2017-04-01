@@ -1,0 +1,34 @@
+1000 print"(clr)";
+1010 print"testxyz"
+1020 remgjsldg
+1900 print"okay"
+1990 end
+4100 data20,5,19,20,x,y,z,-spc-,33:remtestxyz
+4110 data15,11,1,25,-spc-,36:remokay
+4120 data-spc-,40:remblank
+4130 dataready,46,-spc-,34,end:remready.
+5000 restore:gosub6000
+5010 print
+5020 meta-verbose 2
+5025 list-1
+5030 ifre=1thenprint"testresult=pass good=";n
+5040 ifre<1thenprint"testresult=fail at row=";int(-re/40)+1;"col=";-re-int(-re/40)*40+1
+5060 print"fin"
+5080 meta-verbose 0
+5085 meta-dumpstate
+5090 end
+6000 rem screen check
+6010 n=0:re=1
+6020 readd$:d=val(d$):ifd$="end"then6050
+6025 ifd$="-spc-"thenreadx:gosub6200:n=n-1:goto6038
+6027 ifd$<>"0"andd=0thengosub6300:n=n-1:goto6038
+6030 ifpeek(1024+n)<>dthenre=-n:print"expecting";d;"got";peek(1024+n)
+6038 ifre<1thenreturn
+6040 n=n+1:goto6020
+6050 return
+6200 fori=1tox:ifpeek(1024+n)<>32thenre=-n:return
+6210 n=n+1:next:return
+6300 fori=1tolen(d$):a$=mid$(d$,i,1):d=asc(a$)-64:ifd<0thend=d+64
+6310 ifpeek(1024+n)<>dthenre=-n:print"exp";d;"got";peek(1024+n):return
+6320 n=n+1:next
+6340 return

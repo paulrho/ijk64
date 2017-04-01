@@ -1,0 +1,42 @@
+10 print"(clr)";
+100 fori=32to127:printchr$(i);:next
+110 fori=160to255:printchr$(i);:next
+900 end
+4100 data32,33,34,"#$%&'()*+,-./"
+4110 data"0123456789:;<=>?@"
+4120 data"abcdefghijklmnopqrstuvwxyz[\]"
+4130 data30,31,64
+4140 data65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86
+4142 data87,88,89,90
+4150 data91,92,93,94,95,96:rem was 160
+4160 data97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114
+4170 data115,116,117,118,119,120,121,122,123,124,125,126,127
+4180 data64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86
+4182 data87,88,89,90
+4190 data91,92,93,94,95
+4990 dataend
+5000 restore:gosub6000
+5010 print
+5020 meta-verbose 2
+5025 list-1
+5030 ifre=1thenprint"testresult=pass good=";n
+5040 ifre<1thenprint"testresult=fail at row=";int(-re/40)+1;"col=";-re-int(-re/40)*40+1
+5060 print"fin"
+5080 meta-verbose 0
+5085 meta-dumpstate
+5090 end
+6000 rem screen check
+6010 n=0:re=1
+6020 readd$:d=val(d$):ifd$="end"then6050
+6025 ifd$="-spc-"thenreadx:gosub6200:n=n-1:goto6038
+6027 ifd$<>"0"andd=0thengosub6300:n=n-1:goto6038
+6030 ifpeek(1024+n)<>dthenre=-n:print"expecting";d;"got";peek(1024+n)
+6038 ifre<1thenreturn
+6040 n=n+1:goto6020
+6050 return
+6200 fori=1tox:ifpeek(1024+n)<>32thenre=-n:return
+6210 n=n+1:next:return
+6300 fori=1tolen(d$):a$=mid$(d$,i,1):d=asc(a$)-64:ifd<0thend=d+64
+6310 ifpeek(1024+n)<>dthenre=-n:print"exp";d;"got";peek(1024+n):return
+6320 n=n+1:next
+6340 return

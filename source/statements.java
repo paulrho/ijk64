@@ -136,7 +136,7 @@ int MAXTOKENS=100;
 String[] basicTokens={
   "FOR","TO","STEP","NEXT","IF","THEN","GOTO","GOSUB","RETURN","PRINT#","PRINT","ENDFRAME","DIM",
   "GET#5,",
-  "POKE","OPEN","INPUT#1,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST",
+  "POKE","OPEN","INPUT#","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST",
   "META-VERBOSE",
   "SYS","CLR",
   "META-SCALEY","META-ROWS",
@@ -659,7 +659,7 @@ boolean ReadStatement() throws BasicException
       case ST_PRINT: if (ProcessPRINTstatement()) { return true; } break;
       case ST_REM: if (ProcessREMstatement()) { return true; } break;
       case ST_PRINThash: // because it would have gone elsewhere
-        if (ProcessIGNOREstatement()) { return true; } break;
+        if (ProcessPRINThashstatement()) { return true; } break;
       case ST_FAST:  // I wish
         if (ProcessIGNOREstatement()) { return true; } break;
       case ST_RESTORE: 
@@ -760,8 +760,10 @@ boolean ReadStatement() throws BasicException
         if (ProcessSYSstatement()) { return true; } break;
       case ST_POKE:
         if (ProcessPOKEstatement()) { return true; } break;
-      case ST_OPEN: case ST_CLOSE:
-        if (ProcessIGNOREstatement()) { return true; }
+      case ST_OPEN:
+        if (ProcessOPENstatement()) { return true; } break;
+      case ST_CLOSE:
+        if (ProcessCLOSEstatement()) { return true; }
         break;
       case ST_LIST:
         if (ProcessLISTstatement()) { return true; }
@@ -1280,13 +1282,73 @@ boolean ProcessPRINTstatement() throws BasicException
   ReadColon(); // check
   return true;
 }
+boolean ProcessPRINThashstatement() throws BasicException
+{
+  boolean firstexp=true;
+  if (verbose) { System.out.printf("Processing PRINT statement\n"); }
+  ReadExpression();
+  if (verbose) { System.out.printf("MachinePrintEvaluate( %s )\n",keepExpression); }
+  /// if (verbose  ) { System.out.printf("%s",machine.evaluate_partial(keepExpression).print()); }
+  /// machine.print(machine.evaluate_partial(keepExpression).print());
+  // this should probably be nicer
+  int x=0;
+  String separator="";
+  /// while ((x=machine.evaluate_engine.parse_restart)>0) { 
+  do {
+    if (verbose) { System.out.printf("More to evaluate!!!! - should resubmit with the remaining string after %d...\n",machine.evaluate_engine.parse_restart); }
+    // there is more to evaluate
+    String temp=new String(keepExpression);  // do I need to do this?
+    keepExpression=temp.substring(x,temp.length());
+
+    x=0; // now we are at the start of it again
+    while (x<keepExpression.length() && 
+      (keepExpression.substring(x,x+1).equals(";") || keepExpression.substring(x,x+1).equals(",") || keepExpression.substring(x,x+1).equals(" ")))
+      { 
+        if (keepExpression.substring(x,x+1).equals(",")) {
+          //if (verbose) { System.out.printf("Should space out to next position....(Not impl yet)\n"); }
+          separator=","; 
+          if (!firstexp) machine.PrintFile(" "); // for now just a single space
+          else firstexp=false;
+        } else if (keepExpression.substring(x,x+1).equals(";")) {
+          separator=";"; 
+        }
+        x++;
+      } // chew them up // need to include blanks and , too!
+    /// String
+    temp=new String(keepExpression);  // do I need to do this?
+    keepExpression=temp.substring(x,temp.length());
+    if (keepExpression.equals("")) { break; }
+
+    if (verbose) { System.out.printf("should resubmit with the remaining string after %d will do so with:%s\n",machine.evaluate_engine.parse_restart,keepExpression); }
+    if (firstexp) {
+          // if this is the first time here -> we will have the fh first
+     
+      GenericType gt=machine.evaluate_partial(keepExpression);
+       //   if (gt.gttop==1) {
+      System.out.printf("Hash value = %d\n",//(int)gt.num());
+                (int)gt.num());
+      machine.SetFH((int)gt.num());
+      //firstexp=false;
+    } else {
+      machine.PrintFile(machine.evaluate_partial(keepExpression).print());
+    }
+    separator="";
+  } while ((x=machine.evaluate_engine.parse_restart)>0);
+  if (machine.evaluate_engine.stayonline && separator.equals("")) separator=";";
+  if (!separator.equals(";") && !separator.equals(",")) {
+    if (verbose  ) { System.out.printf("\n"); }
+    machine.PrintFile("\n");
+    machine.PrintFileFlush();
+  }
+  ReadColon(); // check
+  return true;
+}
 
 boolean ProcessIFstatement() throws BasicException
 {
   ReadExpression();
   
   if (verbose) { System.out.printf("MachineEvaluate( %s )\n",keepExpression); }
-  if (verbose) { System.out.printf("  evaluates to %s\n",machine.evaluate(keepExpression).print()); }
   //ReadStatementToken(); // note MUST be THEN or GOTO
   // implicetly read already with the ReadExpression
   if (gotToken!=ST_GOTO && gotToken!=ST_THEN) {
@@ -1297,7 +1359,9 @@ boolean ProcessIFstatement() throws BasicException
   // IF the evaluated expression is true (non zero), continue...
   // otherwise read out rest of line and skip to new line
   //if (machine.evaluate(keepExpression)==0.0) { // num only returns a num
-  if (machine.evaluate(keepExpression).equals(0.0)) { // num only returns a num
+  GenericType gt=machine.evaluate(keepExpression); // so that verbose works
+  if (verbose) { System.out.printf("  evaluates to %s\n",gt.print()); }
+  if (gt.equals(0.0)) { // num only returns a num
     // read everthing to the end of line
     while (pnt<linelength && !line.substring(pnt,pnt+1).equals("\n")) {
       pnt++;
@@ -1635,11 +1699,27 @@ boolean ProcessREADstatement() throws BasicException
 // can be used for INPUT and READ
 boolean ProcessINPUTstatement(boolean stayonsameline) throws BasicException
 {
+  int fh=-1;
   ReadExpression();
   // simplistic addition to allow string part of INPUT ["string";] x$, y$, z$...
   // search for semicolon, trim off and print
   //contains
   // read partial, see if ends in semicolon???
+  if (stayonsameline) {
+    // it must be a input#
+    // read out fh
+    GenericType gt=machine.evaluate_partial(keepExpression);
+    int x=machine.evaluate_engine.parse_restart;
+    if(x>=0 && x<keepExpression.length()-1 && keepExpression.substring(x,x+1).equals(",")) {
+      // all good
+      fh=(int)gt.num();
+      if (verbose) { System.out.printf("fh=%d\n",fh); }
+      String temp=keepExpression;
+      keepExpression=temp.substring(x+1,temp.length());
+    } else {
+      throw new BasicException("SYNTAX ERROR NEEDS FH & COMMA");
+    }
+  }
   if (keepExpression.contains(";")) {
         // check if string AND semicolon is next
     String prompt=machine.evaluate_partial(keepExpression).print();
@@ -1662,8 +1742,18 @@ boolean ProcessINPUTstatement(boolean stayonsameline) throws BasicException
 
   if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
   if (!stayonsameline) machine.print("? ");
-
-  String got=machine.getline();
+  String got;
+  if (fh!=1 && fh>=0) { // just for now - say fh=1 is keyboad! later we read this from device
+    if (verbose) { System.out.printf("we are reading a fh=%d\n",fh); }
+    machine.SetFH(fh);
+    got=machine.InputFile(fh);
+    if (got==null) { got=""; }
+  } else {
+    got=machine.getline();
+    if (stayonsameline) {
+      machine.print("(up)");
+    }
+  }
   if (verbose) { System.out.printf("got string \"%s\"\n",got.trim()); }
   // it a string so keep it quoted
   // still need to separate out the answer to multiple strings!
@@ -1673,20 +1763,25 @@ boolean ProcessINPUTstatement(boolean stayonsameline) throws BasicException
   // change all commas to \",\"
   String processedString = stringQuoteStuff(got.trim().toLowerCase());
   machine.assignment(keepExpression.toLowerCase()+"="+processedString);
-  if (stayonsameline) {
-    machine.print("(up)");
-  }
   if (verbose) { machine.dumpstate(); }
   return true;
 }
 
+// fred,jim,sam  ->  "fred","jim","sam"
+// but
+// "fred,jim",sam must give "fred,jim","sam" 
+// also eat up any existing quotes
 String stringQuoteStuff(String arg)
 {
   //take a string and return it as is appart from , surrounded by \",\" and one single \" before and after the string
   String building="";
+  boolean quoted=false;
   for (int p=0; p<arg.length(); ++p) { 
     String a=arg.substring(p,p+1);
-    if (a.equals(",")) {
+    if (a.equals("\"")) {
+      quoted=!quoted;
+      // just chew up the quote!
+    } else if (!quoted && a.equals(",")) { // technically should include ":" and "," and even CR13
       building+="\",\"";
     } else { building+=a; }
   }
@@ -1731,6 +1826,50 @@ boolean ProcessSAVEstatement() throws BasicException
   machine.saveProgram(filename);
   return true;
 }
+//boolean ProcessPRINThashstatementTest() throws BasicException
+//{
+  //ReadExpression();
+  //if (verbose) { machine.dumpstate(); }
+  //GenericType gt=machine.evaluate(keepExpression);
+  //if (gt.gttop==2) {
+     //machine.PrintFile(
+       //(int)gt.gtlist[0].num(),
+       //gt.gtlist[1].str()
+     //);
+     //return true;
+  //} else {
+     //return false;
+  //}
+//}
+boolean ProcessOPENstatement() throws BasicException
+{
+  ReadExpression();
+  if (verbose) { machine.dumpstate(); }
+  GenericType gt=machine.evaluate(keepExpression);
+  if (gt.gttop==4) {
+     machine.OpenFile(
+       (int)gt.gtlist[0].num(),
+       gt.gtlist[3].str()
+     );
+     return true;
+  } else if (gt.gttop==2) {
+     machine.OpenFile(
+       (int)gt.gtlist[0].num(),
+       "KB"
+     );
+     return true;
+  } else {
+     return false;
+  }
+}
+boolean ProcessCLOSEstatement() throws BasicException
+{
+  ReadExpression();
+  GenericType gt=machine.evaluate(keepExpression);
+  machine.CloseFile( (int)gt.num());
+  return true;
+}
+
 boolean ProcessLOADstatement() throws BasicException
 {
   // this will be a bit wierd if actually run from a program itself!

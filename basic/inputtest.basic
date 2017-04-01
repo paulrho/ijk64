@@ -1,0 +1,7 @@
+10 open8,8,8,"test3,r"
+20 input#8,a$,b$
+21 printa$
+22 remprint"b$=";b$
+25 n=n+1:ifn=10thenstop
+27 ifst=0then20
+30 print"[eof]"
