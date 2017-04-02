@@ -1,0 +1,6 @@
+10 remopen8,8,8,"@0:test5,w"
+12 open8,8,8,"test6,r"
+20 print#8,"vaxxxxxr1"+chr$(13)+"var2"
+25 print#8,"vaxxxxxr1"+chr$(13)+"var2"
+27 print#8,"vaxxxxxr1"+chr$(13)+"var2"
+30 close8
