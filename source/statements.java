@@ -1325,7 +1325,7 @@ boolean ProcessPRINThashstatement() throws BasicException
      
       GenericType gt=machine.evaluate_partial(keepExpression);
        //   if (gt.gttop==1) {
-      System.out.printf("Hash value = %d\n",//(int)gt.num());
+      if (verbose) System.out.printf("Hash value = %d\n",//(int)gt.num());
                 (int)gt.num());
       machine.SetFH((int)gt.num());
       //firstexp=false;

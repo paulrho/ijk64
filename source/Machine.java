@@ -989,7 +989,7 @@ public class Machine {
     } catch (Exception e) { System.out.printf("flush exception\n"); }
   }
   void PrintFile(String raw) {
-    System.out.printf("use = %d raw test = %s\n",foff,raw);
+    if (verbose) System.out.printf("use = %d raw test = %s\n",foff,raw);
     try {
     handleHash[foff].output.append(raw);
     } catch (Exception e) { System.out.printf("append exception\n"); }
