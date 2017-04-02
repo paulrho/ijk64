@@ -940,9 +940,10 @@ public class Machine {
        String[] data = param.split(":"); // throw away the num for now
        param=data[1];
      }
-     String[] data = param.split(",");
+     String[] data = param.split(",|\\.");
      if (data.length>1 && data[1].startsWith("s")) { format="seq"; }
-     if (data.length>1 && data[1].startsWith("u")) { format="usr"; }
+     else if (data.length>1 && data[1].startsWith("u")) { format="usr"; }
+     else if (data.length>1) { format=data[1]; }
      String filename=data[0]+"."+format;
      if (data.length>2 && data[2].equals("w")) { type='W'; }
      filename=filename.replace('/','_');

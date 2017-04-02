@@ -1747,7 +1747,7 @@ boolean ProcessINPUTstatement(boolean stayonsameline) throws BasicException
     if (verbose) { System.out.printf("we are reading a fh=%d\n",fh); }
     machine.SetFH(fh);
     got=machine.InputFile(fh);
-    if (got==null) { got=""; }
+    //if (got==null) { got=""; }
   } else {
     got=machine.getline();
     if (stayonsameline) {
@@ -1761,10 +1761,12 @@ boolean ProcessINPUTstatement(boolean stayonsameline) throws BasicException
   // TEST,SECOND
   // "TEST","SECOND"
   // change all commas to \",\"
-  String processedString = stringQuoteStuff(got.trim().toLowerCase());
-  if (verbose) { System.out.printf("assigning to %s\n",keepExpression.toLowerCase()); }
-  machine.assignment_dt(keepExpression.toLowerCase()+"="+processedString);
-  if (verbose) { machine.dumpstate(); }
+  if (got != null) {
+    String processedString = stringQuoteStuff(got.trim().toLowerCase());
+    if (verbose) { System.out.printf("assigning to %s\n",keepExpression.toLowerCase()); }
+    machine.assignment_dt(keepExpression.toLowerCase()+"="+processedString);
+    if (verbose) { machine.dumpstate(); }
+  }
   return true;
 }
 
