@@ -1209,22 +1209,27 @@ class evaluate {
   GenericType interpret_string_partial(String intstring_param) throws EvaluateException {
     partialmatching=true;
     stayonline=false;
-    return interpret_string(intstring_param, false, 0.0, false);
+    return interpret_string(intstring_param, false, 0.0, 0);
   }
 
   GenericType interpret_string_with_assignment(String intstring_param) throws EvaluateException {
     partialmatching=false;
-    return interpret_string(intstring_param, false, 0.0, true);
+    return interpret_string(intstring_param, false, 0.0, 1);
+  }
+
+  GenericType interpret_string_with_assignment_dt(String intstring_param) throws EvaluateException {
+    partialmatching=false;
+    return interpret_string(intstring_param, false, 0.0, 2);
   }
 
   GenericType interpret_string(String intstring_param) throws EvaluateException {
     partialmatching=false;
-    return interpret_string(intstring_param, false, 0.0, false);
+    return interpret_string(intstring_param, false, 0.0, 0);
   }
 
   GenericType interpret_string(String intstring_param, double expecting) throws EvaluateException {
     partialmatching=true; //for now???
-    return interpret_string(intstring_param, true, expecting, false);
+    return interpret_string(intstring_param, true, expecting, 0);
   }
 
 
@@ -1232,13 +1237,14 @@ class evaluate {
   // it also means that the FIRST variable be it array or singleton should NOT be evaluated!
   // note, we could have A(X+5,Y-B=3)=5
   boolean g_is_assignment;
-  GenericType interpret_string(String intstring_param, boolean testing, double expecting, boolean is_assignment) 
+  GenericType interpret_string(String intstring_param, boolean testing, double expecting, int is_assignment) 
     throws EvaluateException
   {
 
     is_defining_function=false;
     parse_restart=(-1); // means no restart required // really could be zero too!
-    g_is_assignment=is_assignment;
+    g_is_assignment=is_assignment>0;
+    inspect_datatype=is_assignment==2;   
     upto=0; // nothing is on the stack, upto points past the end of the current array, at the NEXT point
     doing=D_NUM;
     //stkop[0]=""; // this is a special case where we simple return a value, but have passed in is_assigment=true
@@ -1467,7 +1473,7 @@ boolean dontallowextraclosingbrackets=true; // here for now
       }
 boolean dontallowunbalancedopeningbracket=true; // here for now
       if (dontallowunbalancedopeningbracket && stkop[upto-2].equals(OP_OPEN_BRACKET)) {
-        System.out.printf("?UNBLANANCED BRACKETS - too many open brackets - not closed\n");
+        System.out.printf("?UNBALANCED BRACKETS - too many open brackets - not closed\n");
         throw new EvaluateException("UNBLANANCED BRACKETS - NOT CLOSED");
       }
       calc_and_pop();
@@ -1581,8 +1587,9 @@ boolean dontallowunbalancedopeningbracket=true; // here for now
 ///     return index;
 ///   }
 boolean reads_from_datastream;
+boolean inspect_datatype;
 
-GenericType ReadValue(int stypeindex, int index) {
+GenericType ReadValue(int stypeindex, int index) throws EvaluateException {
   if (reads_from_datastream) {
     // we should NOT return the type in the stack because
     // we didnt set it! actually we set it to a special type
@@ -1611,6 +1618,16 @@ GenericType ReadValue(int stypeindex, int index) {
       }
     }
   } else {
+    boolean dotypecast_tonum=false;
+    if (inspect_datatype) {
+      if (verbose) { System.out.printf("Inspecting datatype\n"); }
+      int end=stkfunc[stypeindex].length()-1;
+      String lastchar=stkfunc[stypeindex].substring(end,end+1);
+      if (!lastchar.equals("$")) {
+        if (verbose) { System.out.printf("  not a string\n"); }
+        dotypecast_tonum=true;
+      }
+    }
     // we return the type that it is in the stack
     // ignore stype passed,:
     int stype=stktype[index]; // i think this was an undected bug! - it was getting given rubbish types, but it seemed to work!
@@ -1620,7 +1637,15 @@ GenericType ReadValue(int stypeindex, int index) {
       return new GenericType(stknum[index]);
     } else {
       if (verbose) { System.out.printf("%s\n",stkstring[index]); }
-      return new GenericType(stkstring[index]);
+      if (dotypecast_tonum) {
+        try {
+          return new GenericType(Double.parseDouble(stkstring[index]));
+        } catch (Exception e) {
+          //return new GenericType(0.0); // should throw an error
+          throw new EvaluateException("not numeric");
+        }
+      } else
+        return new GenericType(stkstring[index]);
     }
   }
 }

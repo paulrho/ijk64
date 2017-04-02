@@ -1,0 +1,9 @@
+10 data1,xxx
+20 reada:print"a=";a
+30 readb:print"b=";b
+40 readc:print"c=";c
+50 stop
+100 rem run 100
+120 reada$:print"a$=";a$
+130 readb$:print"b$=";b$
+140 readc$:print"c$=";c$

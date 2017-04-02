@@ -410,6 +410,16 @@ public class Machine {
       throw new BasicException(ee.getMessage());
     }
   }
+  void assignment_dt(String expression) throws BasicException {
+    try {
+      if (evaluate_engine.interpret_string_with_assignment_dt(expression)!=null)
+        return;// true;
+      else
+        return;// false;
+    } catch (EvaluateException ee) {
+      throw new BasicException(ee.getMessage());
+    }
+  }
 
   //////////////////////////////////
   // GStack : Gosub stack
@@ -586,14 +596,18 @@ public class Machine {
     // and wack it into a big string
   }
   
-  GenericType metareaddatastreamNum()
+  GenericType metareaddatastreamNum() throws EvaluateException
   {
     String str=metareaddatastreamString().str();
-    if (str.equals("")) return new GenericType(0.0);
-    else return new GenericType(Double.parseDouble(str));
+    try {
+      if (str.equals("")) return new GenericType(0.0);
+      else return new GenericType(Double.parseDouble(str));
+    } catch (NumberFormatException e) {
+      throw new EvaluateException("NOT NUMERIC"); // TYPE MISMATCH ?
+    }
   }
   
-  GenericType metareaddatastreamString()
+  GenericType metareaddatastreamString() throws EvaluateException
   {
     // from whatever we happen to be reading (say DATA) return a string
     // added possibility of continuation marks in DATA strings
@@ -601,6 +615,7 @@ public class Machine {
     boolean quoted=false;
     boolean cont=false;
     boolean preamble=true; // chew all spaces until quote
+    if (uptoDATA>=allDATA.length()) throw new EvaluateException("OUT OF DATA");
     for (; uptoDATA<allDATA.length(); ++uptoDATA) {
       String a=allDATA.substring(uptoDATA,uptoDATA+1);
       // this continuation code was a mistake, it was actually implemented in a basic program!
@@ -864,26 +879,38 @@ public class Machine {
     String filename;
     int mode;
     int type;
+    int dev;
     Writer output;
     BufferedReader input;
     FileHandle() { fileno=-1; }; //initialise
-    void newFileHandle(int fh, String filename, char type) {
-      if (true) System.out.printf("new fh = %d\n",topHandle);
-      handleHash[topHandle]=new FileHandle();
-      handleHash[topHandle].fileno=fh;
-      handleHash[topHandle].filename=filename;
-      if (!filename.equals("KB")) {
+    void newFileHandle(int fh, int dev, String filename, char type, boolean overwrite) throws BasicException {
+      if (verbose) System.out.printf("new fh = %d filename=%s dev=%d type=%c overwrite=%s\n",topHandle,filename,dev,type,overwrite?"true":"false");
+      // look for free spot:
+      int hand;
+      for (hand=0; hand<topHandle; ++hand) {
+        if (handleHash[hand].fileno<0) break;
+      }
+      if (verbose) System.out.printf("topHandle=%d hand=%d\n",topHandle,hand);
+      handleHash[hand]=new FileHandle();
+      handleHash[hand].fileno=fh;
+      handleHash[hand].type=type;
+      handleHash[hand].dev=dev;
+      handleHash[hand].filename=filename;
+      //if (!filename.equals("KB")) {
+      if (dev>0) {
         try {
           if (type=='R') {
             if (verbose) { System.out.printf("Read mode\n"); }
-            handleHash[topHandle].input = new BufferedReader(new FileReader( new File(filename)));
+            handleHash[hand].input = new BufferedReader(new FileReader( new File(filename)));
           } else if (type=='W') {
             if (verbose) { System.out.printf("Write mode\n"); }
-            handleHash[topHandle].output = new BufferedWriter(new FileWriter(filename, true));
+            handleHash[hand].output = new BufferedWriter(new FileWriter(filename, !overwrite));
           }
-        } catch (Exception e) { System.out.printf("open exception\n"); }
+        } catch (Exception e) { System.out.printf("open exception\n");
+          throw new BasicException("COULD NOT OPEN");
+        }
       }
-      topHandle++;
+      if (hand==topHandle) topHandle++;
       //handleHash[FileHandle.top].fileno=fh;
     }
     int findHandle(int fh) {
@@ -898,26 +925,56 @@ public class Machine {
   int fileio_ST=0;
   
  // open file
-  void OpenFile(int fh, String param) {
+// format [@][n:]filename[,format[,type]]    (type = 'A
+  void OpenFile(int fh, int dev, String param) throws BasicException {
+     String format="seq";
      char type='R';
-     String[] data = param.split(",");
-     String filename=data[0]+".seq";
-     if (data.length>1 && data[1].equals("w")) { type='W'; }
-     dummyhandleHash.newFileHandle(fh,filename,type);
+     boolean overwrite=false;
+     if (param.startsWith("@")) {
+       overwrite=true;
+       param=param.substring(1);
+       if (verbose) { System.out.printf("overwrite\n"); }
+     }
+     if (param.charAt(1)==':') {
+       if (verbose) { System.out.printf("got 0: format\n"); }
+       String[] data = param.split(":"); // throw away the num for now
+       param=data[1];
+     }
+     String[] data = param.split(",|\\.");
+     if (data.length>1 && data[1].startsWith("s")) { format="seq"; }
+     else if (data.length>1 && data[1].startsWith("u")) { format="usr"; }
+     else if (data.length>1) { format=data[1]; }
+     String filename=data[0]+"."+format;
+     if (data.length>2 && data[2].equals("w")) { type='W'; }
+     filename=filename.replace('/','_');
+     dummyhandleHash.newFileHandle(fh,dev,filename,type,overwrite);
      fileio_ST=0;
   }
+
   void CloseAllFiles() {
     try {
-      for (int i=0; i<topHandle; ++i) if (handleHash[i].fileno>=0) handleHash[i].output.close();
+      for (int i=0; i<topHandle; ++i) 
+        if (handleHash[i].fileno>=0 && handleHash[i].dev>0) 
+          if (handleHash[i].type=='W') 
+            handleHash[i].output.close();
+          else
+            handleHash[i].input.close();
     } catch (Exception e) { System.out.printf("closeall exception\n"); }
     topHandle=0;
   }
  // close file
-  void CloseFile(int fh) {
+  void CloseFile(int fh) throws BasicException {
     foff=dummyhandleHash.findHandle(fh);
     try {
-      handleHash[foff].output.close();
-    } catch (Exception e) { System.out.printf("close exception\n"); }
+      if (handleHash[foff].dev>0) {
+        if (handleHash[foff].type=='W') 
+          handleHash[foff].output.close();
+        else 
+          handleHash[foff].input.close();
+      }
+    } catch (Exception e) { System.out.printf("close exception\n"); 
+        throw new BasicException("FILE NOT OPEN");
+    }
     handleHash[foff].fileno=-1;
     handleHash[foff].output=null;
   }
@@ -933,7 +990,7 @@ public class Machine {
     } catch (Exception e) { System.out.printf("flush exception\n"); }
   }
   void PrintFile(String raw) {
-    System.out.printf("use = %d raw test = %s\n",foff,raw);
+    if (verbose) System.out.printf("use = %d raw test = %s\n",foff,raw);
     try {
     handleHash[foff].output.append(raw);
     } catch (Exception e) { System.out.printf("append exception\n"); }

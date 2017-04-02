@@ -1325,7 +1325,7 @@ boolean ProcessPRINThashstatement() throws BasicException
      
       GenericType gt=machine.evaluate_partial(keepExpression);
        //   if (gt.gttop==1) {
-      System.out.printf("Hash value = %d\n",//(int)gt.num());
+      if (verbose) System.out.printf("Hash value = %d\n",//(int)gt.num());
                 (int)gt.num());
       machine.SetFH((int)gt.num());
       //firstexp=false;
@@ -1747,7 +1747,7 @@ boolean ProcessINPUTstatement(boolean stayonsameline) throws BasicException
     if (verbose) { System.out.printf("we are reading a fh=%d\n",fh); }
     machine.SetFH(fh);
     got=machine.InputFile(fh);
-    if (got==null) { got=""; }
+    //if (got==null) { got=""; }
   } else {
     got=machine.getline();
     if (stayonsameline) {
@@ -1761,9 +1761,12 @@ boolean ProcessINPUTstatement(boolean stayonsameline) throws BasicException
   // TEST,SECOND
   // "TEST","SECOND"
   // change all commas to \",\"
-  String processedString = stringQuoteStuff(got.trim().toLowerCase());
-  machine.assignment(keepExpression.toLowerCase()+"="+processedString);
-  if (verbose) { machine.dumpstate(); }
+  if (got != null) {
+    String processedString = stringQuoteStuff(got.trim().toLowerCase());
+    if (verbose) { System.out.printf("assigning to %s\n",keepExpression.toLowerCase()); }
+    machine.assignment_dt(keepExpression.toLowerCase()+"="+processedString);
+    if (verbose) { machine.dumpstate(); }
+  }
   return true;
 }
 
@@ -1849,12 +1852,14 @@ boolean ProcessOPENstatement() throws BasicException
   if (gt.gttop==4) {
      machine.OpenFile(
        (int)gt.gtlist[0].num(),
+       (int)gt.gtlist[1].num(),
        gt.gtlist[3].str()
      );
      return true;
   } else if (gt.gttop==2) {
      machine.OpenFile(
        (int)gt.gtlist[0].num(),
+       (int)gt.gtlist[1].num(),
        "KB"
      );
      return true;
