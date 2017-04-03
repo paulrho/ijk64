@@ -1,0 +1,3 @@
+EDITOR="/usr/bin/vim" ; export EDITOR
+alias vi='/usr/bin/vim -c ":syn on"'
+
