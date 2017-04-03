@@ -1820,7 +1820,7 @@ boolean ProcessSAVEstatement() throws BasicException
     filename=machine.evaluate(keepExpression).str().toLowerCase();
   }
 
-  machine.print("saving "+filename.toLowerCase()+"...");
+  if (verbose) { machine.print("saving "+filename.toLowerCase()+"..."); }
   if (!filename.matches(".*\\.basic")) {
     filename=filename.toLowerCase()+".basic";
   } else {

@@ -1,6 +1,0 @@
-10 meta-timing
-20 forl=1to100
-30 fori=0to999:poke1024+i,int(rnd(0)*256):next
-40 fori=0to999:poke55296+i,int(rnd(0)*16):next
-50 nextl
-60 meta-timingl

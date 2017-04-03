@@ -1693,17 +1693,18 @@ void ProcessAssignment() throws EvaluateException {
           if (verbose) { System.out.printf("parameters %d\n",parameters); }
           if (parameters==0) {
             // simple setting
+            GenericType rv=ReadValue(stackp,currentvalue++);
             if (using_machine!=null) {
               if (verbose) { 
-                System.out.printf("Wanting to set %s = %s\n",stkfunc[stackp],
-                  ReadValue(stackp,currentvalue).print()
-                );
+                System.out.printf("Wanting to set %s = %s\n",stkfunc[stackp],rv.print());
+                  //ReadValue(stackp,currentvalue).print()
+                //);
               }
-              using_machine.setvariable(stkfunc[stackp].toLowerCase(),ReadValue(stackp,currentvalue++));
+              using_machine.setvariable(stkfunc[stackp].toLowerCase(),rv);
               //using_machine.setvariable(stkfunc[stackp].toLowerCase(),ReadValue(stktype[stackp+1],currentvalue++));
             } else {
               if (verbose) {
-                System.out.printf("stackp=%d Would have set %s to %s\n",stackp,stkfunc[stackp].toLowerCase(),ReadValue(stackp,currentvalue++).print());
+                System.out.printf("stackp=%d Would have set %s to %s\n",stackp,stkfunc[stackp].toLowerCase(),rv.print());
               }
             }
           } else { 

@@ -1,4 +1,0 @@
-10 a$=ti$
-20 ifa$=ti$then20
-30 printti$
-40 goto10
