@@ -605,6 +605,7 @@ void interpret_string(String passed_line, int startat, String lineNo)
         throw new BasicException("SYNTAX ERROR : DID NOT GET STATEMENT");
       }
     } catch (ArrayIndexOutOfBoundsException e) { 
+      e.printStackTrace();
       throw new BasicException("ILLEGAL QUANTITY");
     }
   } // while everything

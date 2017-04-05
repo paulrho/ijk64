@@ -177,16 +177,17 @@ class evaluate {
 
   Random generator = new Random();
 
+  static final int STACKLIMIT = 100;
   evaluate(Machine machine)
   {
     using_machine=machine;
-    stknum=new double[100];
-    stkop=new String[100];
-    stkfunc=new String[100];
+    stknum=new double[STACKLIMIT];
+    stkop=new String[STACKLIMIT];
+    stkfunc=new String[STACKLIMIT];
 
     // to allow typeing
-    stktype=new int[100];
-    stkstring=new String[100];
+    stktype=new int[STACKLIMIT];
+    stkstring=new String[STACKLIMIT];
 
     // all setup ready
   }
@@ -194,13 +195,13 @@ class evaluate {
   evaluate()
   {
     if (false) { System.out.printf("Running evaluate\n"); }
-    stknum=new double[100];
-    stkop=new String[100];
-    stkfunc=new String[100];
+    stknum=new double[STACKLIMIT];
+    stkop=new String[STACKLIMIT];
+    stkfunc=new String[STACKLIMIT];
 
     // to allow typeing
-    stktype=new int[100];
-    stkstring=new String[100];
+    stktype=new int[STACKLIMIT];
+    stkstring=new String[STACKLIMIT];
 
     // all setup ready
   } // end func
@@ -1560,9 +1561,9 @@ boolean dontallowunbalancedopeningbracket=true; // here for now
     // if there are more, add to it
     for (int i=1; i<upto; ++i) {
       if (stktype[i]==ST_NUM) {
-        gt.add(stknum[i]);
+        gt.add(stknum[i],upto);
       } else {
-        gt.add(stkstring[i]);
+        gt.add(stkstring[i],upto);
       }
     }
     return gt;
