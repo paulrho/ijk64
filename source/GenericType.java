@@ -53,10 +53,11 @@ class GenericType {
   }
 
   // here we add to a list
-  void add(double val) {
+  void add(double val, int hint) {
     //add a generic type
    if (gttop==1) {
-     gtlist=new GenericType[50]; // empty types // funny way to do this - watch that this doesnt get blown
+     gtlist=new GenericType[hint]; // empty types // funny way to do this - watch that this doesnt get blown
+                                 // 20170405 - yes it did get blown, for now - make it the same as what we want!
      gtlist[0]=new GenericType(this); // duplicate this generic type and put it on the list
    }
    // add to list
@@ -64,10 +65,10 @@ class GenericType {
    gttop++;
   }
 
-  void add(String thestring) {
+  void add(String thestring, int hint) {
     //add a generic type
    if (gttop==1) {
-     gtlist=new GenericType[50]; // empty types // dont forget this one too!
+     gtlist=new GenericType[hint]; // empty types // dont forget this one too! // see above
      gtlist[0]=new GenericType(this); // duplicate this generic type and put it on the list
    }
    // add to list

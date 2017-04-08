@@ -1161,7 +1161,8 @@ String read_http(String urlstring) throws BasicException {
 	} catch (IOException e)
 	{ 
 	    e.printStackTrace();	// should do real exception handling
-            return false;
+            //return false;
+            throw new BasicException("SAVE ERROR");
 	}
         return true;
     }
