@@ -896,9 +896,11 @@ boolean ReadStatement() throws BasicException
                 (int)gt.gtlist[4].num()
                );
               return true;
-          } 
-        }
-        break;
+          } else
+            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
+
+        } else throw new BasicException("GRAPHICS NOT ACTIVE");
+        //break;
 
       case ST_LSET:
         if (machine.graphicsDevice!=null) {
@@ -911,9 +913,11 @@ boolean ReadStatement() throws BasicException
                 (int)gt.gtlist[1].num()
                );
               return true;
-          } 
-        }
-        break;
+          } else
+            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
+
+        } else throw new BasicException("GRAPHICS NOT ACTIVE");
+        //break;
 
 
       case ST_CIRCLE:
@@ -931,9 +935,10 @@ boolean ReadStatement() throws BasicException
                );
               return true;
           } else
-            throw new BasicException("ILLEGAL QUANTITY ERROR"); // wrong number params
-        }
-        break;
+            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
+
+        } else throw new BasicException("GRAPHICS NOT ACTIVE");
+        //break;
 
       case ST_RECT:
         if (machine.graphicsDevice!=null) {
@@ -965,9 +970,10 @@ boolean ReadStatement() throws BasicException
                );
               return true;
           } else
-            throw new BasicException("ILLEGAL QUANTITY ERROR"); // wrong number params
-        }
-        break;
+            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
+
+        } else throw new BasicException("GRAPHICS NOT ACTIVE");
+        //break;
 
       case ST_GPRINT:
         if (machine.graphicsDevice!=null) {
@@ -984,9 +990,10 @@ boolean ReadStatement() throws BasicException
                );
               return true;
           } else
-            throw new BasicException("ILLEGAL QUANTITY ERROR"); // wrong number params
-        }
-        break;
+            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
+
+        } else throw new BasicException("GRAPHICS NOT ACTIVE");
+        //break;
 
       case ST_FSET:
         if (machine.graphicsDevice!=null) {
@@ -998,9 +1005,11 @@ boolean ReadStatement() throws BasicException
                 (int)gt.gtlist[1].num()
                );
               return true;
-          } 
-        }
-        break;
+          } else
+            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
+
+        } else throw new BasicException("GRAPHICS NOT ACTIVE");
+        //break;
 
       case ST_IMAGELOAD:
         if (machine.graphicsDevice!=null) {
@@ -1014,25 +1023,30 @@ boolean ReadStatement() throws BasicException
                // special case here! so if it works
               machine.assignment("imgno="+imgno);
               return true;
-          } else throw new BasicException("INCORRECT PARAMETERS");
+          } else //throw new BasicException("INCORRECT PARAMETERS");
+            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
 
-        }
-        break;
+        } else throw new BasicException("GRAPHICS NOT ACTIVE");
+        //break;
 
       case ST_IMAGESAVE:
         if (machine.graphicsDevice!=null) {
           ReadExpression();
           GenericType gt=machine.evaluate(keepExpression);
           if (gt.gttop==1) {
-              if (verbose) System.out.printf("load the image to reference\n");
-              machine.graphicsDevice.command_SAVEIMAGE(
-                gt.str()
-               );
+              try { 
+                machine.graphicsDevice.command_SAVEIMAGE(
+                  gt.str()
+                 );
+              } catch (Exception e) {
+                throw new BasicException("IMAGE SAVE ERROR");
+              }
               return true;
-          } else throw new BasicException("INCORRECT PARAMETERS");
+          } else //throw new BasicException("INCORRECT PARAMETERS");
+            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
 
-        }
-        break;
+        } else throw new BasicException("GRAPHICS NOT ACTIVE");
+        //break;
 
       case ST_DRAWIMAGE:
         if (machine.graphicsDevice!=null) {
@@ -1048,13 +1062,11 @@ boolean ReadStatement() throws BasicException
                 (double)gt.gtlist[4].num()
                );
               return true;
-          } else throw new BasicException("INCORRECT PARAMETERS");
-        }
-        break;
+          } else //throw new BasicException("INCORRECT PARAMETERS");
+            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
 
-
-
-
+        } else throw new BasicException("GRAPHICS NOT ACTIVE");
+        //break;
     }
     return false;
 }
