@@ -907,6 +907,9 @@ public class Machine {
             handleHash[hand].output = new BufferedWriter(new FileWriter(filename, !overwrite));
           }
         } catch (Exception e) { System.out.printf("open exception\n");
+	  if (verbose) { e.printStackTrace(); }	// should do real exception handling 
+           handleHash[hand].fileno=-1; // invalidate it!
+           handleHash[hand].output=null; //?
           throw new BasicException("COULD NOT OPEN");
         }
       }
@@ -940,7 +943,12 @@ public class Machine {
        String[] data = param.split(":"); // throw away the num for now
        param=data[1];
      }
-     String[] data = param.split(",|\\.");
+     String[] data;
+     if (/* no commas*/!param.contains(",")) {
+       data = param.split(",|\\.");
+     } else {
+       data = param.split(",");
+     }
      if (data.length>1 && data[1].startsWith("s")) { format="seq"; }
      else if (data.length>1 && data[1].startsWith("u")) { format="usr"; }
      else if (data.length>1) { format=data[1]; }
