@@ -1028,6 +1028,8 @@ public class Machine {
   //String bufLine; 
   //int bufOffset;
 
+  final static boolean INPUT_COLON_SEPARATES=false; // for now - disallow the : sep (which was true 64 emulation) 
+
   GenericType metainputstreamString() throws EvaluateException {
     if (foff<0) throw new EvaluateException("FILE NOT OPEN");
     if (handleHash[foff].bufLine == null) { return new GenericType(""); }
@@ -1050,7 +1052,7 @@ public class Machine {
       char c = handleHash[foff].bufLine.charAt(i);        
       //Process char
       if (c=='\"') quote=!quote;
-      else if (!quote && (c==',' || c==':'&&false)) { i=i+1; break; }  // for now - disallow the : sep (which was true 64 emulation) 
+      else if (!quote && (c==',' || c==':'&& INPUT_COLON_SEPARATES)) { i=i+1; break; } 
       else if (c==13 || c==10) { i=i+1; break; }
       else build=build+c;
     }
