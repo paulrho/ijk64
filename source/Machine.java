@@ -80,6 +80,8 @@ import java.text.SimpleDateFormat; // for DIR
 
 import java.net.*; // for reading from http
 
+import java.util.TimeZone; // for $TISD
+import java.util.Calendar; // for $TISD
 /** Machine modules :
 <PRE>
     +-------------------------
@@ -243,8 +245,20 @@ public class Machine {
           return new GenericType((double)(int)(System.currentTimeMillis()/1000.0));
         } else if (variable.equals("ti")) {
           return new GenericType((double)(int)((System.currentTimeMillis()/16.66666666)%1073741824));
-        } else if (variable.equals("tisec")) 
+        } else if (variable.equals("tisec")) {
           return new GenericType((double)(int)(System.currentTimeMillis()/1000.0));
+        } else if (variable.equals("tisd")) {  // sec.ddd
+            long offset = TimeZone.getDefault().getOffset(Calendar.ZONE_OFFSET);
+            return new GenericType((double)((System.currentTimeMillis()+offset)/1000.0));
+        } else if (variable.equals("titz")) {  // sec.ddd
+            long offset = TimeZone.getDefault().getOffset(Calendar.ZONE_OFFSET);
+            return new GenericType((double)(offset/1000.0));
+        } else if (variable.equals("tidt$")) {  // sec.ddd
+            java.text.SimpleDateFormat localDateFormat = new java.text.SimpleDateFormat("yyyyMMdd");
+            return new GenericType(
+              localDateFormat.format( System.currentTimeMillis())
+          );
+        }
       } else if (variable.equals("st")) {
         //return new GenericType(0.0); // start to use it now
         int st=fileio_ST; fileio_ST=0; // I think we clear on read
