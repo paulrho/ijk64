@@ -227,7 +227,8 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
    
    /* new things for drawing images*/
    int topimage=0;
-   BufferedImage[] imgarray= new BufferedImage[20]; // bad hard code at moment
+   private static final int MAXIMAGE=100;
+   BufferedImage[] imgarray= new BufferedImage[MAXIMAGE]; // bad hard code at moment
    
    public void command_SAVEIMAGE(String filename) {
        save(filename);
@@ -238,7 +239,8 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
        save(filename.substring(1));
        return -1;
      }
-	 if (topimage+1==20) return -1;
+	 //if (topimage+1==20) return -1;
+	 if (topimage+1==MAXIMAGE) topimage=0; // instead, wind it back
      try {
        imgarray[topimage] = ImageIO.read(new File(filename));
      } catch (IOException e) {
@@ -248,6 +250,7 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
    }
 
    public void command_DRAWIMAGE(int imgno, int x, int y, double scale, double rotation) {
+       if (imgno<0) imgno=topimage-1; //display the last one
        AffineTransform tx = AffineTransform.getScaleInstance(scale, scale);
 //       tx.translate(x,y+(double)tby/scale); // was but scales the x,y too
        tx.translate(x/scale,(y+(double)tby)/scale);
