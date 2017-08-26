@@ -1702,7 +1702,7 @@ boolean ProcessREADstatement() throws BasicException
   // here we use the special feature of evaluate
   ReadExpression();
   if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
-  machine.assignment(keepExpression.toLowerCase()+"=metards(1)");
+  machine.assignment(keepExpression.toLowerCase()+"=metaread(1)");
   if (verbose) { machine.dumpstate(); }
   return true;
 }
@@ -1758,8 +1758,10 @@ boolean ProcessINPUTstatement(boolean stayonsameline) throws BasicException
   String got;
   if (fh!=1 && fh>=0) { // just for now - say fh=1 is keyboad! later we read this from device
     if (verbose) { System.out.printf("we are reading a fh=%d\n",fh); }
-    machine.SetFH(fh);
-    got=machine.InputFile(fh);
+    machine.SetFH(fh); // this now becomes more critical, as the stream reader depends on this being set
+    /* old way got=machine.InputFile(fh); */
+    machine.assignment(keepExpression.toLowerCase()+"=metainput(1)");
+    return true;
     //if (got==null) { got=""; }
   } else {
     got=machine.getline();

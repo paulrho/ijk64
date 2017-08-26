@@ -80,6 +80,8 @@ import java.text.SimpleDateFormat; // for DIR
 
 import java.net.*; // for reading from http
 
+import java.util.TimeZone; // for $TISD
+import java.util.Calendar; // for $TISD
 /** Machine modules :
 <PRE>
     +-------------------------
@@ -243,8 +245,20 @@ public class Machine {
           return new GenericType((double)(int)(System.currentTimeMillis()/1000.0));
         } else if (variable.equals("ti")) {
           return new GenericType((double)(int)((System.currentTimeMillis()/16.66666666)%1073741824));
-        } else if (variable.equals("tisec")) 
+        } else if (variable.equals("tisec")) {
           return new GenericType((double)(int)(System.currentTimeMillis()/1000.0));
+        } else if (variable.equals("tisd")) {  // sec.ddd
+            long offset = TimeZone.getDefault().getOffset(Calendar.ZONE_OFFSET);
+            return new GenericType((double)((System.currentTimeMillis()+offset)/1000.0));
+        } else if (variable.equals("titz")) {  // sec.ddd
+            long offset = TimeZone.getDefault().getOffset(Calendar.ZONE_OFFSET);
+            return new GenericType((double)(offset/1000.0));
+        } else if (variable.equals("tidt$")) {  // sec.ddd
+            java.text.SimpleDateFormat localDateFormat = new java.text.SimpleDateFormat("yyyyMMdd");
+            return new GenericType(
+              localDateFormat.format( System.currentTimeMillis())
+          );
+        }
       } else if (variable.equals("st")) {
         //return new GenericType(0.0); // start to use it now
         int st=fileio_ST; fileio_ST=0; // I think we clear on read
@@ -880,6 +894,8 @@ public class Machine {
     int mode;
     int type;
     int dev;
+    String bufLine;
+    int bufOffset;
     Writer output;
     BufferedReader input;
     FileHandle() { fileno=-1; }; //initialise
@@ -902,11 +918,16 @@ public class Machine {
           if (type=='R') {
             if (verbose) { System.out.printf("Read mode\n"); }
             handleHash[hand].input = new BufferedReader(new FileReader( new File(filename)));
+            handleHash[hand].bufLine = "";
+            handleHash[hand].bufOffset = -1;
           } else if (type=='W') {
             if (verbose) { System.out.printf("Write mode\n"); }
             handleHash[hand].output = new BufferedWriter(new FileWriter(filename, !overwrite));
           }
         } catch (Exception e) { System.out.printf("open exception\n");
+	  if (verbose) { e.printStackTrace(); }	// should do real exception handling 
+           handleHash[hand].fileno=-1; // invalidate it!
+           handleHash[hand].output=null; //?
           throw new BasicException("COULD NOT OPEN");
         }
       }
@@ -940,7 +961,12 @@ public class Machine {
        String[] data = param.split(":"); // throw away the num for now
        param=data[1];
      }
-     String[] data = param.split(",|\\.");
+     String[] data;
+     //if (/* no commas*/!param.contains(",")) {
+     data = param.split(",|\\.");
+     if (data.length>3) { // must have too many . so ignore . as separator
+       data = param.split(",");
+     }
      if (data.length>1 && data[1].startsWith("s")) { format="seq"; }
      else if (data.length>1 && data[1].startsWith("u")) { format="usr"; }
      else if (data.length>1) { format=data[1]; }
@@ -1011,6 +1037,52 @@ public class Machine {
       return line;
     } catch (Exception e) { System.out.printf("input exception\n"); }
     return null;
+  }
+
+  //String bufLine; 
+  //int bufOffset;
+
+  final static boolean INPUT_COLON_SEPARATES=false; // for now - disallow the : sep (which was true 64 emulation) 
+
+  GenericType metainputstreamString() throws EvaluateException {
+    if (foff<0) throw new EvaluateException("FILE NOT OPEN");
+    if (handleHash[foff].bufLine == null) { return new GenericType(""); }
+    if (handleHash[foff].bufOffset<0 || handleHash[foff].bufOffset==handleHash[foff].bufLine.length()) { 
+      // read the line in
+      try {
+        if ((handleHash[foff].bufLine=handleHash[foff].input.readLine()) == null) 
+          fileio_ST=64; 
+      } catch (Exception e) { throw new EvaluateException("INPUT ERROR"); }
+      handleHash[foff].bufOffset=0;
+    }
+    // we now have a line queued up -
+    // read a field (which is to : , or CR (or EOL)) but quote masks : and ,
+
+    if (handleHash[foff].bufLine == null) { return new GenericType(""); }
+    String build="";
+    boolean quote=false;
+    int i;
+    for (i = handleHash[foff].bufOffset; i < handleHash[foff].bufLine.length(); i++) {
+      char c = handleHash[foff].bufLine.charAt(i);        
+      //Process char
+      if (c=='\"') quote=!quote;
+      else if (!quote && (c==',' || c==':'&& INPUT_COLON_SEPARATES)) { i=i+1; break; } 
+      else if (c==13 || c==10) { i=i+1; break; }
+      else build=build+c;
+    }
+    handleHash[foff].bufOffset=i;
+    return new GenericType(build);
+  }
+
+  GenericType metainputstreamNum() throws EvaluateException
+  {
+    String str=metainputstreamString().str();
+    try {
+      if (str.equals("")) return new GenericType(0.0);
+      else return new GenericType(Double.parseDouble(str));
+    } catch (NumberFormatException e) {
+      throw new EvaluateException("NOT NUMERIC"); // TYPE MISMATCH ?
+    }
   }
 
 

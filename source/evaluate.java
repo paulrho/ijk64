@@ -144,6 +144,7 @@ class evaluate {
   static final int ST_STRING=1; // new type
   static final int ST_INT=2; // not implemented
   static final int ST_DATASTREAM=5;
+  static final int ST_INPUTSTREAM=6;
   static final int ST_PARAM=10; // the current variables name is in func - there is no actual value
                                 // need to use ST_PARAM and ST_DATASTREAM in debugging output
 
@@ -263,6 +264,7 @@ class evaluate {
       else if (stktype[levelx]==ST_PARAM) havetype="param";
       else if (stktype[levelx]==ST_INT) havetype=" int";
       else if (stktype[levelx]==ST_DATASTREAM) havetype="datast";
+      else if (stktype[levelx]==ST_INPUTSTREAM) havetype="inputs";
       System.out.printf("%-6s|",havetype);
 
       // print op column
@@ -636,10 +638,15 @@ class evaluate {
           stknum[upto-2]=0;
 	    }
         return;
-      } else if (function.equals("metards")) { // meta read data stream
+      } else if (function.equals("metaread")) { // meta read data stream
         // VERY special function to say, we dont read anything else and we also get our values from a machine function
         // dummy setting - but we also set a special flag to indicate this??
         stktype[upto-2]=ST_DATASTREAM;
+        return;
+      } else if (function.equals("metainput")) { // meta read data stream
+        // VERY special function to say, we dont read anything else and we also get our values from a machine function
+        // dummy setting - but we also set a special flag to indicate this??
+        stktype[upto-2]=ST_INPUTSTREAM;
         return;
       } else if (function.equals("str$")) {
         if (parameters==1) {
@@ -1587,11 +1594,11 @@ boolean dontallowunbalancedopeningbracket=true; // here for now
 ///     // how do we know whether to treat it as a string or a number???
 ///     return index;
 ///   }
-boolean reads_from_datastream;
+int reads_from_stream;
 boolean inspect_datatype;
 
 GenericType ReadValue(int stypeindex, int index) throws EvaluateException {
-  if (reads_from_datastream) {
+  if (reads_from_stream>0) {
     // we should NOT return the type in the stack because
     // we didnt set it! actually we set it to a special type
     // if ST_NUM, read it as a num, else read it as a string
@@ -1613,9 +1620,15 @@ GenericType ReadValue(int stypeindex, int index) throws EvaluateException {
     } else {
       if (lastchar.equals("$")) {
         // demanding a GenericType from the machine (we dont care we it gets it from)
-        return using_machine.metareaddatastreamString();
+        if (reads_from_stream==ST_DATASTREAM)
+          return using_machine.metareaddatastreamString();
+        else
+          return using_machine.metainputstreamString();
       } else { 
-        return using_machine.metareaddatastreamNum();
+        if (reads_from_stream==ST_DATASTREAM)
+          return using_machine.metareaddatastreamNum();
+        else
+          return using_machine.metainputstreamNum();
       }
     }
   } else {
@@ -1654,10 +1667,10 @@ GenericType ReadValue(int stypeindex, int index) throws EvaluateException {
 void ProcessAssignment() throws EvaluateException { 
       // try and see if it can be made to go faster for the singleton case
       //verbose=true;
-      reads_from_datastream=false;
-      if (upto>0 && stktype[upto-1]==ST_DATASTREAM) {
+      reads_from_stream=0;
+      if (upto>0 && (stktype[upto-1]==ST_DATASTREAM || stktype[upto-1]==ST_INPUTSTREAM)) {
         if (verbose) { System.out.printf("We need to read from a datastream\n"); }
-        reads_from_datastream=true;
+        reads_from_stream=stktype[upto-1];
       }
       if (verbose) { System.out.printf("Yes, we really have an assignment!\n"); }
       // lets SET the variable, we expect the top of the stack is the num or string, the rest is what we set!
