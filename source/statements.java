@@ -1931,7 +1931,7 @@ boolean ProcessLOADstatement() throws BasicException
     if (filename.startsWith(":")) {
       filename=filename.replaceFirst(":","http://www.futex.com.au/basic/");
     }
-    if (filename.contains("http:")) {
+    if (filename.contains("http")) {
       //filename=filename.toLowerCase()+".txt";
       filename=filename+".txt";
     } else if (!filename.matches(".*\\.basic")) {

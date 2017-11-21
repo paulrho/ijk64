@@ -1487,12 +1487,18 @@ void chewcr() {
           }
           printnewline();
         }
-        if (filename.toLowerCase().contains("http:")) {
+        if (filename.toLowerCase().contains("http")) {
           //if (false) { // want message
             //print("\n");
             //print("searching for "+filename+"\n");
           //}
           programText=read_http(filename);
+	  // just to show the short hand name
+          if(filename.startsWith("http://test.futex.com.au/cloud/c64x")) {
+            filename=filename.replaceFirst("http://test.futex.com.au/cloud/c64x","");
+            filename=filename.replaceFirst(".txt",""); // trim trailing txt
+            filename="%"+filename; // put it back! - but only the short version
+          }
         } else {
           //if (false) { // want message
             //print("\n");
