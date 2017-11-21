@@ -1498,7 +1498,7 @@ void chewcr() {
         machinescreen.load_bgimage(filename);
         return true;
       } else {
-        if (program_modified) {
+        if (reset && program_modified) {
           print("program not saved, continue? ");
           if (!getconfirmation()) {
              print("\n?program not saved"); // took off "[CR]"
