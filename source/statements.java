@@ -861,9 +861,18 @@ boolean ReadStatement() throws BasicException
         return true;
 
       case ST_CHDIR:
-        ReadExpression();
-        machine.doCHDIR(keepExpression);
-        return true;
+	{
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          if (gt.gttop==1 && !gt.isNum() && !gt.str().equals("")) {
+            machine.doCHDIR(gt.str());
+	  } else {
+            //throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
+	    // should print the current dir
+            machine.print(machine.cloudNet+"\n");
+	  }
+          return true;
+	}
       case ST_DIR:
         ReadExpression();
         machine.listDIR(keepExpression.startsWith("-"));
@@ -1903,22 +1912,21 @@ boolean ProcessLOADstatement() throws BasicException
   if (filename.equals("%")) {
     machine.print("\n");
     machine.print("searching for "+filename.toLowerCase()+"\n");
-    //filename=filename.replaceFirst("%","http://www.futex.com.au/basic/dir.php");
-    filename=filename.replaceFirst("%","http://test.futex.com.au/basic/dir.php");
+    filename=filename.replaceFirst("%",machine.cloudNet+"/basic/dir.php");
   } else if (filename.equals("*")) {
     machine.print("\n");
     machine.print("searching for "+filename.toLowerCase()+"\n");
-    filename=filename.replaceFirst("\\*","http://test.futex.com.au/basic/dir.php");
+    filename=filename.replaceFirst("\\*",machine.cloudNet+"/basic/dir.php");
   } else if (filename.startsWith("%")) {
     machine.print("\n");
     machine.print("searching for "+filename.toLowerCase()+"\n");
-    //filename=filename.replaceFirst("%","http://www.futex.com.au/c64x");
-    filename=filename.replaceFirst("%","http://test.futex.com.au/cloud/c64x");
+    filename=filename.replaceFirst("%",machine.cloudNet+"/cloud/c64x");
     filename=filename+".basic.txt";
   } else
   if (filename.matches(".*\\.au")
     || filename.matches(".*\\.wav")
     || filename.matches(".*\\....") // bmp jpg txt etc
+    || filename.matches(".*\\.....") // jpeg
     ) {
     //filename=filename.toLowerCase();
   } else {
@@ -1929,7 +1937,7 @@ boolean ProcessLOADstatement() throws BasicException
     machine.print("searching for "+filename.toLowerCase()+"\n");
     //machine.print("loading "+filename.toLowerCase()+"...");
     if (filename.startsWith(":")) {
-      filename=filename.replaceFirst(":","http://www.futex.com.au/basic/");
+      filename=filename.replaceFirst(":",machine.cloudNet+"/basic/");
     }
     if (filename.contains("http")) {
       //filename=filename.toLowerCase()+".txt";

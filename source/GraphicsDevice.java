@@ -185,7 +185,8 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
    }
 
    public void command_FSET(String fontname, int s) {
-	 fontuse=fontname;
+     if (fontname == null) return; // quiet ignore
+     fontuse=fontname;
      fsize=s;
    }
 
@@ -203,6 +204,7 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 
 	
    public void command_GPRINT(String text, int x, int y, int col) {
+      if (text == null) text=""; // stop bad error if a numeric was passed
       //Font font= new Font ("Monospaced", Font.BOLD, fsize); //maybe keep this global?
       Font font= new Font (fontuse, Font.BOLD, fsize); //maybe keep this global?
       newoffGraphics.setFont(font);
