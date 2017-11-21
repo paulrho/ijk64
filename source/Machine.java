@@ -1469,7 +1469,19 @@ void chewcr() {
 
   }
   
-  boolean loadProgram(String filename) //throws BasicException
+  String fileUnalias(String filename) {
+    if (filename.equals("%")) {
+      filename=filename.replaceFirst("%",cloudNet+"/basic/dir.php");
+    } else if (filename.equals("*")) {
+      filename=filename.replaceFirst("\\*",cloudNet+"/basic/dir.php");
+    } else if (filename.startsWith("%")) {
+      filename=filename.replaceFirst("%",cloudNet+"/cloud/c64x");
+      filename=filename+".basic.txt";
+    }
+    return filename;
+  }
+
+  boolean loadProgram(String filename, boolean reset) //throws BasicException
   {
 
     try {
@@ -1526,12 +1538,15 @@ void chewcr() {
        print("\n?"+basicerror.getMessage().toLowerCase()); // took off "[CR]"
        return false;
     }
-    program_saved_executionpoint=(-1);
-    program_name=filename; // keep a copy of what we loaded
-    machinescreen.setTitle(baseTitle+" - "+program_name); // try this
 
-    program_modified=false;
-    variables_clr();     // didnt do this before!
+    program_name=filename; // keep a copy of what we loaded
+    if (reset) {
+      machinescreen.setTitle(baseTitle+" - "+program_name); // try this
+  
+      program_saved_executionpoint=(-1);
+      program_modified=false;
+      variables_clr();     // didnt do this before!
+    }
     return true;
   }
 
@@ -1597,7 +1612,17 @@ void chewcr() {
     System.out.printf("param was %s\n",newDir);
     System.out.printf("Cloud Net is %s\n",cloudNet);
   }
-  void listDIR(boolean datesort) {
+  void listDIR(String param, boolean datesort) throws BasicException
+  {
+    if (param != null && param.startsWith("%")) {
+      String stashText = programText;
+      String stashProgram_name=program_name;
+      String filename = fileUnalias(param);
+      loadProgram(filename,false);
+      listProgram(-1,-1);
+      programText=stashText;
+      program_name=stashProgram_name;
+    } else {
     File dir = new File(".");
   
     File[] files = dir.listFiles();
@@ -1632,6 +1657,7 @@ void chewcr() {
             }
         }
     //}
+    }
   }
 
   boolean contProgram() throws BasicException // not used now (see below)

@@ -874,9 +874,12 @@ boolean ReadStatement() throws BasicException
           return true;
 	}
       case ST_DIR:
-        ReadExpression();
-        machine.listDIR(keepExpression.startsWith("-"));
-        return true;
+	{
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          machine.listDIR(gt.str(),keepExpression.startsWith("-"));
+          return true;
+	}
       case ST_FILES:
         machine.listFiles();
         return true;
@@ -1909,6 +1912,7 @@ boolean ProcessLOADstatement() throws BasicException
   }
   String filename=machine.evaluate(keepExpression).str();
   // only add basic if it doesnt have it already
+  // consider using fileUnalias
   if (filename.equals("%")) {
     machine.print("\n");
     machine.print("searching for "+filename.toLowerCase()+"\n");
@@ -1947,7 +1951,7 @@ boolean ProcessLOADstatement() throws BasicException
       filename=filename+".basic";
     }
   }
-  machine.loadProgram(filename);
+  machine.loadProgram(filename,true);
   return true;
 }
 boolean ProcessMETACHARSETstatement() throws BasicException
