@@ -1597,11 +1597,11 @@ void chewcr() {
   // &  https
   // && https futex
   void doCHDIR(String newDir) {
-    if (newDir.startsWith("&&")) {
+    if (newDir.startsWith("&")) {
       cloudNet="https://futex.com.au";
-    } else if (newDir.startsWith("&")) {
+    } else if (newDir.startsWith("&&")) {
       cloudNet="https://test.futex.com.au";
-      System.out.printf("setting it param was %s\n",newDir);
+      //System.out.printf("setting it param was %s\n",newDir);
     } else if (newDir.startsWith("%")) {
       cloudNet="http://test.futex.com.au";
     } else if (newDir.startsWith("http")) {
@@ -1609,7 +1609,7 @@ void chewcr() {
     } else {
       System.setProperty("user.dir", newDir);
     }
-    System.out.printf("param was %s\n",newDir);
+    if (verbose) { System.out.printf("param was %s\n",newDir); }
     System.out.printf("Cloud Net is %s\n",cloudNet);
   }
   void listDIR(String param, boolean datesort) throws BasicException
