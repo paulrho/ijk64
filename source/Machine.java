@@ -628,6 +628,7 @@ public class Machine {
   {
     // from whatever we happen to be reading (say DATA) return a string
     // added possibility of continuation marks in DATA strings
+    if (verbose) { System.out.printf("in metareaddatastreamString\n"); }
     String building="";
     boolean quoted=false;
     boolean cont=false;
@@ -1470,7 +1471,9 @@ void chewcr() {
   }
   
   String fileUnalias(String filename) {
-    if (filename.equals("%")) {
+    if (filename.equals("%%")) {
+      filename=filename.replaceFirst("%",cloudNet+"/basic/dirod.php");
+    } else if (filename.equals("%")) {
       filename=filename.replaceFirst("%",cloudNet+"/basic/dir.php");
     } else if (filename.equals("*")) {
       filename=filename.replaceFirst("\\*",cloudNet+"/basic/dir.php");

@@ -189,7 +189,7 @@ class C64 {
     for (int i=0; i<args.length; ++i) 
       if (args[i].length()>=1 && !args[i].substring(0,1).equals("-")) {
         filename=args[i];
-        if (filename.length()>=1) machine.loadProgram(filename); // load it in
+        if (filename.length()>=1) machine.loadProgram(filename,true); // load it in
         if (runImmediate) {
           machine.runProgram(); // we now execute the statements upon a machine
         }

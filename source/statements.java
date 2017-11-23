@@ -1662,6 +1662,12 @@ boolean ProcessLISTstatement() throws BasicException
   from=-1; to=-1;
   ReadExpression();
   if (verbose) { System.out.printf("wanting to list lines: %s\n",keepExpression); }
+  if (keepExpression.startsWith("\"")) {
+    // allow to list "xx" a file
+    GenericType gt=machine.evaluate(keepExpression);
+    machine.listDIR(gt.str(),keepExpression.startsWith("-"));
+    return true;
+  }
   /* split to from to */
   /* nothing:   -1 -1 */
   /* from-:     99 -1 */
@@ -1913,19 +1919,25 @@ boolean ProcessLOADstatement() throws BasicException
   String filename=machine.evaluate(keepExpression).str();
   // only add basic if it doesnt have it already
   // consider using fileUnalias
-  if (filename.equals("%")) {
+  String newfile=machine.fileUnalias(filename);
+  if (!newfile.equals(filename)) {
     machine.print("\n");
     machine.print("searching for "+filename.toLowerCase()+"\n");
-    filename=filename.replaceFirst("%",machine.cloudNet+"/basic/dir.php");
-  } else if (filename.equals("*")) {
-    machine.print("\n");
-    machine.print("searching for "+filename.toLowerCase()+"\n");
-    filename=filename.replaceFirst("\\*",machine.cloudNet+"/basic/dir.php");
-  } else if (filename.startsWith("%")) {
-    machine.print("\n");
-    machine.print("searching for "+filename.toLowerCase()+"\n");
-    filename=filename.replaceFirst("%",machine.cloudNet+"/cloud/c64x");
-    filename=filename+".basic.txt";
+    filename=newfile;
+
+//  if (filename.equals("%")) {
+//    machine.print("\n");
+//    machine.print("searching for "+filename.toLowerCase()+"\n");
+//    filename=filename.replaceFirst("%",machine.cloudNet+"/basic/dir.php");
+//  } else if (filename.equals("*")) {
+//    machine.print("\n");
+//    machine.print("searching for "+filename.toLowerCase()+"\n");
+//    filename=filename.replaceFirst("\\*",machine.cloudNet+"/basic/dir.php");
+//  } else if (filename.startsWith("%")) {
+//    machine.print("\n");
+//    machine.print("searching for "+filename.toLowerCase()+"\n");
+//    filename=filename.replaceFirst("%",machine.cloudNet+"/cloud/c64x");
+//    filename=filename+".basic.txt";
   } else
   if (filename.matches(".*\\.au")
     || filename.matches(".*\\.wav")
