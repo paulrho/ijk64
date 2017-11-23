@@ -1477,6 +1477,13 @@ void chewcr() {
       filename=filename.replaceFirst("%",cloudNet+"/basic/dir.php");
     } else if (filename.equals("*")) {
       filename=filename.replaceFirst("\\*",cloudNet+"/basic/dir.php");
+    } else if (filename.startsWith("%") &&
+       (   filename.toLowerCase().endsWith(".png")
+          || filename.toLowerCase().endsWith(".jpg")
+          || filename.toLowerCase().endsWith(".jpeg")
+	  || filename.toLowerCase().endsWith(".bmp") 
+        )) {
+      filename=filename.replaceFirst("%",cloudNet+"/cloudimages/");
     } else if (filename.startsWith("%")) {
       filename=filename.replaceFirst("%",cloudNet+"/cloud/c64x");
       filename=filename+".basic.txt";
@@ -1498,7 +1505,7 @@ void chewcr() {
           || filename.toLowerCase().endsWith(".jpeg")
 	  || filename.toLowerCase().endsWith(".bmp") 
         ) {
-        machinescreen.load_bgimage(filename);
+        machinescreen.load_bgimage(fileUnalias(filename));
         return true;
       } else {
         if (reset && program_modified) {
@@ -1516,6 +1523,7 @@ void chewcr() {
             //print("\n");
             //print("searching for "+filename+"\n");
           //}
+          filename=filename.replace("..","X"); // safety - no http should have a .. in it
           programText=read_http(filename);
 	  // just to show the short hand name
           if(filename.startsWith(cloudNet+"/cloud/c64x")) {
@@ -1561,6 +1569,7 @@ void chewcr() {
         filename=filename.replaceFirst("%","");
         filename=filename.replaceFirst(cloudNet+"/cloud/c64x","");
         filename=filename.replaceFirst(".basic.txt",""); // trim trailing txt
+        filename=filename.replace("..","X"); // safety - no http should have a .. in it
         ret=post_http(filename);
         filename="%"+filename; // put it back! - but only the short version
       } else {
