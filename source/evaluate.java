@@ -1598,7 +1598,9 @@ int reads_from_stream;
 boolean inspect_datatype;
 
 GenericType ReadValue(int stypeindex, int index) throws EvaluateException {
+if (verbose) { System.out.printf("in 000\n"); }
   if (reads_from_stream>0) {
+if (verbose) { System.out.printf("in 001\n"); }
     // we should NOT return the type in the stack because
     // we didnt set it! actually we set it to a special type
     // if ST_NUM, read it as a num, else read it as a string
@@ -1618,7 +1620,9 @@ GenericType ReadValue(int stypeindex, int index) throws EvaluateException {
         return new GenericType(10.5); // test only
       }
     } else {
+if (verbose) { System.out.printf("in 002\n"); }
       if (lastchar.equals("$")) {
+if (verbose) { System.out.printf("in 003\n"); }
         // demanding a GenericType from the machine (we dont care we it gets it from)
         if (reads_from_stream==ST_DATASTREAM)
           return using_machine.metareaddatastreamString();

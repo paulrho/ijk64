@@ -186,6 +186,9 @@ public class Machine {
       Empty GStack
       Empty DCache
   **/
+
+  String cloudNet="http://test.futex.com.au"; // /cloud /basic
+
   void clearMachineState() {
     toplinecache=0; // optimisation only & goto/gosub lookup & findcurrentline
     toplabcache=0;
@@ -625,6 +628,7 @@ public class Machine {
   {
     // from whatever we happen to be reading (say DATA) return a string
     // added possibility of continuation marks in DATA strings
+    if (verbose) { System.out.printf("in metareaddatastreamString\n"); }
     String building="";
     boolean quoted=false;
     boolean cont=false;
@@ -1161,6 +1165,9 @@ String read_http(String urlstring) throws BasicException {
       in.close();
         //}
     
+    } catch (javax.net.ssl.SSLHandshakeException e) { 
+      System.out.println(e);
+      throw new BasicException("CERTIFICATE ERROR");
     } catch (Exception e) { 
       System.out.println(e);
       throw new BasicException("FILE NOT FOUND 404");
@@ -1197,8 +1204,7 @@ String read_http(String urlstring) throws BasicException {
 
         String charset = "UTF-8"; 
         //String url = "http://localhost/test2.php";
-        //String url = "http://www.futex.com.au/basic/uploader.php";
-        String url = "http://test.futex.com.au/basic/uploader.php";
+        String url = cloudNet+"/basic/uploader.php";
         try {
           String boundary = Long.toHexString(System.currentTimeMillis()); // Just generate some unique random value.
 
@@ -1464,7 +1470,28 @@ void chewcr() {
 
   }
   
-  boolean loadProgram(String filename) //throws BasicException
+  String fileUnalias(String filename) {
+    if (filename.equals("%%")) {
+      filename=filename.replaceFirst("%",cloudNet+"/basic/dirod.php");
+    } else if (filename.equals("%")) {
+      filename=filename.replaceFirst("%",cloudNet+"/basic/dir.php");
+    } else if (filename.equals("*")) {
+      filename=filename.replaceFirst("\\*",cloudNet+"/basic/dir.php");
+    } else if (filename.startsWith("%") &&
+       (   filename.toLowerCase().endsWith(".png")
+          || filename.toLowerCase().endsWith(".jpg")
+          || filename.toLowerCase().endsWith(".jpeg")
+	  || filename.toLowerCase().endsWith(".bmp") 
+        )) {
+      filename=filename.replaceFirst("%",cloudNet+"/cloudimages/");
+    } else if (filename.startsWith("%")) {
+      filename=filename.replaceFirst("%",cloudNet+"/cloud/c64x");
+      filename=filename+".basic.txt";
+    }
+    return filename;
+  }
+
+  boolean loadProgram(String filename, boolean reset) //throws BasicException
   {
 
     try {
@@ -1473,11 +1500,15 @@ void chewcr() {
         PlaySound sound = new PlaySound(filename);
         return true;
       } else
-      if (filename.toLowerCase().endsWith(".png") || filename.toLowerCase().endsWith(".jpg") || filename.toLowerCase().endsWith(".bmp")) {
-        machinescreen.load_bgimage(filename);
+      if (   filename.toLowerCase().endsWith(".png")
+          || filename.toLowerCase().endsWith(".jpg")
+          || filename.toLowerCase().endsWith(".jpeg")
+	  || filename.toLowerCase().endsWith(".bmp") 
+        ) {
+        machinescreen.load_bgimage(fileUnalias(filename));
         return true;
       } else {
-        if (program_modified) {
+        if (reset && program_modified) {
           print("program not saved, continue? ");
           if (!getconfirmation()) {
              print("\n?program not saved"); // took off "[CR]"
@@ -1487,12 +1518,19 @@ void chewcr() {
           }
           printnewline();
         }
-        if (filename.toLowerCase().contains("http:")) {
+        if (filename.toLowerCase().contains("http")) {
           //if (false) { // want message
             //print("\n");
             //print("searching for "+filename+"\n");
           //}
+          filename=filename.replace("..","X"); // safety - no http should have a .. in it
           programText=read_http(filename);
+	  // just to show the short hand name
+          if(filename.startsWith(cloudNet+"/cloud/c64x")) {
+            filename=filename.replaceFirst(cloudNet+"/cloud/c64x","");
+            filename=filename.replaceFirst(".txt",""); // trim trailing txt
+            filename="%"+filename; // put it back! - but only the short version
+          }
         } else {
           //if (false) { // want message
             //print("\n");
@@ -1511,12 +1549,15 @@ void chewcr() {
        print("\n?"+basicerror.getMessage().toLowerCase()); // took off "[CR]"
        return false;
     }
-    program_saved_executionpoint=(-1);
-    program_name=filename; // keep a copy of what we loaded
-    machinescreen.setTitle(baseTitle+" - "+program_name); // try this
 
-    program_modified=false;
-    variables_clr();     // didnt do this before!
+    program_name=filename; // keep a copy of what we loaded
+    if (reset) {
+      machinescreen.setTitle(baseTitle+" - "+program_name); // try this
+  
+      program_saved_executionpoint=(-1);
+      program_modified=false;
+      variables_clr();     // didnt do this before!
+    }
     return true;
   }
 
@@ -1524,10 +1565,11 @@ void chewcr() {
   {
     boolean ret;
     try {
-      if(filename.startsWith("%") || filename.startsWith("http://test.futex.com.au/cloud/c64x")) {
+      if(filename.startsWith("%") || filename.startsWith(cloudNet+"/cloud/c64x")) {
         filename=filename.replaceFirst("%","");
-        filename=filename.replaceFirst("http://test.futex.com.au/cloud/c64x","");
+        filename=filename.replaceFirst(cloudNet+"/cloud/c64x","");
         filename=filename.replaceFirst(".basic.txt",""); // trim trailing txt
+        filename=filename.replace("..","X"); // safety - no http should have a .. in it
         ret=post_http(filename);
         filename="%"+filename; // put it back! - but only the short version
       } else {
@@ -1561,10 +1603,38 @@ void chewcr() {
         }
     }
   }
+
+
+  // %  reset to http test
+  // &  https
+  // && https futex
   void doCHDIR(String newDir) {
-    System.setProperty("user.dir", newDir);
+    if (newDir.startsWith("&")) {
+      cloudNet="https://futex.com.au";
+    } else if (newDir.startsWith("&&")) {
+      cloudNet="https://test.futex.com.au";
+      //System.out.printf("setting it param was %s\n",newDir);
+    } else if (newDir.startsWith("%")) {
+      cloudNet="http://test.futex.com.au";
+    } else if (newDir.startsWith("http")) {
+      cloudNet=newDir;
+    } else {
+      System.setProperty("user.dir", newDir);
+    }
+    if (verbose) { System.out.printf("param was %s\n",newDir); }
+    System.out.printf("Cloud Net is %s\n",cloudNet);
   }
-  void listDIR(boolean datesort) {
+  void listDIR(String param, boolean datesort) throws BasicException
+  {
+    if (param != null && param.startsWith("%")) {
+      String stashText = programText;
+      String stashProgram_name=program_name;
+      String filename = fileUnalias(param);
+      loadProgram(filename,false);
+      listProgram(-1,-1);
+      programText=stashText;
+      program_name=stashProgram_name;
+    } else {
     File dir = new File(".");
   
     File[] files = dir.listFiles();
@@ -1599,6 +1669,7 @@ void chewcr() {
             }
         }
     //}
+    }
   }
 
   boolean contProgram() throws BasicException // not used now (see below)

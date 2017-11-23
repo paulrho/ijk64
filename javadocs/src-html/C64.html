@@ -197,7 +197,7 @@
 <span class="sourceLineNo">189</span>    for (int i=0; i&lt;args.length; ++i) <a name="line.189"></a>
 <span class="sourceLineNo">190</span>      if (args[i].length()&gt;=1 &amp;&amp; !args[i].substring(0,1).equals("-")) {<a name="line.190"></a>
 <span class="sourceLineNo">191</span>        filename=args[i];<a name="line.191"></a>
-<span class="sourceLineNo">192</span>        if (filename.length()&gt;=1) machine.loadProgram(filename); // load it in<a name="line.192"></a>
+<span class="sourceLineNo">192</span>        if (filename.length()&gt;=1) machine.loadProgram(filename,true); // load it in<a name="line.192"></a>
 <span class="sourceLineNo">193</span>        if (runImmediate) {<a name="line.193"></a>
 <span class="sourceLineNo">194</span>          machine.runProgram(); // we now execute the statements upon a machine<a name="line.194"></a>
 <span class="sourceLineNo">195</span>        }<a name="line.195"></a>
