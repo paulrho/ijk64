@@ -861,13 +861,25 @@ boolean ReadStatement() throws BasicException
         return true;
 
       case ST_CHDIR:
-        ReadExpression();
-        machine.doCHDIR(keepExpression);
-        return true;
+	{
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          if (gt.gttop==1 && !gt.isNum() && !gt.str().equals("")) {
+            machine.doCHDIR(gt.str());
+	  } else {
+            //throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
+	    // should print the current dir
+            machine.print(machine.cloudNet+"\n");
+	  }
+          return true;
+	}
       case ST_DIR:
-        ReadExpression();
-        machine.listDIR(keepExpression.startsWith("-"));
-        return true;
+	{
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          machine.listDIR(gt.str(),keepExpression.startsWith("-"));
+          return true;
+	}
       case ST_FILES:
         machine.listFiles();
         return true;
@@ -1650,6 +1662,12 @@ boolean ProcessLISTstatement() throws BasicException
   from=-1; to=-1;
   ReadExpression();
   if (verbose) { System.out.printf("wanting to list lines: %s\n",keepExpression); }
+  if (keepExpression.startsWith("\"")) {
+    // allow to list "xx" a file
+    GenericType gt=machine.evaluate(keepExpression);
+    machine.listDIR(gt.str(),keepExpression.startsWith("-"));
+    return true;
+  }
   /* split to from to */
   /* nothing:   -1 -1 */
   /* from-:     99 -1 */
@@ -1900,25 +1918,31 @@ boolean ProcessLOADstatement() throws BasicException
   }
   String filename=machine.evaluate(keepExpression).str();
   // only add basic if it doesnt have it already
-  if (filename.equals("%")) {
+  // consider using fileUnalias
+  String newfile=machine.fileUnalias(filename);
+  if (!newfile.equals(filename)) {
     machine.print("\n");
     machine.print("searching for "+filename.toLowerCase()+"\n");
-    //filename=filename.replaceFirst("%","http://www.futex.com.au/basic/dir.php");
-    filename=filename.replaceFirst("%","http://test.futex.com.au/basic/dir.php");
-  } else if (filename.equals("*")) {
-    machine.print("\n");
-    machine.print("searching for "+filename.toLowerCase()+"\n");
-    filename=filename.replaceFirst("\\*","http://test.futex.com.au/basic/dir.php");
-  } else if (filename.startsWith("%")) {
-    machine.print("\n");
-    machine.print("searching for "+filename.toLowerCase()+"\n");
-    //filename=filename.replaceFirst("%","http://www.futex.com.au/c64x");
-    filename=filename.replaceFirst("%","http://test.futex.com.au/cloud/c64x");
-    filename=filename+".basic.txt";
+    filename=newfile;
+
+//  if (filename.equals("%")) {
+//    machine.print("\n");
+//    machine.print("searching for "+filename.toLowerCase()+"\n");
+//    filename=filename.replaceFirst("%",machine.cloudNet+"/basic/dir.php");
+//  } else if (filename.equals("*")) {
+//    machine.print("\n");
+//    machine.print("searching for "+filename.toLowerCase()+"\n");
+//    filename=filename.replaceFirst("\\*",machine.cloudNet+"/basic/dir.php");
+//  } else if (filename.startsWith("%")) {
+//    machine.print("\n");
+//    machine.print("searching for "+filename.toLowerCase()+"\n");
+//    filename=filename.replaceFirst("%",machine.cloudNet+"/cloud/c64x");
+//    filename=filename+".basic.txt";
   } else
   if (filename.matches(".*\\.au")
     || filename.matches(".*\\.wav")
     || filename.matches(".*\\....") // bmp jpg txt etc
+    || filename.matches(".*\\.....") // jpeg
     ) {
     //filename=filename.toLowerCase();
   } else {
@@ -1929,9 +1953,9 @@ boolean ProcessLOADstatement() throws BasicException
     machine.print("searching for "+filename.toLowerCase()+"\n");
     //machine.print("loading "+filename.toLowerCase()+"...");
     if (filename.startsWith(":")) {
-      filename=filename.replaceFirst(":","http://www.futex.com.au/basic/");
+      filename=filename.replaceFirst(":",machine.cloudNet+"/basic/");
     }
-    if (filename.contains("http:")) {
+    if (filename.contains("http")) {
       //filename=filename.toLowerCase()+".txt";
       filename=filename+".txt";
     } else if (!filename.matches(".*\\.basic")) {
@@ -1939,7 +1963,7 @@ boolean ProcessLOADstatement() throws BasicException
       filename=filename+".basic";
     }
   }
-  machine.loadProgram(filename);
+  machine.loadProgram(filename,true);
   return true;
 }
 boolean ProcessMETACHARSETstatement() throws BasicException

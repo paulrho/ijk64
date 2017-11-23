@@ -690,6 +690,7 @@ boolean hasFocus=false;
 
 ///////////////////////////////////////////
   
+  int currentcharset=0;
   public void changeCharSet(int charset) {
     Toolkit kit = Toolkit.getDefaultToolkit();
     if (charset == 0) {
@@ -697,11 +698,13 @@ boolean hasFocus=false;
       charsetUpp2 = kit.getImage(C64Screen.class.getResource("images/c64_upp_2.gif"));
       charsetUpp2x1 = kit.getImage(C64Screen.class.getResource("images/c64_upp_2x1.gif"));
       charsetUpp3 = kit.getImage(C64Screen.class.getResource("images/c64_upp_3.gif"));
+      currentcharset=0;
     } else {
       charsetUpp = kit.getImage(C64Screen.class.getResource("images/c64_low.gif"));
       charsetUpp2 = kit.getImage(C64Screen.class.getResource("images/c64_low_2.gif"));
       charsetUpp2x1 = kit.getImage(C64Screen.class.getResource("images/c64_low_2x1.gif"));
       charsetUpp3 = kit.getImage(C64Screen.class.getResource("images/c64_low_3.gif"));
+      currentcharset=1;
     }
     initcolour();
     drawchar_init();
@@ -713,13 +716,23 @@ boolean hasFocus=false;
 //------------------------------
 
   public void load_bgimage(String filename) throws BasicException {
+
     if (bgtrans_ability) {
 
       filename=filename.replace(".basic","");
+      filename=filename.replace(".txt","");
       System.out.printf("About to read %s\n",filename);
       try {
-        bgImage = ImageIO.read(new File(filename));
+        //bgImage = ImageIO.read(new File(filename));
+	if (filename.startsWith("http")) {
+	  URL url = new URL(filename);
+          bgImage = ImageIO.read(url.openStream());
+	} else {
+          bgImage = ImageIO.read(new File(filename));
+        }
+
       } catch (IOException e) {
+        System.out.println(e);
         throw new BasicException("BGIMAGE FILE NOT FOUND");
       }
     
@@ -2405,6 +2418,10 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
     if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
       ctrldown = true;
     }
+    if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
+      if (altdown && ctrldown) { changeCharSet(1-currentcharset); }
+    }
+
 
     switch (e.getKeyCode()) {
       case KeyEvent.VK_UP:        addkey2buf(PETSCII_UP);        return;
