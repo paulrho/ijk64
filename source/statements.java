@@ -1069,7 +1069,7 @@ boolean ReadStatement() throws BasicException
           if (gt.gttop==1) {
               if (verbose) System.out.printf("load the image to reference\n");
               int imgno=machine.graphicsDevice.command_LOADIMAGE(
-                gt.str()
+                machine.fileUnalias(gt.str())
                );
                // special case here! so if it works
               machine.assignment("imgno="+imgno);

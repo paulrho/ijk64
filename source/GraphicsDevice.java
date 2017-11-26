@@ -17,6 +17,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.*;
 import java.awt.geom.*;
 
+import java.net.*; // for reading from http
+
 public class GraphicsDevice extends JFrame implements MouseListener, MouseMotionListener {
 
   Image newoffImage;
@@ -316,7 +318,12 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 	 //if (topimage+1==20) return -1;
 	 if (topimage+1==MAXIMAGE) topimage=0; // instead, wind it back
      try {
-       imgarray[topimage] = ImageIO.read(new File(filename));
+       if (filename.startsWith("http")) {
+	  URL url = new URL(filename);
+         imgarray[topimage] = ImageIO.read(url.openStream());
+       } else {
+         imgarray[topimage] = ImageIO.read(new File(filename));
+       }
      } catch (IOException e) {
 		 return -1;
      }

@@ -1077,7 +1077,7 @@
 <span class="sourceLineNo">1069</span>          if (gt.gttop==1) {<a name="line.1069"></a>
 <span class="sourceLineNo">1070</span>              if (verbose) System.out.printf("load the image to reference\n");<a name="line.1070"></a>
 <span class="sourceLineNo">1071</span>              int imgno=machine.graphicsDevice.command_LOADIMAGE(<a name="line.1071"></a>
-<span class="sourceLineNo">1072</span>                gt.str()<a name="line.1072"></a>
+<span class="sourceLineNo">1072</span>                machine.fileUnalias(gt.str())<a name="line.1072"></a>
 <span class="sourceLineNo">1073</span>               );<a name="line.1073"></a>
 <span class="sourceLineNo">1074</span>               // special case here! so if it works<a name="line.1074"></a>
 <span class="sourceLineNo">1075</span>              machine.assignment("imgno="+imgno);<a name="line.1075"></a>
