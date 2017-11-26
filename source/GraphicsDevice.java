@@ -22,6 +22,9 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
   Image newoffImage;
   Graphics2D newoffGraphics;
 
+  Image[] newoffImageB = new Image[2];
+  Graphics2D[] newoffGraphicsB=new Graphics2D[2];
+
   Random generator = new Random();
 
 //  int sizex=1000; 
@@ -32,6 +35,9 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
   int sizex=default_sizex;   
   int sizey=default_sizey;
   
+  boolean blitting=true;
+  int blit=0;
+  int paintblit=0;
    
   public GraphicsDevice(int x, int y) {
     super("ijk64 graphics");
@@ -49,10 +55,22 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
     setVisible(true); // start AWT painting.
     addMouseListener(this);
     addMouseMotionListener(this);
-	newoffImage = createImage(sizex,sizey);
-	//newoffImage = createVolatileImage(sizex,sizey);
-	newoffGraphics = (Graphics2D) newoffImage.getGraphics();
-    if (true) newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        if (blitting) {
+	  newoffImageB[0] = createImage(sizex,sizey);
+	  newoffImageB[1] = createImage(sizex,sizey);
+	  newoffGraphicsB[0] = (Graphics2D) newoffImageB[0].getGraphics();
+	  newoffGraphicsB[1] = (Graphics2D) newoffImageB[1].getGraphics();
+          if (blitting) { 
+	     blit++; if (blit>1) blit=0; 
+	     newoffGraphics = newoffGraphicsB[blit];
+             paintblit=blit;
+          }
+	} else {
+	  newoffImage = createImage(sizex,sizey);
+	  //newoffImage = createVolatileImage(sizex,sizey);
+	  newoffGraphics = (Graphics2D) newoffImage.getGraphics();
+	}
+        command_ANTIALIAS(1);
 
   }
 
@@ -89,7 +107,7 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
     fsize=16;
     topimage=0; //reset this back
     circleCentered=true; // reset this too
-    if (true) newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // also reset this
+    command_ANTIALIAS(1);
   }
   public void resetDevice() {
     resetDevice(default_sizex,default_sizey-tby);
@@ -135,11 +153,14 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
    /* COMMANDS */
    /************/
    
-   public void command_BEGINFRAME() {
+   // do I need this
+   public synchronized void command_BEGINFRAME() {
+     paintblit=blit; // necessary
      inframe=true;
    }
 
    public void command_ENDFRAME() {
+     paintblit=blit;
      inframe=false;
      doupdate();   
    }
@@ -153,6 +174,10 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
    }
 
    public synchronized void command_CLS() { /* try this */
+     if (blitting && inframe && paintblit==blit) { 
+	     blit++; if (blit>1) blit=0; 
+	     newoffGraphics = newoffGraphicsB[blit];
+     }
      newoffGraphics.setColor(Color.WHITE);
      newoffGraphics.fillRect(0, 0, sizex,sizey+tby);	   
      //newoffGraphics.clearRect(0, 0, sizex,sizey+tby);	   
@@ -220,10 +245,21 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
    }
 
    public void command_ANTIALIAS(int aa) {
-       if (aa==0)  
+    if (blitting) {
+       if (aa==0)  {
+          newoffGraphicsB[0].setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+          newoffGraphicsB[1].setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+       } else {
+          newoffGraphicsB[0].setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+          newoffGraphicsB[1].setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+       }
+    } else {
+       if (aa==0)  {
          newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-       else
+       } else {
          newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+       }
+    }
    }
 
    public void command_LSET(int w, int c) {
@@ -388,8 +424,16 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
     Graphics2D g2d = (Graphics2D) g;
 
 
-    if(!inframe)
+    if(blitting) {
+      //if(!inframe)
+          //g2d.drawImage(newoffImageB[1-blit], 0, 0, this);
+      //else
+       if (!inframe || paintblit!=blit)
+          g2d.drawImage(newoffImageB[paintblit], 0, 0, this);
+    } else {
+      if(!inframe)
           g2d.drawImage(newoffImage, 0, 0, this);
+    }
 
   }
 
