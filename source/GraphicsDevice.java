@@ -50,8 +50,14 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
     addMouseListener(this);
     addMouseMotionListener(this);
 	newoffImage = createImage(sizex,sizey);
+	//newoffImage = createVolatileImage(sizex,sizey);
 	newoffGraphics = (Graphics2D) newoffImage.getGraphics();
     if (true) newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+  }
+
+  void redirectkeys(C64Screen screen) {
+    addKeyListener(screen);       // for listening to key strokes
   }
       
   void save(String filename) {
@@ -82,6 +88,8 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
     command_ENDFRAME();
     fsize=16;
     topimage=0; //reset this back
+    circleCentered=true; // reset this too
+    if (true) newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // also reset this
   }
   public void resetDevice() {
     resetDevice(default_sizex,default_sizey-tby);
@@ -151,12 +159,27 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
      if (!inframe) doupdate();
    }
          
+   boolean circleCentered=true;
+
+   public void command_CIRCLE_CONTROL(int control) {
+     if (control==1) { circleCentered=true; }
+     else { circleCentered=false; }
+   }
+
    public void command_CIRCLE(int x1, int y1, int r, int col, int fill) {
      newoffGraphics.setColor(colorindex[col]);
-     if (fill!=0) {
-       newoffGraphics.fillOval(x1,y1+tby,r,r);
+     if (circleCentered) {
+       if (fill!=0) {
+         newoffGraphics.fillOval(x1-r/2,y1+tby-r/2,r,r);
+       } else {
+         newoffGraphics.drawOval(x1-r/2,y1+tby-r/2,r,r);
+       }
      } else {
-       newoffGraphics.drawOval(x1,y1+tby,r,r);
+       if (fill!=0) {
+         newoffGraphics.fillOval(x1,y1+tby,r,r);
+       } else {
+         newoffGraphics.drawOval(x1,y1+tby,r,r);
+       }
      }
      if (!inframe) doupdate();
    }
@@ -164,6 +187,12 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
    public void command_RECT(int x1, int y1, int x2, int y2, int col) {
      newoffGraphics.setColor(colorindex[col]);
      newoffGraphics.fillRect(x1,y1+tby,x2-x1,y2-y1);
+     if (!inframe) doupdate();
+   }
+
+   public void command_PSET(int x1, int y1, int col) {
+     newoffGraphics.setColor(colorindex[col]);
+     newoffGraphics.fillRect(x1,y1+tby,1,1);
      if (!inframe) doupdate();
    }
 
@@ -190,12 +219,19 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
      fsize=s;
    }
 
+   public void command_ANTIALIAS(int aa) {
+       if (aa==0)  
+         newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+       else
+         newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+   }
+
    public void command_LSET(int w, int c) {
      if (c==4) {
        if (w==0)   // 0,4 off
-         newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+         command_ANTIALIAS(0);
        else        // 1,4 on
-         newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+         command_ANTIALIAS(1);
      } else {
        lsize=w;
        newoffGraphics.setStroke(new BasicStroke(w));

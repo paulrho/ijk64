@@ -147,7 +147,7 @@ String[] basicTokens={
   "LABEL"
   ,"SCREEN","GPRINT","BEGINFRAME","END","CLS","LINE","FSET","SLEEP","ALERT","RECT","FILES"
   ,"LSET"
-  ,"IMAGELOAD","DRAWIMAGE","DESTROYIMAGE","CIRCLE"
+  ,"IMAGELOAD","DRAWIMAGE","DESTROYIMAGE","CIRCLE","ANTIALIAS","PSET"
   ,"IMAGESAVE"
   ,"DIR","PWD","CHDIR","MKDIR"
   ,"ON"
@@ -218,18 +218,20 @@ static final int ST_DRAWIMAGE=58;
 static final int ST_DESTROYIMAGE=59;
 
 static final int ST_CIRCLE=60;
-static final int ST_IMAGESAVE=61;
-static final int ST_DIR=62;
-static final int ST_PWD=63;
-static final int ST_CHDIR=64;
-static final int ST_MKDIR=65;
+static final int ST_ANTIALIAS=61;
+static final int ST_PSET=62;
+static final int ST_IMAGESAVE=63;
+static final int ST_DIR=64;
+static final int ST_PWD=65;
+static final int ST_CHDIR=66;
+static final int ST_MKDIR=67;
 
-static final int ST_ON=66;
+static final int ST_ON=68;
 
-static final int ST_DEF=67;
-static final int ST_LET=68;
+static final int ST_DEF=69;
+static final int ST_LET=70;
 
-static final int ST_HELP=69;
+static final int ST_HELP=71;
 
 
 String line;
@@ -830,6 +832,7 @@ boolean ReadStatement() throws BasicException
             if (machine.graphicsDevice==null) {
               machine.graphicsDevice = new GraphicsDevice(
                 (int)gt.gtlist[1].num(),(int)gt.gtlist[2].num());
+	      machine.graphicsDevice.redirectkeys(machine.machinescreen); // should be done elsewhere
             } else {
               // just to make sure it is all reset
               machine.graphicsDevice.resetDevice(
@@ -841,6 +844,7 @@ boolean ReadStatement() throws BasicException
           } else {
             if (machine.graphicsDevice==null) {
               machine.graphicsDevice = new GraphicsDevice();
+	      machine.graphicsDevice.redirectkeys(machine.machinescreen); // should be done elsewhere
             } else {
               // just to make sure it is all reset
               machine.graphicsDevice.resetDevice();
@@ -930,13 +934,48 @@ boolean ReadStatement() throws BasicException
 
         } else throw new BasicException("GRAPHICS NOT ACTIVE");
         //break;
+	//
+      case ST_PSET:
+        if (machine.graphicsDevice!=null) {
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          if (gt.gttop==3) {
+              if (verbose) System.out.printf("about to set line size\n");
+              machine.graphicsDevice.command_PSET(
+                (int)gt.gtlist[0].num(),
+                (int)gt.gtlist[1].num(),
+                (int)gt.gtlist[2].num()
+               );
+              return true;
+          } else
+            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
 
+        } else throw new BasicException("GRAPHICS NOT ACTIVE");
+        //break;
+
+      case ST_ANTIALIAS:
+        if (machine.graphicsDevice!=null) {
+          ReadExpression();
+          GenericType gt=machine.evaluate(keepExpression);
+          if (gt.gttop==1) {
+              if (verbose) System.out.printf("about to set antialias\n");
+              machine.graphicsDevice.command_ANTIALIAS( (int)gt.num());
+              return true;
+          } else
+            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
+        } else throw new BasicException("GRAPHICS NOT ACTIVE");
+        //break;
 
       case ST_CIRCLE:
         if (machine.graphicsDevice!=null) {
           ReadExpression();
           GenericType gt=machine.evaluate(keepExpression);
-          if (gt.gttop==5) {
+          if (gt.gttop==1) {
+            // special - command the offset type
+	    
+            machine.graphicsDevice.command_CIRCLE_CONTROL((int)gt.num());
+              return true;
+	  } else if (gt.gttop==5) {
               if (verbose) System.out.printf("about to draw circle\n");
               machine.graphicsDevice.command_CIRCLE(
                 (int)gt.gtlist[0].num(),

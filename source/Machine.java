@@ -1363,7 +1363,7 @@ int hs;
        ,"SCREEN","GPRINT","BEGINFRAME","END","CLS","LINE","FSET","SLEEP","ALERT","RECT","FILES"
        ,"LSET"
        ,"IMAGELOAD","DRAWIMAGE","DESTROYIMAGE"
-       ,"CIRCLE"
+       ,"CIRCLE","ANTIALIAS"
        ,"HELP"
     };
   String got;
