@@ -1090,6 +1090,7 @@ boolean ReadStatement() throws BasicException
                   gt.str()
                  );
               } catch (Exception e) {
+                if (verbose) { e.printStackTrace(); }
                 throw new BasicException("IMAGE SAVE ERROR");
               }
               return true;

@@ -83,7 +83,10 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
   void save(String filename) {
     //Graphics2D cg = newoffImage.createGraphics();
     try {
-      if (ImageIO.write((BufferedImage)newoffImage, "png", new File(filename+".png"))) {
+      BufferedImage image;
+      if (blitting) { image = (BufferedImage)newoffImageB[paintblit]; }
+      else  image=(BufferedImage)newoffImage;
+      if (ImageIO.write(image, "png", new File(filename+".png"))) {
         System.out.println("-- saved");
       }
     } catch (IOException e) {
