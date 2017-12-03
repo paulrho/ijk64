@@ -17,10 +17,15 @@ import javax.imageio.ImageIO;
 import java.awt.image.*;
 import java.awt.geom.*;
 
+import java.net.*; // for reading from http
+
 public class GraphicsDevice extends JFrame implements MouseListener, MouseMotionListener {
 
   Image newoffImage;
   Graphics2D newoffGraphics;
+
+  Image[] newoffImageB = new Image[2];
+  Graphics2D[] newoffGraphicsB=new Graphics2D[2];
 
   Random generator = new Random();
 
@@ -32,6 +37,9 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
   int sizex=default_sizex;   
   int sizey=default_sizey;
   
+  boolean blitting=true;
+  int blit=0;
+  int paintblit=0;
    
   public GraphicsDevice(int x, int y) {
     super("ijk64 graphics");
@@ -49,15 +57,36 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
     setVisible(true); // start AWT painting.
     addMouseListener(this);
     addMouseMotionListener(this);
-	newoffImage = createImage(sizex,sizey);
-	newoffGraphics = (Graphics2D) newoffImage.getGraphics();
-    if (true) newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        if (blitting) {
+	  newoffImageB[0] = createImage(sizex,sizey);
+	  newoffImageB[1] = createImage(sizex,sizey);
+	  newoffGraphicsB[0] = (Graphics2D) newoffImageB[0].getGraphics();
+	  newoffGraphicsB[1] = (Graphics2D) newoffImageB[1].getGraphics();
+          if (blitting) { 
+	     blit++; if (blit>1) blit=0; 
+	     newoffGraphics = newoffGraphicsB[blit];
+             paintblit=blit;
+          }
+	} else {
+	  newoffImage = createImage(sizex,sizey);
+	  //newoffImage = createVolatileImage(sizex,sizey);
+	  newoffGraphics = (Graphics2D) newoffImage.getGraphics();
+	}
+        command_ANTIALIAS(1);
+
+  }
+
+  void redirectkeys(C64Screen screen) {
+    addKeyListener(screen);       // for listening to key strokes
   }
       
   void save(String filename) {
     //Graphics2D cg = newoffImage.createGraphics();
     try {
-      if (ImageIO.write((BufferedImage)newoffImage, "png", new File(filename+".png"))) {
+      BufferedImage image;
+      if (blitting) { image = (BufferedImage)newoffImageB[paintblit]; }
+      else  image=(BufferedImage)newoffImage;
+      if (ImageIO.write(image, "png", new File(filename+".png"))) {
         System.out.println("-- saved");
       }
     } catch (IOException e) {
@@ -82,6 +111,8 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
     command_ENDFRAME();
     fsize=16;
     topimage=0; //reset this back
+    circleCentered=true; // reset this too
+    command_ANTIALIAS(1);
   }
   public void resetDevice() {
     resetDevice(default_sizex,default_sizey-tby);
@@ -127,11 +158,14 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
    /* COMMANDS */
    /************/
    
-   public void command_BEGINFRAME() {
+   // do I need this
+   public synchronized void command_BEGINFRAME() {
+     paintblit=blit; // necessary
      inframe=true;
    }
 
    public void command_ENDFRAME() {
+     paintblit=blit;
      inframe=false;
      doupdate();   
    }
@@ -145,18 +179,37 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
    }
 
    public synchronized void command_CLS() { /* try this */
+     if (blitting && inframe && paintblit==blit) { 
+	     blit++; if (blit>1) blit=0; 
+	     newoffGraphics = newoffGraphicsB[blit];
+     }
      newoffGraphics.setColor(Color.WHITE);
      newoffGraphics.fillRect(0, 0, sizex,sizey+tby);	   
      //newoffGraphics.clearRect(0, 0, sizex,sizey+tby);	   
      if (!inframe) doupdate();
    }
          
+   boolean circleCentered=true;
+
+   public void command_CIRCLE_CONTROL(int control) {
+     if (control==1) { circleCentered=true; }
+     else { circleCentered=false; }
+   }
+
    public void command_CIRCLE(int x1, int y1, int r, int col, int fill) {
      newoffGraphics.setColor(colorindex[col]);
-     if (fill!=0) {
-       newoffGraphics.fillOval(x1,y1+tby,r,r);
+     if (circleCentered) {
+       if (fill!=0) {
+         newoffGraphics.fillOval(x1-r/2,y1+tby-r/2,r,r);
+       } else {
+         newoffGraphics.drawOval(x1-r/2,y1+tby-r/2,r,r);
+       }
      } else {
-       newoffGraphics.drawOval(x1,y1+tby,r,r);
+       if (fill!=0) {
+         newoffGraphics.fillOval(x1,y1+tby,r,r);
+       } else {
+         newoffGraphics.drawOval(x1,y1+tby,r,r);
+       }
      }
      if (!inframe) doupdate();
    }
@@ -164,6 +217,12 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
    public void command_RECT(int x1, int y1, int x2, int y2, int col) {
      newoffGraphics.setColor(colorindex[col]);
      newoffGraphics.fillRect(x1,y1+tby,x2-x1,y2-y1);
+     if (!inframe) doupdate();
+   }
+
+   public void command_PSET(int x1, int y1, int col) {
+     newoffGraphics.setColor(colorindex[col]);
+     newoffGraphics.fillRect(x1,y1+tby,1,1);
      if (!inframe) doupdate();
    }
 
@@ -190,12 +249,30 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
      fsize=s;
    }
 
+   public void command_ANTIALIAS(int aa) {
+    if (blitting) {
+       if (aa==0)  {
+          newoffGraphicsB[0].setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+          newoffGraphicsB[1].setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+       } else {
+          newoffGraphicsB[0].setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+          newoffGraphicsB[1].setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+       }
+    } else {
+       if (aa==0)  {
+         newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+       } else {
+         newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+       }
+    }
+   }
+
    public void command_LSET(int w, int c) {
      if (c==4) {
        if (w==0)   // 0,4 off
-         newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+         command_ANTIALIAS(0);
        else        // 1,4 on
-         newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+         command_ANTIALIAS(1);
      } else {
        lsize=w;
        newoffGraphics.setStroke(new BasicStroke(w));
@@ -244,7 +321,12 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 	 //if (topimage+1==20) return -1;
 	 if (topimage+1==MAXIMAGE) topimage=0; // instead, wind it back
      try {
-       imgarray[topimage] = ImageIO.read(new File(filename));
+       if (filename.startsWith("http")) {
+	  URL url = new URL(filename);
+         imgarray[topimage] = ImageIO.read(url.openStream());
+       } else {
+         imgarray[topimage] = ImageIO.read(new File(filename));
+       }
      } catch (IOException e) {
 		 return -1;
      }
@@ -352,8 +434,16 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
     Graphics2D g2d = (Graphics2D) g;
 
 
-    if(!inframe)
+    if(blitting) {
+      //if(!inframe)
+          //g2d.drawImage(newoffImageB[1-blit], 0, 0, this);
+      //else
+       if (!inframe || paintblit!=blit)
+          g2d.drawImage(newoffImageB[paintblit], 0, 0, this);
+    } else {
+      if(!inframe)
           g2d.drawImage(newoffImage, 0, 0, this);
+    }
 
   }
 
