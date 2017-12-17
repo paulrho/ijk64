@@ -768,7 +768,54 @@ public class Machine {
       int x=(memloc-55296)%40;
       int y=(memloc-55296)/40;
       machinescreen.setCharColour(x,y,(char)memval);
+    } else if (memloc==65000) {
+      basictimer=(memval!=0)?true:false;
+      System.out.printf("basictimer switched %s\n",basictimer?"on":"off");
+    } else if (memloc==65001) {
+      // arbirary,  test cos, sin, tan, sqrt x the number in the value
+      // acos
+      double x=0; double w=0.5;
+      for (int i=0; i<memval; i++)
+        x+=Math.acos(w+=0.0001);
+      System.out.printf("final acos = %f\n",x);
+    } else if (memloc==65002) {
+      double x=0; double w=0.0;
+      for (int i=0; i<memval; i++)
+        x+=Math.cos(w+=0.1);
+      System.out.printf("final cos = %f\n",x);
+    } else if (memloc==65003) {
+      double x=0; double w=0.0;
+      for (int i=0; i<memval; i++)
+        x+=Math.sin(w+=0.1);
+      System.out.printf("final sin = %f\n",x);
+    } else if (memloc==65004) {
+      double x=0; double w=0.0;
+      for (int i=0; i<memval; i++)
+        x+=Math.sqrt(w+=0.1);
+      System.out.printf("final sqrt = %f\n",x);
+    } else if (memloc==65005) {
+      double x=0; double w=0.0;
+      for (int i=0; i<memval; i++)
+        x+=Math.atan(w+=0.1);
+      System.out.printf("final atn = %f\n",x);
+    } else if (memloc==65006) {
+      double x=0; double w=0.0;
+      for (int i=0; i<memval; i++)
+        x+=Math.pow(w+=0.1,2.0);
+      System.out.printf("final x^2 = %f\n",x);
+    } else if (memloc==65007) {
+      double x=0; double w=0.0;
+      for (int i=0; i<memval; i++)
+        x+=(double)((int)(w+=0.153));
+      System.out.printf("final int() = %f\n",x);
+    } else if (memloc==65008) {
+      double x=0; double w=0.0;
+      for (int i=0; i<memval; i++)
+        x+=Math.pow(256.0,2.0)*(double)(int)((1.0-0.12124)*255.0)+256.0*(double)(int)((1.0-0.125412)*255.0)+(double)(int)((1.0-0.23523*(1.0-0.236))*255.0);
+
+      System.out.printf("final comp256^2.. = %f\n",x);
     }
+
   }
   
 
