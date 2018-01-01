@@ -200,9 +200,12 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
      newoffGraphics.setColor(colorindex[col]);
      if (circleCentered) {
        if (fill!=0) {
-         newoffGraphics.fillOval(x1-r/2,y1+tby-r/2,r,r);
+	       // this change will break some of the newer programs
+         //newoffGraphics.fillOval(x1-r/2,y1+tby-r/2,r,r); // was diameter
+         newoffGraphics.fillOval(x1-r,y1+tby-r,r*2,r*2);
        } else {
-         newoffGraphics.drawOval(x1-r/2,y1+tby-r/2,r,r);
+         //newoffGraphics.drawOval(x1-r/2,y1+tby-r/2,r,r); // was diameter
+         newoffGraphics.drawOval(x1-r,y1+tby-r,r*2,r*2);
        }
      } else {
        if (fill!=0) {

@@ -958,7 +958,7 @@ boolean openFile () {
             "JEBI/C64/ijk64 version "
             + version.programVersion + "\n"  // was 3.0.48
             + "Paul Salanitri, Futex\n"
-            + "Copyright (c) 2001-2007-2012-2016 P. Salanitri";
+            + "Copyright (c) 2001-2007-2012-2018 P. Salanitri";
         String licence =
             "Redistribution and use in source and binary forms, with or\n"
             + "without modification, are permitted provided that the\n"
@@ -992,8 +992,13 @@ boolean openFile () {
         JTextArea licenceArea = new JTextArea(licence);
         licenceArea.setEditable(false);
         String javaVersion = System.getProperty("java.version");
+	String javaVMName = System.getProperty("java.vm.name");
+	String javaVMInfo = System.getProperty("java.vm.info");
         Object contents[] = new Object[] { myversion, licenceArea, 
-        	"Java version " + javaVersion };
+        	"Java version " + javaVersion + "\n" +
+	        "Java VM Name " + javaVMName + "\n" +
+	        "Java VM Info " + javaVMInfo 
+	};
         //JOptionPane.showMessageDialog(parent, contents, "About GeomLab",
         JOptionPane.showMessageDialog( screen, contents, "About JEBI/C64/ijk64",
         	JOptionPane.INFORMATION_MESSAGE);
