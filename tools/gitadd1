@@ -1,0 +1,1 @@
+cp -p jar/ijk64.jar latest/C64.jar && git add source jar latest run javadocs build.xml

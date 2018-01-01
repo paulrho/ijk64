@@ -966,7 +966,7 @@
 <span class="sourceLineNo">958</span>            "JEBI/C64/ijk64 version "<a name="line.958"></a>
 <span class="sourceLineNo">959</span>            + version.programVersion + "\n"  // was 3.0.48<a name="line.959"></a>
 <span class="sourceLineNo">960</span>            + "Paul Salanitri, Futex\n"<a name="line.960"></a>
-<span class="sourceLineNo">961</span>            + "Copyright (c) 2001-2007-2012-2016 P. Salanitri";<a name="line.961"></a>
+<span class="sourceLineNo">961</span>            + "Copyright (c) 2001-2007-2012-2018 P. Salanitri";<a name="line.961"></a>
 <span class="sourceLineNo">962</span>        String licence =<a name="line.962"></a>
 <span class="sourceLineNo">963</span>            "Redistribution and use in source and binary forms, with or\n"<a name="line.963"></a>
 <span class="sourceLineNo">964</span>            + "without modification, are permitted provided that the\n"<a name="line.964"></a>
@@ -1000,20 +1000,25 @@
 <span class="sourceLineNo">992</span>        JTextArea licenceArea = new JTextArea(licence);<a name="line.992"></a>
 <span class="sourceLineNo">993</span>        licenceArea.setEditable(false);<a name="line.993"></a>
 <span class="sourceLineNo">994</span>        String javaVersion = System.getProperty("java.version");<a name="line.994"></a>
-<span class="sourceLineNo">995</span>        Object contents[] = new Object[] { myversion, licenceArea, <a name="line.995"></a>
-<span class="sourceLineNo">996</span>                "Java version " + javaVersion };<a name="line.996"></a>
-<span class="sourceLineNo">997</span>        //JOptionPane.showMessageDialog(parent, contents, "About GeomLab",<a name="line.997"></a>
-<span class="sourceLineNo">998</span>        JOptionPane.showMessageDialog( screen, contents, "About JEBI/C64/ijk64",<a name="line.998"></a>
-<span class="sourceLineNo">999</span>                JOptionPane.INFORMATION_MESSAGE);<a name="line.999"></a>
-<span class="sourceLineNo">1000</span>    }<a name="line.1000"></a>
-<span class="sourceLineNo">1001</span><a name="line.1001"></a>
-<span class="sourceLineNo">1002</span><a name="line.1002"></a>
-<span class="sourceLineNo">1003</span><a name="line.1003"></a>
-<span class="sourceLineNo">1004</span><a name="line.1004"></a>
-<span class="sourceLineNo">1005</span><a name="line.1005"></a>
-<span class="sourceLineNo">1006</span>}<a name="line.1006"></a>
-<span class="sourceLineNo">1007</span>//end///<a name="line.1007"></a>
+<span class="sourceLineNo">995</span>        String javaVMName = System.getProperty("java.vm.name");<a name="line.995"></a>
+<span class="sourceLineNo">996</span>        String javaVMInfo = System.getProperty("java.vm.info");<a name="line.996"></a>
+<span class="sourceLineNo">997</span>        Object contents[] = new Object[] { myversion, licenceArea, <a name="line.997"></a>
+<span class="sourceLineNo">998</span>                "Java version " + javaVersion + "\n" +<a name="line.998"></a>
+<span class="sourceLineNo">999</span>                "Java VM Name " + javaVMName + "\n" +<a name="line.999"></a>
+<span class="sourceLineNo">1000</span>                "Java VM Info " + javaVMInfo <a name="line.1000"></a>
+<span class="sourceLineNo">1001</span>        };<a name="line.1001"></a>
+<span class="sourceLineNo">1002</span>        //JOptionPane.showMessageDialog(parent, contents, "About GeomLab",<a name="line.1002"></a>
+<span class="sourceLineNo">1003</span>        JOptionPane.showMessageDialog( screen, contents, "About JEBI/C64/ijk64",<a name="line.1003"></a>
+<span class="sourceLineNo">1004</span>                JOptionPane.INFORMATION_MESSAGE);<a name="line.1004"></a>
+<span class="sourceLineNo">1005</span>    }<a name="line.1005"></a>
+<span class="sourceLineNo">1006</span><a name="line.1006"></a>
+<span class="sourceLineNo">1007</span><a name="line.1007"></a>
 <span class="sourceLineNo">1008</span><a name="line.1008"></a>
+<span class="sourceLineNo">1009</span><a name="line.1009"></a>
+<span class="sourceLineNo">1010</span><a name="line.1010"></a>
+<span class="sourceLineNo">1011</span>}<a name="line.1011"></a>
+<span class="sourceLineNo">1012</span>//end///<a name="line.1012"></a>
+<span class="sourceLineNo">1013</span><a name="line.1013"></a>
 
 
 
