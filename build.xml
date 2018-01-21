@@ -179,6 +179,17 @@
     </java>
   </target>
 
+  <target name="timingjar_profile_2" description="timing test the program using the jar with profiling" depends="dist">
+    <java jar="${dist}/ijk64.jar" dir="basic" fork="true"
+      maxmemory="128m"
+    >
+       <jvmarg value="-Xrunhprof:cpu=samples,interval=1,depth=10,thread=n" />
+       <arg value="../basic/tests/mp2.basic"/>
+       <arg value="-r"/>
+       <arg value="-x"/>
+    </java>
+  </target>
+
   <target name="timing" description="timing test the program (no profiling)" depends="dist">
     <java dir="${build}" fork="true" classname="C64"
       maxmemory="128m"

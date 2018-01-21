@@ -158,6 +158,10 @@ class evaluate {
   String a; // temp string variable containing current pointed to char
   boolean is_defining_function;
 
+  boolean speeder_compile=true;
+  String compiled_obj="";
+  String compiled_asm="";
+
   // constants and enums
   static int D_NUM=0;
   static int D_OP=1;
@@ -354,6 +358,11 @@ class evaluate {
 
       // these functions take 1 numeric parameter:
       //if (righttype!=ST_NUM) { System.out.printf("?INCORRECT TYPE\n"); }
+      String save_compiled_asm="";
+      if (speeder_compile) { save_compiled_asm=compiled_asm; compiled_obj=compiled_obj+","+function; // we will unwind this if it is a variable array
+	      compiled_asm+="  FNC "+function+"\n";
+	      //System.out.printf(",%s",function);
+      }
 
       if (function.length()>=2 && function.substring(0,2).equals("fn")) {
         if (verbose) { System.out.printf("Wanting to use predefined function %s with parameter %f\n",function,right); }
@@ -727,6 +736,12 @@ class evaluate {
         if (verbose) { System.out.printf("Assuming array %s\n",function); }
         // for an array, add the distinguishing trailing (
         GenericType value=get_value(function+"(",parameters,stknum[upto-1],stknum[upto],stknum[upto+1]);
+        if (speeder_compile) { for (int i=0; i<parameters; ++i) compiled_obj=compiled_obj+"[]";
+				       int v = using_machine.getvarindex(function+"(");
+	  compiled_asm=save_compiled_asm+"  PSH mem: "+function;
+          for (int i=0; i<parameters; ++i) compiled_asm+="[]";
+	  compiled_asm+="="+String.valueOf(v)+"\n";
+	}
         if (value.isNum()) {
           if (verbose) { System.out.printf("%sGot value %s\n",printprefix,value.print()); }
           // push this value on stack
@@ -818,6 +833,11 @@ class evaluate {
 
   GenericType calc(String leftstr, String oper, String rightstr) throws EvaluateException {
     oper=oper.toLowerCase(); //20060204pgs
+    if (speeder_compile) { if (!oper.equals("(")) compiled_obj+=",$"+oper;
+      if (!oper.equals("(")) 
+	    compiled_asm+="  PRF STR "+oper+"\n";
+	    // if (!oper.equals("(")) System.out.printf(",%s",oper);
+    }
     // returns a number
          if (oper.equals(">")) { return new GenericType((leftstr.compareTo(rightstr)>0)?-1.0:0.0); }
     else if (oper.equals("<")) { return new GenericType((rightstr.compareTo(leftstr)>0)?-1.0:0.0); }
@@ -846,6 +866,11 @@ class evaluate {
 
   double calc(double left, String oper, double right) throws EvaluateException {
     oper=oper.toLowerCase(); //20060204pgs
+    if (speeder_compile) { if (!oper.equals("(")) compiled_obj+=","+oper;
+      if (!oper.equals("(")) 
+	    compiled_asm+="  PRF DBL "+oper+"\n";
+	    // if (!oper.equals("(")) System.out.printf(",%s",oper);
+    }
     double answer=0.0;
     // old boolean like way, lets do a c64 bit like way now
          //if (oper.equals("or")) { answer=(((left!=0.0)?true:false) || ((right!=0.0)?true:false))?-1.0:0.0; }
@@ -1201,6 +1226,11 @@ class evaluate {
 
             // replace the variable with the value of the variable
               GenericType value=get_value(building);
+	      if (speeder_compile) { compiled_obj+=","+building;
+				       int v = using_machine.getvarindex(building.toLowerCase());
+		compiled_asm+="  PSH "+ (value.isNum()?"DBL":"STR") + " MEM: "+building+"="+String.valueOf(v)+"\n";
+                // System.out.printf(",%s",building);
+	      }
               if (value.isNum()) {
                 if (verbose) { System.out.printf("%sGot value %s\n",printprefix,value.print()); }
                 // push this value on stack
@@ -1249,6 +1279,7 @@ class evaluate {
     throws EvaluateException
   {
 
+    if (speeder_compile) { compiled_obj=""; compiled_asm=""; }
     is_defining_function=false;
     parse_restart=(-1); // means no restart required // really could be zero too!
     g_is_assignment=is_assignment>0;
@@ -1292,6 +1323,10 @@ class evaluate {
           pushOp("-ve");
         } else if (a.compareTo("0")>=0 && a.compareTo("9")<=0 || a.equals(".")) { // allow leading . for numbers
           double num=readNum();
+	  if (speeder_compile) { compiled_obj+=","+String.valueOf(num);
+		  compiled_asm+="  PSH IMM DBL "+String.valueOf(num)+"\n";
+	    //System.out.printf(",%.9f ",num);
+          }
           pushNum(num); 
           doing=D_OP;
         // not sure if this ignore case is right
@@ -1302,6 +1337,10 @@ class evaluate {
           // quoted string
           String qs=readQuotedString();
           pushString(qs); // we push, not a number, but a string
+          if (speeder_compile) { compiled_obj+=",\""+qs+"\"";
+		  compiled_asm+="  PSH IMM STR "+"\""+qs+"\"\n";
+	          //System.out.printf(",\"%s\"",qs);
+          }
           doing=D_OP;
         } else {
           if (!partialmatching) {
@@ -1498,6 +1537,7 @@ boolean dontallowunbalancedopeningbracket=true; // here for now
         }
       }
       if (really_has_assignment) { ProcessAssignment(); }
+      else throw new EvaluateException("SYNTAX ERROR"); // no assignment to anything
     }
 
   } catch (EvaluateException evalerror) {
@@ -1720,6 +1760,12 @@ void ProcessAssignment() throws EvaluateException {
               }
               using_machine.setvariable(stkfunc[stackp].toLowerCase(),rv);
               //using_machine.setvariable(stkfunc[stackp].toLowerCase(),ReadValue(stktype[stackp+1],currentvalue++));
+	      if (speeder_compile) { compiled_obj+="."+stkfunc[stackp].toLowerCase();
+				       int v = using_machine.getvarindex(stkfunc[stackp].toLowerCase());
+		      compiled_asm+="  STO "+ (rv.isNum()?"DBL":"STR") +" MEM: "+stkfunc[stackp].toLowerCase()+"="+String.valueOf(v)+"\n";
+		      // System.out.printf(".%s\n",stkfunc[stackp].toLowerCase());
+		      // System.out.printf("RPNALG: STO -> %s\n",stkfunc[stackp].toLowerCase());
+	      }
             } else {
               if (verbose) {
                 System.out.printf("stackp=%d Would have set %s to %s\n",stackp,stkfunc[stackp].toLowerCase(),rv.print());
@@ -1734,7 +1780,19 @@ void ProcessAssignment() throws EvaluateException {
               if (using_machine!=null) {
                 using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],ReadValue(stackvar,currentvalue++));
                 //using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],ReadValue(stktype[0],currentvalue++));
+	      if (speeder_compile) { compiled_obj+="."+stkfunc[stackvar].toLowerCase();
+		                       for (int i=0; i<parameters; ++i) 
+		                         compiled_obj+="[]";
+				       int v = using_machine.getvarindex(stkfunc[stackvar].toLowerCase()+"(");
+		      compiled_asm+="  STO mem: "+stkfunc[stackvar].toLowerCase();
+		                       for (int i=0; i<parameters; ++i) 
+		                         compiled_asm+="[]";
+		                       compiled_asm+="="+String.valueOf(v)+"\n";
+		                         //compiled_obj+="["+String.valueOf((int)stknum[stackvar+i+1])+"]"; // no this doesn't make sense - we are a compiler!
+		      // System.out.printf(".%s\n",stkfunc[stackp].toLowerCase());
+		      // System.out.printf("RPNALG: STO -> %s\n",stkfunc[stackp].toLowerCase());
               }
+	      }
           }
           parameters=0;
         } else if (stkop[stackp].equals(OP_OPEN_BRACKET)) {

@@ -236,6 +236,10 @@ public class Machine {
     return variables.getvariable(variable,param,p1,p2,p3);
   }
 
+  int getvarindex(String variable) {
+    return variables.getvarindex(variable);
+  }
+
   GenericType getvariable(String variable) {
     if (builtinvariables) {
       if (variable.startsWith("ti")) {

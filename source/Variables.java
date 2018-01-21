@@ -205,6 +205,16 @@ class Variables {
   //not used yet//     return V_DOUBLE;
   //not used yet// }
 
+  // this is not finished yet - used for speedcompile
+  int getvarindex(String variable) {
+    for (int i=0; i<topvariable; ++i) {
+      if (variable.equals(variablename[i])) {
+	      return i;
+      }
+    }
+    return -1;
+  }
+
   GenericType getvariable(String variable) {
     // if we try to get a non existant variable, create it and set its value to 0.0
     for (int i=0; i<topvariable; ++i) {
