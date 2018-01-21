@@ -868,7 +868,7 @@ class evaluate {
     oper=oper.toLowerCase(); //20060204pgs
     if (speeder_compile) { if (!oper.equals("(")) compiled_obj+=","+oper;
       if (!oper.equals("(")) 
-	    compiled_asm+="  PRF DBL "+oper+"\n";
+	    compiled_asm+="  PRF Dbl "+oper+"\n";
 	    // if (!oper.equals("(")) System.out.printf(",%s",oper);
     }
     double answer=0.0;
@@ -1228,7 +1228,7 @@ class evaluate {
               GenericType value=get_value(building);
 	      if (speeder_compile) { compiled_obj+=","+building;
 				       int v = using_machine.getvarindex(building.toLowerCase());
-		compiled_asm+="  PSH "+ (value.isNum()?"DBL":"STR") + " MEM: "+building+"="+String.valueOf(v)+"\n";
+		compiled_asm+="  PSH "+ (value.isNum()?"Dbl":"Str") + " MEM: "+building+"="+String.valueOf(v)+"\n";
                 // System.out.printf(",%s",building);
 	      }
               if (value.isNum()) {
@@ -1324,7 +1324,7 @@ class evaluate {
         } else if (a.compareTo("0")>=0 && a.compareTo("9")<=0 || a.equals(".")) { // allow leading . for numbers
           double num=readNum();
 	  if (speeder_compile) { compiled_obj+=","+String.valueOf(num);
-		  compiled_asm+="  PSH IMM DBL "+String.valueOf(num)+"\n";
+		  compiled_asm+="  PSH Dbl IMM "+String.valueOf(num)+"\n";
 	    //System.out.printf(",%.9f ",num);
           }
           pushNum(num); 
@@ -1338,7 +1338,7 @@ class evaluate {
           String qs=readQuotedString();
           pushString(qs); // we push, not a number, but a string
           if (speeder_compile) { compiled_obj+=",\""+qs+"\"";
-		  compiled_asm+="  PSH IMM STR "+"\""+qs+"\"\n";
+		  compiled_asm+="  PSH Str IMM "+"\""+qs+"\"\n";
 	          //System.out.printf(",\"%s\"",qs);
           }
           doing=D_OP;
@@ -1762,7 +1762,7 @@ void ProcessAssignment() throws EvaluateException {
               //using_machine.setvariable(stkfunc[stackp].toLowerCase(),ReadValue(stktype[stackp+1],currentvalue++));
 	      if (speeder_compile) { compiled_obj+="."+stkfunc[stackp].toLowerCase();
 				       int v = using_machine.getvarindex(stkfunc[stackp].toLowerCase());
-		      compiled_asm+="  STO "+ (rv.isNum()?"DBL":"STR") +" MEM: "+stkfunc[stackp].toLowerCase()+"="+String.valueOf(v)+"\n";
+		      compiled_asm+="  STO "+ (rv.isNum()?"Dbl":"Str") +" MEM: "+stkfunc[stackp].toLowerCase()+"="+String.valueOf(v)+"\n";
 		      // System.out.printf(".%s\n",stkfunc[stackp].toLowerCase());
 		      // System.out.printf("RPNALG: STO -> %s\n",stkfunc[stackp].toLowerCase());
 	      }
