@@ -158,7 +158,7 @@ class evaluate {
   String a; // temp string variable containing current pointed to char
   boolean is_defining_function;
 
-  boolean speeder_compile=true;
+  boolean speeder_compile=false;
   String compiled_obj="";
   String compiled_asm="";
 
@@ -362,7 +362,7 @@ class evaluate {
       if (speeder_compile) { save_compiled_asm=compiled_asm; compiled_obj=compiled_obj+","+function; // we will unwind this if it is a variable array
 	      compiled_asm+="  FNC "+function+"\n";
 	      //System.out.printf(",%s",function);
-	      using_machine.petspeed.addInstr(Petspeed.I_FNC,Petspeed.ftoken(function));
+	      using_machine.petspeed.addInstr(Petspeed.I_FNC | Petspeed.ftoken(function));
       }
 
       if (function.length()>=2 && function.substring(0,2).equals("fn")) {
@@ -837,10 +837,11 @@ class evaluate {
   GenericType calc(String leftstr, String oper, String rightstr) throws EvaluateException {
     oper=oper.toLowerCase(); //20060204pgs
     if (speeder_compile) { if (!oper.equals("(")) compiled_obj+=",$"+oper;
-      if (!oper.equals("(")) 
+      if (!oper.equals("(")) {
 	    compiled_asm+="  PRF Str "+oper+"\n";
 	    // if (!oper.equals("(")) System.out.printf(",%s",oper);
 	    using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Str | Petspeed.ftoken(oper));
+      }
     }
     // returns a number
          if (oper.equals(">")) { return new GenericType((leftstr.compareTo(rightstr)>0)?-1.0:0.0); }
@@ -871,10 +872,11 @@ class evaluate {
   double calc(double left, String oper, double right) throws EvaluateException {
     oper=oper.toLowerCase(); //20060204pgs
     if (speeder_compile) { if (!oper.equals("(")) compiled_obj+=","+oper;
-      if (!oper.equals("(")) 
+      if (!oper.equals("(")) {
 	    compiled_asm+="  PRF Dbl "+oper+"\n";
 	    // if (!oper.equals("(")) System.out.printf(",%s",oper);
 	    using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Dbl | Petspeed.ftoken(oper));
+      }
     }
     double answer=0.0;
     // old boolean like way, lets do a c64 bit like way now
