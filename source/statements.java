@@ -1203,14 +1203,14 @@ boolean ReadAssign() throws BasicException {
       if (!true) { machine.assignment(keepVariable+"="+keepExpression); }
 
       int sp_end=pnt;
-      if (speeder) { System.out.printf("ASSIGNMENT:(%d,%d,%s) %s\n",sp_start,sp_end,machine.getCurrentLine(sp_start),keepExpression); }
+      if (speeder) if (verbose) { System.out.printf("ASSIGNMENT:(%d,%d,%s) %s\n",sp_start,sp_end,machine.getCurrentLine(sp_start),keepExpression); }
 
       if (speeder) { machine.evaluate_engine.speeder_compile=true; }
       machine.assignment(keepExpression);
       if (speeder) { machine.evaluate_engine.speeder_compile=false; }
                                                  if (dofulltiming) { end_timing(TIME_massign); }
-      if (speeder) { System.out.printf("Compiled obj: %s\n",machine.evaluate_engine.compiled_obj); }
-      if (speeder) { System.out.printf("Compiled asm:\n%s",machine.evaluate_engine.compiled_asm); }
+      if (speeder) if (verbose) { System.out.printf("Compiled obj: %s\n",machine.evaluate_engine.compiled_obj); }
+      if (speeder) if (verbose) { System.out.printf("Compiled asm:\n%s",machine.evaluate_engine.compiled_asm); }
       if (speeder) { machine.petspeed.saveacode(pnt); }
 
       //machine.setvariable(machine.parse(keepVariable),machine.evaluate(keepExpression));

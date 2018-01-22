@@ -743,7 +743,7 @@ class evaluate {
           for (int i=0; i<parameters; ++i) compiled_asm+="[]";
 	  compiled_asm+="="+String.valueOf(v)+"\n";
 	      using_machine.petspeed.rewind();
-	      using_machine.petspeed.addInstr(Petspeed.I_PSH | Petspeed.M_MEMARR1,Petspeed.ftoken(function));
+	      using_machine.petspeed.addInstr(Petspeed.I_PSH | ((value.isNum())?Petspeed.T_Dbl:Petspeed.T_Str) | Petspeed.M_MEMARR1,v);
 	}
         if (value.isNum()) {
           if (verbose) { System.out.printf("%sGot value %s\n",printprefix,value.print()); }
@@ -1789,7 +1789,8 @@ void ProcessAssignment() throws EvaluateException {
                 stkfunc[stackvar],parameters,stknum[stackvar+1],stknum[stackvar+2],stknum[stackvar+3],
                 stknum[currentvalue]); }
               if (using_machine!=null) {
-                using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],ReadValue(stackvar,currentvalue++));
+                GenericType rv=ReadValue(stackvar,currentvalue++);
+                using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],rv); //ReadValue(stackvar,currentvalue++));
                 //using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],ReadValue(stktype[0],currentvalue++));
 	      if (speeder_compile) { compiled_obj+="."+stkfunc[stackvar].toLowerCase();
 		                       for (int i=0; i<parameters; ++i) 
@@ -1802,7 +1803,7 @@ void ProcessAssignment() throws EvaluateException {
 		                         //compiled_obj+="["+String.valueOf((int)stknum[stackvar+i+1])+"]"; // no this doesn't make sense - we are a compiler!
 		      // System.out.printf(".%s\n",stkfunc[stackp].toLowerCase());
 		      // System.out.printf("RPNALG: STO -> %s\n",stkfunc[stackp].toLowerCase());
-	          using_machine.petspeed.addInstr(Petspeed.I_STO | Petspeed.M_MEMARR1 | Petspeed.M_MEM,v);
+	          using_machine.petspeed.addInstr(Petspeed.I_STO | ((rv.isNum())?Petspeed.T_Dbl:Petspeed.T_Str) | Petspeed.M_MEMARR1,v);
               }
 	      }
           }
