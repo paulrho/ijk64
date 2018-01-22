@@ -1790,6 +1790,8 @@ void chewcr() {
   boolean runProgram()
   {
     program_running=true;
+    // fix me!!!!
+    if (speeder) petspeed=new Petspeed(this); // just for now just respawn the lot!
     new statements(programText, this); // passing along the machine too
     program_saved_executionpoint=save_executionpoint; // only done on running a program
     program_running=false;

@@ -36,7 +36,7 @@ class Petspeed
       pargD[tmptop]=argD;
       pargmem[tmptop]=argmem;
       pargS[tmptop]=argS;
-      if (true) System.out.printf("%d %d %d %f %s\n",tmptop,prog[tmptop],pargmem[tmptop],pargD[tmptop],pargS[tmptop]);
+      if (using_machine.verbose) System.out.printf("%d %d %d %f %s\n",tmptop,prog[tmptop],pargmem[tmptop],pargD[tmptop],pargS[tmptop]);
       tmptop++;
       return 1;
     } else return 0;
@@ -68,56 +68,58 @@ class Petspeed
       switch(prog[i]) {
         case I_HLT: 
           if (verbose) System.out.printf("\n");
+	  if (atop!=0) System.out.printf("atop not at zero\n");
           return true;
 	case I_FNC | F_sin : 
-          if (verbose) System.out.printf("v ");
 	  astack_d[atop-1]= Math.sin(astack_d[atop-1]);
 	  break;
 	case I_FNC | F_cos : 
-          if (verbose) System.out.printf("v ");
 	  astack_d[atop-1]= Math.cos(astack_d[atop-1]);
 	  break;
 	case I_FNC | F_int : 
-          if (verbose) System.out.printf("v ");
 	  astack_d[atop-1]= (double)((int)(astack_d[atop-1]));
 	  break;
+	case I_FNC | F_log : 
+	  astack_d[atop-1]= Math.log(astack_d[atop-1]);
+	  break;
+	case I_PRF | O_pow : 
+	  astack_d[atop-2]= Math.pow(astack_d[atop-2],astack_d[atop-1]); atop--;
+	  break;
+	case I_PRF | O_neg : 
+	  astack_d[atop-1]= -astack_d[atop-1];
+	  break;
 	case I_PRF | O_mul : 
-          if (verbose) System.out.printf("v ");
 	  astack_d[atop-2]= astack_d[atop-2] * astack_d[atop-1]; atop--;
 	  break;
 	case I_PRF | O_add : 
-          if (verbose) System.out.printf("v ");
 	  astack_d[atop-2]= astack_d[atop-2] + astack_d[atop-1]; atop--;
 	  break;
 	case I_PRF | O_sub : 
-          if (verbose) System.out.printf("v ");
 	  astack_d[atop-2]= astack_d[atop-2] - astack_d[atop-1]; atop--;
 	  break;
 	case I_PRF | O_div : 
-          if (verbose) System.out.printf("v ");
-          //System.out.printf("%f %f \n",astack_d[atop-1],astack_d[atop-2]);
 	  astack_d[atop-2]= astack_d[atop-2] / astack_d[atop-1]; atop--;
-          //System.out.printf("%f \n",astack_d[atop-1]);
 	  break;
 	case I_PSH | T_Dbl | M_IMM : 
-          //System.out.printf("My first instruction!! PSH Dbl IMM\n");
-          if (verbose) System.out.printf("v ");
 	  astack_d[atop++]=pargD[i];
 	  break;
+	case I_PSH | T_Dbl | M_MEMARR1 : 
+	  astack_d[atop-1]=using_machine.variables.variablearrayvalue1[pargmem[i]][(int)astack_d[atop-1]];
+	  break;
+	case I_STO | T_Dbl | M_MEMARR1 : 
+	  using_machine.variables.variablearrayvalue1[pargmem[i]][(int)astack_d[atop-2]]=astack_d[atop-1];
+	  atop--; atop--;
+	  break;
 	case I_PSH | T_Dbl | M_MEM : 
-          //System.out.printf("My first instruction!! PSH Dbl IMM\n");
-          if (verbose) System.out.printf("v ");
 	  astack_d[atop++]=using_machine.variables.variablevalue[pargmem[i]];
 	  break;
 	case I_STO | T_Dbl | M_MEM : 
-          //System.out.printf("My second instruction!! STO Dbl MEM\n");
-          if (verbose) System.out.printf("v ");
-          //System.out.printf("setting to %f \n",astack_d[atop-1]);
 	  using_machine.variables.variablevalue[pargmem[i]]=astack_d[--atop];
-          //System.out.printf("set to %f \n", using_machine.variables.variablevalue[pargmem[i]]);
 	  break;
 	default:
           if (verbose) System.out.printf("X ");
+          System.out.printf("Instruction Fault\n");
+	  // should through an error! Instruction Fault
 	  break;
       }
       if (verbose) System.out.printf("\n");
@@ -142,7 +144,7 @@ class Petspeed
 	  acpointer_next[savestart_p]=end;
 	  // this is now marked as a valid piece of code
 	  top=tmptop;
-	  if (true) System.out.printf("Saved code from %d to %d for location %d\n",savestart_ac,top,savestart_p);
+          if (using_machine.verbose) System.out.printf("Saved code from %d to %d for location %d\n",savestart_ac,top,savestart_p);
 	  record=false;
   }
 
@@ -162,7 +164,7 @@ class Petspeed
   static final int M_MEMARR1=2<<5;
   static final int M_MEMARR2=3<<5;
 
-  static final int O_exp=0;
+  static final int O_pow=0;
   static final int O_mul=1;
   static final int O_div=2;
   static final int O_add=3;
@@ -181,9 +183,10 @@ class Petspeed
   static final int F_sin=0;
   static final int F_cos=1;
   static final int F_int=2;
+  static final int F_log=3;
 
   static String O_strings[]={"^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<="};
-  static String F_strings[]={"sin","cos","int"};
+  static String F_strings[]={"sin","cos","int","log"};
   //enum { I_PRF, I_PSH, I_STO, I_FNC, I_HLT };           //0..5  (3 bits)
 
   // enum { T_Dbl, T_Str };                                //0..1  (1 bit)
