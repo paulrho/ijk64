@@ -362,6 +362,7 @@ class evaluate {
       if (speeder_compile) { save_compiled_asm=compiled_asm; compiled_obj=compiled_obj+","+function; // we will unwind this if it is a variable array
 	      compiled_asm+="  FNC "+function+"\n";
 	      //System.out.printf(",%s",function);
+	      using_machine.petspeed.addInstr(Petspeed.I_FNC,Petspeed.ftoken(function));
       }
 
       if (function.length()>=2 && function.substring(0,2).equals("fn")) {
@@ -741,6 +742,8 @@ class evaluate {
 	  compiled_asm=save_compiled_asm+"  PSH mem: "+function;
           for (int i=0; i<parameters; ++i) compiled_asm+="[]";
 	  compiled_asm+="="+String.valueOf(v)+"\n";
+	      using_machine.petspeed.rewind();
+	      using_machine.petspeed.addInstr(Petspeed.I_PSH | Petspeed.M_MEMARR1,Petspeed.ftoken(function));
 	}
         if (value.isNum()) {
           if (verbose) { System.out.printf("%sGot value %s\n",printprefix,value.print()); }
@@ -835,8 +838,9 @@ class evaluate {
     oper=oper.toLowerCase(); //20060204pgs
     if (speeder_compile) { if (!oper.equals("(")) compiled_obj+=",$"+oper;
       if (!oper.equals("(")) 
-	    compiled_asm+="  PRF STR "+oper+"\n";
+	    compiled_asm+="  PRF Str "+oper+"\n";
 	    // if (!oper.equals("(")) System.out.printf(",%s",oper);
+	    using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Str | Petspeed.ftoken(oper));
     }
     // returns a number
          if (oper.equals(">")) { return new GenericType((leftstr.compareTo(rightstr)>0)?-1.0:0.0); }
@@ -870,6 +874,7 @@ class evaluate {
       if (!oper.equals("(")) 
 	    compiled_asm+="  PRF Dbl "+oper+"\n";
 	    // if (!oper.equals("(")) System.out.printf(",%s",oper);
+	    using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Dbl | Petspeed.ftoken(oper));
     }
     double answer=0.0;
     // old boolean like way, lets do a c64 bit like way now
@@ -1230,6 +1235,7 @@ class evaluate {
 				       int v = using_machine.getvarindex(building.toLowerCase());
 		compiled_asm+="  PSH "+ (value.isNum()?"Dbl":"Str") + " MEM: "+building+"="+String.valueOf(v)+"\n";
                 // System.out.printf(",%s",building);
+	          using_machine.petspeed.addInstr(Petspeed.I_PSH | ((value.isNum())?Petspeed.T_Dbl:Petspeed.T_Str) | Petspeed.M_MEM,v);
 	      }
               if (value.isNum()) {
                 if (verbose) { System.out.printf("%sGot value %s\n",printprefix,value.print()); }
@@ -1326,6 +1332,7 @@ class evaluate {
 	  if (speeder_compile) { compiled_obj+=","+String.valueOf(num);
 		  compiled_asm+="  PSH Dbl IMM "+String.valueOf(num)+"\n";
 	    //System.out.printf(",%.9f ",num);
+	          using_machine.petspeed.addInstr(Petspeed.I_PSH | Petspeed.T_Dbl | Petspeed.M_IMM, num);
           }
           pushNum(num); 
           doing=D_OP;
@@ -1340,6 +1347,7 @@ class evaluate {
           if (speeder_compile) { compiled_obj+=",\""+qs+"\"";
 		  compiled_asm+="  PSH Str IMM "+"\""+qs+"\"\n";
 	          //System.out.printf(",\"%s\"",qs);
+	          using_machine.petspeed.addInstr(Petspeed.I_PSH | Petspeed.T_Str | Petspeed.M_IMM,qs);
           }
           doing=D_OP;
         } else {
@@ -1765,6 +1773,7 @@ void ProcessAssignment() throws EvaluateException {
 		      compiled_asm+="  STO "+ (rv.isNum()?"Dbl":"Str") +" MEM: "+stkfunc[stackp].toLowerCase()+"="+String.valueOf(v)+"\n";
 		      // System.out.printf(".%s\n",stkfunc[stackp].toLowerCase());
 		      // System.out.printf("RPNALG: STO -> %s\n",stkfunc[stackp].toLowerCase());
+	          using_machine.petspeed.addInstr(Petspeed.I_STO | ((rv.isNum())?Petspeed.T_Dbl:Petspeed.T_Str) | Petspeed.M_MEM,v);
 	      }
             } else {
               if (verbose) {
@@ -1784,13 +1793,14 @@ void ProcessAssignment() throws EvaluateException {
 		                       for (int i=0; i<parameters; ++i) 
 		                         compiled_obj+="[]";
 				       int v = using_machine.getvarindex(stkfunc[stackvar].toLowerCase()+"(");
-		      compiled_asm+="  STO mem: "+stkfunc[stackvar].toLowerCase();
+		      compiled_asm+="  STO MEM: "+stkfunc[stackvar].toLowerCase();
 		                       for (int i=0; i<parameters; ++i) 
 		                         compiled_asm+="[]";
 		                       compiled_asm+="="+String.valueOf(v)+"\n";
 		                         //compiled_obj+="["+String.valueOf((int)stknum[stackvar+i+1])+"]"; // no this doesn't make sense - we are a compiler!
 		      // System.out.printf(".%s\n",stkfunc[stackp].toLowerCase());
 		      // System.out.printf("RPNALG: STO -> %s\n",stkfunc[stackp].toLowerCase());
+	          using_machine.petspeed.addInstr(Petspeed.I_STO | Petspeed.M_MEMARR1 | Petspeed.M_MEM,v);
               }
 	      }
           }

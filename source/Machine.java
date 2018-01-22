@@ -151,6 +151,9 @@ public class Machine {
     attachScreen(screen);
   }
 
+  boolean speeder=true;
+  Petspeed petspeed=null;
+
   public void initialise_machine() {
     if (verbose) { System.out.printf("Initialising machine\n"); }
     variables.verbose=verbose;
@@ -159,6 +162,7 @@ public class Machine {
     evaluate_engine.verbose=false;
     evaluate_engine.quiet=true;
     System.setProperty("java.net.useSystemProxies", "true");
+    if (speeder) petspeed=new Petspeed(this);
   }
   //////////////////////////////////
   // Machine configuration
