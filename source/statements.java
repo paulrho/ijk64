@@ -273,6 +273,8 @@ long counter_func[]={0,0,0,0,0,0,0,0,0,0,0,0,0};
 long timer_func[]={0,0,0,0,0,0,0,0,0,0,0,0,0};
 String timername_func[]={"ReadPart","ReadStatementToken","ReadStatement","ReadAssign","ReadAssign->ReadExpression","ReadAssign->ReadAssignment","ReadAssign->machine.assignment","interp_whileloop","ReadPart->ReadStatementToken","ReadExpression","m_evaluate","m_assign1","ReadLineNo"};
 
+static final boolean dofulltiming=true;
+
 void start_timing(int func)
 {
     // not re-entrant!
@@ -319,9 +321,9 @@ boolean ReadPart() throws BasicException
       //else 
       if (partType==PT_NEWLINE && a.compareTo("0")>=0 && a.compareTo("9")<=0) {
         // just read it here like the token thing
-if (true) { start_timing(TIME_ReadLineNo); }
+if (dofulltiming) { start_timing(TIME_ReadLineNo); }
         if (ReadLineNo()) {
-if (true) { end_timing(TIME_ReadLineNo); }
+if (dofulltiming) { end_timing(TIME_ReadLineNo); }
           partType=PT_HASLINE; // we are up to statements
           // pnt+=at+1; already done (+1 is good?)
           // keepLine set to line # (string)
@@ -346,9 +348,9 @@ if (true) { end_timing(TIME_ReadLineNo); }
         return true;
       } else if (a.compareToIgnoreCase("a")>=0 && a.compareTo("z")<=0) {
         // one of two things here - a token, or an assignment!
-if (true) { start_timing(TIME_ReadStatementToken); }
+if (dofulltiming) { start_timing(TIME_ReadStatementToken); }
         if (ReadStatementToken()) {
-if (true) { end_timing(TIME_ReadStatementToken); }
+if (dofulltiming) { end_timing(TIME_ReadStatementToken); }
           partType=PT_TOKEN;
           // gotToken already set
           // pnt+=at; already done
@@ -363,7 +365,7 @@ if (true) { end_timing(TIME_ReadStatementToken); }
           }
           return true;
         } else {
-if (true) { end_timing(TIME_ReadStatementToken); }
+if (dofulltiming) { end_timing(TIME_ReadStatementToken); }
           // have to assume this is an assignment
           partType=PT_ASSIGN;
           // we dont move pnt at all, we start from the start!
@@ -589,7 +591,7 @@ void interpret_string(String passed_line, int startat, String lineNo)
   long startTime1=System.currentTimeMillis(); 
   long cnt2=0;
   while (pnt<linelength) {
-if (true) { start_timing(TIME_interp_while); }
+if (dofulltiming) { start_timing(TIME_interp_while); }
   startTime2+=System.currentTimeMillis(); 
     // for each part, check control C status - is this inefficient?
     if (machine.hasControlC()) {
@@ -609,11 +611,11 @@ if (true) { start_timing(TIME_interp_while); }
     }
 
     // change order to see if CONT will work now
-                                                          if (true) { start_timing(TIME_ReadPart); }
+                                                          if (dofulltiming) { start_timing(TIME_ReadPart); }
     if (!ReadPart()) { 
       throw new BasicException("SYNTAX ERROR");
     }
-                                                          if (true) { end_timing(TIME_ReadPart); }
+                                                          if (dofulltiming) { end_timing(TIME_ReadPart); }
     if (basictimer) { doBasicTimer(false); }
 
 
@@ -621,19 +623,19 @@ if (true) { start_timing(TIME_interp_while); }
       if (partType==PT_EOF) {
         break; // better to put this at the end of the if condition (for speed)
       } else if (partType==PT_TOKEN) {
-                                                          if (true) { start_timing(TIME_ReadStatement); }
+                                                          if (dofulltiming) { start_timing(TIME_ReadStatement); }
         if (!ReadStatement()) {
           throw new BasicException("SYNTAX ERROR : BAD TOKEN");
         }
-                                                          if (true) { end_timing(TIME_ReadStatement); }
+                                                          if (dofulltiming) { end_timing(TIME_ReadStatement); }
       } else if (partType==PT_ASSIGN) {
-                                                          if (true) { start_timing(TIME_ReadAssign); }
+                                                          if (dofulltiming) { start_timing(TIME_ReadAssign); }
         if (!ReadAssign()) {
           //throw new BasicException("SYNTAX ERROR : NO TOKEN OR ASSIGNMENT");
           // simplify this now, we didnt get a token OR an assignment - just a plain old syntax error
           throw new BasicException("SYNTAX ERROR");          
         }
-                                                          if (true) { end_timing(TIME_ReadAssign); }
+                                                          if (dofulltiming) { end_timing(TIME_ReadAssign); }
       } else {
         throw new BasicException("SYNTAX ERROR : DID NOT GET STATEMENT");
       }
@@ -641,20 +643,20 @@ if (true) { start_timing(TIME_interp_while); }
       e.printStackTrace();
       throw new BasicException("ILLEGAL QUANTITY");
     }
-                                                          if (true) { end_timing(TIME_interp_while); }
+                                                          if (dofulltiming) { end_timing(TIME_interp_while); }
                                                             startTime2-=System.currentTimeMillis();  cnt2++;
   } // while everything
-                                                          if (true) { print_timing(TIME_interp_while); }
-                                                          if (true) { print_timing(TIME_ReadPart); }
-                                                          if (true) { print_timing(TIME_ReadStatement); }
-                                                          if (true) { print_timing(TIME_ReadAssign); }
-                                                          if (true) { print_timing(TIME_massign); }
-                                                          if (true) { print_timing(TIME_ReadExpression); }
-                                                          if (true) { print_timing(TIME_ReadStatementToken); }
-                                                          if (true) { print_timing(TIME_ReadLineNo); }
-                                                          if (true) { print_timing(TIME_RAReadAssignment); }
-                                                          if (true) { System.out.printf("diff = %d\n", System.currentTimeMillis()-startTime1); }
-                                                          if (true) { System.out.printf("2    = %d over %d\n", startTime2,cnt2); }
+                                                          if (dofulltiming) { print_timing(TIME_interp_while); }
+                                                          if (dofulltiming) { print_timing(TIME_ReadPart); }
+                                                          if (dofulltiming) { print_timing(TIME_ReadStatement); }
+                                                          if (dofulltiming) { print_timing(TIME_ReadAssign); }
+                                                          if (dofulltiming) { print_timing(TIME_massign); }
+                                                          if (dofulltiming) { print_timing(TIME_ReadExpression); }
+                                                          if (dofulltiming) { print_timing(TIME_ReadStatementToken); }
+                                                          if (dofulltiming) { print_timing(TIME_ReadLineNo); }
+                                                          if (dofulltiming) { print_timing(TIME_RAReadAssignment); }
+                                                          if (dofulltiming) { System.out.printf("diff = %d\n", System.currentTimeMillis()-startTime1); }
+                                                          if (dofulltiming) { System.out.printf("2    = %d over %d\n", startTime2,cnt2); }
 
   } catch (BasicCONTrestart contrestart) {
      // this is a special case where we want to start/restart the program 
@@ -1171,29 +1173,45 @@ boolean ReadAssign() throws BasicException {
     // could be a null statement
     //if (ReadColon()) { return true; }
 
+    if (speeder) { 
+      if (machine.petspeed.is_compiled(pnt)) { 
+	if (verbose) System.out.printf("Found compiled at %d\n",pnt); 
+	
+	machine.petspeed.execute(pnt);
+        // jump the pointer
+	pnt=machine.petspeed.nextpnt(pnt);
+        ReadColon();
+        return true;
+      }
+    }
+
     // could be an assignment
-                                                 if (true) { start_timing(TIME_RAReadAssignment); }
+                                                 if (dofulltiming) { start_timing(TIME_RAReadAssignment); }
     if (true || ReadAssignment()) {        // just ignore this - seem what happens!
-                                                 if (true) { end_timing(TIME_RAReadAssignment); }
-                                                 if (true) { start_timing(TIME_ReadExpression); }
+                                                 if (dofulltiming) { end_timing(TIME_RAReadAssignment); }
+                                                 if (dofulltiming) { start_timing(TIME_ReadExpression); }
 //speeder
       int sp_start=pnt;
+      if (speeder) { machine.petspeed.savestart(pnt); }
       ReadExpression();
-                                                 if (true) { end_timing(TIME_ReadExpression); }
+                                                 if (dofulltiming) { end_timing(TIME_ReadExpression); }
 
                                                  if (verbose) { System.out.printf("MachineVariableSet(variable=%s with evaluate( %s ))\n",keepVariable,keepExpression); }
       // parse the keep variable in the machine to turn X(I+1) into X(42)
 
-                                                 if (true) { start_timing(TIME_massign); }
+                                                 if (dofulltiming) { start_timing(TIME_massign); }
       if (!true) { machine.assignment(keepVariable+"="+keepExpression); }
 
       int sp_end=pnt;
       if (speeder) { System.out.printf("ASSIGNMENT:(%d,%d,%s) %s\n",sp_start,sp_end,machine.getCurrentLine(sp_start),keepExpression); }
 
+      if (speeder) { machine.evaluate_engine.speeder_compile=true; }
       machine.assignment(keepExpression);
-                                                 if (true) { end_timing(TIME_massign); }
+      if (speeder) { machine.evaluate_engine.speeder_compile=false; }
+                                                 if (dofulltiming) { end_timing(TIME_massign); }
       if (speeder) { System.out.printf("Compiled obj: %s\n",machine.evaluate_engine.compiled_obj); }
       if (speeder) { System.out.printf("Compiled asm:\n%s",machine.evaluate_engine.compiled_asm); }
+      if (speeder) { machine.petspeed.saveacode(pnt); }
 
       //machine.setvariable(machine.parse(keepVariable),machine.evaluate(keepExpression));
       // just change this one for the moment - try new way
@@ -1201,7 +1219,7 @@ boolean ReadAssign() throws BasicException {
       ReadColon();
       return true;
     } else {
-if (true) { end_timing(TIME_RAReadAssignment); }
+if (dofulltiming) { end_timing(TIME_RAReadAssignment); }
       // Did not get token or assignment (was 103:)
       return false;
     }
