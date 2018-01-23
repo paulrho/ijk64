@@ -102,7 +102,7 @@ class statements {
   boolean verbose=false;
   long startTime; // doesnt make a difference being in here // oh yes it does - non simultaneous measurs!
   long endTime;
-  boolean speeder=true;
+  static boolean speeder=false; // put this on the base class for now
 
   statements(String interpstring, Machine themachine)
   {
@@ -273,7 +273,7 @@ long counter_func[]={0,0,0,0,0,0,0,0,0,0,0,0,0};
 long timer_func[]={0,0,0,0,0,0,0,0,0,0,0,0,0};
 String timername_func[]={"ReadPart","ReadStatementToken","ReadStatement","ReadAssign","ReadAssign->ReadExpression","ReadAssign->ReadAssignment","ReadAssign->machine.assignment","interp_whileloop","ReadPart->ReadStatementToken","ReadExpression","m_evaluate","m_assign1","ReadLineNo"};
 
-static final boolean dofulltiming=true;
+static final boolean dofulltiming=false;
 
 void start_timing(int func)
 {
@@ -1177,7 +1177,9 @@ boolean ReadAssign() throws BasicException {
       if (machine.petspeed.is_compiled(pnt)) { 
 	if (verbose) System.out.printf("Found compiled at %d\n",pnt); 
 	
-	machine.petspeed.execute(pnt);
+	try {
+	  machine.petspeed.execute(pnt);
+	} catch (EvaluateException e) { throw new BasicException("EXECUTE ERROR"); }
         // jump the pointer
 	pnt=machine.petspeed.nextpnt(pnt);
         ReadColon();
@@ -1496,7 +1498,9 @@ boolean ProcessIFstatement() throws BasicException
       if (speeder && machine.petspeed.is_compiled(pnt)) { 
 	       if (verbose) System.out.printf("Found compiled at %d\n",pnt); 
 	
-	       machine.petspeed.execute(pnt);
+	       try {
+	         machine.petspeed.execute(pnt);
+	       } catch (EvaluateException e) { throw new BasicException("EXECUTE ERROR"); }
          gt= new GenericType(machine.petspeed.result());
          // jump the pointer
 	       pnt=machine.petspeed.nextpnt(pnt);

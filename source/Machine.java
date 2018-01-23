@@ -151,7 +151,7 @@ public class Machine {
     attachScreen(screen);
   }
 
-  boolean speeder=true;
+  boolean speeder=false;
   Petspeed petspeed=null;
 
   public void initialise_machine() {
@@ -162,7 +162,14 @@ public class Machine {
     evaluate_engine.verbose=false;
     evaluate_engine.quiet=true;
     System.setProperty("java.net.useSystemProxies", "true");
+  }
+
+  void switchSpeeder(boolean sw) {
+    speeder=sw;
     if (speeder) petspeed=new Petspeed(this);
+    evaluate_engine.speeder_compile=speeder;
+    statements.speeder=speeder; // static- on the class itself will it work? yes, any will get this
+    if (speeder || verbose) { System.out.printf("Petspeed switched %s\n",speeder?"ON":"OFF"); }
   }
   //////////////////////////////////
   // Machine configuration

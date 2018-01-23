@@ -99,6 +99,7 @@ class C64 {
 
   public C64(String args[]) {
     boolean runImmediate=false;
+    boolean speeder=false;
     boolean specialGOTO=false;
     boolean exitImmediate=false;
 
@@ -141,6 +142,7 @@ class C64 {
           System.out.printf("  -x : exit immediately\n");
           System.out.printf("  -2 : double size\n");
           System.out.printf("  -3 : triple size\n");
+          System.out.printf("  -z : petspeed\n");
         } else if (args[i].substring(0,2).equals("-b")) {
           blankscreen=true;
         } else if (args[i].substring(0,2).equals("-n")) {
@@ -149,6 +151,8 @@ class C64 {
           C64Screen.static_bgtrans=true;
         } else if (args[i].substring(0,2).equals("-x")) {
           exitImmediate=true;
+        } else if (args[i].substring(0,2).equals("-z")) {
+          speeder=true;
         } else if (args[i].substring(0,2).equals("-2")) {
           C64Screen.static_scale=2;
         } else if (args[i].substring(0,2).equals("-3")) {
@@ -167,6 +171,7 @@ class C64 {
 
 //    machine=new Machine(screen=new C64Screen("C64")); // new way of attaching screen
     machine=new Machine(screen=new C64Screen("ijk64")); // new way of attaching screen
+    machine.switchSpeeder(speeder);
     C64Screen.static_centre=false;
     C64PopupMenu pop=new C64PopupMenu(machine,screen); // keep a reference to it for returning things
 
