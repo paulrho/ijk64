@@ -362,7 +362,9 @@ class evaluate {
       if (speeder_compile) { save_compiled_asm=compiled_asm; compiled_obj=compiled_obj+","+function; // we will unwind this if it is a variable array
 	      compiled_asm+="  FNC "+function+"\n";
 	      //System.out.printf(",%s",function);
-	      using_machine.petspeed.addInstr(Petspeed.I_FNC | Petspeed.ftoken(function));
+	      int ft=Petspeed.ftoken(function);
+                if (verbose && ft<0) System.out.printf("A-COMPILER could not find %s (okay if array)\n",function);
+	      using_machine.petspeed.addInstr(Petspeed.I_FNC | ft);
       }
 
       if (function.length()>=2 && function.substring(0,2).equals("fn")) {
@@ -842,7 +844,9 @@ class evaluate {
       if (!oper.equals("(")) {
 	    compiled_asm+="  PRF Str "+oper+"\n";
 	    // if (!oper.equals("(")) System.out.printf(",%s",oper);
-	    using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Str | Petspeed.ftoken(oper));
+	      int ft=Petspeed.ftoken(oper);
+                if (verbose && ft<0) System.out.printf("A-COMPILER could not find %s (okay if array)\n",oper);
+	    using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Str | ft);
       }
     }
     // returns a number
@@ -877,7 +881,9 @@ class evaluate {
       if (!oper.equals("(")) {
 	    compiled_asm+="  PRF Dbl "+oper+"\n";
 	    // if (!oper.equals("(")) System.out.printf(",%s",oper);
-	    using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Dbl | Petspeed.ftoken(oper));
+	      int ft=Petspeed.ftoken(oper);
+                if (verbose && ft<0) System.out.printf("A-COMPILER could not find %s (okay if array)\n",oper);
+	    using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Dbl | ft);
       }
     }
     double answer=0.0;
@@ -1239,7 +1245,13 @@ class evaluate {
 				       int v = using_machine.getvarindex(building.toLowerCase());
 		compiled_asm+="  PSH "+ (value.isNum()?"Dbl":"Str") + " MEM: "+building+"="+String.valueOf(v)+"\n";
                 // System.out.printf(",%s",building);
-		if (v<0) System.out.printf("A-COMPILER could not find variable %s\n",building);
+		if (v<0) {
+		  if (verbose) System.out.printf("A-COMPILER could not find variable %s\n",building);
+	          int ft=Petspeed.ftoken(building);
+		    if (ft<0) System.out.printf("A-COMPILER could not find variable %s or special function variable\n",building);
+		 // assuming this is a special variable, we will treat it like a function with no params
+	          using_machine.petspeed.addInstr(Petspeed.I_FNC | ft);
+		} else
 	          using_machine.petspeed.addInstr(Petspeed.I_PSH | ((value.isNum())?Petspeed.T_Dbl:Petspeed.T_Str) | Petspeed.M_MEM,v);
 	      }
               if (value.isNum()) {

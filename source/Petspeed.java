@@ -50,7 +50,7 @@ class Petspeed
       if (O_strings[i].equals(f)) return i;
     for (int i=0; i<F_strings.length; ++i)
       if (F_strings[i].equals(f)) return i;
-    System.out.printf("A-COMPILER could not find %s\n",f);
+    //if (using_machine.verbose) System.out.printf("A-COMPILER could not find %s (okay if array)\n",f);
     return -1;
   }
 
@@ -61,6 +61,7 @@ class Petspeed
   double astack_d[]=new double[AMAX];
   String astack_s[]=new String[AMAX];
   int atop=0;
+  java.text.SimpleDateFormat localDateFormat = new java.text.SimpleDateFormat("HHmmss"); // for TI$ efficiency
 
   boolean execute(int x) throws EvaluateException {
     boolean verbose=using_machine.verbose;
@@ -111,6 +112,17 @@ class Petspeed
 	  astack_d[atop-1]= Math.exp(astack_d[atop-1]);
 	  break;
 
+	case I_FNC | F_val : 
+          // takes a string but returns a double
+          try {
+            astack_d[atop-1]=Double.parseDouble(astack_s[atop-1]); 
+          } catch (Exception e) { 
+            // maybe just a "." should be coverted to 0 or a ""???
+            // throw new EvaluateException("NON NUMERIC STRING"); // look at what the C64 really does
+            astack_d[atop-1]=0.0;
+          }
+	  break;
+
 	case I_FNC | F_midD : 
           try {          
 	    astack_s[atop-3]=astack_s[atop-3].substring((int)astack_d[atop-2]-1,(int)astack_d[atop-2]-1+(int)astack_d[atop-1]);
@@ -119,6 +131,50 @@ class Petspeed
           } catch(Exception e) {
             throw new EvaluateException("BAD SUBSTRING INDEX");              
           }
+	  break;
+	case I_FNC | F_leftD : 
+          try {          
+	    astack_s[atop-2]=astack_s[atop-2].substring(0,(int)astack_d[atop-1]);
+	    atop--;
+          } catch(Exception e) {
+            throw new EvaluateException("BAD SUBSTRING INDEX");              
+          }
+	  break;
+	case I_FNC | F_strD : 
+	  // I think the leading space is wrong - it should be -ve if it is.... FIX
+	  if (astack_d[atop-1]-(int)astack_d[atop-1]==0.0) {
+	    astack_s[atop-1]=" "+(int)astack_d[atop-1];
+          } else {
+	    astack_s[atop-1]=" "+(new Double(astack_d[atop-1]).toString());
+          }
+	  break;
+	case I_FNC | F_len : 
+          try {          
+	    astack_d[atop-1]=astack_s[atop-1].length();
+          } catch(Exception e) {
+            throw new EvaluateException("BAD SUBSTRING INDEX");              
+          }
+	  break;
+
+	case I_FNC | F_peek : 
+	  astack_d[atop-1]=using_machine.peek((int)astack_d[atop-1]);
+	  break;
+
+	case I_FNC | F_var_ti : 
+	  astack_d[atop++]= (double)(int)((System.currentTimeMillis()/16.66666666)%1073741824);
+	  break;
+	case I_FNC | F_var_st : 
+	  astack_d[atop++]= 0; // FIX
+	  break;
+	case I_FNC | F_var_tiD : 
+	  astack_s[atop++]= localDateFormat.format( System.currentTimeMillis());
+	  break;
+	case I_FNC | F_var_pi : 
+	  astack_d[atop++]= Math.PI;
+	  break;
+
+	case I_PRF | T_Str | O_add : 
+	  astack_s[atop-2]= astack_s[atop-2] + astack_s[atop-1]; atop--;
 	  break;
 
 	case I_PRF | O_pow : 
@@ -319,10 +375,17 @@ class Petspeed
   static final int F_rightD=18;
   static final int F_strD=19;
   static final int F_chrD=20;
+  static final int F_var_ti=21;
+  static final int F_var_st=22;
+  static final int F_var_tiD=23;
+  static final int F_var_pi=24;
+  static final int F_peek=25;
 
   static String O_strings[]={"^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<=","<>"};
   static String F_strings[]={"sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp",
-	                     "len","val","asc","mid$","left$","right$","str$","chr$"};
+	                     "len","val","asc","mid$","left$","right$","str$","chr$",
+                             "ti","st","ti$","mathpi",
+                             "peek"};
   //enum { I_PRF, I_PSH, I_STO, I_FNC, I_HLT };           //0..5  (3 bits)
 
   // enum { T_Dbl, T_Str };                                //0..1  (1 bit)
