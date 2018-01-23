@@ -82,6 +82,17 @@ class Petspeed
 	case I_FNC | F_log : 
 	  astack_d[atop-1]= Math.log(astack_d[atop-1]);
 	  break;
+	case I_FNC | F_tan : 
+	  astack_d[atop-1]= Math.tan(astack_d[atop-1]);
+	  break;
+	case I_FNC | F_atn : 
+	  astack_d[atop-1]= Math.atan(astack_d[atop-1]);
+	  break;
+	case I_FNC | F_sqr : 
+	case I_FNC | F_sqrt : 
+	  astack_d[atop-1]= Math.sqrt(astack_d[atop-1]);
+	  break;
+
 	case I_PRF | O_pow : 
 	  astack_d[atop-2]= Math.pow(astack_d[atop-2],astack_d[atop-1]); atop--;
 	  break;
@@ -103,18 +114,26 @@ class Petspeed
 	case I_PSH | T_Dbl | M_IMM : 
 	  astack_d[atop++]=pargD[i];
 	  break;
+	case I_PSH | T_Dbl | M_MEM : 
+	  astack_d[atop++]=using_machine.variables.variablevalue[pargmem[i]];
+	  break;
 	case I_PSH | T_Dbl | M_MEMARR1 : 
 	  astack_d[atop-1]=using_machine.variables.variablearrayvalue1[pargmem[i]][(int)astack_d[atop-1]];
+	  break;
+	case I_PSH | T_Dbl | M_MEMARR2 : 
+	  astack_d[atop-2]=using_machine.variables.variablearrayvalue2[pargmem[i]][(int)astack_d[atop-1]][(int)astack_d[atop-2]];
+    atop--;
+	  break;
+	case I_STO | T_Dbl | M_MEM : 
+	  using_machine.variables.variablevalue[pargmem[i]]=astack_d[--atop];
 	  break;
 	case I_STO | T_Dbl | M_MEMARR1 : 
 	  using_machine.variables.variablearrayvalue1[pargmem[i]][(int)astack_d[atop-2]]=astack_d[atop-1];
 	  atop--; atop--;
 	  break;
-	case I_PSH | T_Dbl | M_MEM : 
-	  astack_d[atop++]=using_machine.variables.variablevalue[pargmem[i]];
-	  break;
-	case I_STO | T_Dbl | M_MEM : 
-	  using_machine.variables.variablevalue[pargmem[i]]=astack_d[--atop];
+	case I_STO | T_Dbl | M_MEMARR2 : 
+	  using_machine.variables.variablearrayvalue2[pargmem[i]][(int)astack_d[atop-3]][(int)astack_d[atop-2]]=astack_d[atop-1];
+	  atop--; atop--; atop--;
 	  break;
 	default:
           if (verbose) System.out.printf("X ");
@@ -184,9 +203,13 @@ class Petspeed
   static final int F_cos=1;
   static final int F_int=2;
   static final int F_log=3;
+  static final int F_sqr=4;
+  static final int F_sqrt=5;
+  static final int F_atn=6;
+  static final int F_tan=7;
 
   static String O_strings[]={"^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<="};
-  static String F_strings[]={"sin","cos","int","log"};
+  static String F_strings[]={"sin","cos","int","log","sqr","sqrt","atn","tan"};
   //enum { I_PRF, I_PSH, I_STO, I_FNC, I_HLT };           //0..5  (3 bits)
 
   // enum { T_Dbl, T_Str };                                //0..1  (1 bit)
