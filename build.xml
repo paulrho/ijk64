@@ -132,6 +132,15 @@
     </java>
   </target>
 
+  <target name="runz" description="run the program in server mode" depends="dist">
+    <java jar="${dist}/ijk64.jar" fork="true" maxmemory="128m" dir="basic">
+       <jvmarg value="-server"/>
+       <arg value="-c"/>
+       <arg value="-2"/>
+       <arg value="-z"/>
+    </java>
+  </target>
+
   <!-- spawn="yes" would be good - but we see no output!-->
   <!-- normal "run" is transparent and no frames - this now requires command line options -->
   <target name="runclear" description="run the program" depends="dist">
