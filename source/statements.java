@@ -1502,7 +1502,28 @@ boolean ProcessIFstatement() throws BasicException
   // IF the evaluated expression is true (non zero), continue...
   // otherwise read out rest of line and skip to new line
   //if (machine.evaluate(keepExpression)==0.0) { // num only returns a num
-  GenericType gt=machine.evaluate(keepExpression); // so that verbose works
+  
+  
+  
+  GenericType gt;
+      if (speeder && machine.petspeed.is_compiled(pnt)) { 
+	       if (verbose) System.out.printf("Found compiled at %d\n",pnt); 
+	
+	       machine.petspeed.execute(pnt);
+         gt= new GenericType(machine.petspeed.result());
+         // jump the pointer
+	       pnt=machine.petspeed.nextpnt(pnt);
+      } else {
+
+  if (speeder) { machine.petspeed.savestart(pnt); }
+  if (speeder) { machine.evaluate_engine.speeder_compile=true; }
+  gt=machine.evaluate(keepExpression); // so that verbose works
+  if (speeder) { machine.evaluate_engine.speeder_compile=false; }
+  if (speeder) { machine.petspeed.saveacode(pnt); }
+
+     }
+
+
   if (verbose) { System.out.printf("  evaluates to %s\n",gt.print()); }
   if (gt.equals(0.0)) { // num only returns a num
     // read everthing to the end of line
