@@ -1489,6 +1489,19 @@ boolean ProcessPRINThashstatement() throws BasicException
 
 boolean ProcessIFstatement() throws BasicException
 {
+  if (speeder) { machine.petspeed.savestart(pnt); }
+
+  
+  GenericType gt;
+      if (speeder && machine.petspeed.is_compiled(pnt)) { 
+	       if (verbose) System.out.printf("Found compiled at %d\n",pnt); 
+	
+	       machine.petspeed.execute(pnt);
+         gt= new GenericType(machine.petspeed.result());
+         // jump the pointer
+	       pnt=machine.petspeed.nextpnt(pnt);
+      } else {
+
   ReadExpression();
   
   if (verbose) { System.out.printf("MachineEvaluate( %s )\n",keepExpression); }
@@ -1504,18 +1517,8 @@ boolean ProcessIFstatement() throws BasicException
   //if (machine.evaluate(keepExpression)==0.0) { // num only returns a num
   
   
-  
-  GenericType gt;
-      if (speeder && machine.petspeed.is_compiled(pnt)) { 
-	       if (verbose) System.out.printf("Found compiled at %d\n",pnt); 
-	
-	       machine.petspeed.execute(pnt);
-         gt= new GenericType(machine.petspeed.result());
-         // jump the pointer
-	       pnt=machine.petspeed.nextpnt(pnt);
-      } else {
 
-  if (speeder) { machine.petspeed.savestart(pnt); }
+
   if (speeder) { machine.evaluate_engine.speeder_compile=true; }
   gt=machine.evaluate(keepExpression); // so that verbose works
   if (speeder) { machine.evaluate_engine.speeder_compile=false; }

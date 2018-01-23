@@ -50,6 +50,7 @@ class Petspeed
       if (O_strings[i].equals(f)) return i;
     for (int i=0; i<F_strings.length; ++i)
       if (F_strings[i].equals(f)) return i;
+    System.out.printf("A-COMPILER could not find %s\n",f);
     return -1;
   }
 
@@ -58,9 +59,10 @@ class Petspeed
   //////////////////////////////////////////////////////////////////////
   static final int AMAX=100;
   double astack_d[]=new double[AMAX];
+  String astack_s[]=new String[AMAX];
   int atop=0;
 
-  boolean execute(int x) {
+  boolean execute(int x) throws EvaluateException {
     boolean verbose=using_machine.verbose;
     for (int i=acpointer[x]; i<MAX; ++i) {
       //if (prog[i]==I_HLT) break;
@@ -68,7 +70,7 @@ class Petspeed
       switch(prog[i]) {
         case I_HLT: 
           if (verbose) System.out.printf("\n");
-	  if (atop!=0) System.out.printf("atop not at zero\n");
+	  if (atop!=0 && atop!=1) System.out.printf("atop not at zero or one\n");
           return true;
 	case I_FNC | F_sin : 
 	  astack_d[atop-1]= Math.sin(astack_d[atop-1]);
@@ -97,6 +99,26 @@ class Petspeed
 	  break;
 	case I_FNC | F_acos : 
 	  astack_d[atop-1]= Math.acos(astack_d[atop-1]);
+	  break;
+	case I_FNC | F_abs : 
+	  astack_d[atop-1]= Math.abs(astack_d[atop-1]);
+	  break;
+	case I_FNC | F_rnd : 
+          if (astack_d[atop-1]<0) { using_machine.evaluate_engine.generator = new java.util.Random((long)-astack_d[atop-1]); } // added this in for seeds
+	  astack_d[atop-1]=using_machine.evaluate_engine.generator.nextDouble();
+	  break;
+	case I_FNC | F_exp : 
+	  astack_d[atop-1]= Math.exp(astack_d[atop-1]);
+	  break;
+
+	case I_FNC | F_midD : 
+          try {          
+	    astack_s[atop-3]=astack_s[atop-3].substring((int)astack_d[atop-2]-1,(int)astack_d[atop-2]-1+(int)astack_d[atop-1]);
+	    atop--;
+	    atop--;
+          } catch(Exception e) {
+            throw new EvaluateException("BAD SUBSTRING INDEX");              
+          }
 	  break;
 
 	case I_PRF | O_pow : 
@@ -151,6 +173,37 @@ class Petspeed
 	case I_PRF | O_xor : 
 	  astack_d[atop-2]= (((int)(astack_d[atop-2])) ^ ((int)(astack_d[atop-1]))); atop--;
 	  break;
+
+	case I_PRF | T_Str | O_ne : 
+	  astack_d[atop-2]= (astack_s[atop-2].equals(astack_s[atop-1]))?0:-1; atop--;
+	  break;
+	case I_PRF | T_Str | O_eq : 
+	  astack_d[atop-2]= (astack_s[atop-2].equals(astack_s[atop-1]))?-1:0; atop--;
+	  break;
+	case I_PSH | T_Str | M_IMM : 
+	  astack_s[atop++]=pargS[i];
+	  break;
+	case I_PSH | T_Str | M_MEM : 
+	  astack_s[atop++]=using_machine.variables.variablestring[pargmem[i]];
+	  break;
+	case I_PSH | T_Str | M_MEMARR1 : 
+	  astack_s[atop-1]=using_machine.variables.variablearraystring1[pargmem[i]][(int)astack_d[atop-1]];
+	  break;
+	case I_PSH | T_Str | M_MEMARR2 : 
+	  astack_s[atop-2]=using_machine.variables.variablearraystring2[pargmem[i]][(int)astack_d[atop-2]][(int)astack_d[atop-1]]; atop--;
+	  break;
+	case I_STO | T_Str | M_MEM : 
+	  using_machine.variables.variablestring[pargmem[i]]=astack_s[--atop];
+	  break;
+	case I_STO | T_Str | M_MEMARR1 : 
+	  using_machine.variables.variablearraystring1[pargmem[i]][(int)astack_d[atop-2]]=astack_s[atop-1];
+	  atop--; atop--;
+	  break;
+	case I_STO | T_Str | M_MEMARR2 : 
+	  using_machine.variables.variablearraystring2[pargmem[i]][(int)astack_d[atop-3]][(int)astack_d[atop-2]]=astack_s[atop-1];
+	  atop--; atop--; atop--;
+	  break;
+
 	case I_PSH | T_Dbl | M_IMM : 
 	  astack_d[atop++]=pargD[i];
 	  break;
@@ -161,8 +214,8 @@ class Petspeed
 	  astack_d[atop-1]=using_machine.variables.variablearrayvalue1[pargmem[i]][(int)astack_d[atop-1]];
 	  break;
 	case I_PSH | T_Dbl | M_MEMARR2 : 
-	  astack_d[atop-2]=using_machine.variables.variablearrayvalue2[pargmem[i]][(int)astack_d[atop-1]][(int)astack_d[atop-2]];
-    atop--;
+	  astack_d[atop-2]=using_machine.variables.variablearrayvalue2[pargmem[i]][(int)astack_d[atop-2]][(int)astack_d[atop-1]];
+          atop--;
 	  break;
 	case I_STO | T_Dbl | M_MEM : 
 	  using_machine.variables.variablevalue[pargmem[i]]=astack_d[--atop];
@@ -220,8 +273,8 @@ class Petspeed
   static final int I_FNC=3<<8;
   static final int I_HLT=4<<8;
 
-  static final int T_Dbl=0<<6;
-  static final int T_Str=1<<6;
+  static final int T_Dbl=0<<7;
+  static final int T_Str=1<<7;
 
   static final int M_IMM=0<<5;
   static final int M_MEM=1<<5;
@@ -255,9 +308,21 @@ class Petspeed
   static final int F_tan=7;
   static final int F_asin=8;
   static final int F_acos=9;
+  static final int F_abs=10;
+  static final int F_rnd=11;
+  static final int F_exp=12;
+  static final int F_len=13;
+  static final int F_val=14;
+  static final int F_asc=15;
+  static final int F_midD=16;
+  static final int F_leftD=17;
+  static final int F_rightD=18;
+  static final int F_strD=19;
+  static final int F_chrD=20;
 
   static String O_strings[]={"^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<=","<>"};
-  static String F_strings[]={"sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos"};
+  static String F_strings[]={"sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp",
+	                     "len","val","asc","mid$","left$","right$","str$","chr$"};
   //enum { I_PRF, I_PSH, I_STO, I_FNC, I_HLT };           //0..5  (3 bits)
 
   // enum { T_Dbl, T_Str };                                //0..1  (1 bit)
