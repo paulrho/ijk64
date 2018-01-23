@@ -92,6 +92,12 @@ class Petspeed
 	case I_FNC | F_sqrt : 
 	  astack_d[atop-1]= Math.sqrt(astack_d[atop-1]);
 	  break;
+	case I_FNC | F_asin : 
+	  astack_d[atop-1]= Math.asin(astack_d[atop-1]);
+	  break;
+	case I_FNC | F_acos : 
+	  astack_d[atop-1]= Math.acos(astack_d[atop-1]);
+	  break;
 
 	case I_PRF | O_pow : 
 	  astack_d[atop-2]= Math.pow(astack_d[atop-2],astack_d[atop-1]); atop--;
@@ -110,6 +116,40 @@ class Petspeed
 	  break;
 	case I_PRF | O_div : 
 	  astack_d[atop-2]= astack_d[atop-2] / astack_d[atop-1]; atop--;
+	  break;
+	case I_PRF | O_lt : 
+	  astack_d[atop-2]= (astack_d[atop-2] < astack_d[atop-1])?-1:0; atop--;
+	  break;
+	case I_PRF | O_le : 
+	  astack_d[atop-2]= (astack_d[atop-2] <= astack_d[atop-1])?-1:0; atop--;
+	  break;
+	case I_PRF | O_eq : 
+	  astack_d[atop-2]= (astack_d[atop-2] == astack_d[atop-1])?-1:0; atop--;
+	  break;
+	case I_PRF | O_ge : 
+	  astack_d[atop-2]= (astack_d[atop-2] >= astack_d[atop-1])?-1:0; atop--;
+	  break;
+	case I_PRF | O_gt : 
+	  astack_d[atop-2]= (astack_d[atop-2] > astack_d[atop-1])?-1:0; atop--;
+	  break;
+	case I_PRF | O_ne : 
+	  astack_d[atop-2]= (astack_d[atop-2] != astack_d[atop-1])?-1:0; atop--;
+	  break;
+         //if (oper.equals("or")) { answer=(double)(((int)(left)) | ((int)(right))); }
+    //else if (oper.equals("xor")) { answer=(double)(((int)(left)) ^ ((int)(right))); }
+    //else if (oper.equals("and")) { answer=(double)(((int)(left)) & ((int)(right))); }
+    //else if (oper.equals("not")) { answer=(double)(~(int)(right)); }
+	case I_PRF | O_not : 
+	  astack_d[atop-1]= (double)(~(int)(astack_d[atop-1]));
+	  break;
+	case I_PRF | O_and : 
+	  astack_d[atop-2]= (((int)(astack_d[atop-2])) & ((int)(astack_d[atop-1]))); atop--;
+	  break;
+	case I_PRF | O_or : 
+	  astack_d[atop-2]= (((int)(astack_d[atop-2])) | ((int)(astack_d[atop-1]))); atop--;
+	  break;
+	case I_PRF | O_xor : 
+	  astack_d[atop-2]= (((int)(astack_d[atop-2])) ^ ((int)(astack_d[atop-1]))); atop--;
 	  break;
 	case I_PSH | T_Dbl | M_IMM : 
 	  astack_d[atop++]=pargD[i];
@@ -146,6 +186,11 @@ class Petspeed
     return true;
   }
 
+  double result()
+  {
+    // just pop the last result
+	  return astack_d[--atop];
+  }
   //////////////////////////////////////////////////////////////////////
   ///
   //////////////////////////////////////////////////////////////////////
@@ -198,6 +243,7 @@ class Petspeed
   static final int O_gt=12;
   static final int O_ge=13;
   static final int O_le=14;
+  static final int O_ne=15;
 
   static final int F_sin=0;
   static final int F_cos=1;
@@ -207,9 +253,11 @@ class Petspeed
   static final int F_sqrt=5;
   static final int F_atn=6;
   static final int F_tan=7;
+  static final int F_asin=8;
+  static final int F_acos=9;
 
-  static String O_strings[]={"^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<="};
-  static String F_strings[]={"sin","cos","int","log","sqr","sqrt","atn","tan"};
+  static String O_strings[]={"^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<=","<>"};
+  static String F_strings[]={"sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos"};
   //enum { I_PRF, I_PSH, I_STO, I_FNC, I_HLT };           //0..5  (3 bits)
 
   // enum { T_Dbl, T_Str };                                //0..1  (1 bit)
