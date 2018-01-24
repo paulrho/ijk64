@@ -146,6 +146,14 @@ class Petspeed
             throw new EvaluateException("BAD SUBSTRING INDEX");              
           }
 	  break;
+	case I_FNC | F_rightD : 
+          try {          
+	    astack_s[atop-2]=astack_s[atop-2].substring(astack_s[atop-2].length()-(int)astack_d[atop-1]);
+	    atop--;
+          } catch(Exception e) {
+            throw new EvaluateException("BAD SUBSTRING INDEX");              
+          }
+	  break;
 	case I_FNC | F_strD : 
 	  // I think the leading space is wrong - it should be -ve if it is.... FIX
 	  if (astack_d[atop-1]-(int)astack_d[atop-1]==0.0) {
@@ -164,6 +172,12 @@ class Petspeed
 
 	case I_FNC | F_peek : 
 	  astack_d[atop-1]=using_machine.peek((int)astack_d[atop-1]);
+	  break;
+	case I_FNC | F_pos : 
+	  {
+            int cursx=using_machine.machinescreen.cursX;
+            astack_d[atop-1]=cursx;
+          }
 	  break;
 
 	case I_FNC | F_var_ti : 
@@ -211,6 +225,7 @@ class Petspeed
 	  astack_d[atop-2]= (astack_d[atop-2] == astack_d[atop-1])?-1:0; atop--;
 	  break;
 	case I_PRF | O_ge : 
+	case I_PRF | O_ge2 : 
 	  astack_d[atop-2]= (astack_d[atop-2] >= astack_d[atop-1])?-1:0; atop--;
 	  break;
 	case I_PRF | O_gt : 
@@ -359,6 +374,7 @@ class Petspeed
   static final int O_ge=13;
   static final int O_le=14;
   static final int O_ne=15;
+  static final int O_ge2=16;
 
   static final int F_sin=0;
   static final int F_cos=1;
@@ -389,12 +405,15 @@ class Petspeed
   static final int F_var_pi=26;
   static final int F_peek=27;
   static final int F_fre=28;
+  static final int F_pos=29;
+  static final int F_tab=30;
+  static final int F_spc=31;
 
-  static String O_strings[]={"^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<=","<>"};
+  static String O_strings[]={"^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<=","<>","=>"};
   static String F_strings[]={"sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",
 	                     "len","val","asc","mid$","left$","right$","str$","chr$","instr",
                              "ti","st","ti$","mathpi",
-                             "peek","fre"};
+                             "peek","fre","pos","tab","spc"};
   //enum { I_PRF, I_PSH, I_STO, I_FNC, I_HLT };           //0..5  (3 bits)
 
   // enum { T_Dbl, T_Str };                                //0..1  (1 bit)
