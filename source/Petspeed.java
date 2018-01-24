@@ -344,73 +344,79 @@ class Petspeed
 
 
   // Instruction Type Mode Operation Function
-  static final int I_PRF=0<<8;
-  static final int I_PSH=1<<8;
-  static final int I_STO=2<<8;
-  static final int I_FNC=3<<8;
-  static final int I_HLT=4<<8;
+  static final int I_PRF=0<<6; // was 8
+  static final int I_PSH=1<<6;
+  static final int I_STO=2<<6;
+  static final int I_FNC=3<<6;
+  //static final int I_HLT=4<<6; // this could be turned into FNC HLT and would save a bit!
 
-  static final int T_Dbl=0<<7;
-  static final int T_Str=1<<7;
 
-  static final int M_IMM=0<<5;
-  static final int M_MEM=1<<5;
-  static final int M_MEMARR1=2<<5;
-  static final int M_MEMARR2=3<<5;
+  static final int T_Dbl=0<<5; // was 7
+  static final int T_Str=1<<5;
 
-  static final int O_pow=0;
-  static final int O_mul=1;
-  static final int O_div=2;
-  static final int O_add=3;
-  static final int O_sub=4;
-  static final int O_neg=5;
-  static final int O_not=6;
-  static final int O_and=7;
-  static final int O_or=8;
-  static final int O_xor=9;
-  static final int O_eq=10;
-  static final int O_lt=11;
-  static final int O_gt=12;
-  static final int O_ge=13;
-  static final int O_le=14;
-  static final int O_ne=15;
-  static final int O_ge2=16;
+  static final int M_IMM=0<<3; // was 5
+  static final int M_MEM=1<<3;
+  static final int M_MEMARR1=2<<3;
+  static final int M_MEMARR2=3<<3;
 
-  static final int F_sin=0;
-  static final int F_cos=1;
-  static final int F_int=2;
-  static final int F_log=3;
-  static final int F_sqr=4;
-  static final int F_sqrt=5;
-  static final int F_atn=6;
-  static final int F_tan=7;
-  static final int F_asin=8;
-  static final int F_acos=9;
-  static final int F_abs=10;
-  static final int F_rnd=11;
-  static final int F_exp=12;
-  static final int F_sgn=13;
-  static final int F_len=14;
-  static final int F_val=15;
-  static final int F_asc=16;
-  static final int F_midD=17;
-  static final int F_leftD=18;
-  static final int F_rightD=19;
-  static final int F_strD=20;
-  static final int F_chrD=21;
-  static final int F_instr=22;
-  static final int F_var_ti=23;
-  static final int F_var_st=24;
-  static final int F_var_tiD=25;
-  static final int F_var_pi=26;
-  static final int F_peek=27;
-  static final int F_fre=28;
-  static final int F_pos=29;
-  static final int F_tab=30;
-  static final int F_spc=31;
+  // can overflow M .: 5 bits = 32 vals
+  static final int O_futureexp=0;
+  static final int O_pow=1;
+  static final int O_mul=2;
+  static final int O_div=3;
+  static final int O_add=4;
+  static final int O_sub=5;
+  static final int O_neg=6;
+  static final int O_not=7;
+  static final int O_and=8;
+  static final int O_or=9;
+  static final int O_xor=10;
+  static final int O_eq=11;
+  static final int O_lt=12;
+  static final int O_gt=13;
+  static final int O_ge=14;
+  static final int O_le=15;
+  static final int O_ne=16;
+  static final int O_ge2=17;
 
-  static String O_strings[]={"^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<=","<>","=>"};
-  static String F_strings[]={"sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",
+  // these can overflow into the M bits and T, which aren't used for FNC .: 6 bits 64 vals
+  static final int F_HLT=0;
+  static final int I_HLT=I_FNC | F_HLT; 
+  static final int F_sin=1;
+  static final int F_cos=2;
+  static final int F_int=3;
+  static final int F_log=4;
+  static final int F_sqr=5;
+  static final int F_sqrt=6;
+  static final int F_atn=7;
+  static final int F_tan=8;
+  static final int F_asin=9;
+  static final int F_acos=10;
+  static final int F_abs=11;
+  static final int F_rnd=12;
+  static final int F_exp=13;
+  static final int F_sgn=14;
+  static final int F_len=15;
+  static final int F_val=16;
+  static final int F_asc=17;
+  static final int F_midD=18;
+  static final int F_leftD=19;
+  static final int F_rightD=20;
+  static final int F_strD=21;
+  static final int F_chrD=22;
+  static final int F_instr=23;
+  static final int F_var_ti=24;
+  static final int F_var_st=25;
+  static final int F_var_tiD=26;
+  static final int F_var_pi=27;
+  static final int F_peek=28;
+  static final int F_fre=29;
+  static final int F_pos=30;
+  static final int F_tab=31;
+  static final int F_spc=32;
+
+  static String O_strings[]={"XXXXXX","^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<=","<>","=>"};
+  static String F_strings[]={"HLTXXX","sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",
 	                     "len","val","asc","mid$","left$","right$","str$","chr$","instr",
                              "ti","st","ti$","mathpi",
                              "peek","fre","pos","tab","spc"};

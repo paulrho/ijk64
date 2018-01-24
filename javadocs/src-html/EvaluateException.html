@@ -1828,37 +1828,36 @@
 <span class="sourceLineNo">1820</span>                                         //compiled_obj+="["+String.valueOf((int)stknum[stackvar+i+1])+"]"; // no this doesn't make sense - we are a compiler!<a name="line.1820"></a>
 <span class="sourceLineNo">1821</span>                      // System.out.printf(".%s\n",stkfunc[stackp].toLowerCase());<a name="line.1821"></a>
 <span class="sourceLineNo">1822</span>                      // System.out.printf("RPNALG: STO -&gt; %s\n",stkfunc[stackp].toLowerCase());<a name="line.1822"></a>
-<span class="sourceLineNo">1823</span>                  using_machine.petspeed.addInstr(Petspeed.I_STO | ((rv.isNum())?Petspeed.T_Dbl:Petspeed.T_Str) | <a name="line.1823"></a>
-<span class="sourceLineNo">1824</span>                                  ((parameters&lt;=1)?Petspeed.M_MEMARR1:Petspeed.M_MEMARR2)<a name="line.1824"></a>
-<span class="sourceLineNo">1825</span>                                  , v);<a name="line.1825"></a>
+<span class="sourceLineNo">1823</span>                  using_machine.petspeed.addInstr(Petspeed.I_STO | ((rv.isNum())?Petspeed.T_Dbl:Petspeed.T_Str) | ((parameters&lt;=1)?Petspeed.M_MEMARR1:Petspeed.M_MEMARR2)<a name="line.1823"></a>
+<span class="sourceLineNo">1824</span>                                  , v);<a name="line.1824"></a>
+<span class="sourceLineNo">1825</span>              }<a name="line.1825"></a>
 <span class="sourceLineNo">1826</span>              }<a name="line.1826"></a>
-<span class="sourceLineNo">1827</span>              }<a name="line.1827"></a>
-<span class="sourceLineNo">1828</span>          }<a name="line.1828"></a>
-<span class="sourceLineNo">1829</span>          parameters=0;<a name="line.1829"></a>
-<span class="sourceLineNo">1830</span>        } else if (stkop[stackp].equals(OP_OPEN_BRACKET)) {<a name="line.1830"></a>
-<span class="sourceLineNo">1831</span>          // we have an array<a name="line.1831"></a>
-<span class="sourceLineNo">1832</span>          parameters=1;<a name="line.1832"></a>
-<span class="sourceLineNo">1833</span>          stackvar=stackp;<a name="line.1833"></a>
-<span class="sourceLineNo">1834</span>        } else if (stkop[stackp].equals(OP_COMMA)) {<a name="line.1834"></a>
-<span class="sourceLineNo">1835</span>          /** COMMA **/<a name="line.1835"></a>
-<span class="sourceLineNo">1836</span>          /* should this be checked for the open bracket, e.g. if paraeters is 0 now, then this is wrong ?? */<a name="line.1836"></a>
-<span class="sourceLineNo">1837</span>          parameters++;<a name="line.1837"></a>
-<span class="sourceLineNo">1838</span>        }<a name="line.1838"></a>
-<span class="sourceLineNo">1839</span>      }<a name="line.1839"></a>
-<span class="sourceLineNo">1840</span>    }<a name="line.1840"></a>
-<span class="sourceLineNo">1841</span><a name="line.1841"></a>
-<span class="sourceLineNo">1842</span>}<a name="line.1842"></a>
-<span class="sourceLineNo">1843</span>  class EvaluateException extends Exception {<a name="line.1843"></a>
-<span class="sourceLineNo">1844</span>    EvaluateException() {<a name="line.1844"></a>
-<span class="sourceLineNo">1845</span>    }<a name="line.1845"></a>
-<span class="sourceLineNo">1846</span>    EvaluateException(String msg) {<a name="line.1846"></a>
-<span class="sourceLineNo">1847</span>        super(msg);<a name="line.1847"></a>
-<span class="sourceLineNo">1848</span>    }<a name="line.1848"></a>
-<span class="sourceLineNo">1849</span>  }<a name="line.1849"></a>
-<span class="sourceLineNo">1850</span><a name="line.1850"></a>
-<span class="sourceLineNo">1851</span>/////////<a name="line.1851"></a>
-<span class="sourceLineNo">1852</span>// END //<a name="line.1852"></a>
-<span class="sourceLineNo">1853</span>/////////<a name="line.1853"></a>
+<span class="sourceLineNo">1827</span>          }<a name="line.1827"></a>
+<span class="sourceLineNo">1828</span>          parameters=0;<a name="line.1828"></a>
+<span class="sourceLineNo">1829</span>        } else if (stkop[stackp].equals(OP_OPEN_BRACKET)) {<a name="line.1829"></a>
+<span class="sourceLineNo">1830</span>          // we have an array<a name="line.1830"></a>
+<span class="sourceLineNo">1831</span>          parameters=1;<a name="line.1831"></a>
+<span class="sourceLineNo">1832</span>          stackvar=stackp;<a name="line.1832"></a>
+<span class="sourceLineNo">1833</span>        } else if (stkop[stackp].equals(OP_COMMA)) {<a name="line.1833"></a>
+<span class="sourceLineNo">1834</span>          /** COMMA **/<a name="line.1834"></a>
+<span class="sourceLineNo">1835</span>          /* should this be checked for the open bracket, e.g. if paraeters is 0 now, then this is wrong ?? */<a name="line.1835"></a>
+<span class="sourceLineNo">1836</span>          parameters++;<a name="line.1836"></a>
+<span class="sourceLineNo">1837</span>        }<a name="line.1837"></a>
+<span class="sourceLineNo">1838</span>      }<a name="line.1838"></a>
+<span class="sourceLineNo">1839</span>    }<a name="line.1839"></a>
+<span class="sourceLineNo">1840</span><a name="line.1840"></a>
+<span class="sourceLineNo">1841</span>}<a name="line.1841"></a>
+<span class="sourceLineNo">1842</span>  class EvaluateException extends Exception {<a name="line.1842"></a>
+<span class="sourceLineNo">1843</span>    EvaluateException() {<a name="line.1843"></a>
+<span class="sourceLineNo">1844</span>    }<a name="line.1844"></a>
+<span class="sourceLineNo">1845</span>    EvaluateException(String msg) {<a name="line.1845"></a>
+<span class="sourceLineNo">1846</span>        super(msg);<a name="line.1846"></a>
+<span class="sourceLineNo">1847</span>    }<a name="line.1847"></a>
+<span class="sourceLineNo">1848</span>  }<a name="line.1848"></a>
+<span class="sourceLineNo">1849</span><a name="line.1849"></a>
+<span class="sourceLineNo">1850</span>/////////<a name="line.1850"></a>
+<span class="sourceLineNo">1851</span>// END //<a name="line.1851"></a>
+<span class="sourceLineNo">1852</span>/////////<a name="line.1852"></a>
 
 
 

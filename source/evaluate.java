@@ -1820,8 +1820,7 @@ void ProcessAssignment() throws EvaluateException {
 		                         //compiled_obj+="["+String.valueOf((int)stknum[stackvar+i+1])+"]"; // no this doesn't make sense - we are a compiler!
 		      // System.out.printf(".%s\n",stkfunc[stackp].toLowerCase());
 		      // System.out.printf("RPNALG: STO -> %s\n",stkfunc[stackp].toLowerCase());
-	          using_machine.petspeed.addInstr(Petspeed.I_STO | ((rv.isNum())?Petspeed.T_Dbl:Petspeed.T_Str) | 
-				  ((parameters<=1)?Petspeed.M_MEMARR1:Petspeed.M_MEMARR2)
+	          using_machine.petspeed.addInstr(Petspeed.I_STO | ((rv.isNum())?Petspeed.T_Dbl:Petspeed.T_Str) | ((parameters<=1)?Petspeed.M_MEMARR1:Petspeed.M_MEMARR2)
 				  , v);
               }
 	      }
