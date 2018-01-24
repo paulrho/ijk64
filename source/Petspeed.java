@@ -37,6 +37,7 @@ class Petspeed
       pargmem[tmptop]=argmem;
       pargS[tmptop]=argS;
       if (using_machine.verbose) System.out.printf("%d %d %d %f %s\n",tmptop,prog[tmptop],pargmem[tmptop],pargD[tmptop],pargS[tmptop]);
+      //if (instr<0) System.out.printf("-1 INSTRUCTION\n"); // debug FIX
       tmptop++;
       return 1;
     } else return 0;
@@ -110,6 +111,11 @@ class Petspeed
 	  break;
 	case I_FNC | F_exp : 
 	  astack_d[atop-1]= Math.exp(astack_d[atop-1]);
+	  break;
+	case I_FNC | F_sgn : 
+	  if (astack_d[atop-1]<0.0) astack_d[atop-1]=-1.0;
+	  else if (astack_d[atop-1]==0.0) astack_d[atop-1]=0.0;
+	  else astack_d[atop-1]=1.0;
 	  break;
 
 	case I_FNC | F_val : 
@@ -286,7 +292,7 @@ class Petspeed
 	  break;
 	default:
           if (verbose) System.out.printf("X ");
-          System.out.printf("Instruction Fault\n");
+          System.out.printf("Instruction Fault at %d instruction %d\n",i,prog[i]);
 	  // should through an error! Instruction Fault
 	  break;
       }
@@ -367,25 +373,28 @@ class Petspeed
   static final int F_abs=10;
   static final int F_rnd=11;
   static final int F_exp=12;
-  static final int F_len=13;
-  static final int F_val=14;
-  static final int F_asc=15;
-  static final int F_midD=16;
-  static final int F_leftD=17;
-  static final int F_rightD=18;
-  static final int F_strD=19;
-  static final int F_chrD=20;
-  static final int F_var_ti=21;
-  static final int F_var_st=22;
-  static final int F_var_tiD=23;
-  static final int F_var_pi=24;
-  static final int F_peek=25;
+  static final int F_sgn=13;
+  static final int F_len=14;
+  static final int F_val=15;
+  static final int F_asc=16;
+  static final int F_midD=17;
+  static final int F_leftD=18;
+  static final int F_rightD=19;
+  static final int F_strD=20;
+  static final int F_chrD=21;
+  static final int F_instr=22;
+  static final int F_var_ti=23;
+  static final int F_var_st=24;
+  static final int F_var_tiD=25;
+  static final int F_var_pi=26;
+  static final int F_peek=27;
+  static final int F_fre=28;
 
   static String O_strings[]={"^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<=","<>"};
-  static String F_strings[]={"sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp",
-	                     "len","val","asc","mid$","left$","right$","str$","chr$",
+  static String F_strings[]={"sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",
+	                     "len","val","asc","mid$","left$","right$","str$","chr$","instr",
                              "ti","st","ti$","mathpi",
-                             "peek"};
+                             "peek","fre"};
   //enum { I_PRF, I_PSH, I_STO, I_FNC, I_HLT };           //0..5  (3 bits)
 
   // enum { T_Dbl, T_Str };                                //0..1  (1 bit)
