@@ -64,7 +64,7 @@ class Petspeed
   int atop=0;
   java.text.SimpleDateFormat localDateFormat = new java.text.SimpleDateFormat("HHmmss"); // for TI$ efficiency
 
-  boolean execute(int x) throws EvaluateException {
+  int execute(int x) throws EvaluateException {
     boolean verbose=using_machine.verbose;
     for (int i=acpointer[x]; i<MAX; ++i) {
       //if (prog[i]==I_HLT) break;
@@ -73,7 +73,7 @@ class Petspeed
         case I_HLT: 
           if (verbose) System.out.printf("\n");
 	  if (atop!=0 && atop!=1) System.out.printf("atop not at zero or one\n");
-          return true;
+	  return nextpnt(x);
 	case I_FNC | F_sin : 
 	  astack_d[atop-1]= Math.sin(astack_d[atop-1]);
 	  break;
@@ -313,7 +313,8 @@ class Petspeed
       }
       if (verbose) System.out.printf("\n");
     }
-    return true;
+    //return nextpnt(x); // we've gone off the end
+    return -1;
   }
 
   double result()
@@ -321,6 +322,26 @@ class Petspeed
     // just pop the last result
 	  return astack_d[--atop];
   }
+
+  //GenericType result() {
+    //if (verbose) { System.out.printf("upto=%d\n",upto); }
+    //GenericType gt; //only allow list of 
+    //if (stktype[0]==ST_NUM) {
+      //gt=new GenericType(stknum[0]);
+    //} else {
+      //if (verbose) { System.out.printf("Returning a string type from evaluate\n"); }
+      //gt=new GenericType(stkstring[0]);
+    //}
+    //// if there are more, add to it
+    //for (int i=1; i<upto; ++i) {
+      //if (stktype[i]==ST_NUM) {
+        //gt.add(stknum[i],upto);
+      //} else {
+        //gt.add(stkstring[i],upto);
+      //}
+    //}
+    //return gt;
+  //}
   //////////////////////////////////////////////////////////////////////
   ///
   //////////////////////////////////////////////////////////////////////
@@ -354,10 +375,10 @@ class Petspeed
   static final int T_Dbl=0<<5; // was 7
   static final int T_Str=1<<5;
 
-  static final int M_IMM=0<<3; // was 5
-  static final int M_MEM=1<<3;
-  static final int M_MEMARR1=2<<3;
-  static final int M_MEMARR2=3<<3;
+  static final int M_IMM=0<<0; // was 5, then 3
+  static final int M_MEM=1<<0;
+  static final int M_MEMARR1=2<<0;
+  static final int M_MEMARR2=3<<0;
 
   // can overflow M .: 5 bits = 32 vals
   static final int O_futureexp=0;
