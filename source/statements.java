@@ -152,7 +152,7 @@ String[] basicTokens={
   ,"IMAGESAVE"
   ,"DIR","PWD","CHDIR","MKDIR"
   ,"ON"
-  ,"DEF","LET"
+  ,"DEF","LET","SLOW"
   ,"HELP"
 };
 static final int ST_FOR=0;
@@ -232,7 +232,9 @@ static final int ST_ON=68;
 static final int ST_DEF=69;
 static final int ST_LET=70;
 
-static final int ST_HELP=71;
+static final int ST_SLOW=71;
+
+static final int ST_HELP=72;
 
 
 String line;
@@ -709,7 +711,11 @@ boolean ReadStatement() throws BasicException
       case ST_REM: if (ProcessREMstatement()) { return true; } break;
       case ST_PRINThash: // because it would have gone elsewhere
         if (ProcessPRINThashstatement()) { return true; } break;
-      case ST_FAST:  // I wish
+      case ST_FAST:  // I wish - wish true: compiler for expressions!
+	machine.switchSpeeder(true); // see if this works CHECK
+        if (ProcessIGNOREstatement()) { return true; } break;
+      case ST_SLOW: 
+	machine.switchSpeeder(false); // see if this works CHECK
         if (ProcessIGNOREstatement()) { return true; } break;
       case ST_RESTORE: 
         machine.uptoDATA=0; // revert back again
@@ -883,7 +889,7 @@ boolean ReadStatement() throws BasicException
               // just to make sure it is all reset
               machine.graphicsDevice.resetDevice(
                 (int)gt.gtlist[1].num(),(int)gt.gtlist[2].num());
-              // and make sure it is visible again (in case you closed it)
+              // and make sure it is visible again (if you closed it)
               machine.graphicsDevice.setVisible(true);
               //if (true) machine.machinescreen.setVisible(true);
             }
@@ -894,7 +900,7 @@ boolean ReadStatement() throws BasicException
             } else {
               // just to make sure it is all reset
               machine.graphicsDevice.resetDevice();
-              // and make sure it is visible again (in case you closed it)
+              // and make sure it is visible again (if you closed it)
               machine.graphicsDevice.setVisible(true);
               //if (true) machine.machinescreen.setVisible(true);
             }
@@ -1169,62 +1175,68 @@ boolean ReadStatement() throws BasicException
     return false;
 }
 
+//GenericType optReadExpressionEvaluate() throws BasicException {
+      //GenericType gt;
+      //if (speeder && machine.petspeed.is_compiled(pnt)) { 
+	//try {
+	  //pnt=machine.petspeed.execute(pnt);
+	  //// and jump the pointer
+	//} catch (EvaluateException e) { throw new BasicException("EXECUTE ERROR"); }
+      //} else {
+        //if (speeder) { machine.petspeed.savestart(pnt); }
+        //ReadExpression();
+        //if (speeder) { machine.evaluate_engine.speeder_compile=true; }
+ // 
+        ////machine.assignment(keepExpression);
+        //gt=machine.evaluate(keepExpression);
+ // 
+        //if (speeder) { machine.evaluate_engine.speeder_compile=false; }
+        //if (speeder) { machine.petspeed.saveacode(pnt); }
+      //}
+      //return gt;
+//}
+
 boolean ReadAssign() throws BasicException {
     // could be a null statement
     //if (ReadColon()) { return true; }
 
-    if (speeder) { 
-      if (machine.petspeed.is_compiled(pnt)) { 
-	if (verbose) System.out.printf("Found compiled at %d\n",pnt); 
-	
+      if (speeder && machine.petspeed.is_compiled(pnt)) { 
 	try {
-	  machine.petspeed.execute(pnt);
+	  pnt=machine.petspeed.execute(pnt);
+	  // and jump the pointer
 	} catch (EvaluateException e) { throw new BasicException("EXECUTE ERROR"); }
-        // jump the pointer
-	pnt=machine.petspeed.nextpnt(pnt);
-        ReadColon();
-        return true;
-      }
-    }
+      } else {
 
-    // could be an assignment
+                                                 // could be an assignment
                                                  if (dofulltiming) { start_timing(TIME_RAReadAssignment); }
-    if (true || ReadAssignment()) {        // just ignore this - seem what happens!
+                                                 ////if (fasle && ReadAssignment()) {        // just ignore this - seem what happens!
                                                  if (dofulltiming) { end_timing(TIME_RAReadAssignment); }
                                                  if (dofulltiming) { start_timing(TIME_ReadExpression); }
-//speeder
-      int sp_start=pnt;
+                                                 int sp_start=pnt;
       if (speeder) { machine.petspeed.savestart(pnt); }
       ReadExpression();
                                                  if (dofulltiming) { end_timing(TIME_ReadExpression); }
-
                                                  if (verbose) { System.out.printf("MachineVariableSet(variable=%s with evaluate( %s ))\n",keepVariable,keepExpression); }
-      // parse the keep variable in the machine to turn X(I+1) into X(42)
-
+                                                 // parse the keep variable in the machine to turn X(I+1) into X(42)
                                                  if (dofulltiming) { start_timing(TIME_massign); }
-      if (!true) { machine.assignment(keepVariable+"="+keepExpression); }
-
-      int sp_end=pnt;
-      if (speeder) if (verbose) { System.out.printf("ASSIGNMENT:(%d,%d,%s) %s\n",sp_start,sp_end,machine.getCurrentLine(sp_start),keepExpression); }
+                                                 //oldway if (!true) { machine.assignment(keepVariable+"="+keepExpression); }
+                                                 if (speeder) if (verbose) { System.out.printf("ASSIGNMENT:(%d,%d,%s) %s\n",sp_start,pnt,machine.getCurrentLine(sp_start),keepExpression); }
 
       if (speeder) { machine.evaluate_engine.speeder_compile=true; }
       machine.assignment(keepExpression);
       if (speeder) { machine.evaluate_engine.speeder_compile=false; }
-                                                 if (dofulltiming) { end_timing(TIME_massign); }
-      if (speeder) if (verbose) { System.out.printf("Compiled obj: %s\n",machine.evaluate_engine.compiled_obj); }
-      if (speeder) if (verbose) { System.out.printf("Compiled asm:\n%s",machine.evaluate_engine.compiled_asm); }
       if (speeder) { machine.petspeed.saveacode(pnt); }
+
+                                                 if (dofulltiming) { end_timing(TIME_massign); }
+                                                 if (speeder) if (verbose) { System.out.printf("Compiled obj: %s\n",machine.evaluate_engine.compiled_obj); }
+                                                 if (speeder) if (verbose) { System.out.printf("Compiled asm:\n%s",machine.evaluate_engine.compiled_asm); }
 
       //machine.setvariable(machine.parse(keepVariable),machine.evaluate(keepExpression));
       // just change this one for the moment - try new way
 
-      ReadColon();
-      return true;
-    } else {
-if (dofulltiming) { end_timing(TIME_RAReadAssignment); }
-      // Did not get token or assignment (was 103:)
-      return false;
     }
+    ReadColon();
+    return true;
 }
 
 //---------------------------------------------------------------------//
@@ -1667,7 +1679,7 @@ boolean ProcessRETURNstatement() throws BasicException
 
 boolean ProcessNEXTstatement() throws BasicException
 {
-  keepExpression=""; // in case it is nothing!
+  keepExpression=""; // for the scenario it is nothing!
   ReadExpression(); // not really, should just be a variable!!
   // split up between commas
   int at=0; 
