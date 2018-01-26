@@ -1,0 +1,8 @@
+
+TOFIX
+found 20180126
+
+c64 DEFFN param should be local
+c64 STR$(-5) should not return leading space
+c64 INT function should just truncate decimal, still allows very big values
+
