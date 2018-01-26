@@ -65,6 +65,7 @@ class Petspeed
   java.text.SimpleDateFormat localDateFormat = new java.text.SimpleDateFormat("HHmmss"); // for TI$ efficiency
 
   int execute(int x) throws EvaluateException {
+    try { // safety catch!
     boolean verbose=using_machine.verbose;
     for (int i=acpointer[x]; i<MAX; ++i) {
       //if (prog[i]==I_HLT) break;
@@ -129,6 +130,17 @@ class Petspeed
           }
 	  break;
 
+	case I_FNC | F_instr : 
+          astack_d[atop-2]=0;
+          for (int j=0; j<=astack_s[atop-2].length()-astack_s[atop-1].length(); ++j) {
+            if (astack_s[atop-2].substring(j,j+astack_s[atop-1].length()).equals(astack_s[atop-1])) {
+              astack_d[atop-2]=j+1;
+              break;
+            }
+          }
+	  atop--;
+	  break;
+
 	case I_FNC | F_midD : 
           try {          
 	    astack_s[atop-3]=astack_s[atop-3].substring((int)astack_d[atop-2]-1,(int)astack_d[atop-2]-1+(int)astack_d[atop-1]);
@@ -139,12 +151,16 @@ class Petspeed
           }
 	  break;
 	case I_FNC | F_leftD : 
-          try {          
-	    astack_s[atop-2]=astack_s[atop-2].substring(0,(int)astack_d[atop-1]);
+          //try {          
+	    //astack_s[atop-2]=astack_s[atop-2].substring(0,(int)astack_d[atop-1]);
+
+            if ((int)astack_d[atop-1]<=0) { astack_s[atop-2]=""; }
+            else if ((int)astack_d[atop-1]>astack_s[atop-2].length()) { }
+            else { astack_s[atop-2]=astack_s[atop-2].substring(0,(int)astack_d[atop-1]); }
 	    atop--;
-          } catch(Exception e) {
-            throw new EvaluateException("BAD SUBSTRING INDEX");              
-          }
+          //} catch(Exception e) {
+            //throw new EvaluateException("BAD SUBSTRING INDEX");              
+          //}
 	  break;
 	case I_FNC | F_rightD : 
           try {          
@@ -353,6 +369,13 @@ class Petspeed
       }
       if (verbose) System.out.printf("\n");
     }
+          } catch(Exception e) {
+	    //System.out.println(e.getMessage());
+	    e.printStackTrace();
+	    System.out.println(e);
+            throw new EvaluateException("BAD SUBSTRING INDEX");              
+          }
+    
     //return nextpnt(x); // we've gone off the end
     return -1;
   }
@@ -389,20 +412,36 @@ class Petspeed
   int nextpnt(int x) { return acpointer_next[x]; }
   int savestart_p=0;
   int savestart_ac=0;
-  boolean is_compiled(int x) { return acpointer[x]!=0; }
-  void savestart(int x) { savestart_p=x; savestart_ac=top; tmptop=top; record=true; }
+  boolean is_compiled(int x) { return acpointer[x]>0; }
+  void savestart(int x) { 
+	  // if <0 then it is a rejected compile, so dont try to recompile, just nod and carry on...
+	  if (acpointer[x]<0) return;
+	  savestart_p=x; savestart_ac=top; tmptop=top; 
+	  record=true; 
+          using_machine.evaluate_engine.speeder_compile=true;
+      // probably dont need both record and swith on speeder_compile
+  }
   void saveacode(int end) 
   {
-	  // push a HLT onto code
-	  addInstr(I_HLT); 
-	  acpointer[savestart_p]=savestart_ac;
-	  acpointer_next[savestart_p]=end;
-	  // this is now marked as a valid piece of code
-	  top=tmptop;
-          if (using_machine.verbose) System.out.printf("Saved code from %d to %d for location %d\n",savestart_ac,top,savestart_p);
-	  record=false;
+	  if (record) {
+	    // push a HLT onto code
+	    addInstr(I_HLT); 
+	    acpointer[savestart_p]=savestart_ac;
+	    acpointer_next[savestart_p]=end;
+	    // this is now marked as a valid piece of code
+	    top=tmptop;
+            if (using_machine.verbose) System.out.printf("Saved code from %d to %d for location %d\n",savestart_ac,top,savestart_p);
+	    record=false;
+            using_machine.evaluate_engine.speeder_compile=false;
+	  }
   }
 
+  void reject()
+  {
+    acpointer[savestart_p]=-1; // don't try to run acode or recompile this
+    record=false;
+    using_machine.evaluate_engine.speeder_compile=false;
+  }
 
   // Instruction Type Mode Operation Function
   static final int I_PRF=0<<6; // was 8

@@ -167,7 +167,6 @@ public class Machine {
   void switchSpeeder(boolean sw) {
     speeder=sw;
     if (speeder) petspeed=new Petspeed(this);
-    evaluate_engine.speeder_compile=speeder;
     statements.speeder=speeder; // static- on the class itself will it work? yes, any will get this
     if (speeder || verbose) { System.out.printf("Petspeed switched %s\n",speeder?"ON":"OFF"); }
   }
