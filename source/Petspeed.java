@@ -180,6 +180,39 @@ class Petspeed
           }
 	  break;
 
+	case I_FNC | F_asc : 
+	  {
+            if (astack_s[atop-1]=="") throw new EvaluateException("ILLEGAL QUANTITY");
+            int v=(int)((astack_s[atop-1].charAt(0))&0xFF);
+            if (v>=65&&v<=90) v+=128; 
+            else if (v>=65&&v<=90) v+=32;
+            else if (v>=97&&v<=122) v-=32; 
+            else if (v>=193&&v<=218) v-=96; 
+            else if (v==95) v=96; 
+            else if (v==96) v=95; 
+            else if (v==123) v=179; else if (v==179) v=123;
+            else if (v==124) v=125; 
+            else if (v==125) v=171; 
+            else if (v==171) v=124;  
+            astack_d[atop-1]=v;
+	  }
+	  break;
+	case I_FNC | F_chrD : 
+	  {
+            int v=(int)astack_d[atop-1];
+            if (v>=193&&v<=218) v=v-128; 
+            else if (v>=65&&v<=90) v=v+32; 
+            else if (v>=97&&v<=122) v=v+96; 
+            else if (v==95) v=96; 
+            else if (v==96) v=95; 
+            else if (v==123) v=179; else if (v==179) v=123;
+            else if (v==124) v=171; 
+            else if (v==125) v=124; 
+            else if (v==171) v=125;  
+            astack_s[atop-1]=""+(char)v;
+	  }
+	  break;
+
 	case I_FNC | F_var_ti : 
 	  astack_d[atop++]= (double)(int)((System.currentTimeMillis()/16.66666666)%1073741824);
 	  break;
@@ -251,6 +284,12 @@ class Petspeed
 	  astack_d[atop-2]= (((int)(astack_d[atop-2])) ^ ((int)(astack_d[atop-1]))); atop--;
 	  break;
 
+	case I_PRF | T_Str | O_gt : 
+	  astack_d[atop-2]= (astack_s[atop-2].compareTo(astack_s[atop-1])>0)?-1:0; atop--;
+	  break;
+	case I_PRF | T_Str | O_lt : 
+	  astack_d[atop-2]= (astack_s[atop-1].compareTo(astack_s[atop-2])>0)?-1:0; atop--;
+	  break;
 	case I_PRF | T_Str | O_ne : 
 	  astack_d[atop-2]= (astack_s[atop-2].equals(astack_s[atop-1]))?0:-1; atop--;
 	  break;
@@ -309,7 +348,8 @@ class Petspeed
           if (verbose) System.out.printf("X ");
           System.out.printf("Instruction Fault at %d instruction %d\n",i,prog[i]);
 	  // should through an error! Instruction Fault
-	  break;
+          throw new EvaluateException("INSTRUCTION FAULT");              
+	  //break;
       }
       if (verbose) System.out.printf("\n");
     }

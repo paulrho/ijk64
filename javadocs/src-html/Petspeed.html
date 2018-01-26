@@ -188,278 +188,318 @@
 <span class="sourceLineNo">180</span>          }<a name="line.180"></a>
 <span class="sourceLineNo">181</span>          break;<a name="line.181"></a>
 <span class="sourceLineNo">182</span><a name="line.182"></a>
-<span class="sourceLineNo">183</span>        case I_FNC | F_var_ti : <a name="line.183"></a>
-<span class="sourceLineNo">184</span>          astack_d[atop++]= (double)(int)((System.currentTimeMillis()/16.66666666)%1073741824);<a name="line.184"></a>
-<span class="sourceLineNo">185</span>          break;<a name="line.185"></a>
-<span class="sourceLineNo">186</span>        case I_FNC | F_var_st : <a name="line.186"></a>
-<span class="sourceLineNo">187</span>          astack_d[atop++]= 0; // FIX<a name="line.187"></a>
-<span class="sourceLineNo">188</span>          break;<a name="line.188"></a>
-<span class="sourceLineNo">189</span>        case I_FNC | F_var_tiD : <a name="line.189"></a>
-<span class="sourceLineNo">190</span>          astack_s[atop++]= localDateFormat.format( System.currentTimeMillis());<a name="line.190"></a>
-<span class="sourceLineNo">191</span>          break;<a name="line.191"></a>
-<span class="sourceLineNo">192</span>        case I_FNC | F_var_pi : <a name="line.192"></a>
-<span class="sourceLineNo">193</span>          astack_d[atop++]= Math.PI;<a name="line.193"></a>
-<span class="sourceLineNo">194</span>          break;<a name="line.194"></a>
-<span class="sourceLineNo">195</span><a name="line.195"></a>
-<span class="sourceLineNo">196</span>        case I_PRF | T_Str | O_add : <a name="line.196"></a>
-<span class="sourceLineNo">197</span>          astack_s[atop-2]= astack_s[atop-2] + astack_s[atop-1]; atop--;<a name="line.197"></a>
-<span class="sourceLineNo">198</span>          break;<a name="line.198"></a>
-<span class="sourceLineNo">199</span><a name="line.199"></a>
-<span class="sourceLineNo">200</span>        case I_PRF | O_pow : <a name="line.200"></a>
-<span class="sourceLineNo">201</span>          astack_d[atop-2]= Math.pow(astack_d[atop-2],astack_d[atop-1]); atop--;<a name="line.201"></a>
-<span class="sourceLineNo">202</span>          break;<a name="line.202"></a>
-<span class="sourceLineNo">203</span>        case I_PRF | O_neg : <a name="line.203"></a>
-<span class="sourceLineNo">204</span>          astack_d[atop-1]= -astack_d[atop-1];<a name="line.204"></a>
-<span class="sourceLineNo">205</span>          break;<a name="line.205"></a>
-<span class="sourceLineNo">206</span>        case I_PRF | O_mul : <a name="line.206"></a>
-<span class="sourceLineNo">207</span>          astack_d[atop-2]= astack_d[atop-2] * astack_d[atop-1]; atop--;<a name="line.207"></a>
-<span class="sourceLineNo">208</span>          break;<a name="line.208"></a>
-<span class="sourceLineNo">209</span>        case I_PRF | O_add : <a name="line.209"></a>
-<span class="sourceLineNo">210</span>          astack_d[atop-2]= astack_d[atop-2] + astack_d[atop-1]; atop--;<a name="line.210"></a>
-<span class="sourceLineNo">211</span>          break;<a name="line.211"></a>
-<span class="sourceLineNo">212</span>        case I_PRF | O_sub : <a name="line.212"></a>
-<span class="sourceLineNo">213</span>          astack_d[atop-2]= astack_d[atop-2] - astack_d[atop-1]; atop--;<a name="line.213"></a>
+<span class="sourceLineNo">183</span>        case I_FNC | F_asc : <a name="line.183"></a>
+<span class="sourceLineNo">184</span>          {<a name="line.184"></a>
+<span class="sourceLineNo">185</span>            if (astack_s[atop-1]=="") throw new EvaluateException("ILLEGAL QUANTITY");<a name="line.185"></a>
+<span class="sourceLineNo">186</span>            int v=(int)((astack_s[atop-1].charAt(0))&amp;0xFF);<a name="line.186"></a>
+<span class="sourceLineNo">187</span>            if (v&gt;=65&amp;&amp;v&lt;=90) v+=128; <a name="line.187"></a>
+<span class="sourceLineNo">188</span>            else if (v&gt;=65&amp;&amp;v&lt;=90) v+=32;<a name="line.188"></a>
+<span class="sourceLineNo">189</span>            else if (v&gt;=97&amp;&amp;v&lt;=122) v-=32; <a name="line.189"></a>
+<span class="sourceLineNo">190</span>            else if (v&gt;=193&amp;&amp;v&lt;=218) v-=96; <a name="line.190"></a>
+<span class="sourceLineNo">191</span>            else if (v==95) v=96; <a name="line.191"></a>
+<span class="sourceLineNo">192</span>            else if (v==96) v=95; <a name="line.192"></a>
+<span class="sourceLineNo">193</span>            else if (v==123) v=179; else if (v==179) v=123;<a name="line.193"></a>
+<span class="sourceLineNo">194</span>            else if (v==124) v=125; <a name="line.194"></a>
+<span class="sourceLineNo">195</span>            else if (v==125) v=171; <a name="line.195"></a>
+<span class="sourceLineNo">196</span>            else if (v==171) v=124;  <a name="line.196"></a>
+<span class="sourceLineNo">197</span>            astack_d[atop-1]=v;<a name="line.197"></a>
+<span class="sourceLineNo">198</span>          }<a name="line.198"></a>
+<span class="sourceLineNo">199</span>          break;<a name="line.199"></a>
+<span class="sourceLineNo">200</span>        case I_FNC | F_chrD : <a name="line.200"></a>
+<span class="sourceLineNo">201</span>          {<a name="line.201"></a>
+<span class="sourceLineNo">202</span>            int v=(int)astack_d[atop-1];<a name="line.202"></a>
+<span class="sourceLineNo">203</span>            if (v&gt;=193&amp;&amp;v&lt;=218) v=v-128; <a name="line.203"></a>
+<span class="sourceLineNo">204</span>            else if (v&gt;=65&amp;&amp;v&lt;=90) v=v+32; <a name="line.204"></a>
+<span class="sourceLineNo">205</span>            else if (v&gt;=97&amp;&amp;v&lt;=122) v=v+96; <a name="line.205"></a>
+<span class="sourceLineNo">206</span>            else if (v==95) v=96; <a name="line.206"></a>
+<span class="sourceLineNo">207</span>            else if (v==96) v=95; <a name="line.207"></a>
+<span class="sourceLineNo">208</span>            else if (v==123) v=179; else if (v==179) v=123;<a name="line.208"></a>
+<span class="sourceLineNo">209</span>            else if (v==124) v=171; <a name="line.209"></a>
+<span class="sourceLineNo">210</span>            else if (v==125) v=124; <a name="line.210"></a>
+<span class="sourceLineNo">211</span>            else if (v==171) v=125;  <a name="line.211"></a>
+<span class="sourceLineNo">212</span>            astack_s[atop-1]=""+(char)v;<a name="line.212"></a>
+<span class="sourceLineNo">213</span>          }<a name="line.213"></a>
 <span class="sourceLineNo">214</span>          break;<a name="line.214"></a>
-<span class="sourceLineNo">215</span>        case I_PRF | O_div : <a name="line.215"></a>
-<span class="sourceLineNo">216</span>          astack_d[atop-2]= astack_d[atop-2] / astack_d[atop-1]; atop--;<a name="line.216"></a>
-<span class="sourceLineNo">217</span>          break;<a name="line.217"></a>
-<span class="sourceLineNo">218</span>        case I_PRF | O_lt : <a name="line.218"></a>
-<span class="sourceLineNo">219</span>          astack_d[atop-2]= (astack_d[atop-2] &lt; astack_d[atop-1])?-1:0; atop--;<a name="line.219"></a>
-<span class="sourceLineNo">220</span>          break;<a name="line.220"></a>
-<span class="sourceLineNo">221</span>        case I_PRF | O_le : <a name="line.221"></a>
-<span class="sourceLineNo">222</span>          astack_d[atop-2]= (astack_d[atop-2] &lt;= astack_d[atop-1])?-1:0; atop--;<a name="line.222"></a>
-<span class="sourceLineNo">223</span>          break;<a name="line.223"></a>
-<span class="sourceLineNo">224</span>        case I_PRF | O_eq : <a name="line.224"></a>
-<span class="sourceLineNo">225</span>          astack_d[atop-2]= (astack_d[atop-2] == astack_d[atop-1])?-1:0; atop--;<a name="line.225"></a>
-<span class="sourceLineNo">226</span>          break;<a name="line.226"></a>
-<span class="sourceLineNo">227</span>        case I_PRF | O_ge : <a name="line.227"></a>
-<span class="sourceLineNo">228</span>        case I_PRF | O_ge2 : <a name="line.228"></a>
-<span class="sourceLineNo">229</span>          astack_d[atop-2]= (astack_d[atop-2] &gt;= astack_d[atop-1])?-1:0; atop--;<a name="line.229"></a>
-<span class="sourceLineNo">230</span>          break;<a name="line.230"></a>
-<span class="sourceLineNo">231</span>        case I_PRF | O_gt : <a name="line.231"></a>
-<span class="sourceLineNo">232</span>          astack_d[atop-2]= (astack_d[atop-2] &gt; astack_d[atop-1])?-1:0; atop--;<a name="line.232"></a>
-<span class="sourceLineNo">233</span>          break;<a name="line.233"></a>
-<span class="sourceLineNo">234</span>        case I_PRF | O_ne : <a name="line.234"></a>
-<span class="sourceLineNo">235</span>          astack_d[atop-2]= (astack_d[atop-2] != astack_d[atop-1])?-1:0; atop--;<a name="line.235"></a>
-<span class="sourceLineNo">236</span>          break;<a name="line.236"></a>
-<span class="sourceLineNo">237</span>         //if (oper.equals("or")) { answer=(double)(((int)(left)) | ((int)(right))); }<a name="line.237"></a>
-<span class="sourceLineNo">238</span>    //else if (oper.equals("xor")) { answer=(double)(((int)(left)) ^ ((int)(right))); }<a name="line.238"></a>
-<span class="sourceLineNo">239</span>    //else if (oper.equals("and")) { answer=(double)(((int)(left)) &amp; ((int)(right))); }<a name="line.239"></a>
-<span class="sourceLineNo">240</span>    //else if (oper.equals("not")) { answer=(double)(~(int)(right)); }<a name="line.240"></a>
-<span class="sourceLineNo">241</span>        case I_PRF | O_not : <a name="line.241"></a>
-<span class="sourceLineNo">242</span>          astack_d[atop-1]= (double)(~(int)(astack_d[atop-1]));<a name="line.242"></a>
-<span class="sourceLineNo">243</span>          break;<a name="line.243"></a>
-<span class="sourceLineNo">244</span>        case I_PRF | O_and : <a name="line.244"></a>
-<span class="sourceLineNo">245</span>          astack_d[atop-2]= (((int)(astack_d[atop-2])) &amp; ((int)(astack_d[atop-1]))); atop--;<a name="line.245"></a>
-<span class="sourceLineNo">246</span>          break;<a name="line.246"></a>
-<span class="sourceLineNo">247</span>        case I_PRF | O_or : <a name="line.247"></a>
-<span class="sourceLineNo">248</span>          astack_d[atop-2]= (((int)(astack_d[atop-2])) | ((int)(astack_d[atop-1]))); atop--;<a name="line.248"></a>
-<span class="sourceLineNo">249</span>          break;<a name="line.249"></a>
-<span class="sourceLineNo">250</span>        case I_PRF | O_xor : <a name="line.250"></a>
-<span class="sourceLineNo">251</span>          astack_d[atop-2]= (((int)(astack_d[atop-2])) ^ ((int)(astack_d[atop-1]))); atop--;<a name="line.251"></a>
-<span class="sourceLineNo">252</span>          break;<a name="line.252"></a>
-<span class="sourceLineNo">253</span><a name="line.253"></a>
-<span class="sourceLineNo">254</span>        case I_PRF | T_Str | O_ne : <a name="line.254"></a>
-<span class="sourceLineNo">255</span>          astack_d[atop-2]= (astack_s[atop-2].equals(astack_s[atop-1]))?0:-1; atop--;<a name="line.255"></a>
+<span class="sourceLineNo">215</span><a name="line.215"></a>
+<span class="sourceLineNo">216</span>        case I_FNC | F_var_ti : <a name="line.216"></a>
+<span class="sourceLineNo">217</span>          astack_d[atop++]= (double)(int)((System.currentTimeMillis()/16.66666666)%1073741824);<a name="line.217"></a>
+<span class="sourceLineNo">218</span>          break;<a name="line.218"></a>
+<span class="sourceLineNo">219</span>        case I_FNC | F_var_st : <a name="line.219"></a>
+<span class="sourceLineNo">220</span>          astack_d[atop++]= 0; // FIX<a name="line.220"></a>
+<span class="sourceLineNo">221</span>          break;<a name="line.221"></a>
+<span class="sourceLineNo">222</span>        case I_FNC | F_var_tiD : <a name="line.222"></a>
+<span class="sourceLineNo">223</span>          astack_s[atop++]= localDateFormat.format( System.currentTimeMillis());<a name="line.223"></a>
+<span class="sourceLineNo">224</span>          break;<a name="line.224"></a>
+<span class="sourceLineNo">225</span>        case I_FNC | F_var_pi : <a name="line.225"></a>
+<span class="sourceLineNo">226</span>          astack_d[atop++]= Math.PI;<a name="line.226"></a>
+<span class="sourceLineNo">227</span>          break;<a name="line.227"></a>
+<span class="sourceLineNo">228</span><a name="line.228"></a>
+<span class="sourceLineNo">229</span>        case I_PRF | T_Str | O_add : <a name="line.229"></a>
+<span class="sourceLineNo">230</span>          astack_s[atop-2]= astack_s[atop-2] + astack_s[atop-1]; atop--;<a name="line.230"></a>
+<span class="sourceLineNo">231</span>          break;<a name="line.231"></a>
+<span class="sourceLineNo">232</span><a name="line.232"></a>
+<span class="sourceLineNo">233</span>        case I_PRF | O_pow : <a name="line.233"></a>
+<span class="sourceLineNo">234</span>          astack_d[atop-2]= Math.pow(astack_d[atop-2],astack_d[atop-1]); atop--;<a name="line.234"></a>
+<span class="sourceLineNo">235</span>          break;<a name="line.235"></a>
+<span class="sourceLineNo">236</span>        case I_PRF | O_neg : <a name="line.236"></a>
+<span class="sourceLineNo">237</span>          astack_d[atop-1]= -astack_d[atop-1];<a name="line.237"></a>
+<span class="sourceLineNo">238</span>          break;<a name="line.238"></a>
+<span class="sourceLineNo">239</span>        case I_PRF | O_mul : <a name="line.239"></a>
+<span class="sourceLineNo">240</span>          astack_d[atop-2]= astack_d[atop-2] * astack_d[atop-1]; atop--;<a name="line.240"></a>
+<span class="sourceLineNo">241</span>          break;<a name="line.241"></a>
+<span class="sourceLineNo">242</span>        case I_PRF | O_add : <a name="line.242"></a>
+<span class="sourceLineNo">243</span>          astack_d[atop-2]= astack_d[atop-2] + astack_d[atop-1]; atop--;<a name="line.243"></a>
+<span class="sourceLineNo">244</span>          break;<a name="line.244"></a>
+<span class="sourceLineNo">245</span>        case I_PRF | O_sub : <a name="line.245"></a>
+<span class="sourceLineNo">246</span>          astack_d[atop-2]= astack_d[atop-2] - astack_d[atop-1]; atop--;<a name="line.246"></a>
+<span class="sourceLineNo">247</span>          break;<a name="line.247"></a>
+<span class="sourceLineNo">248</span>        case I_PRF | O_div : <a name="line.248"></a>
+<span class="sourceLineNo">249</span>          astack_d[atop-2]= astack_d[atop-2] / astack_d[atop-1]; atop--;<a name="line.249"></a>
+<span class="sourceLineNo">250</span>          break;<a name="line.250"></a>
+<span class="sourceLineNo">251</span>        case I_PRF | O_lt : <a name="line.251"></a>
+<span class="sourceLineNo">252</span>          astack_d[atop-2]= (astack_d[atop-2] &lt; astack_d[atop-1])?-1:0; atop--;<a name="line.252"></a>
+<span class="sourceLineNo">253</span>          break;<a name="line.253"></a>
+<span class="sourceLineNo">254</span>        case I_PRF | O_le : <a name="line.254"></a>
+<span class="sourceLineNo">255</span>          astack_d[atop-2]= (astack_d[atop-2] &lt;= astack_d[atop-1])?-1:0; atop--;<a name="line.255"></a>
 <span class="sourceLineNo">256</span>          break;<a name="line.256"></a>
-<span class="sourceLineNo">257</span>        case I_PRF | T_Str | O_eq : <a name="line.257"></a>
-<span class="sourceLineNo">258</span>          astack_d[atop-2]= (astack_s[atop-2].equals(astack_s[atop-1]))?-1:0; atop--;<a name="line.258"></a>
+<span class="sourceLineNo">257</span>        case I_PRF | O_eq : <a name="line.257"></a>
+<span class="sourceLineNo">258</span>          astack_d[atop-2]= (astack_d[atop-2] == astack_d[atop-1])?-1:0; atop--;<a name="line.258"></a>
 <span class="sourceLineNo">259</span>          break;<a name="line.259"></a>
-<span class="sourceLineNo">260</span>        case I_PSH | T_Str | M_IMM : <a name="line.260"></a>
-<span class="sourceLineNo">261</span>          astack_s[atop++]=pargS[i];<a name="line.261"></a>
-<span class="sourceLineNo">262</span>          break;<a name="line.262"></a>
-<span class="sourceLineNo">263</span>        case I_PSH | T_Str | M_MEM : <a name="line.263"></a>
-<span class="sourceLineNo">264</span>          astack_s[atop++]=using_machine.variables.variablestring[pargmem[i]];<a name="line.264"></a>
-<span class="sourceLineNo">265</span>          break;<a name="line.265"></a>
-<span class="sourceLineNo">266</span>        case I_PSH | T_Str | M_MEMARR1 : <a name="line.266"></a>
-<span class="sourceLineNo">267</span>          astack_s[atop-1]=using_machine.variables.variablearraystring1[pargmem[i]][(int)astack_d[atop-1]];<a name="line.267"></a>
-<span class="sourceLineNo">268</span>          break;<a name="line.268"></a>
-<span class="sourceLineNo">269</span>        case I_PSH | T_Str | M_MEMARR2 : <a name="line.269"></a>
-<span class="sourceLineNo">270</span>          astack_s[atop-2]=using_machine.variables.variablearraystring2[pargmem[i]][(int)astack_d[atop-2]][(int)astack_d[atop-1]]; atop--;<a name="line.270"></a>
-<span class="sourceLineNo">271</span>          break;<a name="line.271"></a>
-<span class="sourceLineNo">272</span>        case I_STO | T_Str | M_MEM : <a name="line.272"></a>
-<span class="sourceLineNo">273</span>          using_machine.variables.variablestring[pargmem[i]]=astack_s[--atop];<a name="line.273"></a>
-<span class="sourceLineNo">274</span>          break;<a name="line.274"></a>
-<span class="sourceLineNo">275</span>        case I_STO | T_Str | M_MEMARR1 : <a name="line.275"></a>
-<span class="sourceLineNo">276</span>          using_machine.variables.variablearraystring1[pargmem[i]][(int)astack_d[atop-2]]=astack_s[atop-1];<a name="line.276"></a>
-<span class="sourceLineNo">277</span>          atop--; atop--;<a name="line.277"></a>
-<span class="sourceLineNo">278</span>          break;<a name="line.278"></a>
-<span class="sourceLineNo">279</span>        case I_STO | T_Str | M_MEMARR2 : <a name="line.279"></a>
-<span class="sourceLineNo">280</span>          using_machine.variables.variablearraystring2[pargmem[i]][(int)astack_d[atop-3]][(int)astack_d[atop-2]]=astack_s[atop-1];<a name="line.280"></a>
-<span class="sourceLineNo">281</span>          atop--; atop--; atop--;<a name="line.281"></a>
+<span class="sourceLineNo">260</span>        case I_PRF | O_ge : <a name="line.260"></a>
+<span class="sourceLineNo">261</span>        case I_PRF | O_ge2 : <a name="line.261"></a>
+<span class="sourceLineNo">262</span>          astack_d[atop-2]= (astack_d[atop-2] &gt;= astack_d[atop-1])?-1:0; atop--;<a name="line.262"></a>
+<span class="sourceLineNo">263</span>          break;<a name="line.263"></a>
+<span class="sourceLineNo">264</span>        case I_PRF | O_gt : <a name="line.264"></a>
+<span class="sourceLineNo">265</span>          astack_d[atop-2]= (astack_d[atop-2] &gt; astack_d[atop-1])?-1:0; atop--;<a name="line.265"></a>
+<span class="sourceLineNo">266</span>          break;<a name="line.266"></a>
+<span class="sourceLineNo">267</span>        case I_PRF | O_ne : <a name="line.267"></a>
+<span class="sourceLineNo">268</span>          astack_d[atop-2]= (astack_d[atop-2] != astack_d[atop-1])?-1:0; atop--;<a name="line.268"></a>
+<span class="sourceLineNo">269</span>          break;<a name="line.269"></a>
+<span class="sourceLineNo">270</span>         //if (oper.equals("or")) { answer=(double)(((int)(left)) | ((int)(right))); }<a name="line.270"></a>
+<span class="sourceLineNo">271</span>    //else if (oper.equals("xor")) { answer=(double)(((int)(left)) ^ ((int)(right))); }<a name="line.271"></a>
+<span class="sourceLineNo">272</span>    //else if (oper.equals("and")) { answer=(double)(((int)(left)) &amp; ((int)(right))); }<a name="line.272"></a>
+<span class="sourceLineNo">273</span>    //else if (oper.equals("not")) { answer=(double)(~(int)(right)); }<a name="line.273"></a>
+<span class="sourceLineNo">274</span>        case I_PRF | O_not : <a name="line.274"></a>
+<span class="sourceLineNo">275</span>          astack_d[atop-1]= (double)(~(int)(astack_d[atop-1]));<a name="line.275"></a>
+<span class="sourceLineNo">276</span>          break;<a name="line.276"></a>
+<span class="sourceLineNo">277</span>        case I_PRF | O_and : <a name="line.277"></a>
+<span class="sourceLineNo">278</span>          astack_d[atop-2]= (((int)(astack_d[atop-2])) &amp; ((int)(astack_d[atop-1]))); atop--;<a name="line.278"></a>
+<span class="sourceLineNo">279</span>          break;<a name="line.279"></a>
+<span class="sourceLineNo">280</span>        case I_PRF | O_or : <a name="line.280"></a>
+<span class="sourceLineNo">281</span>          astack_d[atop-2]= (((int)(astack_d[atop-2])) | ((int)(astack_d[atop-1]))); atop--;<a name="line.281"></a>
 <span class="sourceLineNo">282</span>          break;<a name="line.282"></a>
-<span class="sourceLineNo">283</span><a name="line.283"></a>
-<span class="sourceLineNo">284</span>        case I_PSH | T_Dbl | M_IMM : <a name="line.284"></a>
-<span class="sourceLineNo">285</span>          astack_d[atop++]=pargD[i];<a name="line.285"></a>
-<span class="sourceLineNo">286</span>          break;<a name="line.286"></a>
-<span class="sourceLineNo">287</span>        case I_PSH | T_Dbl | M_MEM : <a name="line.287"></a>
-<span class="sourceLineNo">288</span>          astack_d[atop++]=using_machine.variables.variablevalue[pargmem[i]];<a name="line.288"></a>
+<span class="sourceLineNo">283</span>        case I_PRF | O_xor : <a name="line.283"></a>
+<span class="sourceLineNo">284</span>          astack_d[atop-2]= (((int)(astack_d[atop-2])) ^ ((int)(astack_d[atop-1]))); atop--;<a name="line.284"></a>
+<span class="sourceLineNo">285</span>          break;<a name="line.285"></a>
+<span class="sourceLineNo">286</span><a name="line.286"></a>
+<span class="sourceLineNo">287</span>        case I_PRF | T_Str | O_gt : <a name="line.287"></a>
+<span class="sourceLineNo">288</span>          astack_d[atop-2]= (astack_s[atop-2].compareTo(astack_s[atop-1])&gt;0)?-1:0; atop--;<a name="line.288"></a>
 <span class="sourceLineNo">289</span>          break;<a name="line.289"></a>
-<span class="sourceLineNo">290</span>        case I_PSH | T_Dbl | M_MEMARR1 : <a name="line.290"></a>
-<span class="sourceLineNo">291</span>          astack_d[atop-1]=using_machine.variables.variablearrayvalue1[pargmem[i]][(int)astack_d[atop-1]];<a name="line.291"></a>
+<span class="sourceLineNo">290</span>        case I_PRF | T_Str | O_lt : <a name="line.290"></a>
+<span class="sourceLineNo">291</span>          astack_d[atop-2]= (astack_s[atop-1].compareTo(astack_s[atop-2])&gt;0)?-1:0; atop--;<a name="line.291"></a>
 <span class="sourceLineNo">292</span>          break;<a name="line.292"></a>
-<span class="sourceLineNo">293</span>        case I_PSH | T_Dbl | M_MEMARR2 : <a name="line.293"></a>
-<span class="sourceLineNo">294</span>          astack_d[atop-2]=using_machine.variables.variablearrayvalue2[pargmem[i]][(int)astack_d[atop-2]][(int)astack_d[atop-1]];<a name="line.294"></a>
-<span class="sourceLineNo">295</span>          atop--;<a name="line.295"></a>
-<span class="sourceLineNo">296</span>          break;<a name="line.296"></a>
-<span class="sourceLineNo">297</span>        case I_STO | T_Dbl | M_MEM : <a name="line.297"></a>
-<span class="sourceLineNo">298</span>          using_machine.variables.variablevalue[pargmem[i]]=astack_d[--atop];<a name="line.298"></a>
-<span class="sourceLineNo">299</span>          break;<a name="line.299"></a>
-<span class="sourceLineNo">300</span>        case I_STO | T_Dbl | M_MEMARR1 : <a name="line.300"></a>
-<span class="sourceLineNo">301</span>          using_machine.variables.variablearrayvalue1[pargmem[i]][(int)astack_d[atop-2]]=astack_d[atop-1];<a name="line.301"></a>
-<span class="sourceLineNo">302</span>          atop--; atop--;<a name="line.302"></a>
-<span class="sourceLineNo">303</span>          break;<a name="line.303"></a>
-<span class="sourceLineNo">304</span>        case I_STO | T_Dbl | M_MEMARR2 : <a name="line.304"></a>
-<span class="sourceLineNo">305</span>          using_machine.variables.variablearrayvalue2[pargmem[i]][(int)astack_d[atop-3]][(int)astack_d[atop-2]]=astack_d[atop-1];<a name="line.305"></a>
-<span class="sourceLineNo">306</span>          atop--; atop--; atop--;<a name="line.306"></a>
+<span class="sourceLineNo">293</span>        case I_PRF | T_Str | O_ne : <a name="line.293"></a>
+<span class="sourceLineNo">294</span>          astack_d[atop-2]= (astack_s[atop-2].equals(astack_s[atop-1]))?0:-1; atop--;<a name="line.294"></a>
+<span class="sourceLineNo">295</span>          break;<a name="line.295"></a>
+<span class="sourceLineNo">296</span>        case I_PRF | T_Str | O_eq : <a name="line.296"></a>
+<span class="sourceLineNo">297</span>          astack_d[atop-2]= (astack_s[atop-2].equals(astack_s[atop-1]))?-1:0; atop--;<a name="line.297"></a>
+<span class="sourceLineNo">298</span>          break;<a name="line.298"></a>
+<span class="sourceLineNo">299</span>        case I_PSH | T_Str | M_IMM : <a name="line.299"></a>
+<span class="sourceLineNo">300</span>          astack_s[atop++]=pargS[i];<a name="line.300"></a>
+<span class="sourceLineNo">301</span>          break;<a name="line.301"></a>
+<span class="sourceLineNo">302</span>        case I_PSH | T_Str | M_MEM : <a name="line.302"></a>
+<span class="sourceLineNo">303</span>          astack_s[atop++]=using_machine.variables.variablestring[pargmem[i]];<a name="line.303"></a>
+<span class="sourceLineNo">304</span>          break;<a name="line.304"></a>
+<span class="sourceLineNo">305</span>        case I_PSH | T_Str | M_MEMARR1 : <a name="line.305"></a>
+<span class="sourceLineNo">306</span>          astack_s[atop-1]=using_machine.variables.variablearraystring1[pargmem[i]][(int)astack_d[atop-1]];<a name="line.306"></a>
 <span class="sourceLineNo">307</span>          break;<a name="line.307"></a>
-<span class="sourceLineNo">308</span>        default:<a name="line.308"></a>
-<span class="sourceLineNo">309</span>          if (verbose) System.out.printf("X ");<a name="line.309"></a>
-<span class="sourceLineNo">310</span>          System.out.printf("Instruction Fault at %d instruction %d\n",i,prog[i]);<a name="line.310"></a>
-<span class="sourceLineNo">311</span>          // should through an error! Instruction Fault<a name="line.311"></a>
-<span class="sourceLineNo">312</span>          break;<a name="line.312"></a>
-<span class="sourceLineNo">313</span>      }<a name="line.313"></a>
-<span class="sourceLineNo">314</span>      if (verbose) System.out.printf("\n");<a name="line.314"></a>
-<span class="sourceLineNo">315</span>    }<a name="line.315"></a>
-<span class="sourceLineNo">316</span>    //return nextpnt(x); // we've gone off the end<a name="line.316"></a>
-<span class="sourceLineNo">317</span>    return -1;<a name="line.317"></a>
-<span class="sourceLineNo">318</span>  }<a name="line.318"></a>
-<span class="sourceLineNo">319</span><a name="line.319"></a>
-<span class="sourceLineNo">320</span>  double result()<a name="line.320"></a>
-<span class="sourceLineNo">321</span>  {<a name="line.321"></a>
-<span class="sourceLineNo">322</span>    // just pop the last result<a name="line.322"></a>
-<span class="sourceLineNo">323</span>          return astack_d[--atop];<a name="line.323"></a>
-<span class="sourceLineNo">324</span>  }<a name="line.324"></a>
-<span class="sourceLineNo">325</span><a name="line.325"></a>
-<span class="sourceLineNo">326</span>  //GenericType result() {<a name="line.326"></a>
-<span class="sourceLineNo">327</span>    //if (verbose) { System.out.printf("upto=%d\n",upto); }<a name="line.327"></a>
-<span class="sourceLineNo">328</span>    //GenericType gt; //only allow list of <a name="line.328"></a>
-<span class="sourceLineNo">329</span>    //if (stktype[0]==ST_NUM) {<a name="line.329"></a>
-<span class="sourceLineNo">330</span>      //gt=new GenericType(stknum[0]);<a name="line.330"></a>
-<span class="sourceLineNo">331</span>    //} else {<a name="line.331"></a>
-<span class="sourceLineNo">332</span>      //if (verbose) { System.out.printf("Returning a string type from evaluate\n"); }<a name="line.332"></a>
-<span class="sourceLineNo">333</span>      //gt=new GenericType(stkstring[0]);<a name="line.333"></a>
-<span class="sourceLineNo">334</span>    //}<a name="line.334"></a>
-<span class="sourceLineNo">335</span>    //// if there are more, add to it<a name="line.335"></a>
-<span class="sourceLineNo">336</span>    //for (int i=1; i&lt;upto; ++i) {<a name="line.336"></a>
-<span class="sourceLineNo">337</span>      //if (stktype[i]==ST_NUM) {<a name="line.337"></a>
-<span class="sourceLineNo">338</span>        //gt.add(stknum[i],upto);<a name="line.338"></a>
-<span class="sourceLineNo">339</span>      //} else {<a name="line.339"></a>
-<span class="sourceLineNo">340</span>        //gt.add(stkstring[i],upto);<a name="line.340"></a>
-<span class="sourceLineNo">341</span>      //}<a name="line.341"></a>
-<span class="sourceLineNo">342</span>    //}<a name="line.342"></a>
-<span class="sourceLineNo">343</span>    //return gt;<a name="line.343"></a>
-<span class="sourceLineNo">344</span>  //}<a name="line.344"></a>
-<span class="sourceLineNo">345</span>  //////////////////////////////////////////////////////////////////////<a name="line.345"></a>
-<span class="sourceLineNo">346</span>  ///<a name="line.346"></a>
-<span class="sourceLineNo">347</span>  //////////////////////////////////////////////////////////////////////<a name="line.347"></a>
-<span class="sourceLineNo">348</span><a name="line.348"></a>
-<span class="sourceLineNo">349</span>  int nextpnt(int x) { return acpointer_next[x]; }<a name="line.349"></a>
-<span class="sourceLineNo">350</span>  int savestart_p=0;<a name="line.350"></a>
-<span class="sourceLineNo">351</span>  int savestart_ac=0;<a name="line.351"></a>
-<span class="sourceLineNo">352</span>  boolean is_compiled(int x) { return acpointer[x]!=0; }<a name="line.352"></a>
-<span class="sourceLineNo">353</span>  void savestart(int x) { savestart_p=x; savestart_ac=top; tmptop=top; record=true; }<a name="line.353"></a>
-<span class="sourceLineNo">354</span>  void saveacode(int end) <a name="line.354"></a>
-<span class="sourceLineNo">355</span>  {<a name="line.355"></a>
-<span class="sourceLineNo">356</span>          // push a HLT onto code<a name="line.356"></a>
-<span class="sourceLineNo">357</span>          addInstr(I_HLT); <a name="line.357"></a>
-<span class="sourceLineNo">358</span>          acpointer[savestart_p]=savestart_ac;<a name="line.358"></a>
-<span class="sourceLineNo">359</span>          acpointer_next[savestart_p]=end;<a name="line.359"></a>
-<span class="sourceLineNo">360</span>          // this is now marked as a valid piece of code<a name="line.360"></a>
-<span class="sourceLineNo">361</span>          top=tmptop;<a name="line.361"></a>
-<span class="sourceLineNo">362</span>          if (using_machine.verbose) System.out.printf("Saved code from %d to %d for location %d\n",savestart_ac,top,savestart_p);<a name="line.362"></a>
-<span class="sourceLineNo">363</span>          record=false;<a name="line.363"></a>
+<span class="sourceLineNo">308</span>        case I_PSH | T_Str | M_MEMARR2 : <a name="line.308"></a>
+<span class="sourceLineNo">309</span>          astack_s[atop-2]=using_machine.variables.variablearraystring2[pargmem[i]][(int)astack_d[atop-2]][(int)astack_d[atop-1]]; atop--;<a name="line.309"></a>
+<span class="sourceLineNo">310</span>          break;<a name="line.310"></a>
+<span class="sourceLineNo">311</span>        case I_STO | T_Str | M_MEM : <a name="line.311"></a>
+<span class="sourceLineNo">312</span>          using_machine.variables.variablestring[pargmem[i]]=astack_s[--atop];<a name="line.312"></a>
+<span class="sourceLineNo">313</span>          break;<a name="line.313"></a>
+<span class="sourceLineNo">314</span>        case I_STO | T_Str | M_MEMARR1 : <a name="line.314"></a>
+<span class="sourceLineNo">315</span>          using_machine.variables.variablearraystring1[pargmem[i]][(int)astack_d[atop-2]]=astack_s[atop-1];<a name="line.315"></a>
+<span class="sourceLineNo">316</span>          atop--; atop--;<a name="line.316"></a>
+<span class="sourceLineNo">317</span>          break;<a name="line.317"></a>
+<span class="sourceLineNo">318</span>        case I_STO | T_Str | M_MEMARR2 : <a name="line.318"></a>
+<span class="sourceLineNo">319</span>          using_machine.variables.variablearraystring2[pargmem[i]][(int)astack_d[atop-3]][(int)astack_d[atop-2]]=astack_s[atop-1];<a name="line.319"></a>
+<span class="sourceLineNo">320</span>          atop--; atop--; atop--;<a name="line.320"></a>
+<span class="sourceLineNo">321</span>          break;<a name="line.321"></a>
+<span class="sourceLineNo">322</span><a name="line.322"></a>
+<span class="sourceLineNo">323</span>        case I_PSH | T_Dbl | M_IMM : <a name="line.323"></a>
+<span class="sourceLineNo">324</span>          astack_d[atop++]=pargD[i];<a name="line.324"></a>
+<span class="sourceLineNo">325</span>          break;<a name="line.325"></a>
+<span class="sourceLineNo">326</span>        case I_PSH | T_Dbl | M_MEM : <a name="line.326"></a>
+<span class="sourceLineNo">327</span>          astack_d[atop++]=using_machine.variables.variablevalue[pargmem[i]];<a name="line.327"></a>
+<span class="sourceLineNo">328</span>          break;<a name="line.328"></a>
+<span class="sourceLineNo">329</span>        case I_PSH | T_Dbl | M_MEMARR1 : <a name="line.329"></a>
+<span class="sourceLineNo">330</span>          astack_d[atop-1]=using_machine.variables.variablearrayvalue1[pargmem[i]][(int)astack_d[atop-1]];<a name="line.330"></a>
+<span class="sourceLineNo">331</span>          break;<a name="line.331"></a>
+<span class="sourceLineNo">332</span>        case I_PSH | T_Dbl | M_MEMARR2 : <a name="line.332"></a>
+<span class="sourceLineNo">333</span>          astack_d[atop-2]=using_machine.variables.variablearrayvalue2[pargmem[i]][(int)astack_d[atop-2]][(int)astack_d[atop-1]];<a name="line.333"></a>
+<span class="sourceLineNo">334</span>          atop--;<a name="line.334"></a>
+<span class="sourceLineNo">335</span>          break;<a name="line.335"></a>
+<span class="sourceLineNo">336</span>        case I_STO | T_Dbl | M_MEM : <a name="line.336"></a>
+<span class="sourceLineNo">337</span>          using_machine.variables.variablevalue[pargmem[i]]=astack_d[--atop];<a name="line.337"></a>
+<span class="sourceLineNo">338</span>          break;<a name="line.338"></a>
+<span class="sourceLineNo">339</span>        case I_STO | T_Dbl | M_MEMARR1 : <a name="line.339"></a>
+<span class="sourceLineNo">340</span>          using_machine.variables.variablearrayvalue1[pargmem[i]][(int)astack_d[atop-2]]=astack_d[atop-1];<a name="line.340"></a>
+<span class="sourceLineNo">341</span>          atop--; atop--;<a name="line.341"></a>
+<span class="sourceLineNo">342</span>          break;<a name="line.342"></a>
+<span class="sourceLineNo">343</span>        case I_STO | T_Dbl | M_MEMARR2 : <a name="line.343"></a>
+<span class="sourceLineNo">344</span>          using_machine.variables.variablearrayvalue2[pargmem[i]][(int)astack_d[atop-3]][(int)astack_d[atop-2]]=astack_d[atop-1];<a name="line.344"></a>
+<span class="sourceLineNo">345</span>          atop--; atop--; atop--;<a name="line.345"></a>
+<span class="sourceLineNo">346</span>          break;<a name="line.346"></a>
+<span class="sourceLineNo">347</span>        default:<a name="line.347"></a>
+<span class="sourceLineNo">348</span>          if (verbose) System.out.printf("X ");<a name="line.348"></a>
+<span class="sourceLineNo">349</span>          System.out.printf("Instruction Fault at %d instruction %d\n",i,prog[i]);<a name="line.349"></a>
+<span class="sourceLineNo">350</span>          // should through an error! Instruction Fault<a name="line.350"></a>
+<span class="sourceLineNo">351</span>          throw new EvaluateException("INSTRUCTION FAULT");              <a name="line.351"></a>
+<span class="sourceLineNo">352</span>          //break;<a name="line.352"></a>
+<span class="sourceLineNo">353</span>      }<a name="line.353"></a>
+<span class="sourceLineNo">354</span>      if (verbose) System.out.printf("\n");<a name="line.354"></a>
+<span class="sourceLineNo">355</span>    }<a name="line.355"></a>
+<span class="sourceLineNo">356</span>    //return nextpnt(x); // we've gone off the end<a name="line.356"></a>
+<span class="sourceLineNo">357</span>    return -1;<a name="line.357"></a>
+<span class="sourceLineNo">358</span>  }<a name="line.358"></a>
+<span class="sourceLineNo">359</span><a name="line.359"></a>
+<span class="sourceLineNo">360</span>  double result()<a name="line.360"></a>
+<span class="sourceLineNo">361</span>  {<a name="line.361"></a>
+<span class="sourceLineNo">362</span>    // just pop the last result<a name="line.362"></a>
+<span class="sourceLineNo">363</span>          return astack_d[--atop];<a name="line.363"></a>
 <span class="sourceLineNo">364</span>  }<a name="line.364"></a>
 <span class="sourceLineNo">365</span><a name="line.365"></a>
-<span class="sourceLineNo">366</span><a name="line.366"></a>
-<span class="sourceLineNo">367</span>  // Instruction Type Mode Operation Function<a name="line.367"></a>
-<span class="sourceLineNo">368</span>  static final int I_PRF=0&lt;&lt;6; // was 8<a name="line.368"></a>
-<span class="sourceLineNo">369</span>  static final int I_PSH=1&lt;&lt;6;<a name="line.369"></a>
-<span class="sourceLineNo">370</span>  static final int I_STO=2&lt;&lt;6;<a name="line.370"></a>
-<span class="sourceLineNo">371</span>  static final int I_FNC=3&lt;&lt;6;<a name="line.371"></a>
-<span class="sourceLineNo">372</span>  //static final int I_HLT=4&lt;&lt;6; // this could be turned into FNC HLT and would save a bit!<a name="line.372"></a>
-<span class="sourceLineNo">373</span><a name="line.373"></a>
-<span class="sourceLineNo">374</span><a name="line.374"></a>
-<span class="sourceLineNo">375</span>  static final int T_Dbl=0&lt;&lt;5; // was 7<a name="line.375"></a>
-<span class="sourceLineNo">376</span>  static final int T_Str=1&lt;&lt;5;<a name="line.376"></a>
-<span class="sourceLineNo">377</span><a name="line.377"></a>
-<span class="sourceLineNo">378</span>  static final int M_IMM=0&lt;&lt;0; // was 5, then 3<a name="line.378"></a>
-<span class="sourceLineNo">379</span>  static final int M_MEM=1&lt;&lt;0;<a name="line.379"></a>
-<span class="sourceLineNo">380</span>  static final int M_MEMARR1=2&lt;&lt;0;<a name="line.380"></a>
-<span class="sourceLineNo">381</span>  static final int M_MEMARR2=3&lt;&lt;0;<a name="line.381"></a>
-<span class="sourceLineNo">382</span><a name="line.382"></a>
-<span class="sourceLineNo">383</span>  // can overflow M .: 5 bits = 32 vals<a name="line.383"></a>
-<span class="sourceLineNo">384</span>  static final int O_futureexp=0;<a name="line.384"></a>
-<span class="sourceLineNo">385</span>  static final int O_pow=1;<a name="line.385"></a>
-<span class="sourceLineNo">386</span>  static final int O_mul=2;<a name="line.386"></a>
-<span class="sourceLineNo">387</span>  static final int O_div=3;<a name="line.387"></a>
-<span class="sourceLineNo">388</span>  static final int O_add=4;<a name="line.388"></a>
-<span class="sourceLineNo">389</span>  static final int O_sub=5;<a name="line.389"></a>
-<span class="sourceLineNo">390</span>  static final int O_neg=6;<a name="line.390"></a>
-<span class="sourceLineNo">391</span>  static final int O_not=7;<a name="line.391"></a>
-<span class="sourceLineNo">392</span>  static final int O_and=8;<a name="line.392"></a>
-<span class="sourceLineNo">393</span>  static final int O_or=9;<a name="line.393"></a>
-<span class="sourceLineNo">394</span>  static final int O_xor=10;<a name="line.394"></a>
-<span class="sourceLineNo">395</span>  static final int O_eq=11;<a name="line.395"></a>
-<span class="sourceLineNo">396</span>  static final int O_lt=12;<a name="line.396"></a>
-<span class="sourceLineNo">397</span>  static final int O_gt=13;<a name="line.397"></a>
-<span class="sourceLineNo">398</span>  static final int O_ge=14;<a name="line.398"></a>
-<span class="sourceLineNo">399</span>  static final int O_le=15;<a name="line.399"></a>
-<span class="sourceLineNo">400</span>  static final int O_ne=16;<a name="line.400"></a>
-<span class="sourceLineNo">401</span>  static final int O_ge2=17;<a name="line.401"></a>
-<span class="sourceLineNo">402</span><a name="line.402"></a>
-<span class="sourceLineNo">403</span>  // these can overflow into the M bits and T, which aren't used for FNC .: 6 bits 64 vals<a name="line.403"></a>
-<span class="sourceLineNo">404</span>  static final int F_HLT=0;<a name="line.404"></a>
-<span class="sourceLineNo">405</span>  static final int I_HLT=I_FNC | F_HLT; <a name="line.405"></a>
-<span class="sourceLineNo">406</span>  static final int F_sin=1;<a name="line.406"></a>
-<span class="sourceLineNo">407</span>  static final int F_cos=2;<a name="line.407"></a>
-<span class="sourceLineNo">408</span>  static final int F_int=3;<a name="line.408"></a>
-<span class="sourceLineNo">409</span>  static final int F_log=4;<a name="line.409"></a>
-<span class="sourceLineNo">410</span>  static final int F_sqr=5;<a name="line.410"></a>
-<span class="sourceLineNo">411</span>  static final int F_sqrt=6;<a name="line.411"></a>
-<span class="sourceLineNo">412</span>  static final int F_atn=7;<a name="line.412"></a>
-<span class="sourceLineNo">413</span>  static final int F_tan=8;<a name="line.413"></a>
-<span class="sourceLineNo">414</span>  static final int F_asin=9;<a name="line.414"></a>
-<span class="sourceLineNo">415</span>  static final int F_acos=10;<a name="line.415"></a>
-<span class="sourceLineNo">416</span>  static final int F_abs=11;<a name="line.416"></a>
-<span class="sourceLineNo">417</span>  static final int F_rnd=12;<a name="line.417"></a>
-<span class="sourceLineNo">418</span>  static final int F_exp=13;<a name="line.418"></a>
-<span class="sourceLineNo">419</span>  static final int F_sgn=14;<a name="line.419"></a>
-<span class="sourceLineNo">420</span>  static final int F_len=15;<a name="line.420"></a>
-<span class="sourceLineNo">421</span>  static final int F_val=16;<a name="line.421"></a>
-<span class="sourceLineNo">422</span>  static final int F_asc=17;<a name="line.422"></a>
-<span class="sourceLineNo">423</span>  static final int F_midD=18;<a name="line.423"></a>
-<span class="sourceLineNo">424</span>  static final int F_leftD=19;<a name="line.424"></a>
-<span class="sourceLineNo">425</span>  static final int F_rightD=20;<a name="line.425"></a>
-<span class="sourceLineNo">426</span>  static final int F_strD=21;<a name="line.426"></a>
-<span class="sourceLineNo">427</span>  static final int F_chrD=22;<a name="line.427"></a>
-<span class="sourceLineNo">428</span>  static final int F_instr=23;<a name="line.428"></a>
-<span class="sourceLineNo">429</span>  static final int F_var_ti=24;<a name="line.429"></a>
-<span class="sourceLineNo">430</span>  static final int F_var_st=25;<a name="line.430"></a>
-<span class="sourceLineNo">431</span>  static final int F_var_tiD=26;<a name="line.431"></a>
-<span class="sourceLineNo">432</span>  static final int F_var_pi=27;<a name="line.432"></a>
-<span class="sourceLineNo">433</span>  static final int F_peek=28;<a name="line.433"></a>
-<span class="sourceLineNo">434</span>  static final int F_fre=29;<a name="line.434"></a>
-<span class="sourceLineNo">435</span>  static final int F_pos=30;<a name="line.435"></a>
-<span class="sourceLineNo">436</span>  static final int F_tab=31;<a name="line.436"></a>
-<span class="sourceLineNo">437</span>  static final int F_spc=32;<a name="line.437"></a>
-<span class="sourceLineNo">438</span><a name="line.438"></a>
-<span class="sourceLineNo">439</span>  static String O_strings[]={"XXXXXX","^","*","/","+","-","-ve","not","and","or","xor","=","&lt;","&gt;","&gt;=","&lt;=","&lt;&gt;","=&gt;"};<a name="line.439"></a>
-<span class="sourceLineNo">440</span>  static String F_strings[]={"HLTXXX","sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",<a name="line.440"></a>
-<span class="sourceLineNo">441</span>                             "len","val","asc","mid$","left$","right$","str$","chr$","instr",<a name="line.441"></a>
-<span class="sourceLineNo">442</span>                             "ti","st","ti$","mathpi",<a name="line.442"></a>
-<span class="sourceLineNo">443</span>                             "peek","fre","pos","tab","spc"};<a name="line.443"></a>
-<span class="sourceLineNo">444</span>  //enum { I_PRF, I_PSH, I_STO, I_FNC, I_HLT };           //0..5  (3 bits)<a name="line.444"></a>
-<span class="sourceLineNo">445</span><a name="line.445"></a>
-<span class="sourceLineNo">446</span>  // enum { T_Dbl, T_Str };                                //0..1  (1 bit)<a name="line.446"></a>
-<span class="sourceLineNo">447</span>  // enum { M_IMM, M_MEM, M_MEMARR1, M_MEMARR2 };          //0..3  (2 bits)<a name="line.447"></a>
-<span class="sourceLineNo">448</span>  // enum { O_exp, O_mul, O_div, O_add, O_sub, O_neg       //0..15 (4 bits)<a name="line.448"></a>
-<span class="sourceLineNo">449</span>  //     ,O_not,O_and,O_or,O_xor<a name="line.449"></a>
-<span class="sourceLineNo">450</span>  //       ,O_eq,O_lt,O_gt,O_ge,O_le<a name="line.450"></a>
-<span class="sourceLineNo">451</span>  //};<a name="line.451"></a>
-<span class="sourceLineNo">452</span>  //enum { F_sin, F_cos, F_int }                         //0..2  but will be 36 - so (5 bits)<a name="line.452"></a>
-<span class="sourceLineNo">453</span><a name="line.453"></a>
-<span class="sourceLineNo">454</span>}<a name="line.454"></a>
+<span class="sourceLineNo">366</span>  //GenericType result() {<a name="line.366"></a>
+<span class="sourceLineNo">367</span>    //if (verbose) { System.out.printf("upto=%d\n",upto); }<a name="line.367"></a>
+<span class="sourceLineNo">368</span>    //GenericType gt; //only allow list of <a name="line.368"></a>
+<span class="sourceLineNo">369</span>    //if (stktype[0]==ST_NUM) {<a name="line.369"></a>
+<span class="sourceLineNo">370</span>      //gt=new GenericType(stknum[0]);<a name="line.370"></a>
+<span class="sourceLineNo">371</span>    //} else {<a name="line.371"></a>
+<span class="sourceLineNo">372</span>      //if (verbose) { System.out.printf("Returning a string type from evaluate\n"); }<a name="line.372"></a>
+<span class="sourceLineNo">373</span>      //gt=new GenericType(stkstring[0]);<a name="line.373"></a>
+<span class="sourceLineNo">374</span>    //}<a name="line.374"></a>
+<span class="sourceLineNo">375</span>    //// if there are more, add to it<a name="line.375"></a>
+<span class="sourceLineNo">376</span>    //for (int i=1; i&lt;upto; ++i) {<a name="line.376"></a>
+<span class="sourceLineNo">377</span>      //if (stktype[i]==ST_NUM) {<a name="line.377"></a>
+<span class="sourceLineNo">378</span>        //gt.add(stknum[i],upto);<a name="line.378"></a>
+<span class="sourceLineNo">379</span>      //} else {<a name="line.379"></a>
+<span class="sourceLineNo">380</span>        //gt.add(stkstring[i],upto);<a name="line.380"></a>
+<span class="sourceLineNo">381</span>      //}<a name="line.381"></a>
+<span class="sourceLineNo">382</span>    //}<a name="line.382"></a>
+<span class="sourceLineNo">383</span>    //return gt;<a name="line.383"></a>
+<span class="sourceLineNo">384</span>  //}<a name="line.384"></a>
+<span class="sourceLineNo">385</span>  //////////////////////////////////////////////////////////////////////<a name="line.385"></a>
+<span class="sourceLineNo">386</span>  ///<a name="line.386"></a>
+<span class="sourceLineNo">387</span>  //////////////////////////////////////////////////////////////////////<a name="line.387"></a>
+<span class="sourceLineNo">388</span><a name="line.388"></a>
+<span class="sourceLineNo">389</span>  int nextpnt(int x) { return acpointer_next[x]; }<a name="line.389"></a>
+<span class="sourceLineNo">390</span>  int savestart_p=0;<a name="line.390"></a>
+<span class="sourceLineNo">391</span>  int savestart_ac=0;<a name="line.391"></a>
+<span class="sourceLineNo">392</span>  boolean is_compiled(int x) { return acpointer[x]!=0; }<a name="line.392"></a>
+<span class="sourceLineNo">393</span>  void savestart(int x) { savestart_p=x; savestart_ac=top; tmptop=top; record=true; }<a name="line.393"></a>
+<span class="sourceLineNo">394</span>  void saveacode(int end) <a name="line.394"></a>
+<span class="sourceLineNo">395</span>  {<a name="line.395"></a>
+<span class="sourceLineNo">396</span>          // push a HLT onto code<a name="line.396"></a>
+<span class="sourceLineNo">397</span>          addInstr(I_HLT); <a name="line.397"></a>
+<span class="sourceLineNo">398</span>          acpointer[savestart_p]=savestart_ac;<a name="line.398"></a>
+<span class="sourceLineNo">399</span>          acpointer_next[savestart_p]=end;<a name="line.399"></a>
+<span class="sourceLineNo">400</span>          // this is now marked as a valid piece of code<a name="line.400"></a>
+<span class="sourceLineNo">401</span>          top=tmptop;<a name="line.401"></a>
+<span class="sourceLineNo">402</span>          if (using_machine.verbose) System.out.printf("Saved code from %d to %d for location %d\n",savestart_ac,top,savestart_p);<a name="line.402"></a>
+<span class="sourceLineNo">403</span>          record=false;<a name="line.403"></a>
+<span class="sourceLineNo">404</span>  }<a name="line.404"></a>
+<span class="sourceLineNo">405</span><a name="line.405"></a>
+<span class="sourceLineNo">406</span><a name="line.406"></a>
+<span class="sourceLineNo">407</span>  // Instruction Type Mode Operation Function<a name="line.407"></a>
+<span class="sourceLineNo">408</span>  static final int I_PRF=0&lt;&lt;6; // was 8<a name="line.408"></a>
+<span class="sourceLineNo">409</span>  static final int I_PSH=1&lt;&lt;6;<a name="line.409"></a>
+<span class="sourceLineNo">410</span>  static final int I_STO=2&lt;&lt;6;<a name="line.410"></a>
+<span class="sourceLineNo">411</span>  static final int I_FNC=3&lt;&lt;6;<a name="line.411"></a>
+<span class="sourceLineNo">412</span>  //static final int I_HLT=4&lt;&lt;6; // this could be turned into FNC HLT and would save a bit!<a name="line.412"></a>
+<span class="sourceLineNo">413</span><a name="line.413"></a>
+<span class="sourceLineNo">414</span><a name="line.414"></a>
+<span class="sourceLineNo">415</span>  static final int T_Dbl=0&lt;&lt;5; // was 7<a name="line.415"></a>
+<span class="sourceLineNo">416</span>  static final int T_Str=1&lt;&lt;5;<a name="line.416"></a>
+<span class="sourceLineNo">417</span><a name="line.417"></a>
+<span class="sourceLineNo">418</span>  static final int M_IMM=0&lt;&lt;0; // was 5, then 3<a name="line.418"></a>
+<span class="sourceLineNo">419</span>  static final int M_MEM=1&lt;&lt;0;<a name="line.419"></a>
+<span class="sourceLineNo">420</span>  static final int M_MEMARR1=2&lt;&lt;0;<a name="line.420"></a>
+<span class="sourceLineNo">421</span>  static final int M_MEMARR2=3&lt;&lt;0;<a name="line.421"></a>
+<span class="sourceLineNo">422</span><a name="line.422"></a>
+<span class="sourceLineNo">423</span>  // can overflow M .: 5 bits = 32 vals<a name="line.423"></a>
+<span class="sourceLineNo">424</span>  static final int O_futureexp=0;<a name="line.424"></a>
+<span class="sourceLineNo">425</span>  static final int O_pow=1;<a name="line.425"></a>
+<span class="sourceLineNo">426</span>  static final int O_mul=2;<a name="line.426"></a>
+<span class="sourceLineNo">427</span>  static final int O_div=3;<a name="line.427"></a>
+<span class="sourceLineNo">428</span>  static final int O_add=4;<a name="line.428"></a>
+<span class="sourceLineNo">429</span>  static final int O_sub=5;<a name="line.429"></a>
+<span class="sourceLineNo">430</span>  static final int O_neg=6;<a name="line.430"></a>
+<span class="sourceLineNo">431</span>  static final int O_not=7;<a name="line.431"></a>
+<span class="sourceLineNo">432</span>  static final int O_and=8;<a name="line.432"></a>
+<span class="sourceLineNo">433</span>  static final int O_or=9;<a name="line.433"></a>
+<span class="sourceLineNo">434</span>  static final int O_xor=10;<a name="line.434"></a>
+<span class="sourceLineNo">435</span>  static final int O_eq=11;<a name="line.435"></a>
+<span class="sourceLineNo">436</span>  static final int O_lt=12;<a name="line.436"></a>
+<span class="sourceLineNo">437</span>  static final int O_gt=13;<a name="line.437"></a>
+<span class="sourceLineNo">438</span>  static final int O_ge=14;<a name="line.438"></a>
+<span class="sourceLineNo">439</span>  static final int O_le=15;<a name="line.439"></a>
+<span class="sourceLineNo">440</span>  static final int O_ne=16;<a name="line.440"></a>
+<span class="sourceLineNo">441</span>  static final int O_ge2=17;<a name="line.441"></a>
+<span class="sourceLineNo">442</span><a name="line.442"></a>
+<span class="sourceLineNo">443</span>  // these can overflow into the M bits and T, which aren't used for FNC .: 6 bits 64 vals<a name="line.443"></a>
+<span class="sourceLineNo">444</span>  static final int F_HLT=0;<a name="line.444"></a>
+<span class="sourceLineNo">445</span>  static final int I_HLT=I_FNC | F_HLT; <a name="line.445"></a>
+<span class="sourceLineNo">446</span>  static final int F_sin=1;<a name="line.446"></a>
+<span class="sourceLineNo">447</span>  static final int F_cos=2;<a name="line.447"></a>
+<span class="sourceLineNo">448</span>  static final int F_int=3;<a name="line.448"></a>
+<span class="sourceLineNo">449</span>  static final int F_log=4;<a name="line.449"></a>
+<span class="sourceLineNo">450</span>  static final int F_sqr=5;<a name="line.450"></a>
+<span class="sourceLineNo">451</span>  static final int F_sqrt=6;<a name="line.451"></a>
+<span class="sourceLineNo">452</span>  static final int F_atn=7;<a name="line.452"></a>
+<span class="sourceLineNo">453</span>  static final int F_tan=8;<a name="line.453"></a>
+<span class="sourceLineNo">454</span>  static final int F_asin=9;<a name="line.454"></a>
+<span class="sourceLineNo">455</span>  static final int F_acos=10;<a name="line.455"></a>
+<span class="sourceLineNo">456</span>  static final int F_abs=11;<a name="line.456"></a>
+<span class="sourceLineNo">457</span>  static final int F_rnd=12;<a name="line.457"></a>
+<span class="sourceLineNo">458</span>  static final int F_exp=13;<a name="line.458"></a>
+<span class="sourceLineNo">459</span>  static final int F_sgn=14;<a name="line.459"></a>
+<span class="sourceLineNo">460</span>  static final int F_len=15;<a name="line.460"></a>
+<span class="sourceLineNo">461</span>  static final int F_val=16;<a name="line.461"></a>
+<span class="sourceLineNo">462</span>  static final int F_asc=17;<a name="line.462"></a>
+<span class="sourceLineNo">463</span>  static final int F_midD=18;<a name="line.463"></a>
+<span class="sourceLineNo">464</span>  static final int F_leftD=19;<a name="line.464"></a>
+<span class="sourceLineNo">465</span>  static final int F_rightD=20;<a name="line.465"></a>
+<span class="sourceLineNo">466</span>  static final int F_strD=21;<a name="line.466"></a>
+<span class="sourceLineNo">467</span>  static final int F_chrD=22;<a name="line.467"></a>
+<span class="sourceLineNo">468</span>  static final int F_instr=23;<a name="line.468"></a>
+<span class="sourceLineNo">469</span>  static final int F_var_ti=24;<a name="line.469"></a>
+<span class="sourceLineNo">470</span>  static final int F_var_st=25;<a name="line.470"></a>
+<span class="sourceLineNo">471</span>  static final int F_var_tiD=26;<a name="line.471"></a>
+<span class="sourceLineNo">472</span>  static final int F_var_pi=27;<a name="line.472"></a>
+<span class="sourceLineNo">473</span>  static final int F_peek=28;<a name="line.473"></a>
+<span class="sourceLineNo">474</span>  static final int F_fre=29;<a name="line.474"></a>
+<span class="sourceLineNo">475</span>  static final int F_pos=30;<a name="line.475"></a>
+<span class="sourceLineNo">476</span>  static final int F_tab=31;<a name="line.476"></a>
+<span class="sourceLineNo">477</span>  static final int F_spc=32;<a name="line.477"></a>
+<span class="sourceLineNo">478</span><a name="line.478"></a>
+<span class="sourceLineNo">479</span>  static String O_strings[]={"XXXXXX","^","*","/","+","-","-ve","not","and","or","xor","=","&lt;","&gt;","&gt;=","&lt;=","&lt;&gt;","=&gt;"};<a name="line.479"></a>
+<span class="sourceLineNo">480</span>  static String F_strings[]={"HLTXXX","sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",<a name="line.480"></a>
+<span class="sourceLineNo">481</span>                             "len","val","asc","mid$","left$","right$","str$","chr$","instr",<a name="line.481"></a>
+<span class="sourceLineNo">482</span>                             "ti","st","ti$","mathpi",<a name="line.482"></a>
+<span class="sourceLineNo">483</span>                             "peek","fre","pos","tab","spc"};<a name="line.483"></a>
+<span class="sourceLineNo">484</span>  //enum { I_PRF, I_PSH, I_STO, I_FNC, I_HLT };           //0..5  (3 bits)<a name="line.484"></a>
+<span class="sourceLineNo">485</span><a name="line.485"></a>
+<span class="sourceLineNo">486</span>  // enum { T_Dbl, T_Str };                                //0..1  (1 bit)<a name="line.486"></a>
+<span class="sourceLineNo">487</span>  // enum { M_IMM, M_MEM, M_MEMARR1, M_MEMARR2 };          //0..3  (2 bits)<a name="line.487"></a>
+<span class="sourceLineNo">488</span>  // enum { O_exp, O_mul, O_div, O_add, O_sub, O_neg       //0..15 (4 bits)<a name="line.488"></a>
+<span class="sourceLineNo">489</span>  //     ,O_not,O_and,O_or,O_xor<a name="line.489"></a>
+<span class="sourceLineNo">490</span>  //       ,O_eq,O_lt,O_gt,O_ge,O_le<a name="line.490"></a>
+<span class="sourceLineNo">491</span>  //};<a name="line.491"></a>
+<span class="sourceLineNo">492</span>  //enum { F_sin, F_cos, F_int }                         //0..2  but will be 36 - so (5 bits)<a name="line.492"></a>
+<span class="sourceLineNo">493</span><a name="line.493"></a>
+<span class="sourceLineNo">494</span>}<a name="line.494"></a>
 
 
 
