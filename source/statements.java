@@ -1222,9 +1222,7 @@ boolean ReadAssign() throws BasicException {
                                                  //oldway if (!true) { machine.assignment(keepVariable+"="+keepExpression); }
                                                  if (speeder) if (verbose) { System.out.printf("ASSIGNMENT:(%d,%d,%s) %s\n",sp_start,pnt,machine.getCurrentLine(sp_start),keepExpression); }
 
-      if (speeder) { machine.evaluate_engine.speeder_compile=true; }
       machine.assignment(keepExpression);
-      if (speeder) { machine.evaluate_engine.speeder_compile=false; }
       if (speeder) { machine.petspeed.saveacode(pnt); }
 
                                                  if (dofulltiming) { end_timing(TIME_massign); }
@@ -1503,44 +1501,38 @@ boolean ProcessPRINThashstatement() throws BasicException
 
 boolean ProcessIFstatement() throws BasicException
 {
-  if (speeder) { machine.petspeed.savestart(pnt); }
-
   
   GenericType gt;
-      if (speeder && machine.petspeed.is_compiled(pnt)) { 
-	       if (verbose) System.out.printf("Found compiled at %d\n",pnt); 
-	
-	       try {
-	         machine.petspeed.execute(pnt);
-	       } catch (EvaluateException e) { throw new BasicException("EXECUTE ERROR"); }
-         gt= new GenericType(machine.petspeed.result());
+  if (speeder && machine.petspeed.is_compiled(pnt)) { 
+       if (verbose) System.out.printf("Found compiled at %d\n",pnt); 
+       try {
+         pnt=machine.petspeed.execute(pnt);
          // jump the pointer
-	       pnt=machine.petspeed.nextpnt(pnt);
-      } else {
+       } catch (EvaluateException e) { throw new BasicException("EXECUTE ERROR"); }
+       gt= new GenericType(machine.petspeed.result());
+       //pnt=machine.petspeed.nextpnt(pnt);
+  } else {
 
-  ReadExpression();
-  
-  if (verbose) { System.out.printf("MachineEvaluate( %s )\n",keepExpression); }
-  //ReadStatementToken(); // note MUST be THEN or GOTO
-  // implicetly read already with the ReadExpression
-  if (gotToken!=ST_GOTO && gotToken!=ST_THEN) {
-    System.out.printf("?SYNTAX ERROR 104: did not get THEN or GOTO token\n");
-    throw new BasicException("SYNTAX ERROR : NO THEN OR GOTO");
-    //return false;
+     if (speeder) { machine.petspeed.savestart(pnt); }
+      ReadExpression();
+      
+      if (verbose) { System.out.printf("MachineEvaluate( %s )\n",keepExpression); }
+      //ReadStatementToken(); // note MUST be THEN or GOTO
+      // implicetly read already with the ReadExpression
+      if (gotToken!=ST_GOTO && gotToken!=ST_THEN) {
+        System.out.printf("?SYNTAX ERROR 104: did not get THEN or GOTO token\n");
+        throw new BasicException("SYNTAX ERROR : NO THEN OR GOTO");
+        //return false;
+      }
+      // IF the evaluated expression is true (non zero), continue...
+      // otherwise read out rest of line and skip to new line
+      //if (machine.evaluate(keepExpression)==0.0) { // num only returns a num
+    
+    
+      gt=machine.evaluate(keepExpression); // so that verbose works
+      if (speeder) { machine.petspeed.saveacode(pnt); }
+
   }
-  // IF the evaluated expression is true (non zero), continue...
-  // otherwise read out rest of line and skip to new line
-  //if (machine.evaluate(keepExpression)==0.0) { // num only returns a num
-  
-  
-
-
-  if (speeder) { machine.evaluate_engine.speeder_compile=true; }
-  gt=machine.evaluate(keepExpression); // so that verbose works
-  if (speeder) { machine.evaluate_engine.speeder_compile=false; }
-  if (speeder) { machine.petspeed.saveacode(pnt); }
-
-     }
 
 
   if (verbose) { System.out.printf("  evaluates to %s\n",gt.print()); }

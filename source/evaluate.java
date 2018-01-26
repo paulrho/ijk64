@@ -1157,6 +1157,10 @@ class evaluate {
               building=""; // clear this
               //if (verbose) { System.out.printf("Next character = %s\n",a); }
               using_defined_function=true;
+
+	      if (speeder_compile) // until we implement it!
+	          using_machine.petspeed.reject();
+	      
             }
 
             if (a.equalsIgnoreCase("o") && ispnt<intstring.length()-2 && intstring.substring(ispnt+1,ispnt+3).equalsIgnoreCase("or")) {

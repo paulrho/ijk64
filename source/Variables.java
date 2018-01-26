@@ -79,6 +79,9 @@ class Variables {
         // str
         variablename[topvariable]=variable;
         variablearraystring1[topvariable]=new String[p1+1];
+	for (int i=0; i<p1+1; ++i) 
+          variablearraystring1[topvariable][i]=""; // do this to be able to safetly read with acode
+	   // should also do this with 2x string array!
         variablearraystring1[topvariable][pset]=contents.str();
         variabletype[topvariable]=V_ARRAY_STRING1;
       }
