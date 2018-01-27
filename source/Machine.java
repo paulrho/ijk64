@@ -296,6 +296,7 @@ public class Machine {
   int topforloopstack=0;
   int forloopstack[]=new int[MAXFORS];
   String forloopstack_var[]=new String[MAXFORS];
+  int forloopstack_varpnt[]=new int[MAXFORS];
   double forloopstack_to[]=new double[MAXFORS];
   double forloopstack_step[]=new double[MAXFORS];
 
@@ -328,6 +329,7 @@ public class Machine {
             forloopstack_var[j]=forloopstack_var[j+1];
             forloopstack_to[j]=forloopstack_to[j+1];
             forloopstack_step[j]=forloopstack_step[j+1];
+	    forloopstack_varpnt[j]=forloopstack_varpnt[j+1]; // because we can switch this on and off after compile  - need to always do this
           }
         }
         topforloopstack--;
@@ -337,6 +339,7 @@ public class Machine {
     if (verbose) { System.out.printf("processing FOR %s to %f step %f at current=%d at FORSTACK=%d\n",variable,forto,forstep,current,topforloopstack); }
     forloopstack[topforloopstack]=current;
     forloopstack_var[topforloopstack]=variable;
+    forloopstack_varpnt[topforloopstack]=variables.getvarindex(variable); // because we can switch this on and off after compile  - need to always do this
     forloopstack_to[topforloopstack]=forto;
     forloopstack_step[topforloopstack]=forstep;
     if (topforloopstack==MAXFORS-1) throw new BasicException("OUT OF MEMORY");
@@ -350,6 +353,20 @@ public class Machine {
     executionpoint=current;
     while(fl>0) {
       fl--;
+      if (speeder && forloopstack_varpnt[fl]>=0) {
+        // not compiled, but just a lot faster for the looping part
+	int v=forloopstack_varpnt[fl];
+	variables.variablevalue[v]+=forloopstack_step[fl];
+	if (forloopstack_step[fl]>0 && variables.variablevalue[v] > forloopstack_to[fl]
+	  || forloopstack_step[fl]<0 && variables.variablevalue[v] < forloopstack_to[fl]) {
+          topforloopstack=fl; // at least one
+          return false;
+	} else {
+          executionpoint=forloopstack[fl];
+          topforloopstack=fl+1;
+          return true;
+	}
+      }
       if (forloopstack_var[fl].startsWith("_")) break; // matches c64 behavior 
       if (var.equals("") || forloopstack_var[fl].equals(var)) {
       //if (var.equals("") && !forloopstack_var[fl].startsWith("_") || forloopstack_var[fl].equals(var)) {
@@ -387,6 +404,7 @@ public class Machine {
   {
     forloopstack[topforloopstack]=current;
     forloopstack_var[topforloopstack]="_GOSUB";
+    forloopstack_varpnt[topforloopstack]=-1; // because we can switch this on and off after compile  - need to always do this
     //forloopstack_to[topforloopstack]=forto;
     //forloopstack_step[topforloopstack]=forstep;
     if (topforloopstack==MAXFORS-1) throw new BasicException("OUT OF MEMORY"); // FORMULA TO COMPLEX in c128

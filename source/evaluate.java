@@ -670,6 +670,16 @@ class evaluate {
           }
           return;
         }
+      } else if (function.equals("frm")) {
+        if (parameters==2) {
+          stktype[upto-2]=ST_STRING;
+          try {          
+          stkstring[upto-2]=String.format(stkstring[upto-1],stknum[upto]);
+          } catch(Exception e) {
+            throw new EvaluateException("BAD FORMAT");              
+          }
+          return;
+        }
       } else if (function.equals("mid$")) {
         if (parameters==3) {
           if (verbose) { System.out.printf("Calculating mid$\n"); }

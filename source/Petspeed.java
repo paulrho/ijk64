@@ -141,6 +141,14 @@ class Petspeed
 	  atop--;
 	  break;
 
+	case I_FNC | F_frm : 
+          try {          
+            astack_s[atop-2]=String.format(astack_s[atop-2],astack_d[atop-1]);
+	    atop--;
+          } catch(Exception e) {
+            throw new EvaluateException("BAD FORMAT");              
+          }
+	  break;
 	case I_FNC | F_midD : 
           try {          
 	    astack_s[atop-3]=astack_s[atop-3].substring((int)astack_d[atop-2]-1,(int)astack_d[atop-2]-1+(int)astack_d[atop-1]);
@@ -421,6 +429,9 @@ class Petspeed
           using_machine.evaluate_engine.speeder_compile=true;
       // probably dont need both record and swith on speeder_compile
   }
+  void saveelseacode(int then, int end) {
+    acpointer_next[then]=end;
+  }
   void saveacode(int end) 
   {
 	  if (record) {
@@ -514,12 +525,13 @@ class Petspeed
   static final int F_pos=30;
   static final int F_tab=31;
   static final int F_spc=32;
+  static final int F_frm=33;
 
   static String O_strings[]={"XXXXXX","^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<=","<>","=>"};
   static String F_strings[]={"HLTXXX","sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",
 	                     "len","val","asc","mid$","left$","right$","str$","chr$","instr",
                              "ti","st","ti$","mathpi",
-                             "peek","fre","pos","tab","spc"};
+                             "peek","fre","pos","tab","spc","frm"};
   //enum { I_PRF, I_PSH, I_STO, I_FNC, I_HLT };           //0..5  (3 bits)
 
   // enum { T_Dbl, T_Str };                                //0..1  (1 bit)
