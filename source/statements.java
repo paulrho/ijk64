@@ -233,7 +233,6 @@ static final int ST_DEF=69;
 static final int ST_LET=70;
 
 static final int ST_SLOW=71;
-
 static final int ST_HELP=72;
 
 
@@ -1511,6 +1510,10 @@ boolean ProcessIFstatement() throws BasicException
        } catch (EvaluateException e) { throw new BasicException("EXECUTE ERROR"); }
        gt= new GenericType(machine.petspeed.result());
        //pnt=machine.petspeed.nextpnt(pnt);
+       if (gt.equals(0.0)) { // num only returns a num
+         pnt=machine.petspeed.nextpnt(pnt-1); // special case - false eval, stored one before the THEN bit
+	 return true;
+       }
   } else {
 
      if (speeder) { machine.petspeed.savestart(pnt); }
@@ -1532,17 +1535,27 @@ boolean ProcessIFstatement() throws BasicException
       gt=machine.evaluate(keepExpression); // so that verbose works
       if (speeder) { machine.petspeed.saveacode(pnt); }
 
-  }
 
+    if (verbose) { System.out.printf("  evaluates to %s\n",gt.print()); }
 
-  if (verbose) { System.out.printf("  evaluates to %s\n",gt.print()); }
-  if (gt.equals(0.0)) { // num only returns a num
-    // read everthing to the end of line
-    while (pnt<linelength && !line.substring(pnt,pnt+1).equals("\n")) {
-      pnt++;
+    if (speeder && machine.petspeed.nextpnt(pnt-1)==0)  {  // only do this once
+      int p2=pnt;
+      while (p2<linelength && !line.substring(p2,p2+1).equals("\n")) p2++;
+      machine.petspeed.saveelseacode(pnt-1,p2);
     }
-    return true; // parsed okay
+
+    if (gt.equals(0.0)) { // num only returns a num
+      // read everthing to the end of line
+      while (pnt<linelength && !line.substring(pnt,pnt+1).equals("\n")) {
+        pnt++;
+      }
+      return true; // parsed okay
+    }
+
   }
+
+
+
   SkipSpaces(); // really - spaces arent good for anything
   // it might be just a line # - try and read it - if it isn't keep going  
   if (ReadLineNo()) {
