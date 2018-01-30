@@ -397,6 +397,16 @@ class Petspeed
 	  return astack_d[--atop];
   }
 
+  //GenericType resultlist()
+  //{
+    //GenericType gt; 
+	  //// opposite order to pop
+	  //// we need to know the type just assume numbers lists only for now...
+     //for(i=0; i<atop; ++i) {
+     //}
+     //return gt;
+  //}
+
   //GenericType result() {
     //if (verbose) { System.out.printf("upto=%d\n",upto); }
     //GenericType gt; //only allow list of 

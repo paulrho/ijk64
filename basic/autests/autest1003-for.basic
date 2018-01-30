@@ -1,3 +1,4 @@
+1 forpp=1to5: rem for petspeeder
 5 print"(clr)";
 10 y=0
 20 fori=1to10
@@ -12,6 +13,7 @@
 130 fori=1to10step3:
 140 printi
 150 next
+999 nextpp
 4000 data32,"#1","-spc-",38
 4010 data32,"#3","-spc-",38
 4020 data32,"#6","-spc-",38
