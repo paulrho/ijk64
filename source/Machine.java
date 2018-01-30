@@ -351,9 +351,11 @@ public class Machine {
     // could be multiple steps?, no, this should be dealt with by the statements parser
     int fl=topforloopstack;
     executionpoint=current;
+    int vv=-2; if (speeder && !var.equals("")) { vv=variables.getvarindex(var); }
     while(fl>0) {
       fl--;
-      if (speeder && forloopstack_varpnt[fl]>=0) {
+      //if (speeder && forloopstack_varpnt[fl]>=0) {
+      if (speeder && forloopstack_varpnt[fl]==vv) {
         // not compiled, but just a lot faster for the looping part
 	int v=forloopstack_varpnt[fl];
 	variables.variablevalue[v]+=forloopstack_step[fl];
