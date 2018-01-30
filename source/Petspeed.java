@@ -20,6 +20,9 @@ class Petspeed
   int []acpointer = new int[MAXPSIZE];
   int []acpointer_next = new int[MAXPSIZE];
 
+  int []pnext = new int[MAXPSIZE];
+  int []pcache = new int[MAXPSIZE];
+
   Petspeed(Machine m) {
     using_machine=m;
   }

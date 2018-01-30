@@ -316,6 +316,20 @@ boolean ReadPart() throws BasicException
           if (basictimer) { // here!!!!! save this
             basictimer_thispnt=pnt;
           }
+      if (speeder && machine.petspeed.pcache[pnt]>0) {
+	int nnn=machine.petspeed.pcache[pnt];
+        pnt=machine.petspeed.pnext[pnt];
+	if (verbose) System.out.printf("found a cached line start nnn=%d(1=assign) pnt=%d\n",nnn,pnt);
+	if (nnn==1) {
+	  partType=PT_ASSIGN;
+	  return true;
+	} else {
+	  partType=PT_TOKEN;
+	  gotToken=nnn-2;
+	  return true;
+	}
+      }
+    int fpnt=pnt; // speeder - first appearence
     while (pnt<linelength) {
       String a=line.substring(pnt,pnt+1);
       //if (partType==PT_NEWLINE && a.equals("\r")) continue; // try this to allow CRLF
@@ -346,6 +360,11 @@ if (dofulltiming) { end_timing(TIME_ReadLineNo); }
         pnt++;
         partType=PT_TOKEN;
         gotToken=ST_PRINT;
+	if (speeder) {
+          machine.petspeed.pcache[fpnt]=gotToken+2;
+          machine.petspeed.pnext[fpnt]=pnt;
+	  if (verbose) System.out.printf("caching a print\n");
+	}
         return true;
       } else if (a.compareToIgnoreCase("a")>=0 && a.compareTo("z")<=0) {
         // one of two things here - a token, or an assignment!
@@ -364,12 +383,22 @@ if (dofulltiming) { end_timing(TIME_ReadStatementToken); }
               return true;
             }
           }
+	  if (speeder) {
+            machine.petspeed.pcache[fpnt]=gotToken+2;
+            machine.petspeed.pnext[fpnt]=pnt;
+	    if (verbose) System.out.printf("caching a token\n");
+	  }
           return true;
         } else {
 if (dofulltiming) { end_timing(TIME_ReadStatementToken); }
           // have to assume this is an assignment
           partType=PT_ASSIGN;
           // we dont move pnt at all, we start from the start!
+	  if (speeder) {
+            machine.petspeed.pcache[fpnt]=1;
+            machine.petspeed.pnext[fpnt]=pnt;
+	    if (verbose) System.out.printf("caching an assign\n");
+	  }
           return true;
         }
       } else if (a.equals("\n")) {
