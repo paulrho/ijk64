@@ -1824,6 +1824,8 @@ void chewcr() {
 
   boolean runImmediate(String arg) //runDirect mode
   {
+    // very inefficient, just for now
+    if (speeder) petspeed=new Petspeed(this); // just for now just respawn the lot!
     // by giving 0, it will not clear the Machine state
     new statements(arg, this, 0); // tell the statements class who I am
     return true;
