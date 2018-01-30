@@ -405,155 +405,165 @@
 <span class="sourceLineNo">397</span>          return astack_d[--atop];<a name="line.397"></a>
 <span class="sourceLineNo">398</span>  }<a name="line.398"></a>
 <span class="sourceLineNo">399</span><a name="line.399"></a>
-<span class="sourceLineNo">400</span>  //GenericType result() {<a name="line.400"></a>
-<span class="sourceLineNo">401</span>    //if (verbose) { System.out.printf("upto=%d\n",upto); }<a name="line.401"></a>
-<span class="sourceLineNo">402</span>    //GenericType gt; //only allow list of <a name="line.402"></a>
-<span class="sourceLineNo">403</span>    //if (stktype[0]==ST_NUM) {<a name="line.403"></a>
-<span class="sourceLineNo">404</span>      //gt=new GenericType(stknum[0]);<a name="line.404"></a>
-<span class="sourceLineNo">405</span>    //} else {<a name="line.405"></a>
-<span class="sourceLineNo">406</span>      //if (verbose) { System.out.printf("Returning a string type from evaluate\n"); }<a name="line.406"></a>
-<span class="sourceLineNo">407</span>      //gt=new GenericType(stkstring[0]);<a name="line.407"></a>
-<span class="sourceLineNo">408</span>    //}<a name="line.408"></a>
-<span class="sourceLineNo">409</span>    //// if there are more, add to it<a name="line.409"></a>
-<span class="sourceLineNo">410</span>    //for (int i=1; i&lt;upto; ++i) {<a name="line.410"></a>
-<span class="sourceLineNo">411</span>      //if (stktype[i]==ST_NUM) {<a name="line.411"></a>
-<span class="sourceLineNo">412</span>        //gt.add(stknum[i],upto);<a name="line.412"></a>
-<span class="sourceLineNo">413</span>      //} else {<a name="line.413"></a>
-<span class="sourceLineNo">414</span>        //gt.add(stkstring[i],upto);<a name="line.414"></a>
-<span class="sourceLineNo">415</span>      //}<a name="line.415"></a>
-<span class="sourceLineNo">416</span>    //}<a name="line.416"></a>
-<span class="sourceLineNo">417</span>    //return gt;<a name="line.417"></a>
-<span class="sourceLineNo">418</span>  //}<a name="line.418"></a>
-<span class="sourceLineNo">419</span>  //////////////////////////////////////////////////////////////////////<a name="line.419"></a>
-<span class="sourceLineNo">420</span>  ///<a name="line.420"></a>
-<span class="sourceLineNo">421</span>  //////////////////////////////////////////////////////////////////////<a name="line.421"></a>
-<span class="sourceLineNo">422</span><a name="line.422"></a>
-<span class="sourceLineNo">423</span>  int nextpnt(int x) { return acpointer_next[x]; }<a name="line.423"></a>
-<span class="sourceLineNo">424</span>  int savestart_p=0;<a name="line.424"></a>
-<span class="sourceLineNo">425</span>  int savestart_ac=0;<a name="line.425"></a>
-<span class="sourceLineNo">426</span>  boolean is_compiled(int x) { return acpointer[x]&gt;0; }<a name="line.426"></a>
-<span class="sourceLineNo">427</span>  void savestart(int x) { <a name="line.427"></a>
-<span class="sourceLineNo">428</span>          // if &lt;0 then it is a rejected compile, so dont try to recompile, just nod and carry on...<a name="line.428"></a>
-<span class="sourceLineNo">429</span>          if (acpointer[x]&lt;0) return;<a name="line.429"></a>
-<span class="sourceLineNo">430</span>          savestart_p=x; savestart_ac=top; tmptop=top; <a name="line.430"></a>
-<span class="sourceLineNo">431</span>          record=true; <a name="line.431"></a>
-<span class="sourceLineNo">432</span>          using_machine.evaluate_engine.speeder_compile=true;<a name="line.432"></a>
-<span class="sourceLineNo">433</span>      // probably dont need both record and swith on speeder_compile<a name="line.433"></a>
-<span class="sourceLineNo">434</span>  }<a name="line.434"></a>
-<span class="sourceLineNo">435</span>  void saveelseacode(int then, int end) {<a name="line.435"></a>
-<span class="sourceLineNo">436</span>    acpointer_next[then]=end;<a name="line.436"></a>
-<span class="sourceLineNo">437</span>  }<a name="line.437"></a>
-<span class="sourceLineNo">438</span>  void saveacode(int end) <a name="line.438"></a>
-<span class="sourceLineNo">439</span>  {<a name="line.439"></a>
-<span class="sourceLineNo">440</span>          if (record) {<a name="line.440"></a>
-<span class="sourceLineNo">441</span>            // push a HLT onto code<a name="line.441"></a>
-<span class="sourceLineNo">442</span>            addInstr(I_HLT); <a name="line.442"></a>
-<span class="sourceLineNo">443</span>            acpointer[savestart_p]=savestart_ac;<a name="line.443"></a>
-<span class="sourceLineNo">444</span>            acpointer_next[savestart_p]=end;<a name="line.444"></a>
-<span class="sourceLineNo">445</span>            // this is now marked as a valid piece of code<a name="line.445"></a>
-<span class="sourceLineNo">446</span>            top=tmptop;<a name="line.446"></a>
-<span class="sourceLineNo">447</span>            if (using_machine.verbose) System.out.printf("Saved code from %d to %d for location %d\n",savestart_ac,top,savestart_p);<a name="line.447"></a>
-<span class="sourceLineNo">448</span>            record=false;<a name="line.448"></a>
-<span class="sourceLineNo">449</span>            using_machine.evaluate_engine.speeder_compile=false;<a name="line.449"></a>
-<span class="sourceLineNo">450</span>          }<a name="line.450"></a>
-<span class="sourceLineNo">451</span>  }<a name="line.451"></a>
-<span class="sourceLineNo">452</span><a name="line.452"></a>
-<span class="sourceLineNo">453</span>  void reject()<a name="line.453"></a>
-<span class="sourceLineNo">454</span>  {<a name="line.454"></a>
-<span class="sourceLineNo">455</span>    acpointer[savestart_p]=-1; // don't try to run acode or recompile this<a name="line.455"></a>
-<span class="sourceLineNo">456</span>    record=false;<a name="line.456"></a>
-<span class="sourceLineNo">457</span>    using_machine.evaluate_engine.speeder_compile=false;<a name="line.457"></a>
-<span class="sourceLineNo">458</span>  }<a name="line.458"></a>
-<span class="sourceLineNo">459</span><a name="line.459"></a>
-<span class="sourceLineNo">460</span>  // Instruction Type Mode Operation Function<a name="line.460"></a>
-<span class="sourceLineNo">461</span>  static final int I_PRF=0&lt;&lt;6; // was 8<a name="line.461"></a>
-<span class="sourceLineNo">462</span>  static final int I_PSH=1&lt;&lt;6;<a name="line.462"></a>
-<span class="sourceLineNo">463</span>  static final int I_STO=2&lt;&lt;6;<a name="line.463"></a>
-<span class="sourceLineNo">464</span>  static final int I_FNC=3&lt;&lt;6;<a name="line.464"></a>
-<span class="sourceLineNo">465</span>  //static final int I_HLT=4&lt;&lt;6; // this could be turned into FNC HLT and would save a bit!<a name="line.465"></a>
-<span class="sourceLineNo">466</span><a name="line.466"></a>
-<span class="sourceLineNo">467</span><a name="line.467"></a>
-<span class="sourceLineNo">468</span>  static final int T_Dbl=0&lt;&lt;5; // was 7<a name="line.468"></a>
-<span class="sourceLineNo">469</span>  static final int T_Str=1&lt;&lt;5;<a name="line.469"></a>
-<span class="sourceLineNo">470</span><a name="line.470"></a>
-<span class="sourceLineNo">471</span>  static final int M_IMM=0&lt;&lt;0; // was 5, then 3<a name="line.471"></a>
-<span class="sourceLineNo">472</span>  static final int M_MEM=1&lt;&lt;0;<a name="line.472"></a>
-<span class="sourceLineNo">473</span>  static final int M_MEMARR1=2&lt;&lt;0;<a name="line.473"></a>
-<span class="sourceLineNo">474</span>  static final int M_MEMARR2=3&lt;&lt;0;<a name="line.474"></a>
-<span class="sourceLineNo">475</span><a name="line.475"></a>
-<span class="sourceLineNo">476</span>  // can overflow M .: 5 bits = 32 vals<a name="line.476"></a>
-<span class="sourceLineNo">477</span>  static final int O_futureexp=0;<a name="line.477"></a>
-<span class="sourceLineNo">478</span>  static final int O_pow=1;<a name="line.478"></a>
-<span class="sourceLineNo">479</span>  static final int O_mul=2;<a name="line.479"></a>
-<span class="sourceLineNo">480</span>  static final int O_div=3;<a name="line.480"></a>
-<span class="sourceLineNo">481</span>  static final int O_add=4;<a name="line.481"></a>
-<span class="sourceLineNo">482</span>  static final int O_sub=5;<a name="line.482"></a>
-<span class="sourceLineNo">483</span>  static final int O_neg=6;<a name="line.483"></a>
-<span class="sourceLineNo">484</span>  static final int O_not=7;<a name="line.484"></a>
-<span class="sourceLineNo">485</span>  static final int O_and=8;<a name="line.485"></a>
-<span class="sourceLineNo">486</span>  static final int O_or=9;<a name="line.486"></a>
-<span class="sourceLineNo">487</span>  static final int O_xor=10;<a name="line.487"></a>
-<span class="sourceLineNo">488</span>  static final int O_eq=11;<a name="line.488"></a>
-<span class="sourceLineNo">489</span>  static final int O_lt=12;<a name="line.489"></a>
-<span class="sourceLineNo">490</span>  static final int O_gt=13;<a name="line.490"></a>
-<span class="sourceLineNo">491</span>  static final int O_ge=14;<a name="line.491"></a>
-<span class="sourceLineNo">492</span>  static final int O_le=15;<a name="line.492"></a>
-<span class="sourceLineNo">493</span>  static final int O_ne=16;<a name="line.493"></a>
-<span class="sourceLineNo">494</span>  static final int O_ge2=17;<a name="line.494"></a>
-<span class="sourceLineNo">495</span><a name="line.495"></a>
-<span class="sourceLineNo">496</span>  // these can overflow into the M bits and T, which aren't used for FNC .: 6 bits 64 vals<a name="line.496"></a>
-<span class="sourceLineNo">497</span>  static final int F_HLT=0;<a name="line.497"></a>
-<span class="sourceLineNo">498</span>  static final int I_HLT=I_FNC | F_HLT; <a name="line.498"></a>
-<span class="sourceLineNo">499</span>  static final int F_sin=1;<a name="line.499"></a>
-<span class="sourceLineNo">500</span>  static final int F_cos=2;<a name="line.500"></a>
-<span class="sourceLineNo">501</span>  static final int F_int=3;<a name="line.501"></a>
-<span class="sourceLineNo">502</span>  static final int F_log=4;<a name="line.502"></a>
-<span class="sourceLineNo">503</span>  static final int F_sqr=5;<a name="line.503"></a>
-<span class="sourceLineNo">504</span>  static final int F_sqrt=6;<a name="line.504"></a>
-<span class="sourceLineNo">505</span>  static final int F_atn=7;<a name="line.505"></a>
-<span class="sourceLineNo">506</span>  static final int F_tan=8;<a name="line.506"></a>
-<span class="sourceLineNo">507</span>  static final int F_asin=9;<a name="line.507"></a>
-<span class="sourceLineNo">508</span>  static final int F_acos=10;<a name="line.508"></a>
-<span class="sourceLineNo">509</span>  static final int F_abs=11;<a name="line.509"></a>
-<span class="sourceLineNo">510</span>  static final int F_rnd=12;<a name="line.510"></a>
-<span class="sourceLineNo">511</span>  static final int F_exp=13;<a name="line.511"></a>
-<span class="sourceLineNo">512</span>  static final int F_sgn=14;<a name="line.512"></a>
-<span class="sourceLineNo">513</span>  static final int F_len=15;<a name="line.513"></a>
-<span class="sourceLineNo">514</span>  static final int F_val=16;<a name="line.514"></a>
-<span class="sourceLineNo">515</span>  static final int F_asc=17;<a name="line.515"></a>
-<span class="sourceLineNo">516</span>  static final int F_midD=18;<a name="line.516"></a>
-<span class="sourceLineNo">517</span>  static final int F_leftD=19;<a name="line.517"></a>
-<span class="sourceLineNo">518</span>  static final int F_rightD=20;<a name="line.518"></a>
-<span class="sourceLineNo">519</span>  static final int F_strD=21;<a name="line.519"></a>
-<span class="sourceLineNo">520</span>  static final int F_chrD=22;<a name="line.520"></a>
-<span class="sourceLineNo">521</span>  static final int F_instr=23;<a name="line.521"></a>
-<span class="sourceLineNo">522</span>  static final int F_var_ti=24;<a name="line.522"></a>
-<span class="sourceLineNo">523</span>  static final int F_var_st=25;<a name="line.523"></a>
-<span class="sourceLineNo">524</span>  static final int F_var_tiD=26;<a name="line.524"></a>
-<span class="sourceLineNo">525</span>  static final int F_var_pi=27;<a name="line.525"></a>
-<span class="sourceLineNo">526</span>  static final int F_peek=28;<a name="line.526"></a>
-<span class="sourceLineNo">527</span>  static final int F_fre=29;<a name="line.527"></a>
-<span class="sourceLineNo">528</span>  static final int F_pos=30;<a name="line.528"></a>
-<span class="sourceLineNo">529</span>  static final int F_tab=31;<a name="line.529"></a>
-<span class="sourceLineNo">530</span>  static final int F_spc=32;<a name="line.530"></a>
-<span class="sourceLineNo">531</span>  static final int F_frm=33;<a name="line.531"></a>
-<span class="sourceLineNo">532</span><a name="line.532"></a>
-<span class="sourceLineNo">533</span>  static String O_strings[]={"XXXXXX","^","*","/","+","-","-ve","not","and","or","xor","=","&lt;","&gt;","&gt;=","&lt;=","&lt;&gt;","=&gt;"};<a name="line.533"></a>
-<span class="sourceLineNo">534</span>  static String F_strings[]={"HLTXXX","sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",<a name="line.534"></a>
-<span class="sourceLineNo">535</span>                             "len","val","asc","mid$","left$","right$","str$","chr$","instr",<a name="line.535"></a>
-<span class="sourceLineNo">536</span>                             "ti","st","ti$","mathpi",<a name="line.536"></a>
-<span class="sourceLineNo">537</span>                             "peek","fre","pos","tab","spc","frm"};<a name="line.537"></a>
-<span class="sourceLineNo">538</span>  //enum { I_PRF, I_PSH, I_STO, I_FNC, I_HLT };           //0..5  (3 bits)<a name="line.538"></a>
-<span class="sourceLineNo">539</span><a name="line.539"></a>
-<span class="sourceLineNo">540</span>  // enum { T_Dbl, T_Str };                                //0..1  (1 bit)<a name="line.540"></a>
-<span class="sourceLineNo">541</span>  // enum { M_IMM, M_MEM, M_MEMARR1, M_MEMARR2 };          //0..3  (2 bits)<a name="line.541"></a>
-<span class="sourceLineNo">542</span>  // enum { O_exp, O_mul, O_div, O_add, O_sub, O_neg       //0..15 (4 bits)<a name="line.542"></a>
-<span class="sourceLineNo">543</span>  //     ,O_not,O_and,O_or,O_xor<a name="line.543"></a>
-<span class="sourceLineNo">544</span>  //       ,O_eq,O_lt,O_gt,O_ge,O_le<a name="line.544"></a>
-<span class="sourceLineNo">545</span>  //};<a name="line.545"></a>
-<span class="sourceLineNo">546</span>  //enum { F_sin, F_cos, F_int }                         //0..2  but will be 36 - so (5 bits)<a name="line.546"></a>
-<span class="sourceLineNo">547</span><a name="line.547"></a>
-<span class="sourceLineNo">548</span>}<a name="line.548"></a>
+<span class="sourceLineNo">400</span>  //GenericType resultlist()<a name="line.400"></a>
+<span class="sourceLineNo">401</span>  //{<a name="line.401"></a>
+<span class="sourceLineNo">402</span>    //GenericType gt; <a name="line.402"></a>
+<span class="sourceLineNo">403</span>          //// opposite order to pop<a name="line.403"></a>
+<span class="sourceLineNo">404</span>          //// we need to know the type just assume numbers lists only for now...<a name="line.404"></a>
+<span class="sourceLineNo">405</span>     //for(i=0; i&lt;atop; ++i) {<a name="line.405"></a>
+<span class="sourceLineNo">406</span>     //}<a name="line.406"></a>
+<span class="sourceLineNo">407</span>     //return gt;<a name="line.407"></a>
+<span class="sourceLineNo">408</span>  //}<a name="line.408"></a>
+<span class="sourceLineNo">409</span><a name="line.409"></a>
+<span class="sourceLineNo">410</span>  //GenericType result() {<a name="line.410"></a>
+<span class="sourceLineNo">411</span>    //if (verbose) { System.out.printf("upto=%d\n",upto); }<a name="line.411"></a>
+<span class="sourceLineNo">412</span>    //GenericType gt; //only allow list of <a name="line.412"></a>
+<span class="sourceLineNo">413</span>    //if (stktype[0]==ST_NUM) {<a name="line.413"></a>
+<span class="sourceLineNo">414</span>      //gt=new GenericType(stknum[0]);<a name="line.414"></a>
+<span class="sourceLineNo">415</span>    //} else {<a name="line.415"></a>
+<span class="sourceLineNo">416</span>      //if (verbose) { System.out.printf("Returning a string type from evaluate\n"); }<a name="line.416"></a>
+<span class="sourceLineNo">417</span>      //gt=new GenericType(stkstring[0]);<a name="line.417"></a>
+<span class="sourceLineNo">418</span>    //}<a name="line.418"></a>
+<span class="sourceLineNo">419</span>    //// if there are more, add to it<a name="line.419"></a>
+<span class="sourceLineNo">420</span>    //for (int i=1; i&lt;upto; ++i) {<a name="line.420"></a>
+<span class="sourceLineNo">421</span>      //if (stktype[i]==ST_NUM) {<a name="line.421"></a>
+<span class="sourceLineNo">422</span>        //gt.add(stknum[i],upto);<a name="line.422"></a>
+<span class="sourceLineNo">423</span>      //} else {<a name="line.423"></a>
+<span class="sourceLineNo">424</span>        //gt.add(stkstring[i],upto);<a name="line.424"></a>
+<span class="sourceLineNo">425</span>      //}<a name="line.425"></a>
+<span class="sourceLineNo">426</span>    //}<a name="line.426"></a>
+<span class="sourceLineNo">427</span>    //return gt;<a name="line.427"></a>
+<span class="sourceLineNo">428</span>  //}<a name="line.428"></a>
+<span class="sourceLineNo">429</span>  //////////////////////////////////////////////////////////////////////<a name="line.429"></a>
+<span class="sourceLineNo">430</span>  ///<a name="line.430"></a>
+<span class="sourceLineNo">431</span>  //////////////////////////////////////////////////////////////////////<a name="line.431"></a>
+<span class="sourceLineNo">432</span><a name="line.432"></a>
+<span class="sourceLineNo">433</span>  int nextpnt(int x) { return acpointer_next[x]; }<a name="line.433"></a>
+<span class="sourceLineNo">434</span>  int savestart_p=0;<a name="line.434"></a>
+<span class="sourceLineNo">435</span>  int savestart_ac=0;<a name="line.435"></a>
+<span class="sourceLineNo">436</span>  boolean is_compiled(int x) { return acpointer[x]&gt;0; }<a name="line.436"></a>
+<span class="sourceLineNo">437</span>  void savestart(int x) { <a name="line.437"></a>
+<span class="sourceLineNo">438</span>          // if &lt;0 then it is a rejected compile, so dont try to recompile, just nod and carry on...<a name="line.438"></a>
+<span class="sourceLineNo">439</span>          if (acpointer[x]&lt;0) return;<a name="line.439"></a>
+<span class="sourceLineNo">440</span>          savestart_p=x; savestart_ac=top; tmptop=top; <a name="line.440"></a>
+<span class="sourceLineNo">441</span>          record=true; <a name="line.441"></a>
+<span class="sourceLineNo">442</span>          using_machine.evaluate_engine.speeder_compile=true;<a name="line.442"></a>
+<span class="sourceLineNo">443</span>      // probably dont need both record and swith on speeder_compile<a name="line.443"></a>
+<span class="sourceLineNo">444</span>  }<a name="line.444"></a>
+<span class="sourceLineNo">445</span>  void saveelseacode(int then, int end) {<a name="line.445"></a>
+<span class="sourceLineNo">446</span>    acpointer_next[then]=end;<a name="line.446"></a>
+<span class="sourceLineNo">447</span>  }<a name="line.447"></a>
+<span class="sourceLineNo">448</span>  void saveacode(int end) <a name="line.448"></a>
+<span class="sourceLineNo">449</span>  {<a name="line.449"></a>
+<span class="sourceLineNo">450</span>          if (record) {<a name="line.450"></a>
+<span class="sourceLineNo">451</span>            // push a HLT onto code<a name="line.451"></a>
+<span class="sourceLineNo">452</span>            addInstr(I_HLT); <a name="line.452"></a>
+<span class="sourceLineNo">453</span>            acpointer[savestart_p]=savestart_ac;<a name="line.453"></a>
+<span class="sourceLineNo">454</span>            acpointer_next[savestart_p]=end;<a name="line.454"></a>
+<span class="sourceLineNo">455</span>            // this is now marked as a valid piece of code<a name="line.455"></a>
+<span class="sourceLineNo">456</span>            top=tmptop;<a name="line.456"></a>
+<span class="sourceLineNo">457</span>            if (using_machine.verbose) System.out.printf("Saved code from %d to %d for location %d\n",savestart_ac,top,savestart_p);<a name="line.457"></a>
+<span class="sourceLineNo">458</span>            record=false;<a name="line.458"></a>
+<span class="sourceLineNo">459</span>            using_machine.evaluate_engine.speeder_compile=false;<a name="line.459"></a>
+<span class="sourceLineNo">460</span>          }<a name="line.460"></a>
+<span class="sourceLineNo">461</span>  }<a name="line.461"></a>
+<span class="sourceLineNo">462</span><a name="line.462"></a>
+<span class="sourceLineNo">463</span>  void reject()<a name="line.463"></a>
+<span class="sourceLineNo">464</span>  {<a name="line.464"></a>
+<span class="sourceLineNo">465</span>    acpointer[savestart_p]=-1; // don't try to run acode or recompile this<a name="line.465"></a>
+<span class="sourceLineNo">466</span>    record=false;<a name="line.466"></a>
+<span class="sourceLineNo">467</span>    using_machine.evaluate_engine.speeder_compile=false;<a name="line.467"></a>
+<span class="sourceLineNo">468</span>  }<a name="line.468"></a>
+<span class="sourceLineNo">469</span><a name="line.469"></a>
+<span class="sourceLineNo">470</span>  // Instruction Type Mode Operation Function<a name="line.470"></a>
+<span class="sourceLineNo">471</span>  static final int I_PRF=0&lt;&lt;6; // was 8<a name="line.471"></a>
+<span class="sourceLineNo">472</span>  static final int I_PSH=1&lt;&lt;6;<a name="line.472"></a>
+<span class="sourceLineNo">473</span>  static final int I_STO=2&lt;&lt;6;<a name="line.473"></a>
+<span class="sourceLineNo">474</span>  static final int I_FNC=3&lt;&lt;6;<a name="line.474"></a>
+<span class="sourceLineNo">475</span>  //static final int I_HLT=4&lt;&lt;6; // this could be turned into FNC HLT and would save a bit!<a name="line.475"></a>
+<span class="sourceLineNo">476</span><a name="line.476"></a>
+<span class="sourceLineNo">477</span><a name="line.477"></a>
+<span class="sourceLineNo">478</span>  static final int T_Dbl=0&lt;&lt;5; // was 7<a name="line.478"></a>
+<span class="sourceLineNo">479</span>  static final int T_Str=1&lt;&lt;5;<a name="line.479"></a>
+<span class="sourceLineNo">480</span><a name="line.480"></a>
+<span class="sourceLineNo">481</span>  static final int M_IMM=0&lt;&lt;0; // was 5, then 3<a name="line.481"></a>
+<span class="sourceLineNo">482</span>  static final int M_MEM=1&lt;&lt;0;<a name="line.482"></a>
+<span class="sourceLineNo">483</span>  static final int M_MEMARR1=2&lt;&lt;0;<a name="line.483"></a>
+<span class="sourceLineNo">484</span>  static final int M_MEMARR2=3&lt;&lt;0;<a name="line.484"></a>
+<span class="sourceLineNo">485</span><a name="line.485"></a>
+<span class="sourceLineNo">486</span>  // can overflow M .: 5 bits = 32 vals<a name="line.486"></a>
+<span class="sourceLineNo">487</span>  static final int O_futureexp=0;<a name="line.487"></a>
+<span class="sourceLineNo">488</span>  static final int O_pow=1;<a name="line.488"></a>
+<span class="sourceLineNo">489</span>  static final int O_mul=2;<a name="line.489"></a>
+<span class="sourceLineNo">490</span>  static final int O_div=3;<a name="line.490"></a>
+<span class="sourceLineNo">491</span>  static final int O_add=4;<a name="line.491"></a>
+<span class="sourceLineNo">492</span>  static final int O_sub=5;<a name="line.492"></a>
+<span class="sourceLineNo">493</span>  static final int O_neg=6;<a name="line.493"></a>
+<span class="sourceLineNo">494</span>  static final int O_not=7;<a name="line.494"></a>
+<span class="sourceLineNo">495</span>  static final int O_and=8;<a name="line.495"></a>
+<span class="sourceLineNo">496</span>  static final int O_or=9;<a name="line.496"></a>
+<span class="sourceLineNo">497</span>  static final int O_xor=10;<a name="line.497"></a>
+<span class="sourceLineNo">498</span>  static final int O_eq=11;<a name="line.498"></a>
+<span class="sourceLineNo">499</span>  static final int O_lt=12;<a name="line.499"></a>
+<span class="sourceLineNo">500</span>  static final int O_gt=13;<a name="line.500"></a>
+<span class="sourceLineNo">501</span>  static final int O_ge=14;<a name="line.501"></a>
+<span class="sourceLineNo">502</span>  static final int O_le=15;<a name="line.502"></a>
+<span class="sourceLineNo">503</span>  static final int O_ne=16;<a name="line.503"></a>
+<span class="sourceLineNo">504</span>  static final int O_ge2=17;<a name="line.504"></a>
+<span class="sourceLineNo">505</span><a name="line.505"></a>
+<span class="sourceLineNo">506</span>  // these can overflow into the M bits and T, which aren't used for FNC .: 6 bits 64 vals<a name="line.506"></a>
+<span class="sourceLineNo">507</span>  static final int F_HLT=0;<a name="line.507"></a>
+<span class="sourceLineNo">508</span>  static final int I_HLT=I_FNC | F_HLT; <a name="line.508"></a>
+<span class="sourceLineNo">509</span>  static final int F_sin=1;<a name="line.509"></a>
+<span class="sourceLineNo">510</span>  static final int F_cos=2;<a name="line.510"></a>
+<span class="sourceLineNo">511</span>  static final int F_int=3;<a name="line.511"></a>
+<span class="sourceLineNo">512</span>  static final int F_log=4;<a name="line.512"></a>
+<span class="sourceLineNo">513</span>  static final int F_sqr=5;<a name="line.513"></a>
+<span class="sourceLineNo">514</span>  static final int F_sqrt=6;<a name="line.514"></a>
+<span class="sourceLineNo">515</span>  static final int F_atn=7;<a name="line.515"></a>
+<span class="sourceLineNo">516</span>  static final int F_tan=8;<a name="line.516"></a>
+<span class="sourceLineNo">517</span>  static final int F_asin=9;<a name="line.517"></a>
+<span class="sourceLineNo">518</span>  static final int F_acos=10;<a name="line.518"></a>
+<span class="sourceLineNo">519</span>  static final int F_abs=11;<a name="line.519"></a>
+<span class="sourceLineNo">520</span>  static final int F_rnd=12;<a name="line.520"></a>
+<span class="sourceLineNo">521</span>  static final int F_exp=13;<a name="line.521"></a>
+<span class="sourceLineNo">522</span>  static final int F_sgn=14;<a name="line.522"></a>
+<span class="sourceLineNo">523</span>  static final int F_len=15;<a name="line.523"></a>
+<span class="sourceLineNo">524</span>  static final int F_val=16;<a name="line.524"></a>
+<span class="sourceLineNo">525</span>  static final int F_asc=17;<a name="line.525"></a>
+<span class="sourceLineNo">526</span>  static final int F_midD=18;<a name="line.526"></a>
+<span class="sourceLineNo">527</span>  static final int F_leftD=19;<a name="line.527"></a>
+<span class="sourceLineNo">528</span>  static final int F_rightD=20;<a name="line.528"></a>
+<span class="sourceLineNo">529</span>  static final int F_strD=21;<a name="line.529"></a>
+<span class="sourceLineNo">530</span>  static final int F_chrD=22;<a name="line.530"></a>
+<span class="sourceLineNo">531</span>  static final int F_instr=23;<a name="line.531"></a>
+<span class="sourceLineNo">532</span>  static final int F_var_ti=24;<a name="line.532"></a>
+<span class="sourceLineNo">533</span>  static final int F_var_st=25;<a name="line.533"></a>
+<span class="sourceLineNo">534</span>  static final int F_var_tiD=26;<a name="line.534"></a>
+<span class="sourceLineNo">535</span>  static final int F_var_pi=27;<a name="line.535"></a>
+<span class="sourceLineNo">536</span>  static final int F_peek=28;<a name="line.536"></a>
+<span class="sourceLineNo">537</span>  static final int F_fre=29;<a name="line.537"></a>
+<span class="sourceLineNo">538</span>  static final int F_pos=30;<a name="line.538"></a>
+<span class="sourceLineNo">539</span>  static final int F_tab=31;<a name="line.539"></a>
+<span class="sourceLineNo">540</span>  static final int F_spc=32;<a name="line.540"></a>
+<span class="sourceLineNo">541</span>  static final int F_frm=33;<a name="line.541"></a>
+<span class="sourceLineNo">542</span><a name="line.542"></a>
+<span class="sourceLineNo">543</span>  static String O_strings[]={"XXXXXX","^","*","/","+","-","-ve","not","and","or","xor","=","&lt;","&gt;","&gt;=","&lt;=","&lt;&gt;","=&gt;"};<a name="line.543"></a>
+<span class="sourceLineNo">544</span>  static String F_strings[]={"HLTXXX","sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",<a name="line.544"></a>
+<span class="sourceLineNo">545</span>                             "len","val","asc","mid$","left$","right$","str$","chr$","instr",<a name="line.545"></a>
+<span class="sourceLineNo">546</span>                             "ti","st","ti$","mathpi",<a name="line.546"></a>
+<span class="sourceLineNo">547</span>                             "peek","fre","pos","tab","spc","frm"};<a name="line.547"></a>
+<span class="sourceLineNo">548</span>  //enum { I_PRF, I_PSH, I_STO, I_FNC, I_HLT };           //0..5  (3 bits)<a name="line.548"></a>
+<span class="sourceLineNo">549</span><a name="line.549"></a>
+<span class="sourceLineNo">550</span>  // enum { T_Dbl, T_Str };                                //0..1  (1 bit)<a name="line.550"></a>
+<span class="sourceLineNo">551</span>  // enum { M_IMM, M_MEM, M_MEMARR1, M_MEMARR2 };          //0..3  (2 bits)<a name="line.551"></a>
+<span class="sourceLineNo">552</span>  // enum { O_exp, O_mul, O_div, O_add, O_sub, O_neg       //0..15 (4 bits)<a name="line.552"></a>
+<span class="sourceLineNo">553</span>  //     ,O_not,O_and,O_or,O_xor<a name="line.553"></a>
+<span class="sourceLineNo">554</span>  //       ,O_eq,O_lt,O_gt,O_ge,O_le<a name="line.554"></a>
+<span class="sourceLineNo">555</span>  //};<a name="line.555"></a>
+<span class="sourceLineNo">556</span>  //enum { F_sin, F_cos, F_int }                         //0..2  but will be 36 - so (5 bits)<a name="line.556"></a>
+<span class="sourceLineNo">557</span><a name="line.557"></a>
+<span class="sourceLineNo">558</span>}<a name="line.558"></a>
 
 
 

@@ -235,9 +235,9 @@ class evaluate {
     //
   void show_state() {
     System.out.printf("%s                D_NUM                 D_OP\n",printprefix);
-    System.out.printf("%s              +---------------+------+-----+------------------------------+\n",printprefix);
-    System.out.printf("%s              | num           | type | op  | func                         |\n",printprefix);
-    System.out.printf("%s              +---------------+------+-----+------------------------------+\n",printprefix);
+    System.out.printf("%s              +---------------+------+------+------------------------------+\n",printprefix);
+    System.out.printf("%s              | num           | type | op   | func                         |\n",printprefix);
+    System.out.printf("%s              +---------------+------+------+------------------------------+\n",printprefix);
     //System.out.printf("%s |STATE:  upto=%d doing=%d\n",printprefix,upto,doing);
     // necessarily there it is the case when doing==D_OP that we DON'T know what stkop[upto-1] is - therefore, don't show it!
     for (int levelx=0; levelx<upto+((doing==D_NUM)?1:0); levelx++) {
@@ -253,7 +253,7 @@ class evaluate {
       if (stktype[levelx]==ST_STRING) {
         System.out.printf(" %-13s |", stkstring[levelx]);
       } else {
-        if (levelx==upto || haveop.equals("(") || haveop.equals("===") || haveop.equals("-ve") || levelx==upto-1 && doing==D_ASSIGN) {
+        if (levelx==upto || haveop.equals("(") || haveop.equals("===") || haveop.equals("===,") || haveop.equals("-ve") || levelx==upto-1 && doing==D_ASSIGN) {
           System.out.printf(" %-13s |", "");
         } else {
           System.out.printf(" %13f |", stknum[levelx]);
@@ -262,7 +262,7 @@ class evaluate {
 
       // print type column
       String havetype="";
-      if (levelx==upto || haveop.equals("(") || haveop.equals("===")) havetype="";
+      if (levelx==upto || haveop.equals("(") || haveop.equals("===") || haveop.equals("===,")) havetype="";
       else if (stktype[levelx]==ST_NUM) havetype=" num";
       else if (stktype[levelx]==ST_STRING) havetype="string";
       else if (stktype[levelx]==ST_PARAM) havetype="param";
@@ -272,11 +272,11 @@ class evaluate {
       System.out.printf("%-6s|",havetype);
 
       // print op column
-      System.out.printf(" %-3s |", haveop);
+      System.out.printf(" %-4s |", haveop);
           //(levelx!=upto-1 || doing!=D_OP)?stkop[levelx]:"N/A");
       System.out.printf(" %-28s |\n", 
         (stkfunc[levelx]!=null && !stkfunc[levelx].equals("")
-          && ((haveop.equals("(") || haveop.equals("===") 
+          && ((haveop.equals("(") || haveop.equals("===") || haveop.equals("===,")
                || levelx==upto && is_function || levelx==upto-1 && doing==D_ASSIGN))
         )?stkfunc[levelx]+
              ((is_function && levelx==upto)?" (preset:is_function)":
@@ -295,7 +295,7 @@ class evaluate {
         //printprefix,levelx,stknum[levelx],(levelx!=upto-1 || doing!=D_OP)?stkop[levelx]:"N/A",(stkfunc[levelx]!=null)?" stkfunc[]=":"",(stkfunc[levelx]!=null)?stkfunc[levelx]:"",
         //stktype[levelx],stktype[levelx]==ST_STRING?stkstring[levelx]:"");
     }
-    System.out.printf("%s              +---------------+------+-----+------------------------------+\n",printprefix);
+    System.out.printf("%s              +---------------+------+------+------------------------------+\n",printprefix);
     System.out.printf("%s   %s  doing=%s\n",printprefix,
       (doing==D_OP)?"                        ":"",(doing==D_OP)?"D_OP^":((doing==D_NUM)?"D_NUM^":"D_ASSIGN"));
     System.out.printf("%s\n",printprefix);
