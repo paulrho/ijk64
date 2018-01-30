@@ -1763,6 +1763,7 @@ void chewcr() {
     }
     // not the interpretted immediate line!
     program_running=true;
+    statements.speeder=speeder; // return to original state
     new statements(programText, this, program_saved_executionpoint); // passing along the machine too
     program_saved_executionpoint=save_executionpoint; // only done on running a program
     program_running=false;
@@ -1780,6 +1781,7 @@ void chewcr() {
 
       // assumes lines have been cached
       //gotoLine(lineNo);
+      statements.speeder=speeder; // return to original state
       new statements(programText, this, executionpoint,lineNo);
       program_saved_executionpoint=save_executionpoint; // only done on running a program
       program_running=false;
@@ -1789,6 +1791,7 @@ void chewcr() {
       }
       // not the interpretted immediate line!
       program_running=true;
+      statements.speeder=speeder; // return to original state
       new statements(programText, this, program_saved_executionpoint); // passing along the machine too
       program_saved_executionpoint=save_executionpoint; // only done on running a program
       program_running=false;
@@ -1807,6 +1810,7 @@ void chewcr() {
     }
     // not the interpretted immediate line!
     program_running=true;
+    statements.speeder=speeder; // return to original state
     new statements(programText, this, restartat); // passing along the machine too
     program_saved_executionpoint=save_executionpoint; // only done on running a program
     program_running=false;
@@ -1818,6 +1822,7 @@ void chewcr() {
     program_running=true;
     // fix me!!!!
     if (speeder) petspeed=new Petspeed(this); // just for now just respawn the lot!
+    statements.speeder=speeder; // return to original state
     new statements(programText, this); // passing along the machine too
     program_saved_executionpoint=save_executionpoint; // only done on running a program
     program_running=false;
@@ -1827,9 +1832,11 @@ void chewcr() {
   boolean runImmediate(String arg) //runDirect mode
   {
     // very inefficient, just for now
-    if (speeder) petspeed=new Petspeed(this); // just for now just respawn the lot!
+    //if (speeder) petspeed=new Petspeed(this); // just for now just respawn the lot!
     // by giving 0, it will not clear the Machine state
+    statements.speeder=false; // our Machine based optimisation relate to programText only
     new statements(arg, this, 0); // tell the statements class who I am
+    statements.speeder=speeder; // return to original state
     return true;
   }
 
