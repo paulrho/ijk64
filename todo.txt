@@ -7,3 +7,12 @@ c64 STR$(-5) should not return leading space
 c64 INT function should just truncate decimal, still allows very big values
 
 acode MID needs to be copy of eval version
+
+--
+think about this:
+you could push Gosubs and Fors onto the acode runtime stack 
+  both these stacks are now combined too - so logically it should work
+  would alow acode coding of gosub/return for/next
+optimise the command parameter list petspeeding (currently it doesnt do it)
+
+optimise DEFFN (currently just rejected compile and interpreted)

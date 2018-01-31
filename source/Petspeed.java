@@ -65,19 +65,44 @@ class Petspeed
   double astack_d[]=new double[AMAX];
   String astack_s[]=new String[AMAX];
   int atop=0;
+
+  int listtop=0;
+  GenericType list;
+  void listadd(double d) {
+    if (listtop==0) list=new GenericType(d);
+    else list.add(d,20); // hard code 20 for now FIX
+    listtop++;
+  }
+  void listadd(String s) {
+    if (listtop==0) list=new GenericType(s);
+    else list.add(s,20); // hard code 20 for now FIX
+    listtop++;
+  }
+
   java.text.SimpleDateFormat localDateFormat = new java.text.SimpleDateFormat("HHmmss"); // for TI$ efficiency
 
   int execute(int x) throws EvaluateException {
-    try { // safety catch!
+    listtop=atop; // extra overhead - want to avoid this if can - FIX
     boolean verbose=using_machine.verbose;
+
+    try { // safety catch!
     for (int i=acpointer[x]; i<MAX; ++i) {
       //if (prog[i]==I_HLT) break;
       if (verbose) System.out.printf("EXECUTING %d %d %d %f %s  ",i,prog[i],pargmem[i],pargD[i],pargS[i]);
       switch(prog[i]) {
         case I_HLT: 
           if (verbose) System.out.printf("\n");
-	  if (atop!=0 && atop!=1) System.out.printf("atop not at zero or one\n");
+	  if (listtop==0 && atop!=0 && atop!=1) System.out.printf("atop not at zero or one (%d)\n",atop);
+	  if (verbose && listtop>0) { System.out.printf("pushed %d onto gt list\n",listtop); }
 	  return nextpnt(x);
+	case I_PRF | T_Str :
+          if (verbose) System.out.printf("Return parameter %d flagged as a string stack=%d ",listtop,atop);
+          listadd(astack_s[listtop]);
+	  break;
+	case I_PRF | T_Dbl :
+          if (verbose) System.out.printf("Return parameter %d flagged as a double stack=%d ",listtop,atop);
+          listadd(astack_d[listtop]);
+	  break;
 	case I_FNC | F_sin : 
 	  astack_d[atop-1]= Math.sin(astack_d[atop-1]);
 	  break;
@@ -484,7 +509,7 @@ class Petspeed
   static final int M_MEMARR2=3<<0;
 
   // can overflow M .: 5 bits = 32 vals
-  static final int O_futureexp=0;
+  static final int O_PARAM=0;
   static final int O_pow=1;
   static final int O_mul=2;
   static final int O_div=3;

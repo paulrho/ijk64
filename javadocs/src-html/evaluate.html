@@ -1646,232 +1646,245 @@
 <span class="sourceLineNo">1638</span>      }<a name="line.1638"></a>
 <span class="sourceLineNo">1639</span>    }<a name="line.1639"></a>
 <span class="sourceLineNo">1640</span><a name="line.1640"></a>
-<span class="sourceLineNo">1641</span>    if (verbose) { System.out.printf("upto=%d\n",upto); }<a name="line.1641"></a>
-<span class="sourceLineNo">1642</span>    GenericType gt; //only allow list of <a name="line.1642"></a>
-<span class="sourceLineNo">1643</span>    if (stktype[0]==ST_NUM) {<a name="line.1643"></a>
-<span class="sourceLineNo">1644</span>      gt=new GenericType(stknum[0]);<a name="line.1644"></a>
-<span class="sourceLineNo">1645</span>    } else {<a name="line.1645"></a>
-<span class="sourceLineNo">1646</span>      if (verbose) { System.out.printf("Returning a string type from evaluate\n"); }<a name="line.1646"></a>
-<span class="sourceLineNo">1647</span>      gt=new GenericType(stkstring[0]);<a name="line.1647"></a>
-<span class="sourceLineNo">1648</span>    }<a name="line.1648"></a>
-<span class="sourceLineNo">1649</span>    // if there are more, add to it<a name="line.1649"></a>
-<span class="sourceLineNo">1650</span>    for (int i=1; i&lt;upto; ++i) {<a name="line.1650"></a>
-<span class="sourceLineNo">1651</span>      if (stktype[i]==ST_NUM) {<a name="line.1651"></a>
-<span class="sourceLineNo">1652</span>        gt.add(stknum[i],upto);<a name="line.1652"></a>
-<span class="sourceLineNo">1653</span>      } else {<a name="line.1653"></a>
-<span class="sourceLineNo">1654</span>        gt.add(stkstring[i],upto);<a name="line.1654"></a>
-<span class="sourceLineNo">1655</span>      }<a name="line.1655"></a>
-<span class="sourceLineNo">1656</span>    }<a name="line.1656"></a>
-<span class="sourceLineNo">1657</span>    return gt;<a name="line.1657"></a>
-<span class="sourceLineNo">1658</span>    //return stknum[0]; // we cant do this now, we must return maybe a string (even if it is a number)<a name="line.1658"></a>
-<span class="sourceLineNo">1659</span>  }<a name="line.1659"></a>
-<span class="sourceLineNo">1660</span><a name="line.1660"></a>
-<span class="sourceLineNo">1661</span>// there are two ways to get data  from the evaluate stack - or the special case where<a name="line.1661"></a>
-<span class="sourceLineNo">1662</span>// we get the data from the machine itself<a name="line.1662"></a>
-<span class="sourceLineNo">1663</span>// this could be from an input string or reading data statements etc<a name="line.1663"></a>
-<span class="sourceLineNo">1664</span>// one way to do this would be to have a special thing at the top of the stack (or function or whatever)<a name="line.1664"></a>
-<span class="sourceLineNo">1665</span>// which will then go and get the values from else where (ie. the machine)<a name="line.1665"></a>
-<span class="sourceLineNo">1666</span>// READ A$,B,C%,D<a name="line.1666"></a>
-<span class="sourceLineNo">1667</span>// DATAxxx,999,999,999<a name="line.1667"></a>
-<span class="sourceLineNo">1668</span>// an example would be  A$,B,C%,D=METAREADDATASTREAM()<a name="line.1668"></a>
-<span class="sourceLineNo">1669</span>// the parser would also have to leave this function on the stack - and not compute it<a name="line.1669"></a>
-<span class="sourceLineNo">1670</span>// to get the data..another way would be to have the entire data in one string (with CR to separate lines)<a name="line.1670"></a>
-<span class="sourceLineNo">1671</span>// and a offset to the current reading part<a name="line.1671"></a>
-<span class="sourceLineNo">1672</span>///   // but only parse the string as required <a name="line.1672"></a>
-<span class="sourceLineNo">1673</span>///   int prefill(int index) {<a name="line.1673"></a>
-<span class="sourceLineNo">1674</span>///     // this is a tricky thing that will read the next variable JUST IN TIME into the stack<a name="line.1674"></a>
-<span class="sourceLineNo">1675</span>///     // how do we know whether to treat it as a string or a number???<a name="line.1675"></a>
-<span class="sourceLineNo">1676</span>///     return index;<a name="line.1676"></a>
-<span class="sourceLineNo">1677</span>///   }<a name="line.1677"></a>
-<span class="sourceLineNo">1678</span>int reads_from_stream;<a name="line.1678"></a>
-<span class="sourceLineNo">1679</span>boolean inspect_datatype;<a name="line.1679"></a>
-<span class="sourceLineNo">1680</span><a name="line.1680"></a>
-<span class="sourceLineNo">1681</span>GenericType ReadValue(int stypeindex, int index) throws EvaluateException {<a name="line.1681"></a>
-<span class="sourceLineNo">1682</span>if (verbose) { System.out.printf("in 000\n"); }<a name="line.1682"></a>
-<span class="sourceLineNo">1683</span>  if (reads_from_stream&gt;0) {<a name="line.1683"></a>
-<span class="sourceLineNo">1684</span>if (verbose) { System.out.printf("in 001\n"); }<a name="line.1684"></a>
-<span class="sourceLineNo">1685</span>    // we should NOT return the type in the stack because<a name="line.1685"></a>
-<span class="sourceLineNo">1686</span>    // we didnt set it! actually we set it to a special type<a name="line.1686"></a>
-<span class="sourceLineNo">1687</span>    // if ST_NUM, read it as a num, else read it as a string<a name="line.1687"></a>
-<span class="sourceLineNo">1688</span>    // to continue with the wierd theme below, we could (should?) <a name="line.1688"></a>
-<span class="sourceLineNo">1689</span>    // return the value with both a string and num version<a name="line.1689"></a>
-<span class="sourceLineNo">1690</span>    // and based on the assignment, it will take what it needs<a name="line.1690"></a>
-<span class="sourceLineNo">1691</span>    // // dodgy work around GET the variable first, then set it<a name="line.1691"></a>
-<span class="sourceLineNo">1692</span>    // GenericType gt=getvariable(<a name="line.1692"></a>
-<span class="sourceLineNo">1693</span>    // no - another dodgy work around, preinspect the variable name to determine the type to be returned<a name="line.1693"></a>
-<span class="sourceLineNo">1694</span>    // we now get returned a pointer to the variable name - so lets look at it<a name="line.1694"></a>
-<span class="sourceLineNo">1695</span>    int end=stkfunc[stypeindex].length()-1;<a name="line.1695"></a>
-<span class="sourceLineNo">1696</span>    String lastchar=stkfunc[stypeindex].substring(end,end+1);<a name="line.1696"></a>
-<span class="sourceLineNo">1697</span>    if (using_machine==null) {<a name="line.1697"></a>
-<span class="sourceLineNo">1698</span>      if (lastchar.equals("$")) {<a name="line.1698"></a>
-<span class="sourceLineNo">1699</span>        return new GenericType("TESTONLY");<a name="line.1699"></a>
-<span class="sourceLineNo">1700</span>      } else { <a name="line.1700"></a>
-<span class="sourceLineNo">1701</span>        return new GenericType(10.5); // test only<a name="line.1701"></a>
-<span class="sourceLineNo">1702</span>      }<a name="line.1702"></a>
-<span class="sourceLineNo">1703</span>    } else {<a name="line.1703"></a>
-<span class="sourceLineNo">1704</span>if (verbose) { System.out.printf("in 002\n"); }<a name="line.1704"></a>
-<span class="sourceLineNo">1705</span>      if (lastchar.equals("$")) {<a name="line.1705"></a>
-<span class="sourceLineNo">1706</span>if (verbose) { System.out.printf("in 003\n"); }<a name="line.1706"></a>
-<span class="sourceLineNo">1707</span>        // demanding a GenericType from the machine (we dont care we it gets it from)<a name="line.1707"></a>
-<span class="sourceLineNo">1708</span>        if (reads_from_stream==ST_DATASTREAM)<a name="line.1708"></a>
-<span class="sourceLineNo">1709</span>          return using_machine.metareaddatastreamString();<a name="line.1709"></a>
-<span class="sourceLineNo">1710</span>        else<a name="line.1710"></a>
-<span class="sourceLineNo">1711</span>          return using_machine.metainputstreamString();<a name="line.1711"></a>
-<span class="sourceLineNo">1712</span>      } else { <a name="line.1712"></a>
-<span class="sourceLineNo">1713</span>        if (reads_from_stream==ST_DATASTREAM)<a name="line.1713"></a>
-<span class="sourceLineNo">1714</span>          return using_machine.metareaddatastreamNum();<a name="line.1714"></a>
-<span class="sourceLineNo">1715</span>        else<a name="line.1715"></a>
-<span class="sourceLineNo">1716</span>          return using_machine.metainputstreamNum();<a name="line.1716"></a>
-<span class="sourceLineNo">1717</span>      }<a name="line.1717"></a>
-<span class="sourceLineNo">1718</span>    }<a name="line.1718"></a>
-<span class="sourceLineNo">1719</span>  } else {<a name="line.1719"></a>
-<span class="sourceLineNo">1720</span>    boolean dotypecast_tonum=false;<a name="line.1720"></a>
-<span class="sourceLineNo">1721</span>    if (inspect_datatype) {<a name="line.1721"></a>
-<span class="sourceLineNo">1722</span>      if (verbose) { System.out.printf("Inspecting datatype\n"); }<a name="line.1722"></a>
-<span class="sourceLineNo">1723</span>      int end=stkfunc[stypeindex].length()-1;<a name="line.1723"></a>
-<span class="sourceLineNo">1724</span>      String lastchar=stkfunc[stypeindex].substring(end,end+1);<a name="line.1724"></a>
-<span class="sourceLineNo">1725</span>      if (!lastchar.equals("$")) {<a name="line.1725"></a>
-<span class="sourceLineNo">1726</span>        if (verbose) { System.out.printf("  not a string\n"); }<a name="line.1726"></a>
-<span class="sourceLineNo">1727</span>        dotypecast_tonum=true;<a name="line.1727"></a>
-<span class="sourceLineNo">1728</span>      }<a name="line.1728"></a>
-<span class="sourceLineNo">1729</span>    }<a name="line.1729"></a>
-<span class="sourceLineNo">1730</span>    // we return the type that it is in the stack<a name="line.1730"></a>
-<span class="sourceLineNo">1731</span>    // ignore stype passed,:<a name="line.1731"></a>
-<span class="sourceLineNo">1732</span>    int stype=stktype[index]; // i think this was an undected bug! - it was getting given rubbish types, but it seemed to work!<a name="line.1732"></a>
-<span class="sourceLineNo">1733</span>    // is this because it ignores it anyway and uses the type of the string?<a name="line.1733"></a>
-<span class="sourceLineNo">1734</span>    if (stype==ST_NUM) {<a name="line.1734"></a>
-<span class="sourceLineNo">1735</span>      if (verbose) { System.out.printf("%f\n",stknum[index]); }<a name="line.1735"></a>
-<span class="sourceLineNo">1736</span>      return new GenericType(stknum[index]);<a name="line.1736"></a>
-<span class="sourceLineNo">1737</span>    } else {<a name="line.1737"></a>
-<span class="sourceLineNo">1738</span>      if (verbose) { System.out.printf("%s\n",stkstring[index]); }<a name="line.1738"></a>
-<span class="sourceLineNo">1739</span>      if (dotypecast_tonum) {<a name="line.1739"></a>
-<span class="sourceLineNo">1740</span>        try {<a name="line.1740"></a>
-<span class="sourceLineNo">1741</span>          return new GenericType(Double.parseDouble(stkstring[index]));<a name="line.1741"></a>
-<span class="sourceLineNo">1742</span>        } catch (Exception e) {<a name="line.1742"></a>
-<span class="sourceLineNo">1743</span>          //return new GenericType(0.0); // should throw an error<a name="line.1743"></a>
-<span class="sourceLineNo">1744</span>          throw new EvaluateException("not numeric");<a name="line.1744"></a>
-<span class="sourceLineNo">1745</span>        }<a name="line.1745"></a>
-<span class="sourceLineNo">1746</span>      } else<a name="line.1746"></a>
-<span class="sourceLineNo">1747</span>        return new GenericType(stkstring[index]);<a name="line.1747"></a>
-<span class="sourceLineNo">1748</span>    }<a name="line.1748"></a>
-<span class="sourceLineNo">1749</span>  }<a name="line.1749"></a>
-<span class="sourceLineNo">1750</span>}<a name="line.1750"></a>
-<span class="sourceLineNo">1751</span><a name="line.1751"></a>
-<span class="sourceLineNo">1752</span>void ProcessAssignment() throws EvaluateException { <a name="line.1752"></a>
-<span class="sourceLineNo">1753</span>      // try and see if it can be made to go faster for the singleton case<a name="line.1753"></a>
-<span class="sourceLineNo">1754</span>      //verbose=true;<a name="line.1754"></a>
-<span class="sourceLineNo">1755</span>      reads_from_stream=0;<a name="line.1755"></a>
-<span class="sourceLineNo">1756</span>      if (upto&gt;0 &amp;&amp; (stktype[upto-1]==ST_DATASTREAM || stktype[upto-1]==ST_INPUTSTREAM)) {<a name="line.1756"></a>
-<span class="sourceLineNo">1757</span>        if (verbose) { System.out.printf("We need to read from a datastream\n"); }<a name="line.1757"></a>
-<span class="sourceLineNo">1758</span>        reads_from_stream=stktype[upto-1];<a name="line.1758"></a>
-<span class="sourceLineNo">1759</span>      }<a name="line.1759"></a>
-<span class="sourceLineNo">1760</span>      if (verbose) { System.out.printf("Yes, we really have an assignment!\n"); }<a name="line.1760"></a>
-<span class="sourceLineNo">1761</span>      // lets SET the variable, we expect the top of the stack is the num or string, the rest is what we set!<a name="line.1761"></a>
-<span class="sourceLineNo">1762</span>      //if (stkop[upto-2].equals("===")   // we expect this<a name="line.1762"></a>
-<span class="sourceLineNo">1763</span>      // we now have quite a complicated stack of things to assign,<a name="line.1763"></a>
+<span class="sourceLineNo">1641</span>    // to keep the simple numeric expression simple - (like IF xxxx ) then just don't push anything<a name="line.1641"></a>
+<span class="sourceLineNo">1642</span>    if (verbose) { System.out.printf("upto=%d\n",upto); }<a name="line.1642"></a>
+<span class="sourceLineNo">1643</span>    GenericType gt; //only allow list of <a name="line.1643"></a>
+<span class="sourceLineNo">1644</span>    if (stktype[0]==ST_NUM) {<a name="line.1644"></a>
+<span class="sourceLineNo">1645</span>      gt=new GenericType(stknum[0]);<a name="line.1645"></a>
+<span class="sourceLineNo">1646</span>      if (upto&gt;1) // if it is a singleton - don't bother recording anthing!<a name="line.1646"></a>
+<span class="sourceLineNo">1647</span>        if (0==upto-1 || !stkop[0].equals("===") &amp;&amp; !stkop[0].equals("===,")) <a name="line.1647"></a>
+<span class="sourceLineNo">1648</span>          using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Dbl); // flag a double<a name="line.1648"></a>
+<span class="sourceLineNo">1649</span>    } else {<a name="line.1649"></a>
+<span class="sourceLineNo">1650</span>      if (verbose) { System.out.printf("Returning a string type from evaluate\n"); }<a name="line.1650"></a>
+<span class="sourceLineNo">1651</span>      gt=new GenericType(stkstring[0]);<a name="line.1651"></a>
+<span class="sourceLineNo">1652</span>      if (upto&gt;1) // if it is a singleton - don't bother recording anthing!<a name="line.1652"></a>
+<span class="sourceLineNo">1653</span>        if (0==upto-1 || !stkop[0].equals("===") &amp;&amp; !stkop[0].equals("===,")) <a name="line.1653"></a>
+<span class="sourceLineNo">1654</span>          using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Str); // flag a string<a name="line.1654"></a>
+<span class="sourceLineNo">1655</span>    }<a name="line.1655"></a>
+<span class="sourceLineNo">1656</span>    // if there are more, add to it<a name="line.1656"></a>
+<span class="sourceLineNo">1657</span>    for (int i=1; i&lt;upto; ++i) {<a name="line.1657"></a>
+<span class="sourceLineNo">1658</span>      if (stktype[i]==ST_NUM) {<a name="line.1658"></a>
+<span class="sourceLineNo">1659</span>        gt.add(stknum[i],upto);<a name="line.1659"></a>
+<span class="sourceLineNo">1660</span>        if (upto&gt;1) // if it is a singleton - don't bother recording anthing!<a name="line.1660"></a>
+<span class="sourceLineNo">1661</span>          if (i==upto-1 || !stkop[i].equals("===") &amp;&amp; !stkop[i].equals("===,")) <a name="line.1661"></a>
+<span class="sourceLineNo">1662</span>            using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Dbl); // flag a double<a name="line.1662"></a>
+<span class="sourceLineNo">1663</span>      } else {<a name="line.1663"></a>
+<span class="sourceLineNo">1664</span>        gt.add(stkstring[i],upto);<a name="line.1664"></a>
+<span class="sourceLineNo">1665</span>        if (upto&gt;1) // if it is a singleton - don't bother recording anthing!<a name="line.1665"></a>
+<span class="sourceLineNo">1666</span>          if (i==upto-1 || !stkop[i].equals("===") &amp;&amp; !stkop[i].equals("===,")) <a name="line.1666"></a>
+<span class="sourceLineNo">1667</span>            using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Str); // flag a string<a name="line.1667"></a>
+<span class="sourceLineNo">1668</span>      }<a name="line.1668"></a>
+<span class="sourceLineNo">1669</span>    }<a name="line.1669"></a>
+<span class="sourceLineNo">1670</span>    return gt;<a name="line.1670"></a>
+<span class="sourceLineNo">1671</span>    //return stknum[0]; // we cant do this now, we must return maybe a string (even if it is a number)<a name="line.1671"></a>
+<span class="sourceLineNo">1672</span>  }<a name="line.1672"></a>
+<span class="sourceLineNo">1673</span><a name="line.1673"></a>
+<span class="sourceLineNo">1674</span>// there are two ways to get data  from the evaluate stack - or the special case where<a name="line.1674"></a>
+<span class="sourceLineNo">1675</span>// we get the data from the machine itself<a name="line.1675"></a>
+<span class="sourceLineNo">1676</span>// this could be from an input string or reading data statements etc<a name="line.1676"></a>
+<span class="sourceLineNo">1677</span>// one way to do this would be to have a special thing at the top of the stack (or function or whatever)<a name="line.1677"></a>
+<span class="sourceLineNo">1678</span>// which will then go and get the values from else where (ie. the machine)<a name="line.1678"></a>
+<span class="sourceLineNo">1679</span>// READ A$,B,C%,D<a name="line.1679"></a>
+<span class="sourceLineNo">1680</span>// DATAxxx,999,999,999<a name="line.1680"></a>
+<span class="sourceLineNo">1681</span>// an example would be  A$,B,C%,D=METAREADDATASTREAM()<a name="line.1681"></a>
+<span class="sourceLineNo">1682</span>// the parser would also have to leave this function on the stack - and not compute it<a name="line.1682"></a>
+<span class="sourceLineNo">1683</span>// to get the data..another way would be to have the entire data in one string (with CR to separate lines)<a name="line.1683"></a>
+<span class="sourceLineNo">1684</span>// and a offset to the current reading part<a name="line.1684"></a>
+<span class="sourceLineNo">1685</span>///   // but only parse the string as required <a name="line.1685"></a>
+<span class="sourceLineNo">1686</span>///   int prefill(int index) {<a name="line.1686"></a>
+<span class="sourceLineNo">1687</span>///     // this is a tricky thing that will read the next variable JUST IN TIME into the stack<a name="line.1687"></a>
+<span class="sourceLineNo">1688</span>///     // how do we know whether to treat it as a string or a number???<a name="line.1688"></a>
+<span class="sourceLineNo">1689</span>///     return index;<a name="line.1689"></a>
+<span class="sourceLineNo">1690</span>///   }<a name="line.1690"></a>
+<span class="sourceLineNo">1691</span>int reads_from_stream;<a name="line.1691"></a>
+<span class="sourceLineNo">1692</span>boolean inspect_datatype;<a name="line.1692"></a>
+<span class="sourceLineNo">1693</span><a name="line.1693"></a>
+<span class="sourceLineNo">1694</span>GenericType ReadValue(int stypeindex, int index) throws EvaluateException {<a name="line.1694"></a>
+<span class="sourceLineNo">1695</span>if (verbose) { System.out.printf("in 000\n"); }<a name="line.1695"></a>
+<span class="sourceLineNo">1696</span>  if (reads_from_stream&gt;0) {<a name="line.1696"></a>
+<span class="sourceLineNo">1697</span>if (verbose) { System.out.printf("in 001\n"); }<a name="line.1697"></a>
+<span class="sourceLineNo">1698</span>    // we should NOT return the type in the stack because<a name="line.1698"></a>
+<span class="sourceLineNo">1699</span>    // we didnt set it! actually we set it to a special type<a name="line.1699"></a>
+<span class="sourceLineNo">1700</span>    // if ST_NUM, read it as a num, else read it as a string<a name="line.1700"></a>
+<span class="sourceLineNo">1701</span>    // to continue with the wierd theme below, we could (should?) <a name="line.1701"></a>
+<span class="sourceLineNo">1702</span>    // return the value with both a string and num version<a name="line.1702"></a>
+<span class="sourceLineNo">1703</span>    // and based on the assignment, it will take what it needs<a name="line.1703"></a>
+<span class="sourceLineNo">1704</span>    // // dodgy work around GET the variable first, then set it<a name="line.1704"></a>
+<span class="sourceLineNo">1705</span>    // GenericType gt=getvariable(<a name="line.1705"></a>
+<span class="sourceLineNo">1706</span>    // no - another dodgy work around, preinspect the variable name to determine the type to be returned<a name="line.1706"></a>
+<span class="sourceLineNo">1707</span>    // we now get returned a pointer to the variable name - so lets look at it<a name="line.1707"></a>
+<span class="sourceLineNo">1708</span>    int end=stkfunc[stypeindex].length()-1;<a name="line.1708"></a>
+<span class="sourceLineNo">1709</span>    String lastchar=stkfunc[stypeindex].substring(end,end+1);<a name="line.1709"></a>
+<span class="sourceLineNo">1710</span>    if (using_machine==null) {<a name="line.1710"></a>
+<span class="sourceLineNo">1711</span>      if (lastchar.equals("$")) {<a name="line.1711"></a>
+<span class="sourceLineNo">1712</span>        return new GenericType("TESTONLY");<a name="line.1712"></a>
+<span class="sourceLineNo">1713</span>      } else { <a name="line.1713"></a>
+<span class="sourceLineNo">1714</span>        return new GenericType(10.5); // test only<a name="line.1714"></a>
+<span class="sourceLineNo">1715</span>      }<a name="line.1715"></a>
+<span class="sourceLineNo">1716</span>    } else {<a name="line.1716"></a>
+<span class="sourceLineNo">1717</span>if (verbose) { System.out.printf("in 002\n"); }<a name="line.1717"></a>
+<span class="sourceLineNo">1718</span>      if (lastchar.equals("$")) {<a name="line.1718"></a>
+<span class="sourceLineNo">1719</span>if (verbose) { System.out.printf("in 003\n"); }<a name="line.1719"></a>
+<span class="sourceLineNo">1720</span>        // demanding a GenericType from the machine (we dont care we it gets it from)<a name="line.1720"></a>
+<span class="sourceLineNo">1721</span>        if (reads_from_stream==ST_DATASTREAM)<a name="line.1721"></a>
+<span class="sourceLineNo">1722</span>          return using_machine.metareaddatastreamString();<a name="line.1722"></a>
+<span class="sourceLineNo">1723</span>        else<a name="line.1723"></a>
+<span class="sourceLineNo">1724</span>          return using_machine.metainputstreamString();<a name="line.1724"></a>
+<span class="sourceLineNo">1725</span>      } else { <a name="line.1725"></a>
+<span class="sourceLineNo">1726</span>        if (reads_from_stream==ST_DATASTREAM)<a name="line.1726"></a>
+<span class="sourceLineNo">1727</span>          return using_machine.metareaddatastreamNum();<a name="line.1727"></a>
+<span class="sourceLineNo">1728</span>        else<a name="line.1728"></a>
+<span class="sourceLineNo">1729</span>          return using_machine.metainputstreamNum();<a name="line.1729"></a>
+<span class="sourceLineNo">1730</span>      }<a name="line.1730"></a>
+<span class="sourceLineNo">1731</span>    }<a name="line.1731"></a>
+<span class="sourceLineNo">1732</span>  } else {<a name="line.1732"></a>
+<span class="sourceLineNo">1733</span>    boolean dotypecast_tonum=false;<a name="line.1733"></a>
+<span class="sourceLineNo">1734</span>    if (inspect_datatype) {<a name="line.1734"></a>
+<span class="sourceLineNo">1735</span>      if (verbose) { System.out.printf("Inspecting datatype\n"); }<a name="line.1735"></a>
+<span class="sourceLineNo">1736</span>      int end=stkfunc[stypeindex].length()-1;<a name="line.1736"></a>
+<span class="sourceLineNo">1737</span>      String lastchar=stkfunc[stypeindex].substring(end,end+1);<a name="line.1737"></a>
+<span class="sourceLineNo">1738</span>      if (!lastchar.equals("$")) {<a name="line.1738"></a>
+<span class="sourceLineNo">1739</span>        if (verbose) { System.out.printf("  not a string\n"); }<a name="line.1739"></a>
+<span class="sourceLineNo">1740</span>        dotypecast_tonum=true;<a name="line.1740"></a>
+<span class="sourceLineNo">1741</span>      }<a name="line.1741"></a>
+<span class="sourceLineNo">1742</span>    }<a name="line.1742"></a>
+<span class="sourceLineNo">1743</span>    // we return the type that it is in the stack<a name="line.1743"></a>
+<span class="sourceLineNo">1744</span>    // ignore stype passed,:<a name="line.1744"></a>
+<span class="sourceLineNo">1745</span>    int stype=stktype[index]; // i think this was an undected bug! - it was getting given rubbish types, but it seemed to work!<a name="line.1745"></a>
+<span class="sourceLineNo">1746</span>    // is this because it ignores it anyway and uses the type of the string?<a name="line.1746"></a>
+<span class="sourceLineNo">1747</span>    if (stype==ST_NUM) {<a name="line.1747"></a>
+<span class="sourceLineNo">1748</span>      if (verbose) { System.out.printf("%f\n",stknum[index]); }<a name="line.1748"></a>
+<span class="sourceLineNo">1749</span>      return new GenericType(stknum[index]);<a name="line.1749"></a>
+<span class="sourceLineNo">1750</span>    } else {<a name="line.1750"></a>
+<span class="sourceLineNo">1751</span>      if (verbose) { System.out.printf("%s\n",stkstring[index]); }<a name="line.1751"></a>
+<span class="sourceLineNo">1752</span>      if (dotypecast_tonum) {<a name="line.1752"></a>
+<span class="sourceLineNo">1753</span>        try {<a name="line.1753"></a>
+<span class="sourceLineNo">1754</span>          return new GenericType(Double.parseDouble(stkstring[index]));<a name="line.1754"></a>
+<span class="sourceLineNo">1755</span>        } catch (Exception e) {<a name="line.1755"></a>
+<span class="sourceLineNo">1756</span>          //return new GenericType(0.0); // should throw an error<a name="line.1756"></a>
+<span class="sourceLineNo">1757</span>          throw new EvaluateException("not numeric");<a name="line.1757"></a>
+<span class="sourceLineNo">1758</span>        }<a name="line.1758"></a>
+<span class="sourceLineNo">1759</span>      } else<a name="line.1759"></a>
+<span class="sourceLineNo">1760</span>        return new GenericType(stkstring[index]);<a name="line.1760"></a>
+<span class="sourceLineNo">1761</span>    }<a name="line.1761"></a>
+<span class="sourceLineNo">1762</span>  }<a name="line.1762"></a>
+<span class="sourceLineNo">1763</span>}<a name="line.1763"></a>
 <span class="sourceLineNo">1764</span><a name="line.1764"></a>
-<span class="sourceLineNo">1765</span>      // go down the stack to find the last assignment operator, and take a note<a name="line.1765"></a>
-<span class="sourceLineNo">1766</span>      int firstvalue=upto;<a name="line.1766"></a>
-<span class="sourceLineNo">1767</span>      int p=upto-1-1;<a name="line.1767"></a>
-<span class="sourceLineNo">1768</span>      while (p&gt;=0) {<a name="line.1768"></a>
-<span class="sourceLineNo">1769</span>        // it would be good to count the available values but we wont<a name="line.1769"></a>
-<span class="sourceLineNo">1770</span>        if (stkop[p].equals("===")) {<a name="line.1770"></a>
-<span class="sourceLineNo">1771</span>          firstvalue=p+1;<a name="line.1771"></a>
-<span class="sourceLineNo">1772</span>          break;<a name="line.1772"></a>
-<span class="sourceLineNo">1773</span>        }<a name="line.1773"></a>
-<span class="sourceLineNo">1774</span>        p--;<a name="line.1774"></a>
-<span class="sourceLineNo">1775</span>      }<a name="line.1775"></a>
-<span class="sourceLineNo">1776</span>      if (firstvalue==upto) { <a name="line.1776"></a>
-<span class="sourceLineNo">1777</span>         if (verbose) { System.out.printf("?ASSIGNMENTFINALERROR - cant find the last assignment\n"); }<a name="line.1777"></a>
-<span class="sourceLineNo">1778</span>         throw new EvaluateException("ASSIGNMENT FINAL ERROR");<a name="line.1778"></a>
-<span class="sourceLineNo">1779</span>      }<a name="line.1779"></a>
-<span class="sourceLineNo">1780</span><a name="line.1780"></a>
-<span class="sourceLineNo">1781</span>      if (verbose) { <a name="line.1781"></a>
-<span class="sourceLineNo">1782</span>        System.out.printf("upto=%d and firstvalue=%d\n",upto,firstvalue);<a name="line.1782"></a>
-<span class="sourceLineNo">1783</span>      }<a name="line.1783"></a>
-<span class="sourceLineNo">1784</span>      // best to go UP the stack and inspect<a name="line.1784"></a>
-<span class="sourceLineNo">1785</span>      int currentvalue=firstvalue;<a name="line.1785"></a>
-<span class="sourceLineNo">1786</span>      int parameters=0; // singleton<a name="line.1786"></a>
-<span class="sourceLineNo">1787</span>      int stackvar=0;<a name="line.1787"></a>
-<span class="sourceLineNo">1788</span>      for (int stackp=0; stackp&lt;firstvalue; ++stackp) {<a name="line.1788"></a>
-<span class="sourceLineNo">1789</span>        if (verbose) { System.out.printf("stackp=%d\n",stackp); }<a name="line.1789"></a>
-<span class="sourceLineNo">1790</span>        if (stkop[stackp].equals("===") || stkop[stackp].equals("===,")) {<a name="line.1790"></a>
-<span class="sourceLineNo">1791</span>          // we have therefore a variable to assign<a name="line.1791"></a>
-<span class="sourceLineNo">1792</span>          if (verbose) { System.out.printf("parameters %d\n",parameters); }<a name="line.1792"></a>
-<span class="sourceLineNo">1793</span>          if (parameters==0) {<a name="line.1793"></a>
-<span class="sourceLineNo">1794</span>            // simple setting<a name="line.1794"></a>
-<span class="sourceLineNo">1795</span>            GenericType rv=ReadValue(stackp,currentvalue++);<a name="line.1795"></a>
-<span class="sourceLineNo">1796</span>            if (using_machine!=null) {<a name="line.1796"></a>
-<span class="sourceLineNo">1797</span>              if (verbose) { <a name="line.1797"></a>
-<span class="sourceLineNo">1798</span>                System.out.printf("Wanting to set %s = %s\n",stkfunc[stackp],rv.print());<a name="line.1798"></a>
-<span class="sourceLineNo">1799</span>                  //ReadValue(stackp,currentvalue).print()<a name="line.1799"></a>
-<span class="sourceLineNo">1800</span>                //);<a name="line.1800"></a>
-<span class="sourceLineNo">1801</span>              }<a name="line.1801"></a>
-<span class="sourceLineNo">1802</span>              using_machine.setvariable(stkfunc[stackp].toLowerCase(),rv);<a name="line.1802"></a>
-<span class="sourceLineNo">1803</span>              //using_machine.setvariable(stkfunc[stackp].toLowerCase(),ReadValue(stktype[stackp+1],currentvalue++));<a name="line.1803"></a>
-<span class="sourceLineNo">1804</span>              if (speeder_compile) { compiled_obj+="."+stkfunc[stackp].toLowerCase();<a name="line.1804"></a>
-<span class="sourceLineNo">1805</span>                                       int v = using_machine.getvarindex(stkfunc[stackp].toLowerCase());<a name="line.1805"></a>
-<span class="sourceLineNo">1806</span>                      compiled_asm+="  STO "+ (rv.isNum()?"Dbl":"Str") +" MEM: "+stkfunc[stackp].toLowerCase()+"="+String.valueOf(v)+"\n";<a name="line.1806"></a>
-<span class="sourceLineNo">1807</span>                      // System.out.printf(".%s\n",stkfunc[stackp].toLowerCase());<a name="line.1807"></a>
-<span class="sourceLineNo">1808</span>                      // System.out.printf("RPNALG: STO -&gt; %s\n",stkfunc[stackp].toLowerCase());<a name="line.1808"></a>
-<span class="sourceLineNo">1809</span>                  using_machine.petspeed.addInstr(Petspeed.I_STO | ((rv.isNum())?Petspeed.T_Dbl:Petspeed.T_Str) | Petspeed.M_MEM,v);<a name="line.1809"></a>
-<span class="sourceLineNo">1810</span>              }<a name="line.1810"></a>
-<span class="sourceLineNo">1811</span>            } else {<a name="line.1811"></a>
-<span class="sourceLineNo">1812</span>              if (verbose) {<a name="line.1812"></a>
-<span class="sourceLineNo">1813</span>                System.out.printf("stackp=%d Would have set %s to %s\n",stackp,stkfunc[stackp].toLowerCase(),rv.print());<a name="line.1813"></a>
+<span class="sourceLineNo">1765</span>void ProcessAssignment() throws EvaluateException { <a name="line.1765"></a>
+<span class="sourceLineNo">1766</span>      // try and see if it can be made to go faster for the singleton case<a name="line.1766"></a>
+<span class="sourceLineNo">1767</span>      //verbose=true;<a name="line.1767"></a>
+<span class="sourceLineNo">1768</span>      reads_from_stream=0;<a name="line.1768"></a>
+<span class="sourceLineNo">1769</span>      if (upto&gt;0 &amp;&amp; (stktype[upto-1]==ST_DATASTREAM || stktype[upto-1]==ST_INPUTSTREAM)) {<a name="line.1769"></a>
+<span class="sourceLineNo">1770</span>        if (verbose) { System.out.printf("We need to read from a datastream\n"); }<a name="line.1770"></a>
+<span class="sourceLineNo">1771</span>        reads_from_stream=stktype[upto-1];<a name="line.1771"></a>
+<span class="sourceLineNo">1772</span>      }<a name="line.1772"></a>
+<span class="sourceLineNo">1773</span>      if (verbose) { System.out.printf("Yes, we really have an assignment!\n"); }<a name="line.1773"></a>
+<span class="sourceLineNo">1774</span>      // lets SET the variable, we expect the top of the stack is the num or string, the rest is what we set!<a name="line.1774"></a>
+<span class="sourceLineNo">1775</span>      //if (stkop[upto-2].equals("===")   // we expect this<a name="line.1775"></a>
+<span class="sourceLineNo">1776</span>      // we now have quite a complicated stack of things to assign,<a name="line.1776"></a>
+<span class="sourceLineNo">1777</span><a name="line.1777"></a>
+<span class="sourceLineNo">1778</span>      // go down the stack to find the last assignment operator, and take a note<a name="line.1778"></a>
+<span class="sourceLineNo">1779</span>      int firstvalue=upto;<a name="line.1779"></a>
+<span class="sourceLineNo">1780</span>      int p=upto-1-1;<a name="line.1780"></a>
+<span class="sourceLineNo">1781</span>      while (p&gt;=0) {<a name="line.1781"></a>
+<span class="sourceLineNo">1782</span>        // it would be good to count the available values but we wont<a name="line.1782"></a>
+<span class="sourceLineNo">1783</span>        if (stkop[p].equals("===")) {<a name="line.1783"></a>
+<span class="sourceLineNo">1784</span>          firstvalue=p+1;<a name="line.1784"></a>
+<span class="sourceLineNo">1785</span>          break;<a name="line.1785"></a>
+<span class="sourceLineNo">1786</span>        }<a name="line.1786"></a>
+<span class="sourceLineNo">1787</span>        p--;<a name="line.1787"></a>
+<span class="sourceLineNo">1788</span>      }<a name="line.1788"></a>
+<span class="sourceLineNo">1789</span>      if (firstvalue==upto) { <a name="line.1789"></a>
+<span class="sourceLineNo">1790</span>         if (verbose) { System.out.printf("?ASSIGNMENTFINALERROR - cant find the last assignment\n"); }<a name="line.1790"></a>
+<span class="sourceLineNo">1791</span>         throw new EvaluateException("ASSIGNMENT FINAL ERROR");<a name="line.1791"></a>
+<span class="sourceLineNo">1792</span>      }<a name="line.1792"></a>
+<span class="sourceLineNo">1793</span><a name="line.1793"></a>
+<span class="sourceLineNo">1794</span>      if (verbose) { <a name="line.1794"></a>
+<span class="sourceLineNo">1795</span>        System.out.printf("upto=%d and firstvalue=%d\n",upto,firstvalue);<a name="line.1795"></a>
+<span class="sourceLineNo">1796</span>      }<a name="line.1796"></a>
+<span class="sourceLineNo">1797</span>      // best to go UP the stack and inspect<a name="line.1797"></a>
+<span class="sourceLineNo">1798</span>      int currentvalue=firstvalue;<a name="line.1798"></a>
+<span class="sourceLineNo">1799</span>      int parameters=0; // singleton<a name="line.1799"></a>
+<span class="sourceLineNo">1800</span>      int stackvar=0;<a name="line.1800"></a>
+<span class="sourceLineNo">1801</span>      for (int stackp=0; stackp&lt;firstvalue; ++stackp) {<a name="line.1801"></a>
+<span class="sourceLineNo">1802</span>        if (verbose) { System.out.printf("stackp=%d\n",stackp); }<a name="line.1802"></a>
+<span class="sourceLineNo">1803</span>        if (stkop[stackp].equals("===") || stkop[stackp].equals("===,")) {<a name="line.1803"></a>
+<span class="sourceLineNo">1804</span>          // we have therefore a variable to assign<a name="line.1804"></a>
+<span class="sourceLineNo">1805</span>          if (verbose) { System.out.printf("parameters %d\n",parameters); }<a name="line.1805"></a>
+<span class="sourceLineNo">1806</span>          if (parameters==0) {<a name="line.1806"></a>
+<span class="sourceLineNo">1807</span>            // simple setting<a name="line.1807"></a>
+<span class="sourceLineNo">1808</span>            GenericType rv=ReadValue(stackp,currentvalue++);<a name="line.1808"></a>
+<span class="sourceLineNo">1809</span>            if (using_machine!=null) {<a name="line.1809"></a>
+<span class="sourceLineNo">1810</span>              if (verbose) { <a name="line.1810"></a>
+<span class="sourceLineNo">1811</span>                System.out.printf("Wanting to set %s = %s\n",stkfunc[stackp],rv.print());<a name="line.1811"></a>
+<span class="sourceLineNo">1812</span>                  //ReadValue(stackp,currentvalue).print()<a name="line.1812"></a>
+<span class="sourceLineNo">1813</span>                //);<a name="line.1813"></a>
 <span class="sourceLineNo">1814</span>              }<a name="line.1814"></a>
-<span class="sourceLineNo">1815</span>            }<a name="line.1815"></a>
-<span class="sourceLineNo">1816</span>          } else { <a name="line.1816"></a>
-<span class="sourceLineNo">1817</span>            if (verbose) { System.out.printf("array %d\n",parameters); }<a name="line.1817"></a>
-<span class="sourceLineNo">1818</span>            if (verbose) { System.out.printf("%sFINAL ARRAY SETTING\n",printprefix); }<a name="line.1818"></a>
-<span class="sourceLineNo">1819</span>              if (verbose) { System.out.printf("Wanting to set array %s ( (params=%d.. %f,%f,%f) to value = %f\n",<a name="line.1819"></a>
-<span class="sourceLineNo">1820</span>                stkfunc[stackvar],parameters,stknum[stackvar+1],stknum[stackvar+2],stknum[stackvar+3],<a name="line.1820"></a>
-<span class="sourceLineNo">1821</span>                stknum[currentvalue]); }<a name="line.1821"></a>
-<span class="sourceLineNo">1822</span>              if (using_machine!=null) {<a name="line.1822"></a>
-<span class="sourceLineNo">1823</span>                GenericType rv=ReadValue(stackvar,currentvalue++);<a name="line.1823"></a>
-<span class="sourceLineNo">1824</span>                using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],rv); //ReadValue(stackvar,currentvalue++));<a name="line.1824"></a>
-<span class="sourceLineNo">1825</span>                //using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],ReadValue(stktype[0],currentvalue++));<a name="line.1825"></a>
-<span class="sourceLineNo">1826</span>              if (speeder_compile) { compiled_obj+="."+stkfunc[stackvar].toLowerCase();<a name="line.1826"></a>
-<span class="sourceLineNo">1827</span>                                       for (int i=0; i&lt;parameters; ++i) <a name="line.1827"></a>
-<span class="sourceLineNo">1828</span>                                         compiled_obj+="[]";<a name="line.1828"></a>
-<span class="sourceLineNo">1829</span>                                       int v = using_machine.getvarindex(stkfunc[stackvar].toLowerCase()+"(");<a name="line.1829"></a>
-<span class="sourceLineNo">1830</span>                      compiled_asm+="  STO MEM: "+stkfunc[stackvar].toLowerCase();<a name="line.1830"></a>
-<span class="sourceLineNo">1831</span>                                       for (int i=0; i&lt;parameters; ++i) <a name="line.1831"></a>
-<span class="sourceLineNo">1832</span>                                         compiled_asm+="[]";<a name="line.1832"></a>
-<span class="sourceLineNo">1833</span>                                       compiled_asm+="="+String.valueOf(v)+"\n";<a name="line.1833"></a>
-<span class="sourceLineNo">1834</span>                                         //compiled_obj+="["+String.valueOf((int)stknum[stackvar+i+1])+"]"; // no this doesn't make sense - we are a compiler!<a name="line.1834"></a>
-<span class="sourceLineNo">1835</span>                      // System.out.printf(".%s\n",stkfunc[stackp].toLowerCase());<a name="line.1835"></a>
-<span class="sourceLineNo">1836</span>                      // System.out.printf("RPNALG: STO -&gt; %s\n",stkfunc[stackp].toLowerCase());<a name="line.1836"></a>
-<span class="sourceLineNo">1837</span>                  using_machine.petspeed.addInstr(Petspeed.I_STO | ((rv.isNum())?Petspeed.T_Dbl:Petspeed.T_Str) | ((parameters&lt;=1)?Petspeed.M_MEMARR1:Petspeed.M_MEMARR2)<a name="line.1837"></a>
-<span class="sourceLineNo">1838</span>                                  , v);<a name="line.1838"></a>
-<span class="sourceLineNo">1839</span>              }<a name="line.1839"></a>
-<span class="sourceLineNo">1840</span>              }<a name="line.1840"></a>
-<span class="sourceLineNo">1841</span>          }<a name="line.1841"></a>
-<span class="sourceLineNo">1842</span>          parameters=0;<a name="line.1842"></a>
-<span class="sourceLineNo">1843</span>        } else if (stkop[stackp].equals(OP_OPEN_BRACKET)) {<a name="line.1843"></a>
-<span class="sourceLineNo">1844</span>          // we have an array<a name="line.1844"></a>
-<span class="sourceLineNo">1845</span>          parameters=1;<a name="line.1845"></a>
-<span class="sourceLineNo">1846</span>          stackvar=stackp;<a name="line.1846"></a>
-<span class="sourceLineNo">1847</span>        } else if (stkop[stackp].equals(OP_COMMA)) {<a name="line.1847"></a>
-<span class="sourceLineNo">1848</span>          /** COMMA **/<a name="line.1848"></a>
-<span class="sourceLineNo">1849</span>          /* should this be checked for the open bracket, e.g. if paraeters is 0 now, then this is wrong ?? */<a name="line.1849"></a>
-<span class="sourceLineNo">1850</span>          parameters++;<a name="line.1850"></a>
-<span class="sourceLineNo">1851</span>        }<a name="line.1851"></a>
-<span class="sourceLineNo">1852</span>      }<a name="line.1852"></a>
-<span class="sourceLineNo">1853</span>    }<a name="line.1853"></a>
-<span class="sourceLineNo">1854</span><a name="line.1854"></a>
-<span class="sourceLineNo">1855</span>}<a name="line.1855"></a>
-<span class="sourceLineNo">1856</span>  class EvaluateException extends Exception {<a name="line.1856"></a>
-<span class="sourceLineNo">1857</span>    EvaluateException() {<a name="line.1857"></a>
-<span class="sourceLineNo">1858</span>    }<a name="line.1858"></a>
-<span class="sourceLineNo">1859</span>    EvaluateException(String msg) {<a name="line.1859"></a>
-<span class="sourceLineNo">1860</span>        super(msg);<a name="line.1860"></a>
-<span class="sourceLineNo">1861</span>    }<a name="line.1861"></a>
-<span class="sourceLineNo">1862</span>  }<a name="line.1862"></a>
-<span class="sourceLineNo">1863</span><a name="line.1863"></a>
-<span class="sourceLineNo">1864</span>/////////<a name="line.1864"></a>
-<span class="sourceLineNo">1865</span>// END //<a name="line.1865"></a>
-<span class="sourceLineNo">1866</span>/////////<a name="line.1866"></a>
+<span class="sourceLineNo">1815</span>              using_machine.setvariable(stkfunc[stackp].toLowerCase(),rv);<a name="line.1815"></a>
+<span class="sourceLineNo">1816</span>              //using_machine.setvariable(stkfunc[stackp].toLowerCase(),ReadValue(stktype[stackp+1],currentvalue++));<a name="line.1816"></a>
+<span class="sourceLineNo">1817</span>              if (speeder_compile) { compiled_obj+="."+stkfunc[stackp].toLowerCase();<a name="line.1817"></a>
+<span class="sourceLineNo">1818</span>                                       int v = using_machine.getvarindex(stkfunc[stackp].toLowerCase());<a name="line.1818"></a>
+<span class="sourceLineNo">1819</span>                      compiled_asm+="  STO "+ (rv.isNum()?"Dbl":"Str") +" MEM: "+stkfunc[stackp].toLowerCase()+"="+String.valueOf(v)+"\n";<a name="line.1819"></a>
+<span class="sourceLineNo">1820</span>                      // System.out.printf(".%s\n",stkfunc[stackp].toLowerCase());<a name="line.1820"></a>
+<span class="sourceLineNo">1821</span>                      // System.out.printf("RPNALG: STO -&gt; %s\n",stkfunc[stackp].toLowerCase());<a name="line.1821"></a>
+<span class="sourceLineNo">1822</span>                  using_machine.petspeed.addInstr(Petspeed.I_STO | ((rv.isNum())?Petspeed.T_Dbl:Petspeed.T_Str) | Petspeed.M_MEM,v);<a name="line.1822"></a>
+<span class="sourceLineNo">1823</span>              }<a name="line.1823"></a>
+<span class="sourceLineNo">1824</span>            } else {<a name="line.1824"></a>
+<span class="sourceLineNo">1825</span>              if (verbose) {<a name="line.1825"></a>
+<span class="sourceLineNo">1826</span>                System.out.printf("stackp=%d Would have set %s to %s\n",stackp,stkfunc[stackp].toLowerCase(),rv.print());<a name="line.1826"></a>
+<span class="sourceLineNo">1827</span>              }<a name="line.1827"></a>
+<span class="sourceLineNo">1828</span>            }<a name="line.1828"></a>
+<span class="sourceLineNo">1829</span>          } else { <a name="line.1829"></a>
+<span class="sourceLineNo">1830</span>            if (verbose) { System.out.printf("array %d\n",parameters); }<a name="line.1830"></a>
+<span class="sourceLineNo">1831</span>            if (verbose) { System.out.printf("%sFINAL ARRAY SETTING\n",printprefix); }<a name="line.1831"></a>
+<span class="sourceLineNo">1832</span>              if (verbose) { System.out.printf("Wanting to set array %s ( (params=%d.. %f,%f,%f) to value = %f\n",<a name="line.1832"></a>
+<span class="sourceLineNo">1833</span>                stkfunc[stackvar],parameters,stknum[stackvar+1],stknum[stackvar+2],stknum[stackvar+3],<a name="line.1833"></a>
+<span class="sourceLineNo">1834</span>                stknum[currentvalue]); }<a name="line.1834"></a>
+<span class="sourceLineNo">1835</span>              if (using_machine!=null) {<a name="line.1835"></a>
+<span class="sourceLineNo">1836</span>                GenericType rv=ReadValue(stackvar,currentvalue++);<a name="line.1836"></a>
+<span class="sourceLineNo">1837</span>                using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],rv); //ReadValue(stackvar,currentvalue++));<a name="line.1837"></a>
+<span class="sourceLineNo">1838</span>                //using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],ReadValue(stktype[0],currentvalue++));<a name="line.1838"></a>
+<span class="sourceLineNo">1839</span>              if (speeder_compile) { compiled_obj+="."+stkfunc[stackvar].toLowerCase();<a name="line.1839"></a>
+<span class="sourceLineNo">1840</span>                                       for (int i=0; i&lt;parameters; ++i) <a name="line.1840"></a>
+<span class="sourceLineNo">1841</span>                                         compiled_obj+="[]";<a name="line.1841"></a>
+<span class="sourceLineNo">1842</span>                                       int v = using_machine.getvarindex(stkfunc[stackvar].toLowerCase()+"(");<a name="line.1842"></a>
+<span class="sourceLineNo">1843</span>                      compiled_asm+="  STO MEM: "+stkfunc[stackvar].toLowerCase();<a name="line.1843"></a>
+<span class="sourceLineNo">1844</span>                                       for (int i=0; i&lt;parameters; ++i) <a name="line.1844"></a>
+<span class="sourceLineNo">1845</span>                                         compiled_asm+="[]";<a name="line.1845"></a>
+<span class="sourceLineNo">1846</span>                                       compiled_asm+="="+String.valueOf(v)+"\n";<a name="line.1846"></a>
+<span class="sourceLineNo">1847</span>                                         //compiled_obj+="["+String.valueOf((int)stknum[stackvar+i+1])+"]"; // no this doesn't make sense - we are a compiler!<a name="line.1847"></a>
+<span class="sourceLineNo">1848</span>                      // System.out.printf(".%s\n",stkfunc[stackp].toLowerCase());<a name="line.1848"></a>
+<span class="sourceLineNo">1849</span>                      // System.out.printf("RPNALG: STO -&gt; %s\n",stkfunc[stackp].toLowerCase());<a name="line.1849"></a>
+<span class="sourceLineNo">1850</span>                  using_machine.petspeed.addInstr(Petspeed.I_STO | ((rv.isNum())?Petspeed.T_Dbl:Petspeed.T_Str) | ((parameters&lt;=1)?Petspeed.M_MEMARR1:Petspeed.M_MEMARR2)<a name="line.1850"></a>
+<span class="sourceLineNo">1851</span>                                  , v);<a name="line.1851"></a>
+<span class="sourceLineNo">1852</span>              }<a name="line.1852"></a>
+<span class="sourceLineNo">1853</span>              }<a name="line.1853"></a>
+<span class="sourceLineNo">1854</span>          }<a name="line.1854"></a>
+<span class="sourceLineNo">1855</span>          parameters=0;<a name="line.1855"></a>
+<span class="sourceLineNo">1856</span>        } else if (stkop[stackp].equals(OP_OPEN_BRACKET)) {<a name="line.1856"></a>
+<span class="sourceLineNo">1857</span>          // we have an array<a name="line.1857"></a>
+<span class="sourceLineNo">1858</span>          parameters=1;<a name="line.1858"></a>
+<span class="sourceLineNo">1859</span>          stackvar=stackp;<a name="line.1859"></a>
+<span class="sourceLineNo">1860</span>        } else if (stkop[stackp].equals(OP_COMMA)) {<a name="line.1860"></a>
+<span class="sourceLineNo">1861</span>          /** COMMA **/<a name="line.1861"></a>
+<span class="sourceLineNo">1862</span>          /* should this be checked for the open bracket, e.g. if paraeters is 0 now, then this is wrong ?? */<a name="line.1862"></a>
+<span class="sourceLineNo">1863</span>          parameters++;<a name="line.1863"></a>
+<span class="sourceLineNo">1864</span>        }<a name="line.1864"></a>
+<span class="sourceLineNo">1865</span>      }<a name="line.1865"></a>
+<span class="sourceLineNo">1866</span>    }<a name="line.1866"></a>
+<span class="sourceLineNo">1867</span><a name="line.1867"></a>
+<span class="sourceLineNo">1868</span>}<a name="line.1868"></a>
+<span class="sourceLineNo">1869</span>  class EvaluateException extends Exception {<a name="line.1869"></a>
+<span class="sourceLineNo">1870</span>    EvaluateException() {<a name="line.1870"></a>
+<span class="sourceLineNo">1871</span>    }<a name="line.1871"></a>
+<span class="sourceLineNo">1872</span>    EvaluateException(String msg) {<a name="line.1872"></a>
+<span class="sourceLineNo">1873</span>        super(msg);<a name="line.1873"></a>
+<span class="sourceLineNo">1874</span>    }<a name="line.1874"></a>
+<span class="sourceLineNo">1875</span>  }<a name="line.1875"></a>
+<span class="sourceLineNo">1876</span><a name="line.1876"></a>
+<span class="sourceLineNo">1877</span>/////////<a name="line.1877"></a>
+<span class="sourceLineNo">1878</span>// END //<a name="line.1878"></a>
+<span class="sourceLineNo">1879</span>/////////<a name="line.1879"></a>
 
 
 

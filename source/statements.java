@@ -980,8 +980,9 @@ boolean ReadStatement() throws BasicException
 
       case ST_LINE:
         if (machine.graphicsDevice!=null) {
-          ReadExpression();
-          GenericType gt=machine.evaluate(keepExpression);
+          //ReadExpression();
+          //GenericType gt=machine.evaluate(keepExpression);
+          GenericType gt=PSReadExpressionEvaluate();
           if (gt.gttop==5) {
               if (verbose) System.out.printf("about to draw line\n");
               machine.graphicsDevice.command_LINE(
@@ -1073,8 +1074,9 @@ boolean ReadStatement() throws BasicException
 
       case ST_RECT:
         if (machine.graphicsDevice!=null) {
-          ReadExpression();
-          GenericType gt=machine.evaluate(keepExpression);
+          //ReadExpression();
+          //GenericType gt=machine.evaluate(keepExpression);
+          GenericType gt=PSReadExpressionEvaluate();
           if (gt.gttop==5) {
               if (verbose) System.out.printf("about to draw rect\n");
               machine.graphicsDevice.command_RECT(
@@ -1525,6 +1527,26 @@ boolean ProcessPRINThashstatement() throws BasicException
   }
   ReadColon(); // check
   return true;
+}
+
+GenericType PSReadExpressionEvaluate() throws BasicException
+{
+  GenericType gt;
+  if (speeder && machine.petspeed.is_compiled(pnt)) { 
+       if (verbose) System.out.printf("Found compiled at %d\n",pnt); 
+       try {
+         pnt=machine.petspeed.execute(pnt);
+         // jump the pointer
+       } catch (EvaluateException e) { throw new BasicException("EXECUTE ERROR"); }
+       gt= machine.petspeed.list; // not reentrant - FIX
+       machine.petspeed.atop-=machine.petspeed.listtop;
+  } else {
+     if (speeder) { machine.petspeed.savestart(pnt); }
+     ReadExpression();
+     gt=machine.evaluate(keepExpression);
+     if (speeder) { machine.petspeed.saveacode(pnt); }
+  }
+  return gt;
 }
 
 boolean ProcessIFstatement() throws BasicException
