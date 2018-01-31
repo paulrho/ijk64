@@ -289,8 +289,9 @@ void end_timing(int func)
     counter_func[func]++;
     timer_func[func]+=endTime-startTimeb[func];
     //if (counter_func[func]%10000==0) {
-    if (counter_func[func]%10000==0) {
-      System.out.printf("%s c=%d t/c=%f t=%d\n",
+    //if (counter_func[func]%10000==0) {
+    if (speeder && counter_func[func]%100000==0 || !speeder && counter_func[func]%10000==0) {
+      System.out.printf("%s c=%d t/c=%.4f t=%d\n",
         timername_func[func],
         //counter_func[func],timer_func[func]/(double)counter_func[func]);
         counter_func[func],timer_func[func]/(double)counter_func[func],timer_func[func]);
@@ -299,7 +300,7 @@ void end_timing(int func)
 
 void print_timing(int func)
 {
-      System.out.printf("%s c=%d t/c=%f t=%d (final)\n",
+      System.out.printf("%s c=%d t/c=%.4f t=%d (final)\n",
         timername_func[func],
         counter_func[func],timer_func[func]/(double)counter_func[func],timer_func[func]);
 }
@@ -313,11 +314,13 @@ boolean ReadPart() throws BasicException
 
   // when changing String a= to chars, it took the same amount of time (in timingjar)
 
-          if (basictimer) { // here!!!!! save this
-            basictimer_thispnt=pnt;
-          }
+      if (basictimer) { // here!!!!! save this
+        basictimer_thispnt=pnt;
+      }
       if (speeder && machine.petspeed.pcache[pnt]>0) {
 	int nnn=machine.petspeed.pcache[pnt];
+	if (basictimer) 
+          basictimer_thispnt=machine.petspeed.btpnt[pnt];
         pnt=machine.petspeed.pnext[pnt];
 	if (verbose) System.out.printf("found a cached line start nnn=%d(1=assign) pnt=%d\n",nnn,pnt);
 	if (nnn==1) {
@@ -362,6 +365,8 @@ if (dofulltiming) { end_timing(TIME_ReadLineNo); }
         gotToken=ST_PRINT;
 	if (speeder) {
           machine.petspeed.pcache[fpnt]=gotToken+2;
+	  if (basictimer) 
+            machine.petspeed.btpnt[fpnt]=basictimer_thispnt;
           machine.petspeed.pnext[fpnt]=pnt;
 	  if (verbose) System.out.printf("caching a print\n");
 	}
@@ -385,6 +390,8 @@ if (dofulltiming) { end_timing(TIME_ReadStatementToken); }
           }
 	  if (speeder) {
             machine.petspeed.pcache[fpnt]=gotToken+2;
+	    if (basictimer) 
+              machine.petspeed.btpnt[fpnt]=basictimer_thispnt;
             machine.petspeed.pnext[fpnt]=pnt;
 	    if (verbose) System.out.printf("caching a token\n");
 	  }
@@ -396,6 +403,8 @@ if (dofulltiming) { end_timing(TIME_ReadStatementToken); }
           // we dont move pnt at all, we start from the start!
 	  if (speeder) {
             machine.petspeed.pcache[fpnt]=1;
+	    if (basictimer) 
+              machine.petspeed.btpnt[fpnt]=basictimer_thispnt;
             machine.petspeed.pnext[fpnt]=pnt;
 	    if (verbose) System.out.printf("caching an assign\n");
 	  }
@@ -546,12 +555,12 @@ void doBasicTimer(boolean finalprint) {
         basictimer_count[basictimer_lastpnt]++;
         //System.out.printf("BASICTIMER: pnt=%d td=%d line=%s\n",basictimer_lastpnt,timenow-basictimer_lasttime,machine.getCurrentLine(basictimer_lastpnt));
         basictimer_c++;
-        if (basictimer_c>50000 || finalprint) { // need to make this configurable
+        if (speeder && basictimer_c>1000000 || !speeder && basictimer_c>100000 || finalprint) { // need to make this configurable
           basictimer_c=0;
           int i;
           System.out.printf("BASICTIMER SUMMARY----at %d--for %s\n",timenow,machine.program_name);
           if (false) ; else
-              System.out.printf("  %5s %8s %9s %10s  %5s %s\n","pnt=","t=","c=","tp=","line=","stm=");
+              System.out.printf("  %5s %8s %9s %11s  %5s %s\n","pnt=","t=","c=","tp(ms)=","line=","stm=");
           for (i=0; i<MAXBASICTIMER; ++i) if (basictimer_count[i]>0) {
             if (false)
               System.out.printf("  pnt= %5d t= %8d c= %9d tp= %10.3f line= %5s %s\n",
@@ -561,7 +570,7 @@ void doBasicTimer(boolean finalprint) {
                  (line.substring(i,(i+15>line.length()-1?line.length()-1:i+15))+"...").replaceAll("^[ ]*:","").replaceAll("\\r.*|\\n.*|:.*", "")
               );
             else
-              System.out.printf("  %5d %8d %9d %10.3f  %5s %s\n",
+              System.out.printf("  %5d %8d %9d %11.4f  %5s %s\n",
                 i,basictimer_times[i],basictimer_count[i],
                 (double)basictimer_times[i]/(double)basictimer_count[i],
                  machine.getCurrentLine(i),
@@ -1018,8 +1027,9 @@ boolean ReadStatement() throws BasicException
 	//
       case ST_PSET:
         if (machine.graphicsDevice!=null) {
-          ReadExpression();
-          GenericType gt=machine.evaluate(keepExpression);
+          //ReadExpression();
+          //GenericType gt=machine.evaluate(keepExpression);
+          GenericType gt=PSReadExpressionEvaluate();
           if (gt.gttop==3) {
               if (verbose) System.out.printf("about to set line size\n");
               machine.graphicsDevice.command_PSET(
@@ -1049,8 +1059,9 @@ boolean ReadStatement() throws BasicException
 
       case ST_CIRCLE:
         if (machine.graphicsDevice!=null) {
-          ReadExpression();
-          GenericType gt=machine.evaluate(keepExpression);
+          //ReadExpression();
+          //GenericType gt=machine.evaluate(keepExpression);
+          GenericType gt=PSReadExpressionEvaluate();
           if (gt.gttop==1) {
             // special - command the offset type
 	    
@@ -1184,8 +1195,9 @@ boolean ReadStatement() throws BasicException
 
       case ST_DRAWIMAGE:
         if (machine.graphicsDevice!=null) {
-          ReadExpression();
-          GenericType gt=machine.evaluate(keepExpression);
+          //ReadExpression();
+          //GenericType gt=machine.evaluate(keepExpression);
+          GenericType gt=PSReadExpressionEvaluate();
           if (gt.gttop==5) {
               if (verbose) System.out.printf("draw the image\n");
               machine.graphicsDevice.command_DRAWIMAGE(
@@ -1856,7 +1868,19 @@ boolean ProcessRUNstatement() throws BasicException
 
 boolean ProcessREMstatement() 
 {
+  int fpnt=pnt;
+  if (speeder && machine.petspeed.pnext[pnt]>0) {
+    pnt=machine.petspeed.pnext[pnt];
+    if (verbose) System.out.printf("found a cached REM line start pnt=%d\n",pnt);
+    return true;
+  }
+
   IgnoreRestofLine();
+
+  if (speeder) {
+    machine.petspeed.pnext[fpnt]=pnt;
+    if (verbose) System.out.printf("caching a print\n");
+  }
   return true;
 }
 

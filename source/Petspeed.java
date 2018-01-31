@@ -20,8 +20,10 @@ class Petspeed
   int []acpointer = new int[MAXPSIZE];
   int []acpointer_next = new int[MAXPSIZE];
 
+  // to fix -> make this take less space! we are now taking 250k!
   int []pnext = new int[MAXPSIZE];
   int []pcache = new int[MAXPSIZE];
+  int []btpnt = new int[MAXPSIZE]; // only used for basictimer
 
   Petspeed(Machine m) {
     using_machine=m;
