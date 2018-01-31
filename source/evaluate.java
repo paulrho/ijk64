@@ -1638,20 +1638,33 @@ boolean dontallowunbalancedopeningbracket=true; // here for now
       }
     }
 
+    // to keep the simple numeric expression simple - (like IF xxxx ) then just don't push anything
     if (verbose) { System.out.printf("upto=%d\n",upto); }
     GenericType gt; //only allow list of 
     if (stktype[0]==ST_NUM) {
       gt=new GenericType(stknum[0]);
+      if (upto>1) // if it is a singleton - don't bother recording anthing!
+        if (0==upto-1 || !stkop[0].equals("===") && !stkop[0].equals("===,")) 
+          using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Dbl); // flag a double
     } else {
       if (verbose) { System.out.printf("Returning a string type from evaluate\n"); }
       gt=new GenericType(stkstring[0]);
+      if (upto>1) // if it is a singleton - don't bother recording anthing!
+        if (0==upto-1 || !stkop[0].equals("===") && !stkop[0].equals("===,")) 
+          using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Str); // flag a string
     }
     // if there are more, add to it
     for (int i=1; i<upto; ++i) {
       if (stktype[i]==ST_NUM) {
         gt.add(stknum[i],upto);
+        if (upto>1) // if it is a singleton - don't bother recording anthing!
+          if (i==upto-1 || !stkop[i].equals("===") && !stkop[i].equals("===,")) 
+            using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Dbl); // flag a double
       } else {
         gt.add(stkstring[i],upto);
+        if (upto>1) // if it is a singleton - don't bother recording anthing!
+          if (i==upto-1 || !stkop[i].equals("===") && !stkop[i].equals("===,")) 
+            using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Str); // flag a string
       }
     }
     return gt;
