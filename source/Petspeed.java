@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////
 //
-//
+// Petspeed 'er
+// Goes much (26x) faster
 //
 ////////////////////////////////////////////////
 class Petspeed
@@ -181,9 +182,14 @@ class Petspeed
 	  break;
 	case I_FNC | F_midD : 
           try {          
-	    astack_s[atop-3]=astack_s[atop-3].substring((int)astack_d[atop-2]-1,(int)astack_d[atop-2]-1+(int)astack_d[atop-1]);
-	    atop--;
-	    atop--;
+	    if (pargmem[i]==3) {
+	      astack_s[atop-3]=astack_s[atop-3].substring((int)astack_d[atop-2]-1,(int)astack_d[atop-2]-1+(int)astack_d[atop-1]);
+	      atop--;
+	      atop--;
+	    } else {
+	      astack_s[atop-2]=astack_s[atop-2].substring((int)astack_d[atop-1]-1);
+	      atop--;
+	    }
           } catch(Exception e) {
             throw new EvaluateException("BAD SUBSTRING INDEX");              
           }

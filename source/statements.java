@@ -2258,15 +2258,16 @@ boolean ProcessMETABGTRANSstatement() throws BasicException
 
 boolean ProcessPOKEstatement() throws BasicException
 {
-  ReadExpression();
-  if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
-  //verboseFull();
-  // we should have num,num evaluate into a list
-  if (verbose) { System.out.printf("inputting to %s\n",machine.evaluate(keepExpression).print()); }
-  if (verbose) { machine.dumpstate(); }
+  //ReadExpression();
+  GenericType gt=PSReadExpressionEvaluate();
+  //if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
+  ////verboseFull();
+  //// we should have num,num evaluate into a list
+  //if (verbose) { System.out.printf("inputting to %s\n",machine.evaluate(keepExpression).print()); }
+  //if (verbose) { machine.dumpstate(); }
 
   if (machine.graphicsDevice!=null) {
-    GenericType gt=machine.evaluate(keepExpression);
+    //GenericType gt=machine.evaluate(keepExpression);
     int memloc;
     int memval;
     if (gt.gttop==2) {
@@ -2279,7 +2280,8 @@ boolean ProcessPOKEstatement() throws BasicException
     }
   }
 
-  machine.performPOKE(machine.evaluate(keepExpression)); // we assume it is a list of two numbers
+  //machine.performPOKE(machine.evaluate(keepExpression)); // we assume it is a list of two numbers
+  machine.performPOKE(gt); // we assume it is a list of two numbers
   //verboseOff();
   return true;
 }

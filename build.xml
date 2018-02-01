@@ -59,7 +59,8 @@
     />
   </target>
 
-  <target name="dist" depends="compile,javadocs"
+  <!--- depends"compile,javadocs" -->
+  <target name="dist" depends="compile"
         description="generate the distribution" >
     <!-- Create the distribution directory -->
     <mkdir dir="${dist}"/>
