@@ -364,7 +364,7 @@ class evaluate {
 	      //System.out.printf(",%s",function);
 	      int ft=Petspeed.ftoken(function);
                 if (verbose && ft<0) System.out.printf("A-COMPILER could not find %s (okay if array)\n",function);
-	      using_machine.petspeed.addInstr(Petspeed.I_FNC | ft);
+	      using_machine.petspeed.addInstr(Petspeed.I_FNC | ft,parameters); // add # parans, only used for mid$
       }
 
       if (function.length()>=2 && function.substring(0,2).equals("fn")) {

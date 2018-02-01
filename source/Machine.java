@@ -355,7 +355,7 @@ public class Machine {
     while(fl>0) {
       fl--;
       //if (speeder && forloopstack_varpnt[fl]>=0) {
-      if (speeder && forloopstack_varpnt[fl]==vv) {
+      if (speeder && (vv==-2 || forloopstack_varpnt[fl]==vv)) {
         // not compiled, but just a lot faster for the looping part
 	int v=forloopstack_varpnt[fl];
 	variables.variablevalue[v]+=forloopstack_step[fl];

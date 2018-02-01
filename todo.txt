@@ -7,6 +7,7 @@ c64 STR$(-5) should not return leading space
 c64 INT function should just truncate decimal, still allows very big values
 
 acode MID needs to be copy of eval version
+DONE - mid needs 2 and 3 var version, did this by adding params for func
 
 --
 think about this:
