@@ -1633,7 +1633,9 @@ void chewcr() {
 
     program_name=filename; // keep a copy of what we loaded
     if (reset) {
-      machinescreen.setTitle(baseTitle+" - "+program_name); // try this
+      //machinescreen.setTitle(baseTitle+" - "+program_name); // try this
+      machinescreen.setTitle(program_name+" - "+baseTitle); // try this
+      if (graphicsDevice!=null) graphicsDevice.setTitle(program_name+" - "+baseTitle+" graphics");
   
       program_saved_executionpoint=(-1);
       program_modified=false;
@@ -1663,7 +1665,9 @@ void chewcr() {
     }
     if (ret) {
       program_name=filename; // keep a copy of what we last saved
-      machinescreen.setTitle(baseTitle+" - "+program_name); // try this
+      //machinescreen.setTitle(baseTitle+" - "+program_name); // try this
+      machinescreen.setTitle(program_name+" - "+baseTitle); // try this
+      if (graphicsDevice!=null) graphicsDevice.setTitle(program_name+" - "+baseTitle+" graphics");
       program_modified=false;
     }      
     return ret;
@@ -1898,7 +1902,9 @@ void chewcr() {
           programText + line;
       }
       program_modified=true;
-      machinescreen.setTitle(baseTitle+" - "+program_name+"*"); // try this
+      //machinescreen.setTitle(baseTitle+" - "+program_name+"*"); // try this
+      machinescreen.setTitle("*"+program_name+" - "+baseTitle); // try this
+      if (graphicsDevice!=null) graphicsDevice.setTitle("*"+program_name+" - "+baseTitle+" graphics");
       return true;
     } else
       return false;
