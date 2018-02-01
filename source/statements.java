@@ -922,6 +922,7 @@ boolean ReadStatement() throws BasicException
               machine.graphicsDevice = new GraphicsDevice(
                 (int)gt.gtlist[1].num(),(int)gt.gtlist[2].num());
 	      machine.graphicsDevice.redirectkeys(machine.machinescreen); // should be done elsewhere
+              machine.graphicsDevice.setTitle((machine.program_modified?"*":"")+machine.program_name+" - "+machine.baseTitle+" graphics");
             } else {
               // just to make sure it is all reset
               machine.graphicsDevice.resetDevice(
@@ -934,6 +935,7 @@ boolean ReadStatement() throws BasicException
             if (machine.graphicsDevice==null) {
               machine.graphicsDevice = new GraphicsDevice();
 	      machine.graphicsDevice.redirectkeys(machine.machinescreen); // should be done elsewhere
+              machine.graphicsDevice.setTitle((machine.program_modified?"*":"")+machine.program_name+" - "+machine.baseTitle+" graphics");
             } else {
               // just to make sure it is all reset
               machine.graphicsDevice.resetDevice();
@@ -2191,11 +2193,16 @@ boolean ProcessLOADstatement() throws BasicException
     machine.print("searching for "+filename.toLowerCase()+"\n");
     //machine.print("loading "+filename.toLowerCase()+"...");
     if (filename.startsWith(":")) {
-      filename=filename.replaceFirst(":",machine.cloudNet+"/basic/");
+      // for now, don't suffix anything - allows arbitrary loading
+      // any doc or note that shows ":" should be fixed
+      if (false) filename=filename.replaceFirst(":",machine.cloudNet+"/basic/");
+      else filename=filename.replaceFirst(":",machine.cloudNet+"/");
     }
-    if (filename.contains("http")) {
+    if (filename.contains("http")) { // should be startsWith FIX
       //filename=filename.toLowerCase()+".txt";
-      filename=filename+".txt";
+      // if this already ends with .basic, don't put .txt on it
+      if (!filename.endsWith(".basic"))
+        filename=filename+".txt";
     } else if (!filename.matches(".*\\.basic")) {
       //filename=filename.toLowerCase()+".basic";
       filename=filename+".basic";
