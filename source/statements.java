@@ -631,7 +631,7 @@ void interpret_string(String passed_line, int startat, String lineNo)
   long cnt2=0;
   while (pnt<linelength) {
 if (dofulltiming) { start_timing(TIME_interp_while); }
-  startTime2+=System.currentTimeMillis(); 
+if (dofulltiming) startTime2+=System.currentTimeMillis(); 
     // for each part, check control C status - is this inefficient?
     if (machine.hasControlC()) {
       machine.save_executionpoint=pnt; // it is restartable
@@ -683,7 +683,7 @@ if (dofulltiming) { start_timing(TIME_interp_while); }
       throw new BasicException("ILLEGAL QUANTITY");
     }
                                                           if (dofulltiming) { end_timing(TIME_interp_while); }
-                                                            startTime2-=System.currentTimeMillis();  cnt2++;
+                                                          if (dofulltiming) { startTime2-=System.currentTimeMillis();  cnt2++; }
   } // while everything
                                                           if (dofulltiming) { print_timing(TIME_interp_while); }
                                                           if (dofulltiming) { print_timing(TIME_ReadPart); }
