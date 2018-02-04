@@ -457,12 +457,15 @@ class Petspeed
       }
       if (verbose) System.out.printf("\n");
     }
-          } catch(Exception e) {
-	    //System.out.println(e.getMessage());
-	    e.printStackTrace();
-	    System.out.println(e);
-            throw new EvaluateException("BAD SUBSTRING INDEX");              
-          }
+      } catch (ArrayIndexOutOfBoundsException e) { 
+        e.printStackTrace();
+        throw new EvaluateException("ILLEGAL QUANTITIY");              
+      } catch(Exception e) {
+	//System.out.println(e.getMessage());
+	e.printStackTrace();
+	System.out.println(e);
+        throw new EvaluateException("EXECUTE ERROR");              
+      }
     
     //return nextpnt(x); // we've gone off the end
     return -1;
