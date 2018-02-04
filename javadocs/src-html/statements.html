@@ -2266,293 +2266,295 @@
 <span class="sourceLineNo">2258</span><a name="line.2258"></a>
 <span class="sourceLineNo">2259</span>boolean ProcessPOKEstatement() throws BasicException<a name="line.2259"></a>
 <span class="sourceLineNo">2260</span>{<a name="line.2260"></a>
-<span class="sourceLineNo">2261</span>  ReadExpression();<a name="line.2261"></a>
-<span class="sourceLineNo">2262</span>  if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }<a name="line.2262"></a>
-<span class="sourceLineNo">2263</span>  //verboseFull();<a name="line.2263"></a>
-<span class="sourceLineNo">2264</span>  // we should have num,num evaluate into a list<a name="line.2264"></a>
-<span class="sourceLineNo">2265</span>  if (verbose) { System.out.printf("inputting to %s\n",machine.evaluate(keepExpression).print()); }<a name="line.2265"></a>
-<span class="sourceLineNo">2266</span>  if (verbose) { machine.dumpstate(); }<a name="line.2266"></a>
-<span class="sourceLineNo">2267</span><a name="line.2267"></a>
-<span class="sourceLineNo">2268</span>  if (machine.graphicsDevice!=null) {<a name="line.2268"></a>
-<span class="sourceLineNo">2269</span>    GenericType gt=machine.evaluate(keepExpression);<a name="line.2269"></a>
-<span class="sourceLineNo">2270</span>    int memloc;<a name="line.2270"></a>
-<span class="sourceLineNo">2271</span>    int memval;<a name="line.2271"></a>
-<span class="sourceLineNo">2272</span>    if (gt.gttop==2) {<a name="line.2272"></a>
-<span class="sourceLineNo">2273</span>      memloc=(int)gt.gtlist[0].num();<a name="line.2273"></a>
-<span class="sourceLineNo">2274</span>      memval=(int)gt.gtlist[1].num();<a name="line.2274"></a>
-<span class="sourceLineNo">2275</span>      if (memloc==1024) {<a name="line.2275"></a>
-<span class="sourceLineNo">2276</span>        machine.graphicsDevice.command_POKE(memloc,memval);<a name="line.2276"></a>
-<span class="sourceLineNo">2277</span>        return true;<a name="line.2277"></a>
-<span class="sourceLineNo">2278</span>      }<a name="line.2278"></a>
-<span class="sourceLineNo">2279</span>    }<a name="line.2279"></a>
-<span class="sourceLineNo">2280</span>  }<a name="line.2280"></a>
-<span class="sourceLineNo">2281</span><a name="line.2281"></a>
-<span class="sourceLineNo">2282</span>  machine.performPOKE(machine.evaluate(keepExpression)); // we assume it is a list of two numbers<a name="line.2282"></a>
-<span class="sourceLineNo">2283</span>  //verboseOff();<a name="line.2283"></a>
-<span class="sourceLineNo">2284</span>  return true;<a name="line.2284"></a>
-<span class="sourceLineNo">2285</span>}<a name="line.2285"></a>
-<span class="sourceLineNo">2286</span><a name="line.2286"></a>
-<span class="sourceLineNo">2287</span>boolean ProcessSYSstatement() throws BasicException<a name="line.2287"></a>
-<span class="sourceLineNo">2288</span>{<a name="line.2288"></a>
-<span class="sourceLineNo">2289</span>  ReadExpression();<a name="line.2289"></a>
-<span class="sourceLineNo">2290</span>  if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }<a name="line.2290"></a>
-<span class="sourceLineNo">2291</span>  if (verbose) { System.out.printf("inputting to %s\n",machine.evaluate(keepExpression).print()); }<a name="line.2291"></a>
-<span class="sourceLineNo">2292</span>  if (verbose) { machine.dumpstate(); }<a name="line.2292"></a>
-<span class="sourceLineNo">2293</span>  if (!keepExpression.equals("")) {<a name="line.2293"></a>
-<span class="sourceLineNo">2294</span>    machine.performSYS(machine.evaluate(keepExpression));<a name="line.2294"></a>
-<span class="sourceLineNo">2295</span>    machine.machinescreen.startupscreen();<a name="line.2295"></a>
-<span class="sourceLineNo">2296</span>    return true;<a name="line.2296"></a>
-<span class="sourceLineNo">2297</span>  } else {<a name="line.2297"></a>
-<span class="sourceLineNo">2298</span>    throw new BasicException("TOO FEW PARAMETERS");<a name="line.2298"></a>
-<span class="sourceLineNo">2299</span>  }<a name="line.2299"></a>
-<span class="sourceLineNo">2300</span>}<a name="line.2300"></a>
-<span class="sourceLineNo">2301</span><a name="line.2301"></a>
-<span class="sourceLineNo">2302</span>boolean ProcessIGNOREstatement() <a name="line.2302"></a>
-<span class="sourceLineNo">2303</span>{<a name="line.2303"></a>
-<span class="sourceLineNo">2304</span>  // read everthing to the colon (should ignore embedded : in a string -b ut doesn;t yet<a name="line.2304"></a>
-<span class="sourceLineNo">2305</span>  boolean quote=false;<a name="line.2305"></a>
-<span class="sourceLineNo">2306</span>  while (pnt&lt;linelength &amp;&amp; !line.substring(pnt,pnt+1).equals("\n")<a name="line.2306"></a>
-<span class="sourceLineNo">2307</span>    &amp;&amp; !(line.substring(pnt,pnt+1).equals(":")&amp;&amp;!quote)) {<a name="line.2307"></a>
-<span class="sourceLineNo">2308</span>    if (line.substring(pnt,pnt+1).equals("\"")) {<a name="line.2308"></a>
-<span class="sourceLineNo">2309</span>      quote=!quote;<a name="line.2309"></a>
-<span class="sourceLineNo">2310</span>    }<a name="line.2310"></a>
-<span class="sourceLineNo">2311</span>    pnt++;<a name="line.2311"></a>
-<span class="sourceLineNo">2312</span>  }<a name="line.2312"></a>
-<span class="sourceLineNo">2313</span>  return true;<a name="line.2313"></a>
-<span class="sourceLineNo">2314</span>}<a name="line.2314"></a>
-<span class="sourceLineNo">2315</span><a name="line.2315"></a>
-<span class="sourceLineNo">2316</span>char metaCode=' ';<a name="line.2316"></a>
+<span class="sourceLineNo">2261</span>  //ReadExpression();<a name="line.2261"></a>
+<span class="sourceLineNo">2262</span>  GenericType gt=PSReadExpressionEvaluate();<a name="line.2262"></a>
+<span class="sourceLineNo">2263</span>  //if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }<a name="line.2263"></a>
+<span class="sourceLineNo">2264</span>  ////verboseFull();<a name="line.2264"></a>
+<span class="sourceLineNo">2265</span>  //// we should have num,num evaluate into a list<a name="line.2265"></a>
+<span class="sourceLineNo">2266</span>  //if (verbose) { System.out.printf("inputting to %s\n",machine.evaluate(keepExpression).print()); }<a name="line.2266"></a>
+<span class="sourceLineNo">2267</span>  //if (verbose) { machine.dumpstate(); }<a name="line.2267"></a>
+<span class="sourceLineNo">2268</span><a name="line.2268"></a>
+<span class="sourceLineNo">2269</span>  if (machine.graphicsDevice!=null) {<a name="line.2269"></a>
+<span class="sourceLineNo">2270</span>    //GenericType gt=machine.evaluate(keepExpression);<a name="line.2270"></a>
+<span class="sourceLineNo">2271</span>    int memloc;<a name="line.2271"></a>
+<span class="sourceLineNo">2272</span>    int memval;<a name="line.2272"></a>
+<span class="sourceLineNo">2273</span>    if (gt.gttop==2) {<a name="line.2273"></a>
+<span class="sourceLineNo">2274</span>      memloc=(int)gt.gtlist[0].num();<a name="line.2274"></a>
+<span class="sourceLineNo">2275</span>      memval=(int)gt.gtlist[1].num();<a name="line.2275"></a>
+<span class="sourceLineNo">2276</span>      if (memloc==1024) {<a name="line.2276"></a>
+<span class="sourceLineNo">2277</span>        machine.graphicsDevice.command_POKE(memloc,memval);<a name="line.2277"></a>
+<span class="sourceLineNo">2278</span>        return true;<a name="line.2278"></a>
+<span class="sourceLineNo">2279</span>      }<a name="line.2279"></a>
+<span class="sourceLineNo">2280</span>    }<a name="line.2280"></a>
+<span class="sourceLineNo">2281</span>  }<a name="line.2281"></a>
+<span class="sourceLineNo">2282</span><a name="line.2282"></a>
+<span class="sourceLineNo">2283</span>  //machine.performPOKE(machine.evaluate(keepExpression)); // we assume it is a list of two numbers<a name="line.2283"></a>
+<span class="sourceLineNo">2284</span>  machine.performPOKE(gt); // we assume it is a list of two numbers<a name="line.2284"></a>
+<span class="sourceLineNo">2285</span>  //verboseOff();<a name="line.2285"></a>
+<span class="sourceLineNo">2286</span>  return true;<a name="line.2286"></a>
+<span class="sourceLineNo">2287</span>}<a name="line.2287"></a>
+<span class="sourceLineNo">2288</span><a name="line.2288"></a>
+<span class="sourceLineNo">2289</span>boolean ProcessSYSstatement() throws BasicException<a name="line.2289"></a>
+<span class="sourceLineNo">2290</span>{<a name="line.2290"></a>
+<span class="sourceLineNo">2291</span>  ReadExpression();<a name="line.2291"></a>
+<span class="sourceLineNo">2292</span>  if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }<a name="line.2292"></a>
+<span class="sourceLineNo">2293</span>  if (verbose) { System.out.printf("inputting to %s\n",machine.evaluate(keepExpression).print()); }<a name="line.2293"></a>
+<span class="sourceLineNo">2294</span>  if (verbose) { machine.dumpstate(); }<a name="line.2294"></a>
+<span class="sourceLineNo">2295</span>  if (!keepExpression.equals("")) {<a name="line.2295"></a>
+<span class="sourceLineNo">2296</span>    machine.performSYS(machine.evaluate(keepExpression));<a name="line.2296"></a>
+<span class="sourceLineNo">2297</span>    machine.machinescreen.startupscreen();<a name="line.2297"></a>
+<span class="sourceLineNo">2298</span>    return true;<a name="line.2298"></a>
+<span class="sourceLineNo">2299</span>  } else {<a name="line.2299"></a>
+<span class="sourceLineNo">2300</span>    throw new BasicException("TOO FEW PARAMETERS");<a name="line.2300"></a>
+<span class="sourceLineNo">2301</span>  }<a name="line.2301"></a>
+<span class="sourceLineNo">2302</span>}<a name="line.2302"></a>
+<span class="sourceLineNo">2303</span><a name="line.2303"></a>
+<span class="sourceLineNo">2304</span>boolean ProcessIGNOREstatement() <a name="line.2304"></a>
+<span class="sourceLineNo">2305</span>{<a name="line.2305"></a>
+<span class="sourceLineNo">2306</span>  // read everthing to the colon (should ignore embedded : in a string -b ut doesn;t yet<a name="line.2306"></a>
+<span class="sourceLineNo">2307</span>  boolean quote=false;<a name="line.2307"></a>
+<span class="sourceLineNo">2308</span>  while (pnt&lt;linelength &amp;&amp; !line.substring(pnt,pnt+1).equals("\n")<a name="line.2308"></a>
+<span class="sourceLineNo">2309</span>    &amp;&amp; !(line.substring(pnt,pnt+1).equals(":")&amp;&amp;!quote)) {<a name="line.2309"></a>
+<span class="sourceLineNo">2310</span>    if (line.substring(pnt,pnt+1).equals("\"")) {<a name="line.2310"></a>
+<span class="sourceLineNo">2311</span>      quote=!quote;<a name="line.2311"></a>
+<span class="sourceLineNo">2312</span>    }<a name="line.2312"></a>
+<span class="sourceLineNo">2313</span>    pnt++;<a name="line.2313"></a>
+<span class="sourceLineNo">2314</span>  }<a name="line.2314"></a>
+<span class="sourceLineNo">2315</span>  return true;<a name="line.2315"></a>
+<span class="sourceLineNo">2316</span>}<a name="line.2316"></a>
 <span class="sourceLineNo">2317</span><a name="line.2317"></a>
-<span class="sourceLineNo">2318</span>boolean checkMetaCode()<a name="line.2318"></a>
-<span class="sourceLineNo">2319</span>{<a name="line.2319"></a>
-<span class="sourceLineNo">2320</span>  // we assume that we have a pointer at pnt, which we wont move<a name="line.2320"></a>
-<span class="sourceLineNo">2321</span>  // and we have just read a bracket<a name="line.2321"></a>
-<span class="sourceLineNo">2322</span>  int at=1; // we already know the first one is a ( or [<a name="line.2322"></a>
-<span class="sourceLineNo">2323</span>  while (pnt+at&lt;linelength) {<a name="line.2323"></a>
-<span class="sourceLineNo">2324</span>    String a=line.substring(pnt+at,pnt+at+1);<a name="line.2324"></a>
-<span class="sourceLineNo">2325</span>    if (a.equals("\n") || a.equals("\"")) return false; // quoted string ends or new line<a name="line.2325"></a>
-<span class="sourceLineNo">2326</span>    if (a.equals(")") || a.equals("]")) {<a name="line.2326"></a>
-<span class="sourceLineNo">2327</span>      // we have the seemingly end of a code<a name="line.2327"></a>
-<span class="sourceLineNo">2328</span>      // from pnt to (before)pnt+at<a name="line.2328"></a>
-<span class="sourceLineNo">2329</span>      String metatest=line.substring(pnt+1,pnt+at); // skip the first one<a name="line.2329"></a>
-<span class="sourceLineNo">2330</span>      if (verbose) { System.out.printf("Testing for meta code %s\n",metatest); }<a name="line.2330"></a>
-<span class="sourceLineNo">2331</span>   <a name="line.2331"></a>
-<span class="sourceLineNo">2332</span>      if (metatest.equals("home")) metaCode=(char)(19);<a name="line.2332"></a>
-<span class="sourceLineNo">2333</span>      else if (metatest.equals("up")) metaCode=(char)(145);<a name="line.2333"></a>
-<span class="sourceLineNo">2334</span>      else if (metatest.equals("down")) metaCode=(char)(17);<a name="line.2334"></a>
-<span class="sourceLineNo">2335</span>      else if (metatest.equals("left")) metaCode=(char)(157);<a name="line.2335"></a>
-<span class="sourceLineNo">2336</span>      else if (metatest.equals("rght")) metaCode=(char)(29);<a name="line.2336"></a>
-<span class="sourceLineNo">2337</span>      else if (metatest.equals("clr")) metaCode=(char)(147);<a name="line.2337"></a>
-<span class="sourceLineNo">2338</span>      else if (metatest.equals("rvon")) metaCode=(char)(18);<a name="line.2338"></a>
-<span class="sourceLineNo">2339</span>      else if (metatest.equals("rvof")) metaCode=(char)(146);<a name="line.2339"></a>
-<span class="sourceLineNo">2340</span>      else if (metatest.equals("SHIFT-SPACE")) metaCode=(char)(160);<a name="line.2340"></a>
-<span class="sourceLineNo">2341</span><a name="line.2341"></a>
-<span class="sourceLineNo">2342</span>      else if (metatest.equals("blk")) metaCode=(char)(144);<a name="line.2342"></a>
-<span class="sourceLineNo">2343</span>      else if (metatest.equals("wht")) metaCode=(char)(5);<a name="line.2343"></a>
-<span class="sourceLineNo">2344</span>      else if (metatest.equals("red")) metaCode=(char)(28);<a name="line.2344"></a>
-<span class="sourceLineNo">2345</span>      else if (metatest.equals("cyn")) metaCode=(char)(159);<a name="line.2345"></a>
-<span class="sourceLineNo">2346</span>      else if (metatest.equals("pur")) metaCode=(char)(156);<a name="line.2346"></a>
-<span class="sourceLineNo">2347</span>      else if (metatest.equals("grn")) metaCode=(char)(30);<a name="line.2347"></a>
-<span class="sourceLineNo">2348</span>      else if (metatest.equals("blu")) metaCode=(char)(31);<a name="line.2348"></a>
-<span class="sourceLineNo">2349</span>      else if (metatest.equals("yel")) metaCode=(char)(158);<a name="line.2349"></a>
-<span class="sourceLineNo">2350</span>      else if (metatest.equals("orng")) metaCode=(char)(129);<a name="line.2350"></a>
-<span class="sourceLineNo">2351</span>      else if (metatest.equals("brn")) metaCode=(char)(149);<a name="line.2351"></a>
-<span class="sourceLineNo">2352</span>      else if (metatest.equals("lred")) metaCode=(char)(150);<a name="line.2352"></a>
-<span class="sourceLineNo">2353</span>      else if (metatest.equals("gry1")) metaCode=(char)(151);<a name="line.2353"></a>
-<span class="sourceLineNo">2354</span>      else if (metatest.equals("gry2")) metaCode=(char)(152);<a name="line.2354"></a>
-<span class="sourceLineNo">2355</span>      else if (metatest.equals("lgrn")) metaCode=(char)(153);<a name="line.2355"></a>
-<span class="sourceLineNo">2356</span>      else if (metatest.equals("lblu")) metaCode=(char)(154);<a name="line.2356"></a>
-<span class="sourceLineNo">2357</span>      else if (metatest.equals("gry3")) metaCode=(char)(155);<a name="line.2357"></a>
-<span class="sourceLineNo">2358</span>      else return false;<a name="line.2358"></a>
-<span class="sourceLineNo">2359</span>      pnt+=at+1;<a name="line.2359"></a>
-<span class="sourceLineNo">2360</span>      return true; // if any matched<a name="line.2360"></a>
-<span class="sourceLineNo">2361</span>    }<a name="line.2361"></a>
-<span class="sourceLineNo">2362</span>    at++;<a name="line.2362"></a>
-<span class="sourceLineNo">2363</span>  }<a name="line.2363"></a>
-<span class="sourceLineNo">2364</span>  return false;<a name="line.2364"></a>
-<span class="sourceLineNo">2365</span>}<a name="line.2365"></a>
-<span class="sourceLineNo">2366</span><a name="line.2366"></a>
-<span class="sourceLineNo">2367</span>boolean ReadExpression()<a name="line.2367"></a>
-<span class="sourceLineNo">2368</span>{<a name="line.2368"></a>
-<span class="sourceLineNo">2369</span>    int start=pnt;<a name="line.2369"></a>
-<span class="sourceLineNo">2370</span>    int previous;<a name="line.2370"></a>
-<span class="sourceLineNo">2371</span>    previous=pnt;<a name="line.2371"></a>
-<span class="sourceLineNo">2372</span>    boolean quoted=false;<a name="line.2372"></a>
-<span class="sourceLineNo">2373</span>    keepExpression=""; // because we are going to build it up<a name="line.2373"></a>
-<span class="sourceLineNo">2374</span>//if (true) { start_timing(TIME_ReadExpression); }<a name="line.2374"></a>
-<span class="sourceLineNo">2375</span>    while (pnt&lt;linelength) {<a name="line.2375"></a>
-<span class="sourceLineNo">2376</span>      String a=line.substring(pnt,pnt+1);<a name="line.2376"></a>
-<span class="sourceLineNo">2377</span>      previous=pnt;<a name="line.2377"></a>
-<span class="sourceLineNo">2378</span>      if (a.equals("\n")) { break; }<a name="line.2378"></a>
-<span class="sourceLineNo">2379</span>      if (!quoted &amp;&amp; a.equals(":")) { break; }<a name="line.2379"></a>
-<span class="sourceLineNo">2380</span>      // add a bit to to change the meta codes e.g. (home) to 1 char<a name="line.2380"></a>
-<span class="sourceLineNo">2381</span>      if (quoted &amp;&amp; (a.equals("(") || a.equals("["))) {<a name="line.2381"></a>
-<span class="sourceLineNo">2382</span>        // we may have a meta code, lets check it out<a name="line.2382"></a>
-<span class="sourceLineNo">2383</span>        if (checkMetaCode()) {<a name="line.2383"></a>
-<span class="sourceLineNo">2384</span>          // the code is set in a global metaCode<a name="line.2384"></a>
-<span class="sourceLineNo">2385</span>          if (verbose) { System.out.printf("Got a metacode match\n"); }<a name="line.2385"></a>
-<span class="sourceLineNo">2386</span>          keepExpression=keepExpression+line.substring(start,previous)+metaCode;<a name="line.2386"></a>
-<span class="sourceLineNo">2387</span>          start=pnt; // resetting it<a name="line.2387"></a>
-<span class="sourceLineNo">2388</span>          continue;<a name="line.2388"></a>
-<span class="sourceLineNo">2389</span>        }<a name="line.2389"></a>
-<span class="sourceLineNo">2390</span>      }<a name="line.2390"></a>
-<span class="sourceLineNo">2391</span>      if (!quoted // no difference &amp;&amp; a.compareToIgnoreCase("a")&gt;=0 &amp;&amp; a.compareTo("z")&lt;=0<a name="line.2391"></a>
-<span class="sourceLineNo">2392</span>        &amp;&amp; ReadStatementToken()) { break; }<a name="line.2392"></a>
-<span class="sourceLineNo">2393</span>      if (a.equals("\"")) { quoted=!quoted; }<a name="line.2393"></a>
-<span class="sourceLineNo">2394</span>      pnt++;<a name="line.2394"></a>
-<span class="sourceLineNo">2395</span>    }<a name="line.2395"></a>
-<span class="sourceLineNo">2396</span>  if (pnt==linelength) previous=pnt; // special case when we read to end of line<a name="line.2396"></a>
-<span class="sourceLineNo">2397</span>  if (verbose) { System.out.printf("Interpreting \"%s\" as an expression\n",line.substring(start,previous)); }<a name="line.2397"></a>
-<span class="sourceLineNo">2398</span>  //keepExpression=line.substring(start,previous);<a name="line.2398"></a>
-<span class="sourceLineNo">2399</span>  keepExpression=keepExpression+line.substring(start,previous);<a name="line.2399"></a>
-<span class="sourceLineNo">2400</span>// if (true) { end_timing(TIME_ReadExpression); }<a name="line.2400"></a>
-<span class="sourceLineNo">2401</span>  return true;<a name="line.2401"></a>
-<span class="sourceLineNo">2402</span>}<a name="line.2402"></a>
-<span class="sourceLineNo">2403</span><a name="line.2403"></a>
-<span class="sourceLineNo">2404</span>boolean ReadAssignment()<a name="line.2404"></a>
-<span class="sourceLineNo">2405</span>{<a name="line.2405"></a>
-<span class="sourceLineNo">2406</span>    int at=0;<a name="line.2406"></a>
-<span class="sourceLineNo">2407</span><a name="line.2407"></a>
-<span class="sourceLineNo">2408</span>    // up here - should we get rid of spaces?<a name="line.2408"></a>
-<span class="sourceLineNo">2409</span>    // yes - chew up spaces - to make for loops keep correct variable<a name="line.2409"></a>
-<span class="sourceLineNo">2410</span>    while (pnt+at&lt;linelength) {<a name="line.2410"></a>
-<span class="sourceLineNo">2411</span>      String a=line.substring(pnt+at,pnt+at+1);<a name="line.2411"></a>
-<span class="sourceLineNo">2412</span>      if (!a.equals(" ")) { break; }<a name="line.2412"></a>
-<span class="sourceLineNo">2413</span>      pnt++; //! note - moving pnt along!<a name="line.2413"></a>
-<span class="sourceLineNo">2414</span>    }<a name="line.2414"></a>
-<span class="sourceLineNo">2415</span><a name="line.2415"></a>
-<span class="sourceLineNo">2416</span>    int bracketcount=0;<a name="line.2416"></a>
-<span class="sourceLineNo">2417</span>    boolean isarray=false;<a name="line.2417"></a>
-<span class="sourceLineNo">2418</span>    int start=pnt;<a name="line.2418"></a>
-<span class="sourceLineNo">2419</span>    boolean quoted=false;<a name="line.2419"></a>
-<span class="sourceLineNo">2420</span>    while (pnt+at&lt;linelength) {<a name="line.2420"></a>
-<span class="sourceLineNo">2421</span>      <a name="line.2421"></a>
-<span class="sourceLineNo">2422</span>      String a=line.substring(pnt+at,pnt+at+1);<a name="line.2422"></a>
-<span class="sourceLineNo">2423</span>      if (a.equals("(")) { <a name="line.2423"></a>
-<span class="sourceLineNo">2424</span>        if (!isarray &amp;&amp; bracketcount==0) {<a name="line.2424"></a>
-<span class="sourceLineNo">2425</span>          // okay, we mark the start here<a name="line.2425"></a>
-<span class="sourceLineNo">2426</span>          start=pnt+at+1;<a name="line.2426"></a>
-<span class="sourceLineNo">2427</span>          isarray=true; <a name="line.2427"></a>
-<span class="sourceLineNo">2428</span>        }<a name="line.2428"></a>
-<span class="sourceLineNo">2429</span>        bracketcount++; <a name="line.2429"></a>
-<span class="sourceLineNo">2430</span>      } else if (a.equals(")")) { <a name="line.2430"></a>
-<span class="sourceLineNo">2431</span>        bracketcount--; <a name="line.2431"></a>
-<span class="sourceLineNo">2432</span>        // okay, we have an array<a name="line.2432"></a>
-<span class="sourceLineNo">2433</span>      } else if (a.equals("\"")) {<a name="line.2433"></a>
-<span class="sourceLineNo">2434</span>        quoted=!quoted;<a name="line.2434"></a>
-<span class="sourceLineNo">2435</span>      } else if (!quoted &amp;&amp; a.equals(":")) { // end of statement<a name="line.2435"></a>
-<span class="sourceLineNo">2436</span>        // bring the colon too?<a name="line.2436"></a>
-<span class="sourceLineNo">2437</span>        // but we didn't find it so return false<a name="line.2437"></a>
-<span class="sourceLineNo">2438</span>        //at++;<a name="line.2438"></a>
-<span class="sourceLineNo">2439</span>        //break;<a name="line.2439"></a>
-<span class="sourceLineNo">2440</span>        keepVariable="";<a name="line.2440"></a>
-<span class="sourceLineNo">2441</span>        return false;<a name="line.2441"></a>
-<span class="sourceLineNo">2442</span>      } else if (a.equals("=")) {<a name="line.2442"></a>
-<span class="sourceLineNo">2443</span>        // should only allow variables<a name="line.2443"></a>
-<span class="sourceLineNo">2444</span>        // if (at==0) start allowed<a name="line.2444"></a>
-<span class="sourceLineNo">2445</span>        // else internal allowed<a name="line.2445"></a>
-<span class="sourceLineNo">2446</span>        break;<a name="line.2446"></a>
-<span class="sourceLineNo">2447</span>      } else if (a.equals("\n")) {<a name="line.2447"></a>
-<span class="sourceLineNo">2448</span>        // we got to the end of the line - i think this will fix the syntax error miss??<a name="line.2448"></a>
-<span class="sourceLineNo">2449</span>        keepVariable="";<a name="line.2449"></a>
-<span class="sourceLineNo">2450</span>        return false;<a name="line.2450"></a>
-<span class="sourceLineNo">2451</span>      }<a name="line.2451"></a>
-<span class="sourceLineNo">2452</span>      at++;<a name="line.2452"></a>
-<span class="sourceLineNo">2453</span>    }<a name="line.2453"></a>
-<span class="sourceLineNo">2454</span>    if (pnt+at&lt;linelength) {<a name="line.2454"></a>
-<span class="sourceLineNo">2455</span>      // we have got variable =<a name="line.2455"></a>
-<span class="sourceLineNo">2456</span>      if (verbose) { System.out.printf("Found variable %s\n",line.substring(pnt,pnt+at)); }<a name="line.2456"></a>
-<span class="sourceLineNo">2457</span>      keepVariable=line.substring(pnt,pnt+at); // keep it<a name="line.2457"></a>
-<span class="sourceLineNo">2458</span>      pnt+=at+1; // read out the variable and the "=" sign<a name="line.2458"></a>
-<span class="sourceLineNo">2459</span>      return true;<a name="line.2459"></a>
-<span class="sourceLineNo">2460</span>    } else {<a name="line.2460"></a>
-<span class="sourceLineNo">2461</span>      return false;<a name="line.2461"></a>
-<span class="sourceLineNo">2462</span>    }<a name="line.2462"></a>
-<span class="sourceLineNo">2463</span>}<a name="line.2463"></a>
-<span class="sourceLineNo">2464</span><a name="line.2464"></a>
-<span class="sourceLineNo">2465</span>    // for now will read a line number that has a space after it - <a name="line.2465"></a>
-<span class="sourceLineNo">2466</span>    // will change this to allow no space in the future<a name="line.2466"></a>
-<span class="sourceLineNo">2467</span><a name="line.2467"></a>
-<span class="sourceLineNo">2468</span>boolean ReadLineNo() {<a name="line.2468"></a>
-<span class="sourceLineNo">2469</span>    int at=0;<a name="line.2469"></a>
-<span class="sourceLineNo">2470</span>    int chewspace=0;<a name="line.2470"></a>
-<span class="sourceLineNo">2471</span>    //System.out.printf("Trying to read line number - looking at [%d] %s\n",pnt,line.substring(pnt+at,pnt+at+1));<a name="line.2471"></a>
-<span class="sourceLineNo">2472</span>    while (pnt+at&lt;linelength) {<a name="line.2472"></a>
-<span class="sourceLineNo">2473</span>      String a=line.substring(pnt+at,pnt+at+1);<a name="line.2473"></a>
-<span class="sourceLineNo">2474</span>      if (a.equals("\n")) {<a name="line.2474"></a>
-<span class="sourceLineNo">2475</span>                // bug fix<a name="line.2475"></a>
-<span class="sourceLineNo">2476</span>                if (at==0) {<a name="line.2476"></a>
-<span class="sourceLineNo">2477</span>            if (verbose) { System.out.printf("Empty line\n"); }<a name="line.2477"></a>
-<span class="sourceLineNo">2478</span>                        return false;<a name="line.2478"></a>
-<span class="sourceLineNo">2479</span>                }<a name="line.2479"></a>
-<span class="sourceLineNo">2480</span>        // dont read this<a name="line.2480"></a>
-<span class="sourceLineNo">2481</span>        if (verbose) { System.out.printf("Line number %s\n",line.substring(pnt,pnt+at)); }<a name="line.2481"></a>
-<span class="sourceLineNo">2482</span>        keepLine=line.substring(pnt,pnt+at);<a name="line.2482"></a>
-<span class="sourceLineNo">2483</span>        pnt+=at;<a name="line.2483"></a>
-<span class="sourceLineNo">2484</span>        return true;<a name="line.2484"></a>
-<span class="sourceLineNo">2485</span>      }<a name="line.2485"></a>
-<span class="sourceLineNo">2486</span>      if (a.equals(" ")) {<a name="line.2486"></a>
-<span class="sourceLineNo">2487</span>        chewspace=1;<a name="line.2487"></a>
-<span class="sourceLineNo">2488</span>        break; // hopefully got some part of a number<a name="line.2488"></a>
-<span class="sourceLineNo">2489</span>      }<a name="line.2489"></a>
-<span class="sourceLineNo">2490</span><a name="line.2490"></a>
-<span class="sourceLineNo">2491</span>      /* for now - break when not a space! */<a name="line.2491"></a>
-<span class="sourceLineNo">2492</span>      if (!(a.compareTo("0")&gt;=0 &amp;&amp; a.compareTo("9")&lt;=0)) {<a name="line.2492"></a>
-<span class="sourceLineNo">2493</span>        break;<a name="line.2493"></a>
-<span class="sourceLineNo">2494</span>      }      <a name="line.2494"></a>
-<span class="sourceLineNo">2495</span>      //if (!(a.compareTo("0")&gt;=0 &amp;&amp; a.compareTo("9")&lt;=0)) {<a name="line.2495"></a>
-<span class="sourceLineNo">2496</span>      //  keepLine="";<a name="line.2496"></a>
-<span class="sourceLineNo">2497</span>      //  return false; // not a number<a name="line.2497"></a>
-<span class="sourceLineNo">2498</span>      //}<a name="line.2498"></a>
-<span class="sourceLineNo">2499</span>      at++;<a name="line.2499"></a>
-<span class="sourceLineNo">2500</span>    }<a name="line.2500"></a>
-<span class="sourceLineNo">2501</span>    //if (pnt+at&lt;linelength &amp;&amp; at&gt;0) {  // no, not now, as we may be reading a ...THEN100 line<a name="line.2501"></a>
-<span class="sourceLineNo">2502</span>    if (at&gt;0) {<a name="line.2502"></a>
-<span class="sourceLineNo">2503</span>      // we have got number<a name="line.2503"></a>
-<span class="sourceLineNo">2504</span>      if (verbose) { System.out.printf("Line number %s\n",line.substring(pnt,pnt+at)); }<a name="line.2504"></a>
-<span class="sourceLineNo">2505</span>      keepLine=line.substring(pnt,pnt+at);<a name="line.2505"></a>
-<span class="sourceLineNo">2506</span>      pnt+=at+chewspace;<a name="line.2506"></a>
-<span class="sourceLineNo">2507</span>      // add one if we ended in space<a name="line.2507"></a>
-<span class="sourceLineNo">2508</span>      return true;<a name="line.2508"></a>
-<span class="sourceLineNo">2509</span>    } else {<a name="line.2509"></a>
-<span class="sourceLineNo">2510</span>      keepLine="";<a name="line.2510"></a>
-<span class="sourceLineNo">2511</span>      return false;<a name="line.2511"></a>
-<span class="sourceLineNo">2512</span>    }<a name="line.2512"></a>
-<span class="sourceLineNo">2513</span><a name="line.2513"></a>
-<span class="sourceLineNo">2514</span>}<a name="line.2514"></a>
+<span class="sourceLineNo">2318</span>char metaCode=' ';<a name="line.2318"></a>
+<span class="sourceLineNo">2319</span><a name="line.2319"></a>
+<span class="sourceLineNo">2320</span>boolean checkMetaCode()<a name="line.2320"></a>
+<span class="sourceLineNo">2321</span>{<a name="line.2321"></a>
+<span class="sourceLineNo">2322</span>  // we assume that we have a pointer at pnt, which we wont move<a name="line.2322"></a>
+<span class="sourceLineNo">2323</span>  // and we have just read a bracket<a name="line.2323"></a>
+<span class="sourceLineNo">2324</span>  int at=1; // we already know the first one is a ( or [<a name="line.2324"></a>
+<span class="sourceLineNo">2325</span>  while (pnt+at&lt;linelength) {<a name="line.2325"></a>
+<span class="sourceLineNo">2326</span>    String a=line.substring(pnt+at,pnt+at+1);<a name="line.2326"></a>
+<span class="sourceLineNo">2327</span>    if (a.equals("\n") || a.equals("\"")) return false; // quoted string ends or new line<a name="line.2327"></a>
+<span class="sourceLineNo">2328</span>    if (a.equals(")") || a.equals("]")) {<a name="line.2328"></a>
+<span class="sourceLineNo">2329</span>      // we have the seemingly end of a code<a name="line.2329"></a>
+<span class="sourceLineNo">2330</span>      // from pnt to (before)pnt+at<a name="line.2330"></a>
+<span class="sourceLineNo">2331</span>      String metatest=line.substring(pnt+1,pnt+at); // skip the first one<a name="line.2331"></a>
+<span class="sourceLineNo">2332</span>      if (verbose) { System.out.printf("Testing for meta code %s\n",metatest); }<a name="line.2332"></a>
+<span class="sourceLineNo">2333</span>   <a name="line.2333"></a>
+<span class="sourceLineNo">2334</span>      if (metatest.equals("home")) metaCode=(char)(19);<a name="line.2334"></a>
+<span class="sourceLineNo">2335</span>      else if (metatest.equals("up")) metaCode=(char)(145);<a name="line.2335"></a>
+<span class="sourceLineNo">2336</span>      else if (metatest.equals("down")) metaCode=(char)(17);<a name="line.2336"></a>
+<span class="sourceLineNo">2337</span>      else if (metatest.equals("left")) metaCode=(char)(157);<a name="line.2337"></a>
+<span class="sourceLineNo">2338</span>      else if (metatest.equals("rght")) metaCode=(char)(29);<a name="line.2338"></a>
+<span class="sourceLineNo">2339</span>      else if (metatest.equals("clr")) metaCode=(char)(147);<a name="line.2339"></a>
+<span class="sourceLineNo">2340</span>      else if (metatest.equals("rvon")) metaCode=(char)(18);<a name="line.2340"></a>
+<span class="sourceLineNo">2341</span>      else if (metatest.equals("rvof")) metaCode=(char)(146);<a name="line.2341"></a>
+<span class="sourceLineNo">2342</span>      else if (metatest.equals("SHIFT-SPACE")) metaCode=(char)(160);<a name="line.2342"></a>
+<span class="sourceLineNo">2343</span><a name="line.2343"></a>
+<span class="sourceLineNo">2344</span>      else if (metatest.equals("blk")) metaCode=(char)(144);<a name="line.2344"></a>
+<span class="sourceLineNo">2345</span>      else if (metatest.equals("wht")) metaCode=(char)(5);<a name="line.2345"></a>
+<span class="sourceLineNo">2346</span>      else if (metatest.equals("red")) metaCode=(char)(28);<a name="line.2346"></a>
+<span class="sourceLineNo">2347</span>      else if (metatest.equals("cyn")) metaCode=(char)(159);<a name="line.2347"></a>
+<span class="sourceLineNo">2348</span>      else if (metatest.equals("pur")) metaCode=(char)(156);<a name="line.2348"></a>
+<span class="sourceLineNo">2349</span>      else if (metatest.equals("grn")) metaCode=(char)(30);<a name="line.2349"></a>
+<span class="sourceLineNo">2350</span>      else if (metatest.equals("blu")) metaCode=(char)(31);<a name="line.2350"></a>
+<span class="sourceLineNo">2351</span>      else if (metatest.equals("yel")) metaCode=(char)(158);<a name="line.2351"></a>
+<span class="sourceLineNo">2352</span>      else if (metatest.equals("orng")) metaCode=(char)(129);<a name="line.2352"></a>
+<span class="sourceLineNo">2353</span>      else if (metatest.equals("brn")) metaCode=(char)(149);<a name="line.2353"></a>
+<span class="sourceLineNo">2354</span>      else if (metatest.equals("lred")) metaCode=(char)(150);<a name="line.2354"></a>
+<span class="sourceLineNo">2355</span>      else if (metatest.equals("gry1")) metaCode=(char)(151);<a name="line.2355"></a>
+<span class="sourceLineNo">2356</span>      else if (metatest.equals("gry2")) metaCode=(char)(152);<a name="line.2356"></a>
+<span class="sourceLineNo">2357</span>      else if (metatest.equals("lgrn")) metaCode=(char)(153);<a name="line.2357"></a>
+<span class="sourceLineNo">2358</span>      else if (metatest.equals("lblu")) metaCode=(char)(154);<a name="line.2358"></a>
+<span class="sourceLineNo">2359</span>      else if (metatest.equals("gry3")) metaCode=(char)(155);<a name="line.2359"></a>
+<span class="sourceLineNo">2360</span>      else return false;<a name="line.2360"></a>
+<span class="sourceLineNo">2361</span>      pnt+=at+1;<a name="line.2361"></a>
+<span class="sourceLineNo">2362</span>      return true; // if any matched<a name="line.2362"></a>
+<span class="sourceLineNo">2363</span>    }<a name="line.2363"></a>
+<span class="sourceLineNo">2364</span>    at++;<a name="line.2364"></a>
+<span class="sourceLineNo">2365</span>  }<a name="line.2365"></a>
+<span class="sourceLineNo">2366</span>  return false;<a name="line.2366"></a>
+<span class="sourceLineNo">2367</span>}<a name="line.2367"></a>
+<span class="sourceLineNo">2368</span><a name="line.2368"></a>
+<span class="sourceLineNo">2369</span>boolean ReadExpression()<a name="line.2369"></a>
+<span class="sourceLineNo">2370</span>{<a name="line.2370"></a>
+<span class="sourceLineNo">2371</span>    int start=pnt;<a name="line.2371"></a>
+<span class="sourceLineNo">2372</span>    int previous;<a name="line.2372"></a>
+<span class="sourceLineNo">2373</span>    previous=pnt;<a name="line.2373"></a>
+<span class="sourceLineNo">2374</span>    boolean quoted=false;<a name="line.2374"></a>
+<span class="sourceLineNo">2375</span>    keepExpression=""; // because we are going to build it up<a name="line.2375"></a>
+<span class="sourceLineNo">2376</span>//if (true) { start_timing(TIME_ReadExpression); }<a name="line.2376"></a>
+<span class="sourceLineNo">2377</span>    while (pnt&lt;linelength) {<a name="line.2377"></a>
+<span class="sourceLineNo">2378</span>      String a=line.substring(pnt,pnt+1);<a name="line.2378"></a>
+<span class="sourceLineNo">2379</span>      previous=pnt;<a name="line.2379"></a>
+<span class="sourceLineNo">2380</span>      if (a.equals("\n")) { break; }<a name="line.2380"></a>
+<span class="sourceLineNo">2381</span>      if (!quoted &amp;&amp; a.equals(":")) { break; }<a name="line.2381"></a>
+<span class="sourceLineNo">2382</span>      // add a bit to to change the meta codes e.g. (home) to 1 char<a name="line.2382"></a>
+<span class="sourceLineNo">2383</span>      if (quoted &amp;&amp; (a.equals("(") || a.equals("["))) {<a name="line.2383"></a>
+<span class="sourceLineNo">2384</span>        // we may have a meta code, lets check it out<a name="line.2384"></a>
+<span class="sourceLineNo">2385</span>        if (checkMetaCode()) {<a name="line.2385"></a>
+<span class="sourceLineNo">2386</span>          // the code is set in a global metaCode<a name="line.2386"></a>
+<span class="sourceLineNo">2387</span>          if (verbose) { System.out.printf("Got a metacode match\n"); }<a name="line.2387"></a>
+<span class="sourceLineNo">2388</span>          keepExpression=keepExpression+line.substring(start,previous)+metaCode;<a name="line.2388"></a>
+<span class="sourceLineNo">2389</span>          start=pnt; // resetting it<a name="line.2389"></a>
+<span class="sourceLineNo">2390</span>          continue;<a name="line.2390"></a>
+<span class="sourceLineNo">2391</span>        }<a name="line.2391"></a>
+<span class="sourceLineNo">2392</span>      }<a name="line.2392"></a>
+<span class="sourceLineNo">2393</span>      if (!quoted // no difference &amp;&amp; a.compareToIgnoreCase("a")&gt;=0 &amp;&amp; a.compareTo("z")&lt;=0<a name="line.2393"></a>
+<span class="sourceLineNo">2394</span>        &amp;&amp; ReadStatementToken()) { break; }<a name="line.2394"></a>
+<span class="sourceLineNo">2395</span>      if (a.equals("\"")) { quoted=!quoted; }<a name="line.2395"></a>
+<span class="sourceLineNo">2396</span>      pnt++;<a name="line.2396"></a>
+<span class="sourceLineNo">2397</span>    }<a name="line.2397"></a>
+<span class="sourceLineNo">2398</span>  if (pnt==linelength) previous=pnt; // special case when we read to end of line<a name="line.2398"></a>
+<span class="sourceLineNo">2399</span>  if (verbose) { System.out.printf("Interpreting \"%s\" as an expression\n",line.substring(start,previous)); }<a name="line.2399"></a>
+<span class="sourceLineNo">2400</span>  //keepExpression=line.substring(start,previous);<a name="line.2400"></a>
+<span class="sourceLineNo">2401</span>  keepExpression=keepExpression+line.substring(start,previous);<a name="line.2401"></a>
+<span class="sourceLineNo">2402</span>// if (true) { end_timing(TIME_ReadExpression); }<a name="line.2402"></a>
+<span class="sourceLineNo">2403</span>  return true;<a name="line.2403"></a>
+<span class="sourceLineNo">2404</span>}<a name="line.2404"></a>
+<span class="sourceLineNo">2405</span><a name="line.2405"></a>
+<span class="sourceLineNo">2406</span>boolean ReadAssignment()<a name="line.2406"></a>
+<span class="sourceLineNo">2407</span>{<a name="line.2407"></a>
+<span class="sourceLineNo">2408</span>    int at=0;<a name="line.2408"></a>
+<span class="sourceLineNo">2409</span><a name="line.2409"></a>
+<span class="sourceLineNo">2410</span>    // up here - should we get rid of spaces?<a name="line.2410"></a>
+<span class="sourceLineNo">2411</span>    // yes - chew up spaces - to make for loops keep correct variable<a name="line.2411"></a>
+<span class="sourceLineNo">2412</span>    while (pnt+at&lt;linelength) {<a name="line.2412"></a>
+<span class="sourceLineNo">2413</span>      String a=line.substring(pnt+at,pnt+at+1);<a name="line.2413"></a>
+<span class="sourceLineNo">2414</span>      if (!a.equals(" ")) { break; }<a name="line.2414"></a>
+<span class="sourceLineNo">2415</span>      pnt++; //! note - moving pnt along!<a name="line.2415"></a>
+<span class="sourceLineNo">2416</span>    }<a name="line.2416"></a>
+<span class="sourceLineNo">2417</span><a name="line.2417"></a>
+<span class="sourceLineNo">2418</span>    int bracketcount=0;<a name="line.2418"></a>
+<span class="sourceLineNo">2419</span>    boolean isarray=false;<a name="line.2419"></a>
+<span class="sourceLineNo">2420</span>    int start=pnt;<a name="line.2420"></a>
+<span class="sourceLineNo">2421</span>    boolean quoted=false;<a name="line.2421"></a>
+<span class="sourceLineNo">2422</span>    while (pnt+at&lt;linelength) {<a name="line.2422"></a>
+<span class="sourceLineNo">2423</span>      <a name="line.2423"></a>
+<span class="sourceLineNo">2424</span>      String a=line.substring(pnt+at,pnt+at+1);<a name="line.2424"></a>
+<span class="sourceLineNo">2425</span>      if (a.equals("(")) { <a name="line.2425"></a>
+<span class="sourceLineNo">2426</span>        if (!isarray &amp;&amp; bracketcount==0) {<a name="line.2426"></a>
+<span class="sourceLineNo">2427</span>          // okay, we mark the start here<a name="line.2427"></a>
+<span class="sourceLineNo">2428</span>          start=pnt+at+1;<a name="line.2428"></a>
+<span class="sourceLineNo">2429</span>          isarray=true; <a name="line.2429"></a>
+<span class="sourceLineNo">2430</span>        }<a name="line.2430"></a>
+<span class="sourceLineNo">2431</span>        bracketcount++; <a name="line.2431"></a>
+<span class="sourceLineNo">2432</span>      } else if (a.equals(")")) { <a name="line.2432"></a>
+<span class="sourceLineNo">2433</span>        bracketcount--; <a name="line.2433"></a>
+<span class="sourceLineNo">2434</span>        // okay, we have an array<a name="line.2434"></a>
+<span class="sourceLineNo">2435</span>      } else if (a.equals("\"")) {<a name="line.2435"></a>
+<span class="sourceLineNo">2436</span>        quoted=!quoted;<a name="line.2436"></a>
+<span class="sourceLineNo">2437</span>      } else if (!quoted &amp;&amp; a.equals(":")) { // end of statement<a name="line.2437"></a>
+<span class="sourceLineNo">2438</span>        // bring the colon too?<a name="line.2438"></a>
+<span class="sourceLineNo">2439</span>        // but we didn't find it so return false<a name="line.2439"></a>
+<span class="sourceLineNo">2440</span>        //at++;<a name="line.2440"></a>
+<span class="sourceLineNo">2441</span>        //break;<a name="line.2441"></a>
+<span class="sourceLineNo">2442</span>        keepVariable="";<a name="line.2442"></a>
+<span class="sourceLineNo">2443</span>        return false;<a name="line.2443"></a>
+<span class="sourceLineNo">2444</span>      } else if (a.equals("=")) {<a name="line.2444"></a>
+<span class="sourceLineNo">2445</span>        // should only allow variables<a name="line.2445"></a>
+<span class="sourceLineNo">2446</span>        // if (at==0) start allowed<a name="line.2446"></a>
+<span class="sourceLineNo">2447</span>        // else internal allowed<a name="line.2447"></a>
+<span class="sourceLineNo">2448</span>        break;<a name="line.2448"></a>
+<span class="sourceLineNo">2449</span>      } else if (a.equals("\n")) {<a name="line.2449"></a>
+<span class="sourceLineNo">2450</span>        // we got to the end of the line - i think this will fix the syntax error miss??<a name="line.2450"></a>
+<span class="sourceLineNo">2451</span>        keepVariable="";<a name="line.2451"></a>
+<span class="sourceLineNo">2452</span>        return false;<a name="line.2452"></a>
+<span class="sourceLineNo">2453</span>      }<a name="line.2453"></a>
+<span class="sourceLineNo">2454</span>      at++;<a name="line.2454"></a>
+<span class="sourceLineNo">2455</span>    }<a name="line.2455"></a>
+<span class="sourceLineNo">2456</span>    if (pnt+at&lt;linelength) {<a name="line.2456"></a>
+<span class="sourceLineNo">2457</span>      // we have got variable =<a name="line.2457"></a>
+<span class="sourceLineNo">2458</span>      if (verbose) { System.out.printf("Found variable %s\n",line.substring(pnt,pnt+at)); }<a name="line.2458"></a>
+<span class="sourceLineNo">2459</span>      keepVariable=line.substring(pnt,pnt+at); // keep it<a name="line.2459"></a>
+<span class="sourceLineNo">2460</span>      pnt+=at+1; // read out the variable and the "=" sign<a name="line.2460"></a>
+<span class="sourceLineNo">2461</span>      return true;<a name="line.2461"></a>
+<span class="sourceLineNo">2462</span>    } else {<a name="line.2462"></a>
+<span class="sourceLineNo">2463</span>      return false;<a name="line.2463"></a>
+<span class="sourceLineNo">2464</span>    }<a name="line.2464"></a>
+<span class="sourceLineNo">2465</span>}<a name="line.2465"></a>
+<span class="sourceLineNo">2466</span><a name="line.2466"></a>
+<span class="sourceLineNo">2467</span>    // for now will read a line number that has a space after it - <a name="line.2467"></a>
+<span class="sourceLineNo">2468</span>    // will change this to allow no space in the future<a name="line.2468"></a>
+<span class="sourceLineNo">2469</span><a name="line.2469"></a>
+<span class="sourceLineNo">2470</span>boolean ReadLineNo() {<a name="line.2470"></a>
+<span class="sourceLineNo">2471</span>    int at=0;<a name="line.2471"></a>
+<span class="sourceLineNo">2472</span>    int chewspace=0;<a name="line.2472"></a>
+<span class="sourceLineNo">2473</span>    //System.out.printf("Trying to read line number - looking at [%d] %s\n",pnt,line.substring(pnt+at,pnt+at+1));<a name="line.2473"></a>
+<span class="sourceLineNo">2474</span>    while (pnt+at&lt;linelength) {<a name="line.2474"></a>
+<span class="sourceLineNo">2475</span>      String a=line.substring(pnt+at,pnt+at+1);<a name="line.2475"></a>
+<span class="sourceLineNo">2476</span>      if (a.equals("\n")) {<a name="line.2476"></a>
+<span class="sourceLineNo">2477</span>                // bug fix<a name="line.2477"></a>
+<span class="sourceLineNo">2478</span>                if (at==0) {<a name="line.2478"></a>
+<span class="sourceLineNo">2479</span>            if (verbose) { System.out.printf("Empty line\n"); }<a name="line.2479"></a>
+<span class="sourceLineNo">2480</span>                        return false;<a name="line.2480"></a>
+<span class="sourceLineNo">2481</span>                }<a name="line.2481"></a>
+<span class="sourceLineNo">2482</span>        // dont read this<a name="line.2482"></a>
+<span class="sourceLineNo">2483</span>        if (verbose) { System.out.printf("Line number %s\n",line.substring(pnt,pnt+at)); }<a name="line.2483"></a>
+<span class="sourceLineNo">2484</span>        keepLine=line.substring(pnt,pnt+at);<a name="line.2484"></a>
+<span class="sourceLineNo">2485</span>        pnt+=at;<a name="line.2485"></a>
+<span class="sourceLineNo">2486</span>        return true;<a name="line.2486"></a>
+<span class="sourceLineNo">2487</span>      }<a name="line.2487"></a>
+<span class="sourceLineNo">2488</span>      if (a.equals(" ")) {<a name="line.2488"></a>
+<span class="sourceLineNo">2489</span>        chewspace=1;<a name="line.2489"></a>
+<span class="sourceLineNo">2490</span>        break; // hopefully got some part of a number<a name="line.2490"></a>
+<span class="sourceLineNo">2491</span>      }<a name="line.2491"></a>
+<span class="sourceLineNo">2492</span><a name="line.2492"></a>
+<span class="sourceLineNo">2493</span>      /* for now - break when not a space! */<a name="line.2493"></a>
+<span class="sourceLineNo">2494</span>      if (!(a.compareTo("0")&gt;=0 &amp;&amp; a.compareTo("9")&lt;=0)) {<a name="line.2494"></a>
+<span class="sourceLineNo">2495</span>        break;<a name="line.2495"></a>
+<span class="sourceLineNo">2496</span>      }      <a name="line.2496"></a>
+<span class="sourceLineNo">2497</span>      //if (!(a.compareTo("0")&gt;=0 &amp;&amp; a.compareTo("9")&lt;=0)) {<a name="line.2497"></a>
+<span class="sourceLineNo">2498</span>      //  keepLine="";<a name="line.2498"></a>
+<span class="sourceLineNo">2499</span>      //  return false; // not a number<a name="line.2499"></a>
+<span class="sourceLineNo">2500</span>      //}<a name="line.2500"></a>
+<span class="sourceLineNo">2501</span>      at++;<a name="line.2501"></a>
+<span class="sourceLineNo">2502</span>    }<a name="line.2502"></a>
+<span class="sourceLineNo">2503</span>    //if (pnt+at&lt;linelength &amp;&amp; at&gt;0) {  // no, not now, as we may be reading a ...THEN100 line<a name="line.2503"></a>
+<span class="sourceLineNo">2504</span>    if (at&gt;0) {<a name="line.2504"></a>
+<span class="sourceLineNo">2505</span>      // we have got number<a name="line.2505"></a>
+<span class="sourceLineNo">2506</span>      if (verbose) { System.out.printf("Line number %s\n",line.substring(pnt,pnt+at)); }<a name="line.2506"></a>
+<span class="sourceLineNo">2507</span>      keepLine=line.substring(pnt,pnt+at);<a name="line.2507"></a>
+<span class="sourceLineNo">2508</span>      pnt+=at+chewspace;<a name="line.2508"></a>
+<span class="sourceLineNo">2509</span>      // add one if we ended in space<a name="line.2509"></a>
+<span class="sourceLineNo">2510</span>      return true;<a name="line.2510"></a>
+<span class="sourceLineNo">2511</span>    } else {<a name="line.2511"></a>
+<span class="sourceLineNo">2512</span>      keepLine="";<a name="line.2512"></a>
+<span class="sourceLineNo">2513</span>      return false;<a name="line.2513"></a>
+<span class="sourceLineNo">2514</span>    }<a name="line.2514"></a>
 <span class="sourceLineNo">2515</span><a name="line.2515"></a>
-<span class="sourceLineNo">2516</span>boolean SkipNewLines() {<a name="line.2516"></a>
-<span class="sourceLineNo">2517</span>  while (pnt&lt;linelength &amp;&amp; line.substring(pnt,pnt+1).equals("\n")) {<a name="line.2517"></a>
-<span class="sourceLineNo">2518</span>    pnt++;<a name="line.2518"></a>
-<span class="sourceLineNo">2519</span>  }<a name="line.2519"></a>
-<span class="sourceLineNo">2520</span>  return true;<a name="line.2520"></a>
-<span class="sourceLineNo">2521</span>}<a name="line.2521"></a>
-<span class="sourceLineNo">2522</span>boolean SkipSpaces() {<a name="line.2522"></a>
-<span class="sourceLineNo">2523</span>  while (pnt&lt;linelength &amp;&amp; line.substring(pnt,pnt+1).equals(" ")) {<a name="line.2523"></a>
-<span class="sourceLineNo">2524</span>    pnt++;<a name="line.2524"></a>
-<span class="sourceLineNo">2525</span>  }<a name="line.2525"></a>
-<span class="sourceLineNo">2526</span>  return true;<a name="line.2526"></a>
-<span class="sourceLineNo">2527</span>}<a name="line.2527"></a>
-<span class="sourceLineNo">2528</span>boolean ReadColon() {<a name="line.2528"></a>
-<span class="sourceLineNo">2529</span>  if (pnt&lt;linelength &amp;&amp; line.substring(pnt,pnt+1).equals(":")) {<a name="line.2529"></a>
-<span class="sourceLineNo">2530</span>    pnt++;<a name="line.2530"></a>
-<span class="sourceLineNo">2531</span>    return true;<a name="line.2531"></a>
-<span class="sourceLineNo">2532</span>  } else {<a name="line.2532"></a>
-<span class="sourceLineNo">2533</span>    return false;<a name="line.2533"></a>
-<span class="sourceLineNo">2534</span>  }<a name="line.2534"></a>
-<span class="sourceLineNo">2535</span>}<a name="line.2535"></a>
-<span class="sourceLineNo">2536</span><a name="line.2536"></a>
-<span class="sourceLineNo">2537</span>boolean MachineEND() {<a name="line.2537"></a>
-<span class="sourceLineNo">2538</span>  pnt=line.length();<a name="line.2538"></a>
-<span class="sourceLineNo">2539</span>  return true;<a name="line.2539"></a>
-<span class="sourceLineNo">2540</span>}<a name="line.2540"></a>
-<span class="sourceLineNo">2541</span><a name="line.2541"></a>
-<span class="sourceLineNo">2542</span><a name="line.2542"></a>
-<span class="sourceLineNo">2543</span>}<a name="line.2543"></a>
+<span class="sourceLineNo">2516</span>}<a name="line.2516"></a>
+<span class="sourceLineNo">2517</span><a name="line.2517"></a>
+<span class="sourceLineNo">2518</span>boolean SkipNewLines() {<a name="line.2518"></a>
+<span class="sourceLineNo">2519</span>  while (pnt&lt;linelength &amp;&amp; line.substring(pnt,pnt+1).equals("\n")) {<a name="line.2519"></a>
+<span class="sourceLineNo">2520</span>    pnt++;<a name="line.2520"></a>
+<span class="sourceLineNo">2521</span>  }<a name="line.2521"></a>
+<span class="sourceLineNo">2522</span>  return true;<a name="line.2522"></a>
+<span class="sourceLineNo">2523</span>}<a name="line.2523"></a>
+<span class="sourceLineNo">2524</span>boolean SkipSpaces() {<a name="line.2524"></a>
+<span class="sourceLineNo">2525</span>  while (pnt&lt;linelength &amp;&amp; line.substring(pnt,pnt+1).equals(" ")) {<a name="line.2525"></a>
+<span class="sourceLineNo">2526</span>    pnt++;<a name="line.2526"></a>
+<span class="sourceLineNo">2527</span>  }<a name="line.2527"></a>
+<span class="sourceLineNo">2528</span>  return true;<a name="line.2528"></a>
+<span class="sourceLineNo">2529</span>}<a name="line.2529"></a>
+<span class="sourceLineNo">2530</span>boolean ReadColon() {<a name="line.2530"></a>
+<span class="sourceLineNo">2531</span>  if (pnt&lt;linelength &amp;&amp; line.substring(pnt,pnt+1).equals(":")) {<a name="line.2531"></a>
+<span class="sourceLineNo">2532</span>    pnt++;<a name="line.2532"></a>
+<span class="sourceLineNo">2533</span>    return true;<a name="line.2533"></a>
+<span class="sourceLineNo">2534</span>  } else {<a name="line.2534"></a>
+<span class="sourceLineNo">2535</span>    return false;<a name="line.2535"></a>
+<span class="sourceLineNo">2536</span>  }<a name="line.2536"></a>
+<span class="sourceLineNo">2537</span>}<a name="line.2537"></a>
+<span class="sourceLineNo">2538</span><a name="line.2538"></a>
+<span class="sourceLineNo">2539</span>boolean MachineEND() {<a name="line.2539"></a>
+<span class="sourceLineNo">2540</span>  pnt=line.length();<a name="line.2540"></a>
+<span class="sourceLineNo">2541</span>  return true;<a name="line.2541"></a>
+<span class="sourceLineNo">2542</span>}<a name="line.2542"></a>
+<span class="sourceLineNo">2543</span><a name="line.2543"></a>
 <span class="sourceLineNo">2544</span><a name="line.2544"></a>
-<span class="sourceLineNo">2545</span>/////////<a name="line.2545"></a>
-<span class="sourceLineNo">2546</span>// END //<a name="line.2546"></a>
+<span class="sourceLineNo">2545</span>}<a name="line.2545"></a>
+<span class="sourceLineNo">2546</span><a name="line.2546"></a>
 <span class="sourceLineNo">2547</span>/////////<a name="line.2547"></a>
+<span class="sourceLineNo">2548</span>// END //<a name="line.2548"></a>
+<span class="sourceLineNo">2549</span>/////////<a name="line.2549"></a>
 
 
 

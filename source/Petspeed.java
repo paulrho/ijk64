@@ -19,7 +19,7 @@ class Petspeed
 
   static final int MAXPSIZE=50000; // just for now, have a more efficient sparse array later
   int []acpointer = new int[MAXPSIZE];
-  int []acpointer_next = new int[MAXPSIZE];
+  int []acpointer_next = new int[MAXPSIZE];   // fixme - maybe this could go on HLT parameter
 
   // to fix -> make this take less space! we are now taking 250k!
   int []pnext = new int[MAXPSIZE];
@@ -45,16 +45,18 @@ class Petspeed
       int c=(x&(3<<6))>>6;
       switch (c) {
         case I_PRF>>6:
-		ass=I_strings[c]+" "+O_strings[x&31];
+		ass=I_strings[c]+" "+O_strings[x&31]+" "+((x&32)>0?"Str ":((x&31)==0?"Dbl ":""));
 		//ass=I_strings[c]+" "+(x&31);
 		// add type 5th bit
 		break;
 	case I_PSH>>6:
-		ass=I_strings[c]+" "+M_strings[x&3];
+		ass=I_strings[c]+" "+M_strings[x&3]+" "+((x&32)>0?"Str ":"");
+		if ((x&3)!=M_IMM) ass+=using_machine.variables.variablename[pargmem[i]];
 		// add type 5th bit
 		break;
 	case I_STO>>6:
-		ass=I_strings[c]+" "+M_strings[x&3];
+		ass=I_strings[c]+" "+M_strings[x&3]+" "+((x&32)>0?"Str ":"");
+		if ((x&3)!=M_IMM) ass+=using_machine.variables.variablename[pargmem[i]];
 		// add type 5th bit
 		break;
 	case I_FNC>>6:
@@ -62,7 +64,7 @@ class Petspeed
 		break;
       }
       //ass=I_Strings[x&(3<<6)>>6]+" ";
-      System.out.printf("  .%5d %3d %12s %3d %f\n",i,prog[i],ass,pargmem[i],pargD[i]);
+      System.out.printf("  .%5d %3d %-18s %3d %f\n",i,prog[i],ass,pargmem[i],pargD[i]);
       if (x==I_HLT) System.out.printf("--\n");
     }
   }
@@ -618,7 +620,7 @@ class Petspeed
   static String I_strings[]={"PRF","PSH","STO","FNC"}; // just for debugging only
   static String M_strings[]={"IMM","MEM","MEMARR1","MEMARR2"}; // just for debugging only
 
-  static String O_strings[]={"XXXXXX","^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<=","<>","=>"};
+  static String O_strings[]={"XPARAMX","^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<=","<>","=>"};
   static String F_strings[]={"HLTXXX","sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",
 	                     "len","val","asc","mid$","left$","right$","str$","chr$","instr",
                              "ti","st","ti$","mathpi",

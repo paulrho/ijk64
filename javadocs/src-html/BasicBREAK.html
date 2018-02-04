@@ -363,7 +363,7 @@
 <span class="sourceLineNo">355</span>    while(fl&gt;0) {<a name="line.355"></a>
 <span class="sourceLineNo">356</span>      fl--;<a name="line.356"></a>
 <span class="sourceLineNo">357</span>      //if (speeder &amp;&amp; forloopstack_varpnt[fl]&gt;=0) {<a name="line.357"></a>
-<span class="sourceLineNo">358</span>      if (speeder &amp;&amp; forloopstack_varpnt[fl]==vv) {<a name="line.358"></a>
+<span class="sourceLineNo">358</span>      if (speeder &amp;&amp; (vv==-2 || forloopstack_varpnt[fl]==vv)) {<a name="line.358"></a>
 <span class="sourceLineNo">359</span>        // not compiled, but just a lot faster for the looping part<a name="line.359"></a>
 <span class="sourceLineNo">360</span>        int v=forloopstack_varpnt[fl];<a name="line.360"></a>
 <span class="sourceLineNo">361</span>        variables.variablevalue[v]+=forloopstack_step[fl];<a name="line.361"></a>
