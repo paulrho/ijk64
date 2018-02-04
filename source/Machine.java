@@ -625,6 +625,7 @@ public class Machine {
   void dumpstate() {
     variables.dumpstate();
     forloopdumpstate();
+    if (speeder) petspeed.dumpstate();
     System.out.printf("Current Line No = %s\n",currentLineNo);
    // temp debugging
     //for (int i=0; i<256; ++i) { System.out.printf("%d =%d\n",i,(int)machinescreen.petconvert((char)i)); }
