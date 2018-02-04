@@ -27,14 +27,14 @@ class Petspeed
   int []btpnt = new int[MAXPSIZE]; // only used for basictimer
 
   void dumpstate() {
-	  String tmpprog=using_machine.programText+"xxx";
+	  String tmpprog=using_machine.programText+"xxxxxx";
     System.out.printf("i acpointer acpointer_next pnext pcache btpnt\n");
     for (int i=0; i<MAXPSIZE; ++i) {
       if (acpointer[i]!=0 || acpointer_next[i]!=0 || pnext[i]!=0 || pcache[i]!=0 || btpnt[i]!=0) {
-        System.out.printf("  [%5d] %5d %5d %5d %5d %5d =%s\n",
+        System.out.printf("  [%5d] %5d %5d %5d %5d %5d  %s\n",
           i,
 	  acpointer[i],acpointer_next[i],pnext[i],pcache[i],btpnt[i],
-          tmpprog.substring(i,i+3).replace("\n","[CR]")
+          tmpprog.substring(i,i+6).replace("\n","[CR]").replace(" ","[SPC]")
 	  );
       }
     }

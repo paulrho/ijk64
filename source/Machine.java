@@ -222,6 +222,8 @@ public class Machine {
     variables.verbose=verbosekeep;
     program_saved_executionpoint=(-1); // cant continue any more
     //!!! should forloopstack be cleared too? // no -statements clears it
+    if (speeder) petspeed=new Petspeed(this); // just for now just respawn the lot!
+    //statements.speeder=speeder; // return to original state //? is this right?
   }
 
   //////////////////////////////////
@@ -1826,7 +1828,8 @@ void chewcr() {
   {
     program_running=true;
     // fix me!!!!
-    if (speeder) petspeed=new Petspeed(this); // just for now just respawn the lot!
+    // now done in variables_clr
+    //if (speeder) petspeed=new Petspeed(this); // just for now just respawn the lot!
     statements.speeder=speeder; // return to original state
     new statements(programText, this); // passing along the machine too
     program_saved_executionpoint=save_executionpoint; // only done on running a program
