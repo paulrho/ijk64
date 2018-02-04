@@ -1,3 +1,3 @@
 class version {
-  static String programVersion = "3.7.1_b1839";
+  static String programVersion = "3.7.2_b1847";
 }

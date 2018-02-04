@@ -1124,8 +1124,9 @@ boolean ReadStatement() throws BasicException
 
       case ST_GPRINT:
         if (machine.graphicsDevice!=null) {
-          ReadExpression();
-          GenericType gt=machine.evaluate(keepExpression);
+          //ReadExpression();
+          //GenericType gt=machine.evaluate(keepExpression);
+          GenericType gt=PSReadExpressionEvaluate();
           if (gt.gttop==4) {
               if (verbose) System.out.printf("about to draw string \"%s\"\n",gt.gtlist[0].str());
               //for (int i=0; i<gt.gttop; ++i) System.out.printf("isNum[%d]=%s\n",i,gt.gtlist[i].isNum()?"yes":"no");
