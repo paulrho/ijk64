@@ -372,7 +372,7 @@
 <span class="sourceLineNo">364</span>              //System.out.printf(",%s",function);<a name="line.364"></a>
 <span class="sourceLineNo">365</span>              int ft=Petspeed.ftoken(function);<a name="line.365"></a>
 <span class="sourceLineNo">366</span>                if (verbose &amp;&amp; ft&lt;0) System.out.printf("A-COMPILER could not find %s (okay if array)\n",function);<a name="line.366"></a>
-<span class="sourceLineNo">367</span>              using_machine.petspeed.addInstr(Petspeed.I_FNC | ft);<a name="line.367"></a>
+<span class="sourceLineNo">367</span>              using_machine.petspeed.addInstr(Petspeed.I_FNC | ft,parameters); // add # parans, only used for mid$<a name="line.367"></a>
 <span class="sourceLineNo">368</span>      }<a name="line.368"></a>
 <span class="sourceLineNo">369</span><a name="line.369"></a>
 <span class="sourceLineNo">370</span>      if (function.length()&gt;=2 &amp;&amp; function.substring(0,2).equals("fn")) {<a name="line.370"></a>
