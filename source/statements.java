@@ -1250,7 +1250,7 @@ boolean ReadAssign() throws BasicException {
 	try {
 	  pnt=machine.petspeed.execute(pnt);
 	  // and jump the pointer
-	} catch (EvaluateException e) { throw new BasicException("EXECUTE ERROR"); }
+	} catch (EvaluateException e) { throw new BasicException(e.getMessage()); }
       } else {
 
                                                  // could be an assignment
@@ -1553,7 +1553,7 @@ GenericType PSReadExpressionEvaluate() throws BasicException
        try {
          pnt=machine.petspeed.execute(pnt);
          // jump the pointer
-       } catch (EvaluateException e) { throw new BasicException("EXECUTE ERROR"); }
+       } catch (EvaluateException e) { throw new BasicException(e.getMessage()); }
        gt= machine.petspeed.list; // not reentrant - FIX
        machine.petspeed.atop-=machine.petspeed.listtop;
   } else {
@@ -1574,7 +1574,7 @@ boolean ProcessIFstatement() throws BasicException
        try {
          pnt=machine.petspeed.execute(pnt);
          // jump the pointer
-       } catch (EvaluateException e) { throw new BasicException("EXECUTE ERROR"); }
+       } catch (EvaluateException e) { throw new BasicException(e.getMessage()); }
        gt= new GenericType(machine.petspeed.result());
        //pnt=machine.petspeed.nextpnt(pnt);
        if (gt.equals(0.0)) { // num only returns a num
