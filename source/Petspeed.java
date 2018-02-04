@@ -26,6 +26,48 @@ class Petspeed
   int []pcache = new int[MAXPSIZE];
   int []btpnt = new int[MAXPSIZE]; // only used for basictimer
 
+  void dumpstate() {
+	  String tmpprog=using_machine.programText+"xxx";
+    System.out.printf("i acpointer acpointer_next pnext pcache btpnt\n");
+    for (int i=0; i<MAXPSIZE; ++i) {
+      if (acpointer[i]!=0 || acpointer_next[i]!=0 || pnext[i]!=0 || pcache[i]!=0 || btpnt[i]!=0) {
+        System.out.printf("  [%5d] %5d %5d %5d %5d %5d =%s\n",
+          i,
+	  acpointer[i],acpointer_next[i],pnext[i],pcache[i],btpnt[i],
+          tmpprog.substring(i,i+3).replace("\n","[CR]")
+	  );
+      }
+    }
+    System.out.printf("acode program\n");
+    for (int i=1; i<top; ++i) {
+      String ass="";
+      int x=prog[i];
+      int c=(x&(3<<6))>>6;
+      switch (c) {
+        case I_PRF>>6:
+		ass=I_strings[c]+" "+O_strings[x&31];
+		//ass=I_strings[c]+" "+(x&31);
+		// add type 5th bit
+		break;
+	case I_PSH>>6:
+		ass=I_strings[c]+" "+M_strings[x&3];
+		// add type 5th bit
+		break;
+	case I_STO>>6:
+		ass=I_strings[c]+" "+M_strings[x&3];
+		// add type 5th bit
+		break;
+	case I_FNC>>6:
+		ass=I_strings[c]+" "+F_strings[x&63];
+		break;
+      }
+      //ass=I_Strings[x&(3<<6)>>6]+" ";
+      System.out.printf("  .%5d %3d %12s %3d %f\n",i,prog[i],ass,pargmem[i],pargD[i]);
+      if (x==I_HLT) System.out.printf("--\n");
+    }
+  }
+
+
   Petspeed(Machine m) {
     using_machine=m;
   }
@@ -572,6 +614,9 @@ class Petspeed
   static final int F_tab=31;
   static final int F_spc=32;
   static final int F_frm=33;
+
+  static String I_strings[]={"PRF","PSH","STO","FNC"}; // just for debugging only
+  static String M_strings[]={"IMM","MEM","MEMARR1","MEMARR2"}; // just for debugging only
 
   static String O_strings[]={"XXXXXX","^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<=","<>","=>"};
   static String F_strings[]={"HLTXXX","sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",

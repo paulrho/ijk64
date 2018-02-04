@@ -745,7 +745,8 @@ boolean ReadStatement() throws BasicException
       case ST_GOSUB: if (ProcessGOSUBstatement()) { return true; } break;
       case ST_RETURN: if (ProcessRETURNstatement()) { return true; } break;
       case ST_PRINT: if (ProcessPRINTstatement()) { return true; } break;
-      case ST_REM: if (ProcessREMstatement()) { return true; } break;
+      case ST_REM: 
+                    if (ProcessREMstatement()) { return true; } break;
       case ST_PRINThash: // because it would have gone elsewhere
         if (ProcessPRINThashstatement()) { return true; } break;
       case ST_FAST:  // I wish - wish true: compiler for expressions!
@@ -1872,8 +1873,13 @@ boolean ProcessREMstatement()
 {
   int fpnt=pnt;
   if (speeder && machine.petspeed.pnext[pnt]>0) {
-    pnt=machine.petspeed.pnext[pnt];
-    if (verbose) System.out.printf("found a cached REM line start pnt=%d\n",pnt);
+	  // dont jump it iff pcache is not zero, we have an empty REM
+    if (machine.petspeed.pcache[pnt]==0) {
+      pnt=machine.petspeed.pnext[pnt];
+      if (verbose) System.out.printf("found a cached REM line start pnt=%d\n",pnt);
+    } else {
+      if (verbose) System.out.printf("straight into new command pnt=%d\n",pnt);
+    }
     return true;
   }
 
@@ -1881,7 +1887,7 @@ boolean ProcessREMstatement()
 
   if (speeder) {
     machine.petspeed.pnext[fpnt]=pnt;
-    if (verbose) System.out.printf("caching a print\n");
+    if (verbose) System.out.printf("caching a REM\n");
   }
   return true;
 }

@@ -1641,6 +1641,8 @@ boolean dontallowunbalancedopeningbracket=true; // here for now
     // to keep the simple numeric expression simple - (like IF xxxx ) then just don't push anything
     if (verbose) { System.out.printf("upto=%d\n",upto); }
     GenericType gt; //only allow list of 
+
+    if (!g_is_assignment) {
     if (stktype[0]==ST_NUM) {
       gt=new GenericType(stknum[0]);
       if (speeder_compile && upto>1) // if it is a singleton - don't bother recording anthing!
@@ -1667,6 +1669,7 @@ boolean dontallowunbalancedopeningbracket=true; // here for now
             using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Str); // flag a string
       }
     }
+    } else gt=null;
     return gt;
     //return stknum[0]; // we cant do this now, we must return maybe a string (even if it is a number)
   }
