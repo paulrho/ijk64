@@ -318,6 +318,7 @@ boolean ReadPart() throws BasicException
         basictimer_thispnt=pnt;
       }
       if (speeder && machine.petspeed.pcache[pnt]>0) {
+	if (verbose) System.out.printf("found a cached line start pnt=%d\n",pnt);
 	int nnn=machine.petspeed.pcache[pnt];
 	if (basictimer) 
           basictimer_thispnt=machine.petspeed.btpnt[pnt];
@@ -663,6 +664,8 @@ if (dofulltiming) startTime2+=System.currentTimeMillis();
         break; // better to put this at the end of the if condition (for speed)
       } else if (partType==PT_TOKEN) {
                                                           if (dofulltiming) { start_timing(TIME_ReadStatement); }
+        /* speeder Opt 10 - chaining */
+        if (speeder) machine.petspeed.lastassign=-1; // invalidate
         if (!ReadStatement()) {
           throw new BasicException("SYNTAX ERROR : BAD TOKEN");
         }
@@ -1279,7 +1282,7 @@ boolean ReadAssign() throws BasicException {
       // just change this one for the moment - try new way
 
     }
-    ReadColon();
+    // help Opt10  for now - dont read this here // ReadColon();
     return true;
 }
 
@@ -1561,6 +1564,7 @@ GenericType PSReadExpressionEvaluate() throws BasicException
      ReadExpression();
      gt=machine.evaluate(keepExpression);
      if (speeder) { machine.petspeed.saveacode(pnt); }
+     if (speeder) machine.petspeed.lastassign=-1; // invalidate // CHECK, is this the best spot for it?
   }
   return gt;
 }
@@ -1601,6 +1605,7 @@ boolean ProcessIFstatement() throws BasicException
     
       gt=machine.evaluate(keepExpression); // so that verbose works
       if (speeder) { machine.petspeed.saveacode(pnt); }
+      if (speeder) machine.petspeed.lastassign=-1; // invalidate // CHECK, is this the best spot for it?
 
 
     if (verbose) { System.out.printf("  evaluates to %s\n",gt.print()); }
