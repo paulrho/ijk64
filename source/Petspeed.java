@@ -2,7 +2,16 @@
 //
 // Petspeed 'er
 // Goes much (26x) faster
+//  now...
+// Goes much (50x) faster (on the fastest machine)
 //
+//       REM skip
+//       next fix
+// Opt09 eliminate param marking on stack for assignment : 10% faster
+// Opt10 chaining : 16-30% faster again
+//      .. todo - i think every jmp should just be a NOP
+// Opt11 NOP, ordered instr -> no increase/decrease - but NOP makes more sense
+// 
 ////////////////////////////////////////////////
 class Petspeed
 {
@@ -26,56 +35,16 @@ class Petspeed
   int []pcache = new int[MAXPSIZE];
   int []btpnt = new int[MAXPSIZE]; // only used for basictimer
 
-  void dumpstate() {
-	  String tmpprog=using_machine.programText+"xxxxxx";
-    System.out.printf("i acpointer acpointer_next pnext pcache btpnt\n");
-    for (int i=0; i<MAXPSIZE; ++i) {
-      if (acpointer[i]!=0 || acpointer_next[i]!=0 || pnext[i]!=0 || pcache[i]!=0 || btpnt[i]!=0) {
-        System.out.printf("  [%5d] %5d %5d %5d %5d %5d  %s\n",
-          i,
-	  acpointer[i],acpointer_next[i],pnext[i],pcache[i],btpnt[i],
-          tmpprog.substring(i,i+6).replace("\n","[CR]").replace(" ","[SPC]")
-	  );
-      }
-    }
-    System.out.printf("acode program\n");
-    for (int i=1; i<top; ++i) {
-      String ass="";
-      int x=prog[i];
-      int c=(x&(3<<6))>>6;
-      switch (c) {
-        case I_PRF>>6:
-		ass=I_strings[c]+" "+O_strings[x&31]+" "+((x&32)>0?"Str ":((x&31)==0?"Dbl ":""));
-		//ass=I_strings[c]+" "+(x&31);
-		// add type 5th bit
-		break;
-	case I_PSH>>6:
-		ass=I_strings[c]+" "+M_strings[x&3]+" "+((x&32)>0?"Str ":"");
-		if ((x&3)!=M_IMM) ass+=using_machine.variables.variablename[pargmem[i]];
-		// add type 5th bit
-		break;
-	case I_STO>>6:
-		ass=I_strings[c]+" "+M_strings[x&3]+" "+((x&32)>0?"Str ":"");
-		if ((x&3)!=M_IMM) ass+=using_machine.variables.variablename[pargmem[i]];
-		// add type 5th bit
-		break;
-	case I_FNC>>6:
-		ass=I_strings[c]+" "+F_strings[x&63];
-		break;
-      }
-      //ass=I_Strings[x&(3<<6)>>6]+" ";
-      System.out.printf("  .%5d %3d %-18s %3d %f\n",i,prog[i],ass,pargmem[i],pargD[i]);
-      if (x==I_HLT) System.out.printf("--\n");
-    }
-  }
 
+  ////////////////////////////////////////////////////////////////
+  //
+  ////////////////////////////////////////////////////////////////
   boolean verbose=false; //shorthand quicker
 
   Petspeed(Machine m) {
     using_machine=m;
   }
   // storing the program
-  int getTop() { return top; }
   int addInstr(int instr) { return addInstr(instr, 0.0,-1, ""); }
   int addInstr(int instr, String argS) { return addInstr(instr, 0.0,-1, argS); }
   int addInstr(int instr, double argD, int argmem) { return addInstr(instr, argD, argmem, ""); }
@@ -88,8 +57,7 @@ class Petspeed
       pargD[tmptop]=argD;
       pargmem[tmptop]=argmem;
       pargS[tmptop]=argS;
-      if (using_machine.verbose) System.out.printf("%d %d %d %f %s\n",tmptop,prog[tmptop],pargmem[tmptop],pargD[tmptop],pargS[tmptop]);
-      //if (instr<0) System.out.printf("-1 INSTRUCTION\n"); // debug FIX
+      if (verbose) System.out.printf("%d %d %d %f %s\n",tmptop,prog[tmptop],pargmem[tmptop],pargD[tmptop],pargS[tmptop]);
       tmptop++;
       return 1;
     } else return 0;
@@ -117,11 +85,13 @@ class Petspeed
 
   int listtop=0;
   GenericType list;
+
   void listadd(double d) {
     if (listtop==0) list=new GenericType(d);
     else list.add(d,20); // hard code 20 for now FIX
     listtop++;
   }
+
   void listadd(String s) {
     if (listtop==0) list=new GenericType(s);
     else list.add(s,20); // hard code 20 for now FIX
@@ -130,6 +100,12 @@ class Petspeed
 
   java.text.SimpleDateFormat localDateFormat = new java.text.SimpleDateFormat("HHmmss"); // for TI$ efficiency
 
+  ///////////////////////////////////////////////////////////////////////
+  //
+  // the executor
+  //
+  //
+  ///////////////////////////////////////////////////////////////////////
   int execute(int x) throws EvaluateException {
     listtop=atop; // extra overhead - want to avoid this if can - FIX
 
@@ -152,12 +128,28 @@ class Petspeed
           if (verbose) System.out.printf("Return parameter %d flagged as a double stack=%d ",listtop,atop);
           listadd(astack_d[listtop]);
 	  break;
-	/*case I_FNC | F_NOP : // special Opt10 - don't really have to do this - just to make it a bit nicer
+	// most common at top
+	case I_FNC | F_NOP : // special Opt10 - don't really have to do this - just to make it a bit nicer
 	  continue;
-	  */
-	case I_FNC | F_JMP : // special Opt10
-	  i=pargmem[i]-1; // goto / jmp
-	  continue;
+	case I_PSH | T_Dbl | M_MEM : 
+	  astack_d[atop++]=using_machine.variables.variablevalue[pargmem[i]];
+	  break;
+	case I_PRF | O_mul : 
+	  astack_d[atop-2]= astack_d[atop-2] * astack_d[atop-1]; atop--;
+	  break;
+	case I_PRF | O_add : 
+	  astack_d[atop-2]= astack_d[atop-2] + astack_d[atop-1]; atop--;
+	  break;
+	case I_PRF | O_sub : 
+	  astack_d[atop-2]= astack_d[atop-2] - astack_d[atop-1]; atop--;
+	  break;
+	case I_PRF | O_div : 
+	  astack_d[atop-2]= astack_d[atop-2] / astack_d[atop-1]; atop--;
+	  break;
+	case I_STO | T_Dbl | M_MEM : 
+	  using_machine.variables.variablevalue[pargmem[i]]=astack_d[--atop];
+	  break;
+
 	case I_FNC | F_sin : 
 	  astack_d[atop-1]= Math.sin(astack_d[atop-1]);
 	  break;
@@ -329,7 +321,7 @@ class Petspeed
 	  astack_d[atop++]= (double)(int)((System.currentTimeMillis()/16.66666666)%1073741824);
 	  break;
 	case I_FNC | F_var_st : 
-	  astack_d[atop++]= 0; // FIX
+	  astack_d[atop++]=using_machine.fileio_ST; using_machine.fileio_ST=0;
 	  break;
 	case I_FNC | F_var_tiD : 
 	  astack_s[atop++]= localDateFormat.format( System.currentTimeMillis());
@@ -347,18 +339,6 @@ class Petspeed
 	  break;
 	case I_PRF | O_neg : 
 	  astack_d[atop-1]= -astack_d[atop-1];
-	  break;
-	case I_PRF | O_mul : 
-	  astack_d[atop-2]= astack_d[atop-2] * astack_d[atop-1]; atop--;
-	  break;
-	case I_PRF | O_add : 
-	  astack_d[atop-2]= astack_d[atop-2] + astack_d[atop-1]; atop--;
-	  break;
-	case I_PRF | O_sub : 
-	  astack_d[atop-2]= astack_d[atop-2] - astack_d[atop-1]; atop--;
-	  break;
-	case I_PRF | O_div : 
-	  astack_d[atop-2]= astack_d[atop-2] / astack_d[atop-1]; atop--;
 	  break;
 	case I_PRF | O_lt : 
 	  astack_d[atop-2]= (astack_d[atop-2] < astack_d[atop-1])?-1:0; atop--;
@@ -379,10 +359,6 @@ class Petspeed
 	case I_PRF | O_ne : 
 	  astack_d[atop-2]= (astack_d[atop-2] != astack_d[atop-1])?-1:0; atop--;
 	  break;
-         //if (oper.equals("or")) { answer=(double)(((int)(left)) | ((int)(right))); }
-    //else if (oper.equals("xor")) { answer=(double)(((int)(left)) ^ ((int)(right))); }
-    //else if (oper.equals("and")) { answer=(double)(((int)(left)) & ((int)(right))); }
-    //else if (oper.equals("not")) { answer=(double)(~(int)(right)); }
 	case I_PRF | O_not : 
 	  astack_d[atop-1]= (double)(~(int)(astack_d[atop-1]));
 	  break;
@@ -435,18 +411,12 @@ class Petspeed
 	case I_PSH | T_Dbl | M_IMM : 
 	  astack_d[atop++]=pargD[i];
 	  break;
-	case I_PSH | T_Dbl | M_MEM : 
-	  astack_d[atop++]=using_machine.variables.variablevalue[pargmem[i]];
-	  break;
 	case I_PSH | T_Dbl | M_MEMARR1 : 
 	  astack_d[atop-1]=using_machine.variables.variablearrayvalue1[pargmem[i]][(int)astack_d[atop-1]];
 	  break;
 	case I_PSH | T_Dbl | M_MEMARR2 : 
 	  astack_d[atop-2]=using_machine.variables.variablearrayvalue2[pargmem[i]][(int)astack_d[atop-2]][(int)astack_d[atop-1]];
           atop--;
-	  break;
-	case I_STO | T_Dbl | M_MEM : 
-	  using_machine.variables.variablevalue[pargmem[i]]=astack_d[--atop];
 	  break;
 	case I_STO | T_Dbl | M_MEMARR1 : 
 	  using_machine.variables.variablearrayvalue1[pargmem[i]][(int)astack_d[atop-2]]=astack_d[atop-1];
@@ -456,6 +426,9 @@ class Petspeed
 	  using_machine.variables.variablearrayvalue2[pargmem[i]][(int)astack_d[atop-3]][(int)astack_d[atop-2]]=astack_d[atop-1];
 	  atop--; atop--; atop--;
 	  break;
+	case I_FNC | F_JMP : // special Opt10
+	  i=pargmem[i]-1; // goto / jmp
+	  continue;
 	default:
           if (verbose) System.out.printf("X ");
           System.out.printf("Instruction Fault at %d instruction %d\n",i,prog[i]);
@@ -485,35 +458,6 @@ class Petspeed
 	  return astack_d[--atop];
   }
 
-  //GenericType resultlist()
-  //{
-    //GenericType gt; 
-	  //// opposite order to pop
-	  //// we need to know the type just assume numbers lists only for now...
-     //for(i=0; i<atop; ++i) {
-     //}
-     //return gt;
-  //}
-
-  //GenericType result() {
-    //if (verbose) { System.out.printf("upto=%d\n",upto); }
-    //GenericType gt; //only allow list of 
-    //if (stktype[0]==ST_NUM) {
-      //gt=new GenericType(stknum[0]);
-    //} else {
-      //if (verbose) { System.out.printf("Returning a string type from evaluate\n"); }
-      //gt=new GenericType(stkstring[0]);
-    //}
-    //// if there are more, add to it
-    //for (int i=1; i<upto; ++i) {
-      //if (stktype[i]==ST_NUM) {
-        //gt.add(stknum[i],upto);
-      //} else {
-        //gt.add(stkstring[i],upto);
-      //}
-    //}
-    //return gt;
-  //}
   //////////////////////////////////////////////////////////////////////
   ///
   //////////////////////////////////////////////////////////////////////
@@ -524,6 +468,7 @@ class Petspeed
   int lastassign=-1; // Opt10
   int lastfinal=-1; // Opt10
   boolean is_compiled(int x) { return acpointer[x]>0; }
+
   void savestart(int x) { 
 	  // if <0 then it is a rejected compile, so dont try to recompile, just nod and carry on...
 	  if (acpointer[x]<0) return;
@@ -532,11 +477,12 @@ class Petspeed
           using_machine.evaluate_engine.speeder_compile=true;
       // probably dont need both record and swith on speeder_compile
   }
+
   void saveelseacode(int then, int end) {
     acpointer_next[then]=end;
   }
-  void saveacode(int end) 
-  {
+
+  void saveacode(int end) {
 	  if (record) {
 	    // push a HLT onto code
 	    addInstr(I_HLT); 
@@ -544,7 +490,7 @@ class Petspeed
 	    acpointer_next[savestart_p]=end;
 	    // this is now marked as a valid piece of code
 	    top=tmptop;
-            if (using_machine.verbose) System.out.printf("Saved code from %d to %d for location %d\n",savestart_ac,top,savestart_p);
+            if (verbose) System.out.printf("Saved code from %d to %d for location %d\n",savestart_ac,top,savestart_p);
 	    record=false;
             using_machine.evaluate_engine.speeder_compile=false;
 	    // Opt10
@@ -556,11 +502,11 @@ class Petspeed
                 if (pcache[p]==1 /* assign */ && pnext[p]==savestart_p) {
                   if (verbose) System.out.printf("We can chain!\n");
                   if (verbose) System.out.printf("want to change %d from HLT to GOTO %d\n",lastfinal,savestart_ac);
-		  /*if (lastfinal+1==savestart_ac) {
+		  if (lastfinal+1==savestart_ac) {
                     prog[lastfinal]=I_FNC|F_NOP; // dont have to - but just to make it look a bit nicer
-		  } else {*/
+		  } else {
                     prog[lastfinal]=I_FNC|F_JMP; pargmem[lastfinal]=savestart_ac;
-		  /*}*/
+		  }
 		  acpointer_next[lastassign]=end; // combine
 	          lastfinal=top-1;
 		  return; // because we want to keep last assign at the original one!
@@ -573,12 +519,59 @@ class Petspeed
 	  }
   }
 
-  void reject()
-  {
+  void reject() {
     acpointer[savestart_p]=-1; // don't try to run acode or recompile this
     record=false;
     using_machine.evaluate_engine.speeder_compile=false;
     lastassign=-1; //Opt10
+  }
+
+  //////////////////////////////////////////////////////////////
+  //
+  // debugging
+  //
+  //////////////////////////////////////////////////////////////
+  void dumpstate() {
+	  String tmpprog=using_machine.programText+"xxxxxx";
+    System.out.printf("i acpointer acpointer_next pnext pcache btpnt\n");
+    for (int i=0; i<MAXPSIZE; ++i) {
+      if (acpointer[i]!=0 || acpointer_next[i]!=0 || pnext[i]!=0 || pcache[i]!=0 || btpnt[i]!=0) {
+        System.out.printf("  [%5d] %5d %5d %5d %5d %5d  %s\n",
+          i,
+	  acpointer[i],acpointer_next[i],pnext[i],pcache[i],btpnt[i],
+          tmpprog.substring(i,i+6).replace("\n","[CR]").replace(" ","[SPC]")
+	  );
+      }
+    }
+    System.out.printf("acode program\n");
+    for (int i=1; i<top; ++i) {
+      String ass="";
+      int x=prog[i];
+      int c=(x&(3<<6))>>6;
+      switch (c) {
+        case I_PRF>>6:
+		ass=I_strings[c]+" "+O_strings[x&31]+" "+((x&32)>0?"Str ":((x&31)==0?"Dbl ":""));
+		//ass=I_strings[c]+" "+(x&31);
+		// add type 5th bit
+		break;
+	case I_PSH>>6:
+		ass=I_strings[c]+" "+M_strings[x&3]+" "+((x&32)>0?"Str ":"");
+		if ((x&3)!=M_IMM) ass+=using_machine.variables.variablename[pargmem[i]];
+		// add type 5th bit
+		break;
+	case I_STO>>6:
+		ass=I_strings[c]+" "+M_strings[x&3]+" "+((x&32)>0?"Str ":"");
+		if ((x&3)!=M_IMM) ass+=using_machine.variables.variablename[pargmem[i]];
+		// add type 5th bit
+		break;
+	case I_FNC>>6:
+		ass=I_strings[c]+" "+F_strings[x&63];
+		break;
+      }
+      //ass=I_Strings[x&(3<<6)>>6]+" ";
+      System.out.printf("  .%5d %3d %-18s %3d %f\n",i,prog[i],ass,pargmem[i],pargD[i]);
+      if (x==I_HLT) System.out.printf("--\n");
+    }
   }
 
   // Instruction Type Mode Operation Function
@@ -653,8 +646,8 @@ class Petspeed
   static final int F_tab=31;
   static final int F_spc=32;
   static final int F_frm=33;
-  static final int F_JMP=34;
-  /*static final int F_NOP=35;*/
+  static final int F_NOP=34;
+  static final int F_JMP=35;
 
   static String I_strings[]={"PRF","PSH","STO","FNC"}; // just for debugging only
   static String M_strings[]={"IMM","MEM","MEMARR1","MEMARR2"}; // just for debugging only
@@ -663,7 +656,7 @@ class Petspeed
   static String F_strings[]={"HLT___","sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",
 	                     "len","val","asc","mid$","left$","right$","str$","chr$","instr",
                              "ti","st","ti$","mathpi",
-                             "peek","fre","pos","tab","spc","frm","JMP___"/*,"NOP___"*/};
+                             "peek","fre","pos","tab","spc","frm","NOP___","JMP___"};
   //enum { I_PRF, I_PSH, I_STO, I_FNC, I_HLT };           //0..5  (3 bits)
 
   // enum { T_Dbl, T_Str };                                //0..1  (1 bit)
