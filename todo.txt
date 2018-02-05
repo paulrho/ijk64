@@ -27,3 +27,8 @@ update LSET and others to go on both backing screens
 
 interesting...
 dump in acode and ainstructioncode format the whole execution compilation
+
+
+DOC
+profiling:
+java -agentlib:hprof=cpu=samples,depth=100,interval=5,lineno=y,thread=y,file=out.hprof -jar C64.jar -z m.basic -r -x

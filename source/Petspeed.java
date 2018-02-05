@@ -69,6 +69,7 @@ class Petspeed
     }
   }
 
+  boolean verbose=false; //shorthand quicker
 
   Petspeed(Machine m) {
     using_machine=m;
@@ -81,6 +82,7 @@ class Petspeed
   int addInstr(int instr, double argD) { return addInstr(instr, argD, -1, ""); }
   int addInstr(int instr, int argmem)  { return addInstr(instr, 0.0, argmem, ""); }
   int addInstr(int instr, double argD, int argmem, String argS) {
+    verbose=using_machine.verbose; //better spot -moreeffecient
     if (record) {
       prog[tmptop]=instr;
       pargD[tmptop]=argD;
@@ -130,10 +132,9 @@ class Petspeed
 
   int execute(int x) throws EvaluateException {
     listtop=atop; // extra overhead - want to avoid this if can - FIX
-    boolean verbose=using_machine.verbose;
 
     try { // safety catch!
-    for (int i=acpointer[x]; i<MAX; ++i) {
+    for (int i=acpointer[x]; /* i<MAX*/true; ++i) {
       //if (prog[i]==I_HLT) break;
       if (verbose) System.out.printf("EXECUTING %d %d %d %f %s  ",i,prog[i],pargmem[i],pargD[i],pargS[i]);
       switch(prog[i]) {
@@ -141,6 +142,7 @@ class Petspeed
           if (verbose) System.out.printf("\n");
 	  if (listtop==0 && atop!=0 && atop!=1) System.out.printf("atop not at zero or one (%d)\n",atop);
 	  if (verbose && listtop>0) { System.out.printf("pushed %d onto gt list\n",listtop); }
+	  //if (verbose) { System.out.printf("about to return nextpnt(x)= %d\n",nextpnt(x)); }
 	  return nextpnt(x);
 	case I_PRF | T_Str :
           if (verbose) System.out.printf("Return parameter %d flagged as a string stack=%d ",listtop,atop);
@@ -150,6 +152,12 @@ class Petspeed
           if (verbose) System.out.printf("Return parameter %d flagged as a double stack=%d ",listtop,atop);
           listadd(astack_d[listtop]);
 	  break;
+	/*case I_FNC | F_NOP : // special Opt10 - don't really have to do this - just to make it a bit nicer
+	  continue;
+	  */
+	case I_FNC | F_JMP : // special Opt10
+	  i=pargmem[i]-1; // goto / jmp
+	  continue;
 	case I_FNC | F_sin : 
 	  astack_d[atop-1]= Math.sin(astack_d[atop-1]);
 	  break;
@@ -468,7 +476,7 @@ class Petspeed
       }
     
     //return nextpnt(x); // we've gone off the end
-    return -1;
+    // return -1; // don't get here now as we let it blow the array (catch will get it)
   }
 
   double result()
@@ -513,6 +521,8 @@ class Petspeed
   int nextpnt(int x) { return acpointer_next[x]; }
   int savestart_p=0;
   int savestart_ac=0;
+  int lastassign=-1; // Opt10
+  int lastfinal=-1; // Opt10
   boolean is_compiled(int x) { return acpointer[x]>0; }
   void savestart(int x) { 
 	  // if <0 then it is a rejected compile, so dont try to recompile, just nod and carry on...
@@ -537,6 +547,29 @@ class Petspeed
             if (using_machine.verbose) System.out.printf("Saved code from %d to %d for location %d\n",savestart_ac,top,savestart_p);
 	    record=false;
             using_machine.evaluate_engine.speeder_compile=false;
+	    // Opt10
+	    // opt10
+	    // have a look to see if you can chain this
+	    if (lastassign>=0) {
+              int p=acpointer_next[lastassign];
+	      if (p>=0) {
+                if (pcache[p]==1 /* assign */ && pnext[p]==savestart_p) {
+                  if (verbose) System.out.printf("We can chain!\n");
+                  if (verbose) System.out.printf("want to change %d from HLT to GOTO %d\n",lastfinal,savestart_ac);
+		  /*if (lastfinal+1==savestart_ac) {
+                    prog[lastfinal]=I_FNC|F_NOP; // dont have to - but just to make it look a bit nicer
+		  } else {*/
+                    prog[lastfinal]=I_FNC|F_JMP; pargmem[lastfinal]=savestart_ac;
+		  /*}*/
+		  acpointer_next[lastassign]=end; // combine
+	          lastfinal=top-1;
+		  return; // because we want to keep last assign at the original one!
+		}
+	      }
+	    }
+
+	    lastassign=savestart_p;
+	    lastfinal=top-1;
 	  }
   }
 
@@ -545,6 +578,7 @@ class Petspeed
     acpointer[savestart_p]=-1; // don't try to run acode or recompile this
     record=false;
     using_machine.evaluate_engine.speeder_compile=false;
+    lastassign=-1; //Opt10
   }
 
   // Instruction Type Mode Operation Function
@@ -619,15 +653,17 @@ class Petspeed
   static final int F_tab=31;
   static final int F_spc=32;
   static final int F_frm=33;
+  static final int F_JMP=34;
+  /*static final int F_NOP=35;*/
 
   static String I_strings[]={"PRF","PSH","STO","FNC"}; // just for debugging only
   static String M_strings[]={"IMM","MEM","MEMARR1","MEMARR2"}; // just for debugging only
 
   static String O_strings[]={"XPARAMX","^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<=","<>","=>"};
-  static String F_strings[]={"HLTXXX","sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",
+  static String F_strings[]={"HLT___","sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",
 	                     "len","val","asc","mid$","left$","right$","str$","chr$","instr",
                              "ti","st","ti$","mathpi",
-                             "peek","fre","pos","tab","spc","frm"};
+                             "peek","fre","pos","tab","spc","frm","JMP___"/*,"NOP___"*/};
   //enum { I_PRF, I_PSH, I_STO, I_FNC, I_HLT };           //0..5  (3 bits)
 
   // enum { T_Dbl, T_Str };                                //0..1  (1 bit)
