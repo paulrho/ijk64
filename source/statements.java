@@ -1943,6 +1943,7 @@ boolean ProcessGETstatement() throws BasicException
   ReadExpression();
   if (verbose) { System.out.printf("getting to %s\n",keepExpression); }
   String got=machine.getkey();
+  //String got=machine.machinescreen.givemefastkey();
   if (verbose) { System.out.printf("got string \"%s\"\n",got); }
   // it a string so keep it quoted
   //machine.assignment(keepExpression.toLowerCase()+"="+"\""+got.toLowerCase()+"\"");

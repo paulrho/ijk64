@@ -153,6 +153,7 @@ public class Machine {
 
   boolean speeder=false;
   Petspeed petspeed=null;
+  boolean ksfast=false;
 
   public void initialise_machine() {
     if (verbose) { System.out.printf("Initialising machine\n"); }
@@ -783,7 +784,9 @@ public class Machine {
     if (memloc==40000) {
       PlaySound a = new PlaySound("test.wav");
     } else if (memloc==198) {
-      // clear the key buffer if you get this
+      // clear the key buffer if you get this // FIX
+    } else if (memloc==199) { // ijk64 special - switch to fast mode
+      ksfast=(memval>0)?true:false;
     } else if (memloc==53281) {
       // background
       // if it is already set - dont do it again (expensive!)
@@ -884,6 +887,7 @@ public class Machine {
   }
 /* for now -slow down a geta$ - will do a givemekey which has a sleep in it*/
   String getkey() {
+    if (ksfast) return machinescreen.givemefastkey();
     machinescreen.slowinput();
     if (machinescreen.hasinput()) {
       return ""+machinescreen.givemekey();
@@ -1830,6 +1834,9 @@ void chewcr() {
     // fix me!!!!
     // now done in variables_clr
     //if (speeder) petspeed=new Petspeed(this); // just for now just respawn the lot!
+
+    ksfast=false; // reset this!!
+
     statements.speeder=speeder; // return to original state
     new statements(programText, this); // passing along the machine too
     program_saved_executionpoint=save_executionpoint; // only done on running a program
