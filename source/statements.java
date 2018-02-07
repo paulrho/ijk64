@@ -367,7 +367,7 @@ if (dofulltiming) { end_timing(TIME_ReadLineNo); }
 	if (speeder) {
           machine.petspeed.pcache[fpnt]=gotToken+2;
 	  if (basictimer) 
-            machine.petspeed.btpnt[fpnt]=basictimer_thispnt;
+            machine.petspeed.btpnt[fpnt]=skip_spaces(basictimer_thispnt);
           machine.petspeed.pnext[fpnt]=pnt;
 	  if (verbose) System.out.printf("caching a print\n");
 	}
@@ -392,7 +392,7 @@ if (dofulltiming) { end_timing(TIME_ReadStatementToken); }
 	  if (speeder) {
             machine.petspeed.pcache[fpnt]=gotToken+2;
 	    if (basictimer) 
-              machine.petspeed.btpnt[fpnt]=basictimer_thispnt;
+              machine.petspeed.btpnt[fpnt]=skip_spaces(basictimer_thispnt);
             machine.petspeed.pnext[fpnt]=pnt;
 	    if (verbose) System.out.printf("caching a token\n");
 	  }
@@ -405,7 +405,7 @@ if (dofulltiming) { end_timing(TIME_ReadStatementToken); }
 	  if (speeder) {
             machine.petspeed.pcache[fpnt]=1;
 	    if (basictimer) 
-              machine.petspeed.btpnt[fpnt]=basictimer_thispnt;
+              machine.petspeed.btpnt[fpnt]=skip_spaces(basictimer_thispnt);
             machine.petspeed.pnext[fpnt]=pnt;
 	    if (verbose) System.out.printf("caching an assign\n");
 	  }
@@ -417,8 +417,10 @@ if (dofulltiming) { end_timing(TIME_ReadStatementToken); }
         pnt++;
       } else if (a.equals(":")) {
         pnt++; 
+        if (basictimer) basictimer_thispnt=pnt; // I think here too
       } else if (a.equals(" ")) { // or TAB
         pnt++; // no, chew it up
+        if (basictimer) basictimer_thispnt=pnt; // I think here too
       } else {
         // we have found something that finished the sequence
         // we have NO idea what is this!
@@ -583,12 +585,20 @@ void doBasicTimer(boolean finalprint) {
         }
       }
       int pnt_tmp=basictimer_thispnt;
+      // this should need to happen now:
       while (pnt_tmp<linelength && line.substring(pnt_tmp,pnt_tmp+1).equals(" ")) { pnt_tmp++; }
       basictimer_lastpnt=pnt_tmp;
       basictimer_lasttime=timenow;
     }
 }
 
+// only in compilation
+int skip_spaces(int t) {
+	return t; // I think this is no longer required?
+      //int pnt_tmp=t;
+      //while (pnt_tmp<linelength && line.substring(pnt_tmp,pnt_tmp+1).equals(" ")) { pnt_tmp++; }
+      //return pnt_tmp;
+}
 
 void interpret_string(String passed_line, int startat, String lineNo)
 {
@@ -649,6 +659,7 @@ if (dofulltiming) startTime2+=System.currentTimeMillis();
       }
       //machine.dutyCycle(); 
     }
+      if (verbose) System.out.printf("At %d in interpret_string\n",pnt);
 
     // change order to see if CONT will work now
                                                           if (dofulltiming) { start_timing(TIME_ReadPart); }
