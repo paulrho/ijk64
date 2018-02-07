@@ -1,1 +1,2 @@
-cp -p jar/ijk64.jar latest/C64.jar && git add source jar latest run javadocs build.xml
+cp -p jar/ijk64.jar latest/C64.jar && git add source jar latest run javadocs build.xml todo.txt
+cp -p latest/C64.jar /home/pi/C64/C64.jar
