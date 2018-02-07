@@ -53,9 +53,9 @@
       target="1.4"
     -->
     <javac includeantruntime="false" srcdir="${source}" destdir="${build}"
-      debug="true" debuglevel="lines,vars,source"
-      source="1.5"
-      target="1.5"
+      debug="false" debuglevel="lines,vars,source"
+      source="1.8"
+      target="1.8"
     />
   </target>
 

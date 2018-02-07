@@ -112,7 +112,7 @@ class Petspeed
     try { // safety catch!
     for (int i=acpointer[x]; /* i<MAX*/true; ++i) {
       //if (prog[i]==I_HLT) break;
-      if (verbose) System.out.printf("EXECUTING %d %d %d %f %s  ",i,prog[i],pargmem[i],pargD[i],pargS[i]);
+      if (verbose) System.out.printf("\nEXECUTING %d %d %d %f %s  ",i,prog[i],pargmem[i],pargD[i],pargS[i]);
       switch(prog[i]) {
         case I_HLT: 
           if (verbose) System.out.printf("\n");
@@ -133,22 +133,26 @@ class Petspeed
 	  continue;
 	case I_PSH | T_Dbl | M_MEM : 
 	  astack_d[atop++]=using_machine.variables.variablevalue[pargmem[i]];
-	  break;
+	  continue;
 	case I_PRF | O_mul : 
-	  astack_d[atop-2]= astack_d[atop-2] * astack_d[atop-1]; atop--;
-	  break;
+	  //astack_d[atop-2]= astack_d[atop-2] * astack_d[atop-1]; atop--;
+	  astack_d[--atop-1]*= astack_d[atop];
+	  continue;
 	case I_PRF | O_add : 
-	  astack_d[atop-2]= astack_d[atop-2] + astack_d[atop-1]; atop--;
-	  break;
+	  //astack_d[atop-2]= astack_d[atop-2] + astack_d[atop-1]; atop--;
+	  astack_d[--atop-1]+= astack_d[atop];
+	  continue;
 	case I_PRF | O_sub : 
-	  astack_d[atop-2]= astack_d[atop-2] - astack_d[atop-1]; atop--;
-	  break;
+	  //astack_d[atop-2]= astack_d[atop-2] - astack_d[atop-1]; atop--;
+	  astack_d[--atop-1]-= astack_d[atop];
+	  continue;
 	case I_PRF | O_div : 
-	  astack_d[atop-2]= astack_d[atop-2] / astack_d[atop-1]; atop--;
-	  break;
+	  //astack_d[atop-2]= astack_d[atop-2] / astack_d[atop-1]; atop--;
+	  astack_d[--atop-1]/= astack_d[atop];
+	  continue;
 	case I_STO | T_Dbl | M_MEM : 
 	  using_machine.variables.variablevalue[pargmem[i]]=astack_d[--atop];
-	  break;
+	  continue;
 
 	case I_FNC | F_sin : 
 	  astack_d[atop-1]= Math.sin(astack_d[atop-1]);
@@ -435,9 +439,8 @@ class Petspeed
 	  // should through an error! Instruction Fault
           throw new EvaluateException("INSTRUCTION FAULT");              
 	  //break;
-      }
-      if (verbose) System.out.printf("\n");
-    }
+      } // case
+    } // for
       } catch (ArrayIndexOutOfBoundsException e) { 
         e.printStackTrace();
         throw new EvaluateException("ILLEGAL QUANTITIY");              
