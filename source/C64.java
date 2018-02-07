@@ -99,7 +99,8 @@ class C64 {
 
   public C64(String args[]) {
     boolean runImmediate=false;
-    boolean speeder=false;
+    //boolean speeder=false;
+    boolean speeder=true;
     boolean specialGOTO=false;
     boolean exitImmediate=false;
 
@@ -117,6 +118,8 @@ class C64 {
     boolean blankscreen=false;
     String filename="";
     String specialcommand="";
+    String cloudNet="";
+    int screendeco=0;
 
     for (int i=0; i<args.length; ++i) {
       if (args[i].length()>=2 && args[i].substring(0,1).equals("-")) {
@@ -142,9 +145,14 @@ class C64 {
           System.out.printf("  -x : exit immediately\n");
           System.out.printf("  -2 : double size\n");
           System.out.printf("  -3 : triple size\n");
-          System.out.printf("  -z : petspeed\n");
+          System.out.printf("  -z : petspeed [default]\n");  // make this the default
+          System.out.printf("  --slow  : no petspeed\n");  // make this the default
+          System.out.printf("  --https : use https for cloud\n");  // make this the default
+          System.out.printf("  --black : white on black on black\n");  // make this the default
         } else if (args[i].substring(0,2).equals("-b")) {
           blankscreen=true;
+        } else if (args[i].equals("--black")) {
+          blankscreen=true; screendeco=1;
         } else if (args[i].substring(0,2).equals("-n")) {
           C64Screen.static_handles=false;
         } else if (args[i].substring(0,2).equals("-t")) {
@@ -153,6 +161,10 @@ class C64 {
           exitImmediate=true;
         } else if (args[i].substring(0,2).equals("-z")) {
           speeder=true;
+        } else if (args[i].equals("--slow")) {
+          speeder=false;
+        } else if (args[i].equals("--https")) {
+          cloudNet="https://futex.com.au";
         } else if (args[i].substring(0,2).equals("-2")) {
           C64Screen.static_scale=2;
         } else if (args[i].substring(0,2).equals("-3")) {
@@ -160,7 +172,7 @@ class C64 {
           C64Screen.static_scale=3;
         } else if (args[i].substring(0,2).equals("-c")) {
           //screen.setLocationRelativeTo(null); 
-          C64Screen.static_centre=true;
+          C64Screen.static_centre=true; // make this the default ?? FIX
         }
       } else {
         if (args[i].length()>=1 && !args[i].substring(0,1).equals("-")) {
@@ -172,7 +184,8 @@ class C64 {
 //    machine=new Machine(screen=new C64Screen("C64")); // new way of attaching screen
     machine=new Machine(screen=new C64Screen("ijk64")); // new way of attaching screen
     machine.switchSpeeder(speeder);
-    C64Screen.static_centre=false;
+    if (!cloudNet.equals("")) machine.cloudNet=cloudNet;
+    C64Screen.static_centre=false; // is this right CHECK
     C64PopupMenu pop=new C64PopupMenu(machine,screen); // keep a reference to it for returning things
 
     // post initialise
@@ -190,7 +203,11 @@ class C64 {
   
     //machine.runOS // gets a line and executes it (including running program)
 
-    if (!blankscreen) screen.startupscreen(); else screen.startupscreen_blank();
+    if (screendeco==1)
+      screen.startupscreen(0,0,1,blankscreen);
+    else {
+      if (!blankscreen) screen.startupscreen(); else screen.startupscreen_blank();
+    }
     for (int i=0; i<args.length; ++i) 
       if (args[i].length()>=1 && !args[i].substring(0,1).equals("-")) {
         filename=args[i];

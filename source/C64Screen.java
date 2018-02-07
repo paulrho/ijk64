@@ -2363,6 +2363,19 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
     return rets;
   }
 
+  public void startupscreen(int fg, int bg, int cc, boolean starttext) {
+    setcursColour((short)cc);
+    backgroundColour = fullcolour[fg];
+    borderColour = fullcolour[bg];
+    clearscreen();
+    reshapeScreen();            // just to see - this is a dodgy work around!!! when changing background or border colours, must reshape screen
+    if (!starttext) {
+      println("");
+      println(" **** c=64 approximator basic v2ae ****");
+      println("");
+      println(" java ram system  many basic bytes free");
+    }
+  }
   public void startupscreen_blank() {
     setcursColour("LIGHT BLUE"); // now done here
     backgroundColour = fullcolour[6];
