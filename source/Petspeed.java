@@ -41,8 +41,11 @@ class Petspeed
   ////////////////////////////////////////////////////////////////
   boolean verbose=false; //shorthand quicker
 
+  double []vv;
+
   Petspeed(Machine m) {
     using_machine=m;
+    vv=using_machine.variables.variablevalue;
   }
   // storing the program
   int addInstr(int instr) { return addInstr(instr, 0.0,-1, ""); }
@@ -115,9 +118,11 @@ class Petspeed
       if (verbose) System.out.printf("\nEXECUTING %d %d %d %f %s  ",i,prog[i],pargmem[i],pargD[i],pargS[i]);
       switch(prog[i]) {
         case I_HLT: 
-          if (verbose) System.out.printf("\n");
+          if (verbose) {
+            System.out.printf("\n");
+	    if (verbose && listtop>0) { System.out.printf("pushed %d onto gt list\n",listtop); }
+	  }
 	  if (listtop==0 && atop!=0 && atop!=1) System.out.printf("atop not at zero or one (%d)\n",atop);
-	  if (verbose && listtop>0) { System.out.printf("pushed %d onto gt list\n",listtop); }
 	  //if (verbose) { System.out.printf("about to return nextpnt(x)= %d\n",nextpnt(x)); }
 	  return nextpnt(x);
 	case I_PRF | T_Str :
@@ -132,7 +137,8 @@ class Petspeed
 	case I_FNC | F_NOP : // special Opt10 - don't really have to do this - just to make it a bit nicer
 	  continue;
 	case I_PSH | T_Dbl | M_MEM : 
-	  astack_d[atop++]=using_machine.variables.variablevalue[pargmem[i]];
+	  //astack_d[atop++]=using_machine.variables.variablevalue[pargmem[i]];
+	  astack_d[atop++]=vv[pargmem[i]];
 	  continue;
 	case I_PRF | O_mul : 
 	  //astack_d[atop-2]= astack_d[atop-2] * astack_d[atop-1]; atop--;
@@ -151,7 +157,8 @@ class Petspeed
 	  astack_d[--atop-1]/= astack_d[atop];
 	  continue;
 	case I_STO | T_Dbl | M_MEM : 
-	  using_machine.variables.variablevalue[pargmem[i]]=astack_d[--atop];
+	  //using_machine.variables.variablevalue[pargmem[i]]=astack_d[--atop];
+	  vv[pargmem[i]]=astack_d[--atop];
 	  continue;
 
 	case I_FNC | F_sin : 
