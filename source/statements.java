@@ -1569,7 +1569,9 @@ GenericType PSReadExpressionEvaluate() throws BasicException
          // jump the pointer
        } catch (EvaluateException e) { throw new BasicException(e.getMessage()); }
        gt= machine.petspeed.list; // not reentrant - FIX
-       machine.petspeed.atop-=machine.petspeed.listtop;
+       
+       //machine.petspeed.atop-=machine.petspeed.listtop; // no longer required? CHECK
+       
   } else {
      if (speeder) { machine.petspeed.savestart(pnt); }
      ReadExpression();

@@ -84,25 +84,26 @@ class Petspeed
   static final int AMAX=100;
   double astack_d[]=new double[AMAX];
   String astack_s[]=new String[AMAX];
-  int atop=0;
+  int gatop=0; // no advantage byte - does an extra i2b
 
-  int listtop=0;
+  //int listtop=0; // no advantage byte - does an extra i2b
   GenericType list;
 
   void listadd(double d) {
-    if (listtop==0) list=new GenericType(d);
+    if (gatop==0) list=new GenericType(d);
     else list.add(d,20); // hard code 20 for now FIX
-    listtop++;
+    gatop++;
   }
 
   void listadd(String s) {
-    if (listtop==0) list=new GenericType(s);
+    if (gatop==0) list=new GenericType(s);
     else list.add(s,20); // hard code 20 for now FIX
-    listtop++;
+    gatop++;
   }
 
   java.text.SimpleDateFormat localDateFormat = new java.text.SimpleDateFormat("HHmmss"); // for TI$ efficiency
 
+  // FIX could replace listtop by gatop
   ///////////////////////////////////////////////////////////////////////
   //
   // the executor
@@ -110,7 +111,8 @@ class Petspeed
   //
   ///////////////////////////////////////////////////////////////////////
   int execute(int x) throws EvaluateException {
-    listtop=atop; // extra overhead - want to avoid this if can - FIX
+    int atop=gatop;
+    //listtop=atop; // extra overhead - want to avoid this if can - FIX
 
     try { // safety catch!
     for (int i=acpointer[x]; /* i<MAX*/true; ++i) {
@@ -120,22 +122,26 @@ class Petspeed
         case I_HLT: 
           if (verbose) {
             System.out.printf("\n");
-	    if (verbose && listtop>0) { System.out.printf("pushed %d onto gt list\n",listtop); }
+	    if (verbose && gatop>0) { System.out.printf("pushed %d onto gt list\n",gatop); }
 	  }
-	  if (listtop==0 && atop!=0 && atop!=1) System.out.printf("atop not at zero or one (%d)\n",atop);
+	  if (gatop==0 && atop!=0 && atop!=1) System.out.printf("atop not at zero or one (%d)\n",atop);
 	  //if (verbose) { System.out.printf("about to return nextpnt(x)= %d\n",nextpnt(x)); }
+	  gatop=atop-gatop; //? CHECK
 	  return nextpnt(x);
 	case I_PRF | T_Str :
-          if (verbose) System.out.printf("Return parameter %d flagged as a string stack=%d ",listtop,atop);
-          listadd(astack_s[listtop]);
+          if (verbose) System.out.printf("Return parameter %d flagged as a string stack=%d ",gatop,atop);
+          listadd(astack_s[gatop]);
 	  break;
 	case I_PRF | T_Dbl :
-          if (verbose) System.out.printf("Return parameter %d flagged as a double stack=%d ",listtop,atop);
-          listadd(astack_d[listtop]);
+          if (verbose) System.out.printf("Return parameter %d flagged as a double stack=%d ",gatop,atop);
+          listadd(astack_d[gatop]);
 	  break;
 	// most common at top
 	case I_FNC | F_NOP : // special Opt10 - don't really have to do this - just to make it a bit nicer
 	  continue;
+	case I_PSH | T_Dbl | M_IMM : 
+	  astack_d[atop++]=pargD[i];
+	  break;
 	case I_PSH | T_Dbl | M_MEM : 
 	  //astack_d[atop++]=using_machine.variables.variablevalue[pargmem[i]];
 	  astack_d[atop++]=vv[pargmem[i]];
@@ -232,6 +238,7 @@ class Petspeed
             astack_s[atop-2]=String.format(astack_s[atop-2],astack_d[atop-1]);
 	    atop--;
           } catch(Exception e) {
+	    gatop=atop;
             throw new EvaluateException("BAD FORMAT");              
           }
 	  break;
@@ -246,6 +253,7 @@ class Petspeed
 	      atop--;
 	    }
           } catch(Exception e) {
+	    gatop=atop;
             throw new EvaluateException("BAD SUBSTRING INDEX");              
           }
 	  break;
@@ -266,6 +274,7 @@ class Petspeed
 	    astack_s[atop-2]=astack_s[atop-2].substring(astack_s[atop-2].length()-(int)astack_d[atop-1]);
 	    atop--;
           } catch(Exception e) {
+	    gatop=atop;
             throw new EvaluateException("BAD SUBSTRING INDEX");              
           }
 	  break;
@@ -281,6 +290,7 @@ class Petspeed
           try {          
 	    astack_d[atop-1]=astack_s[atop-1].length();
           } catch(Exception e) {
+	    gatop=atop;
             throw new EvaluateException("BAD SUBSTRING INDEX");              
           }
 	  break;
@@ -297,7 +307,10 @@ class Petspeed
 
 	case I_FNC | F_asc : 
 	  {
-            if (astack_s[atop-1]=="") throw new EvaluateException("ILLEGAL QUANTITY");
+            if (astack_s[atop-1]=="") {
+	      gatop=atop;
+              throw new EvaluateException("ILLEGAL QUANTITY");
+	    }
             int v=(int)((astack_s[atop-1].charAt(0))&0xFF);
             if (v>=65&&v<=90) v+=128; 
             else if (v>=65&&v<=90) v+=32;
@@ -419,9 +432,6 @@ class Petspeed
 	  atop--; atop--; atop--;
 	  break;
 
-	case I_PSH | T_Dbl | M_IMM : 
-	  astack_d[atop++]=pargD[i];
-	  break;
 	case I_PSH | T_Dbl | M_MEMARR1 : 
 	  astack_d[atop-1]=using_machine.variables.variablearrayvalue1[pargmem[i]][(int)astack_d[atop-1]];
 	  break;
@@ -444,17 +454,20 @@ class Petspeed
           if (verbose) System.out.printf("X ");
           System.out.printf("Instruction Fault at %d instruction %d\n",i,prog[i]);
 	  // should through an error! Instruction Fault
+	  gatop=atop;
           throw new EvaluateException("INSTRUCTION FAULT");              
 	  //break;
       } // case
     } // for
       } catch (ArrayIndexOutOfBoundsException e) { 
         e.printStackTrace();
+	gatop=atop;
         throw new EvaluateException("ILLEGAL QUANTITIY");              
       } catch(Exception e) {
 	//System.out.println(e.getMessage());
 	e.printStackTrace();
 	System.out.println(e);
+	gatop=atop;
         throw new EvaluateException("EXECUTE ERROR");              
       }
     
@@ -465,7 +478,7 @@ class Petspeed
   double result()
   {
     // just pop the last result
-	  return astack_d[--atop];
+	  return astack_d[--gatop];
   }
 
   //////////////////////////////////////////////////////////////////////
