@@ -112,6 +112,7 @@ class Petspeed
   ///////////////////////////////////////////////////////////////////////
   int execute(int x) throws EvaluateException {
     int atop=gatop;
+    if (atop!=0) throw new EvaluateException("STACK CREEP");
     //listtop=atop; // extra overhead - want to avoid this if can - FIX
 
     try { // safety catch!
@@ -450,6 +451,15 @@ class Petspeed
 	case I_FNC | F_JMP : // special Opt10
 	  i=pargmem[i]-1; // goto / jmp
 	  continue;
+	  /**
+	case I_FNC | F_JSR :
+	  astack_d[atop++]=i+1; // push next pc // better to be int
+	  i=pargmem[i]-1; // goto / jmp
+	  continue;
+	case I_FNC | F_RTN : // special Opt10
+	  i=(int)astack_d[--atop]; // pop the pc // better to be int
+	  continue;
+	   **/
 	default:
           if (verbose) System.out.printf("X ");
           System.out.printf("Instruction Fault at %d instruction %d\n",i,prog[i]);
@@ -671,6 +681,8 @@ class Petspeed
   static final int F_frm=33;
   static final int F_NOP=34;
   static final int F_JMP=35;
+  //static final int F_JSR=36;
+  //static final int F_RTN=37;
 
   static String I_strings[]={"PRF","PSH","STO","FNC"}; // just for debugging only
   static String M_strings[]={"IMM","MEM","MEMARR1","MEMARR2"}; // just for debugging only
@@ -679,7 +691,7 @@ class Petspeed
   static String F_strings[]={"HLT___","sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",
 	                     "len","val","asc","mid$","left$","right$","str$","chr$","instr",
                              "ti","st","ti$","mathpi",
-                             "peek","fre","pos","tab","spc","frm","NOP___","JMP___"};
+                             "peek","fre","pos","tab","spc","frm","NOP___","JMP___" /*,"JSR___","RTN___" */ };
   //enum { I_PRF, I_PSH, I_STO, I_FNC, I_HLT };           //0..5  (3 bits)
 
   // enum { T_Dbl, T_Str };                                //0..1  (1 bit)
