@@ -1,3 +1,4 @@
+9 forpp=1to5:rem for petspeeder
 100 print"(clr)";
 110 x=5
 120 ifx=5thenprint"yes120 ";
@@ -16,6 +17,7 @@
 330 ifx=5then350
 340 print"no340"
 350 print"yes350 ";
+999 nextpp
 4100 data"yes120 yes130 yes160 yes170 yes180      "
 4110 data"yes190 yes320 yes350                    "
 4200 remdata"-spc-",40

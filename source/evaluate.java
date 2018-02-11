@@ -158,6 +158,10 @@ class evaluate {
   String a; // temp string variable containing current pointed to char
   boolean is_defining_function;
 
+  boolean speeder_compile=false;
+  String compiled_obj="";
+  String compiled_asm="";
+
   // constants and enums
   static int D_NUM=0;
   static int D_OP=1;
@@ -231,9 +235,9 @@ class evaluate {
     //
   void show_state() {
     System.out.printf("%s                D_NUM                 D_OP\n",printprefix);
-    System.out.printf("%s              +---------------+------+-----+------------------------------+\n",printprefix);
-    System.out.printf("%s              | num           | type | op  | func                         |\n",printprefix);
-    System.out.printf("%s              +---------------+------+-----+------------------------------+\n",printprefix);
+    System.out.printf("%s              +---------------+------+------+------------------------------+\n",printprefix);
+    System.out.printf("%s              | num           | type | op   | func                         |\n",printprefix);
+    System.out.printf("%s              +---------------+------+------+------------------------------+\n",printprefix);
     //System.out.printf("%s |STATE:  upto=%d doing=%d\n",printprefix,upto,doing);
     // necessarily there it is the case when doing==D_OP that we DON'T know what stkop[upto-1] is - therefore, don't show it!
     for (int levelx=0; levelx<upto+((doing==D_NUM)?1:0); levelx++) {
@@ -249,7 +253,7 @@ class evaluate {
       if (stktype[levelx]==ST_STRING) {
         System.out.printf(" %-13s |", stkstring[levelx]);
       } else {
-        if (levelx==upto || haveop.equals("(") || haveop.equals("===") || haveop.equals("-ve") || levelx==upto-1 && doing==D_ASSIGN) {
+        if (levelx==upto || haveop.equals("(") || haveop.equals("===") || haveop.equals("===,") || haveop.equals("-ve") || levelx==upto-1 && doing==D_ASSIGN) {
           System.out.printf(" %-13s |", "");
         } else {
           System.out.printf(" %13f |", stknum[levelx]);
@@ -258,7 +262,7 @@ class evaluate {
 
       // print type column
       String havetype="";
-      if (levelx==upto || haveop.equals("(") || haveop.equals("===")) havetype="";
+      if (levelx==upto || haveop.equals("(") || haveop.equals("===") || haveop.equals("===,")) havetype="";
       else if (stktype[levelx]==ST_NUM) havetype=" num";
       else if (stktype[levelx]==ST_STRING) havetype="string";
       else if (stktype[levelx]==ST_PARAM) havetype="param";
@@ -268,11 +272,11 @@ class evaluate {
       System.out.printf("%-6s|",havetype);
 
       // print op column
-      System.out.printf(" %-3s |", haveop);
+      System.out.printf(" %-4s |", haveop);
           //(levelx!=upto-1 || doing!=D_OP)?stkop[levelx]:"N/A");
       System.out.printf(" %-28s |\n", 
         (stkfunc[levelx]!=null && !stkfunc[levelx].equals("")
-          && ((haveop.equals("(") || haveop.equals("===") 
+          && ((haveop.equals("(") || haveop.equals("===") || haveop.equals("===,")
                || levelx==upto && is_function || levelx==upto-1 && doing==D_ASSIGN))
         )?stkfunc[levelx]+
              ((is_function && levelx==upto)?" (preset:is_function)":
@@ -291,7 +295,7 @@ class evaluate {
         //printprefix,levelx,stknum[levelx],(levelx!=upto-1 || doing!=D_OP)?stkop[levelx]:"N/A",(stkfunc[levelx]!=null)?" stkfunc[]=":"",(stkfunc[levelx]!=null)?stkfunc[levelx]:"",
         //stktype[levelx],stktype[levelx]==ST_STRING?stkstring[levelx]:"");
     }
-    System.out.printf("%s              +---------------+------+-----+------------------------------+\n",printprefix);
+    System.out.printf("%s              +---------------+------+------+------------------------------+\n",printprefix);
     System.out.printf("%s   %s  doing=%s\n",printprefix,
       (doing==D_OP)?"                        ":"",(doing==D_OP)?"D_OP^":((doing==D_NUM)?"D_NUM^":"D_ASSIGN"));
     System.out.printf("%s\n",printprefix);
@@ -354,6 +358,14 @@ class evaluate {
 
       // these functions take 1 numeric parameter:
       //if (righttype!=ST_NUM) { System.out.printf("?INCORRECT TYPE\n"); }
+      String save_compiled_asm="";
+      if (speeder_compile) { save_compiled_asm=compiled_asm; compiled_obj=compiled_obj+","+function; // we will unwind this if it is a variable array
+	      compiled_asm+="  FNC "+function+"\n";
+	      //System.out.printf(",%s",function);
+	      int ft=Petspeed.ftoken(function);
+                if (verbose && ft<0) System.out.printf("A-COMPILER could not find %s (okay if array)\n",function);
+	      using_machine.petspeed.addInstr(Petspeed.I_FNC | ft,parameters); // add # parans, only used for mid$
+      }
 
       if (function.length()>=2 && function.substring(0,2).equals("fn")) {
         if (verbose) { System.out.printf("Wanting to use predefined function %s with parameter %f\n",function,right); }
@@ -658,6 +670,16 @@ class evaluate {
           }
           return;
         }
+      } else if (function.equals("frm")) {
+        if (parameters==2) {
+          stktype[upto-2]=ST_STRING;
+          try {          
+          stkstring[upto-2]=String.format(stkstring[upto-1],stknum[upto]);
+          } catch(Exception e) {
+            throw new EvaluateException("BAD FORMAT");              
+          }
+          return;
+        }
       } else if (function.equals("mid$")) {
         if (parameters==3) {
           if (verbose) { System.out.printf("Calculating mid$\n"); }
@@ -727,6 +749,16 @@ class evaluate {
         if (verbose) { System.out.printf("Assuming array %s\n",function); }
         // for an array, add the distinguishing trailing (
         GenericType value=get_value(function+"(",parameters,stknum[upto-1],stknum[upto],stknum[upto+1]);
+        if (speeder_compile) { for (int i=0; i<parameters; ++i) compiled_obj=compiled_obj+"[]";
+				       int v = using_machine.getvarindex(function+"(");
+	  compiled_asm=save_compiled_asm+"  PSH mem: "+function;
+          for (int i=0; i<parameters; ++i) compiled_asm+="[]";
+	  compiled_asm+="="+String.valueOf(v)+"\n";
+	      using_machine.petspeed.rewind();
+	      using_machine.petspeed.addInstr(Petspeed.I_PSH | ((value.isNum())?Petspeed.T_Dbl:Petspeed.T_Str) | 
+	        ((parameters<=1)?Petspeed.M_MEMARR1:Petspeed.M_MEMARR2)
+		, v);
+	}
         if (value.isNum()) {
           if (verbose) { System.out.printf("%sGot value %s\n",printprefix,value.print()); }
           // push this value on stack
@@ -818,6 +850,15 @@ class evaluate {
 
   GenericType calc(String leftstr, String oper, String rightstr) throws EvaluateException {
     oper=oper.toLowerCase(); //20060204pgs
+    if (speeder_compile) { if (!oper.equals("(")) compiled_obj+=",$"+oper;
+      if (!oper.equals("(")) {
+	    compiled_asm+="  PRF Str "+oper+"\n";
+	    // if (!oper.equals("(")) System.out.printf(",%s",oper);
+	      int ft=Petspeed.ftoken(oper);
+                if (verbose && ft<0) System.out.printf("A-COMPILER could not find %s (okay if array)\n",oper);
+	    using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Str | ft);
+      }
+    }
     // returns a number
          if (oper.equals(">")) { return new GenericType((leftstr.compareTo(rightstr)>0)?-1.0:0.0); }
     else if (oper.equals("<")) { return new GenericType((rightstr.compareTo(leftstr)>0)?-1.0:0.0); }
@@ -846,6 +887,15 @@ class evaluate {
 
   double calc(double left, String oper, double right) throws EvaluateException {
     oper=oper.toLowerCase(); //20060204pgs
+    if (speeder_compile) { if (!oper.equals("(")) compiled_obj+=","+oper;
+      if (!oper.equals("(")) {
+	    compiled_asm+="  PRF Dbl "+oper+"\n";
+	    // if (!oper.equals("(")) System.out.printf(",%s",oper);
+	      int ft=Petspeed.ftoken(oper);
+                if (verbose && ft<0) System.out.printf("A-COMPILER could not find %s (okay if array)\n",oper);
+	    using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Dbl | ft);
+      }
+    }
     double answer=0.0;
     // old boolean like way, lets do a c64 bit like way now
          //if (oper.equals("or")) { answer=(((left!=0.0)?true:false) || ((right!=0.0)?true:false))?-1.0:0.0; }
@@ -1117,6 +1167,10 @@ class evaluate {
               building=""; // clear this
               //if (verbose) { System.out.printf("Next character = %s\n",a); }
               using_defined_function=true;
+
+	      if (speeder_compile) // until we implement it!
+	          using_machine.petspeed.reject();
+	      
             }
 
             if (a.equalsIgnoreCase("o") && ispnt<intstring.length()-2 && intstring.substring(ispnt+1,ispnt+3).equalsIgnoreCase("or")) {
@@ -1201,6 +1255,19 @@ class evaluate {
 
             // replace the variable with the value of the variable
               GenericType value=get_value(building);
+	      if (speeder_compile) { compiled_obj+=","+building;
+				       int v = using_machine.getvarindex(building.toLowerCase());
+		compiled_asm+="  PSH "+ (value.isNum()?"Dbl":"Str") + " MEM: "+building+"="+String.valueOf(v)+"\n";
+                // System.out.printf(",%s",building);
+		if (v<0) {
+		  if (verbose) System.out.printf("A-COMPILER could not find variable %s\n",building);
+	          int ft=Petspeed.ftoken(building);
+		    if (ft<0) System.out.printf("A-COMPILER could not find variable %s or special function variable\n",building);
+		 // assuming this is a special variable, we will treat it like a function with no params
+	          using_machine.petspeed.addInstr(Petspeed.I_FNC | ft);
+		} else
+	          using_machine.petspeed.addInstr(Petspeed.I_PSH | ((value.isNum())?Petspeed.T_Dbl:Petspeed.T_Str) | Petspeed.M_MEM,v);
+	      }
               if (value.isNum()) {
                 if (verbose) { System.out.printf("%sGot value %s\n",printprefix,value.print()); }
                 // push this value on stack
@@ -1249,6 +1316,7 @@ class evaluate {
     throws EvaluateException
   {
 
+    if (speeder_compile) { compiled_obj=""; compiled_asm=""; }
     is_defining_function=false;
     parse_restart=(-1); // means no restart required // really could be zero too!
     g_is_assignment=is_assignment>0;
@@ -1292,6 +1360,11 @@ class evaluate {
           pushOp("-ve");
         } else if (a.compareTo("0")>=0 && a.compareTo("9")<=0 || a.equals(".")) { // allow leading . for numbers
           double num=readNum();
+	  if (speeder_compile) { compiled_obj+=","+String.valueOf(num);
+		  compiled_asm+="  PSH Dbl IMM "+String.valueOf(num)+"\n";
+	    //System.out.printf(",%.9f ",num);
+	          using_machine.petspeed.addInstr(Petspeed.I_PSH | Petspeed.T_Dbl | Petspeed.M_IMM, num);
+          }
           pushNum(num); 
           doing=D_OP;
         // not sure if this ignore case is right
@@ -1302,6 +1375,13 @@ class evaluate {
           // quoted string
           String qs=readQuotedString();
           pushString(qs); // we push, not a number, but a string
+          if (speeder_compile) { compiled_obj+=",\""+qs+"\"";
+		  compiled_asm+="  PSH Str IMM "+"\""+qs+"\"\n";
+	          //System.out.printf(",\"%s\"",qs);
+		  //System.out.printf("DEBUG: %d | %d | %d = %d\n",Petspeed.I_PSH, Petspeed.T_Str , Petspeed.M_IMM,
+	            //Petspeed.I_PSH | Petspeed.T_Str | Petspeed.M_IMM);
+	          using_machine.petspeed.addInstr(Petspeed.I_PSH | Petspeed.T_Str | Petspeed.M_IMM,qs);
+          }
           doing=D_OP;
         } else {
           if (!partialmatching) {
@@ -1498,6 +1578,7 @@ boolean dontallowunbalancedopeningbracket=true; // here for now
         }
       }
       if (really_has_assignment) { ProcessAssignment(); }
+      else throw new EvaluateException("SYNTAX ERROR"); // no assignment to anything
     }
 
   } catch (EvaluateException evalerror) {
@@ -1557,22 +1638,38 @@ boolean dontallowunbalancedopeningbracket=true; // here for now
       }
     }
 
+    // to keep the simple numeric expression simple - (like IF xxxx ) then just don't push anything
     if (verbose) { System.out.printf("upto=%d\n",upto); }
     GenericType gt; //only allow list of 
+
+    if (!g_is_assignment) {
     if (stktype[0]==ST_NUM) {
       gt=new GenericType(stknum[0]);
+      if (speeder_compile && upto>1) // if it is a singleton - don't bother recording anthing!
+        if (0==upto-1 || !stkop[0].equals("===") && !stkop[0].equals("===,")) 
+          using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Dbl); // flag a double
     } else {
       if (verbose) { System.out.printf("Returning a string type from evaluate\n"); }
       gt=new GenericType(stkstring[0]);
+      if (speeder_compile && upto>1) // if it is a singleton - don't bother recording anthing!
+        if (0==upto-1 || !stkop[0].equals("===") && !stkop[0].equals("===,")) 
+          using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Str); // flag a string
     }
     // if there are more, add to it
     for (int i=1; i<upto; ++i) {
       if (stktype[i]==ST_NUM) {
         gt.add(stknum[i],upto);
+        if (speeder_compile && upto>1) // if it is a singleton - don't bother recording anthing!
+          if (i==upto-1 || !stkop[i].equals("===") && !stkop[i].equals("===,")) 
+            using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Dbl); // flag a double
       } else {
         gt.add(stkstring[i],upto);
+        if (speeder_compile && upto>1) // if it is a singleton - don't bother recording anthing!
+          if (i==upto-1 || !stkop[i].equals("===") && !stkop[i].equals("===,")) 
+            using_machine.petspeed.addInstr(Petspeed.I_PRF | Petspeed.T_Str); // flag a string
       }
     }
+    } else gt=null;
     return gt;
     //return stknum[0]; // we cant do this now, we must return maybe a string (even if it is a number)
   }
@@ -1720,6 +1817,13 @@ void ProcessAssignment() throws EvaluateException {
               }
               using_machine.setvariable(stkfunc[stackp].toLowerCase(),rv);
               //using_machine.setvariable(stkfunc[stackp].toLowerCase(),ReadValue(stktype[stackp+1],currentvalue++));
+	      if (speeder_compile) { compiled_obj+="."+stkfunc[stackp].toLowerCase();
+				       int v = using_machine.getvarindex(stkfunc[stackp].toLowerCase());
+		      compiled_asm+="  STO "+ (rv.isNum()?"Dbl":"Str") +" MEM: "+stkfunc[stackp].toLowerCase()+"="+String.valueOf(v)+"\n";
+		      // System.out.printf(".%s\n",stkfunc[stackp].toLowerCase());
+		      // System.out.printf("RPNALG: STO -> %s\n",stkfunc[stackp].toLowerCase());
+	          using_machine.petspeed.addInstr(Petspeed.I_STO | ((rv.isNum())?Petspeed.T_Dbl:Petspeed.T_Str) | Petspeed.M_MEM,v);
+	      }
             } else {
               if (verbose) {
                 System.out.printf("stackp=%d Would have set %s to %s\n",stackp,stkfunc[stackp].toLowerCase(),rv.print());
@@ -1732,9 +1836,24 @@ void ProcessAssignment() throws EvaluateException {
                 stkfunc[stackvar],parameters,stknum[stackvar+1],stknum[stackvar+2],stknum[stackvar+3],
                 stknum[currentvalue]); }
               if (using_machine!=null) {
-                using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],ReadValue(stackvar,currentvalue++));
+                GenericType rv=ReadValue(stackvar,currentvalue++);
+                using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],rv); //ReadValue(stackvar,currentvalue++));
                 //using_machine.setvariable(stkfunc[stackvar].toLowerCase()+"(",parameters,(int)stknum[stackvar+1],(int)stknum[stackvar+2],(int)stknum[stackvar+3],ReadValue(stktype[0],currentvalue++));
+	      if (speeder_compile) { compiled_obj+="."+stkfunc[stackvar].toLowerCase();
+		                       for (int i=0; i<parameters; ++i) 
+		                         compiled_obj+="[]";
+				       int v = using_machine.getvarindex(stkfunc[stackvar].toLowerCase()+"(");
+		      compiled_asm+="  STO MEM: "+stkfunc[stackvar].toLowerCase();
+		                       for (int i=0; i<parameters; ++i) 
+		                         compiled_asm+="[]";
+		                       compiled_asm+="="+String.valueOf(v)+"\n";
+		                         //compiled_obj+="["+String.valueOf((int)stknum[stackvar+i+1])+"]"; // no this doesn't make sense - we are a compiler!
+		      // System.out.printf(".%s\n",stkfunc[stackp].toLowerCase());
+		      // System.out.printf("RPNALG: STO -> %s\n",stkfunc[stackp].toLowerCase());
+	          using_machine.petspeed.addInstr(Petspeed.I_STO | ((rv.isNum())?Petspeed.T_Dbl:Petspeed.T_Str) | ((parameters<=1)?Petspeed.M_MEMARR1:Petspeed.M_MEMARR2)
+				  , v);
               }
+	      }
           }
           parameters=0;
         } else if (stkop[stackp].equals(OP_OPEN_BRACKET)) {

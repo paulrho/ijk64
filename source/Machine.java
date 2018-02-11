@@ -151,6 +151,10 @@ public class Machine {
     attachScreen(screen);
   }
 
+  boolean speeder=false;
+  Petspeed petspeed=null;
+  boolean ksfast=false;
+
   public void initialise_machine() {
     if (verbose) { System.out.printf("Initialising machine\n"); }
     variables.verbose=verbose;
@@ -159,6 +163,13 @@ public class Machine {
     evaluate_engine.verbose=false;
     evaluate_engine.quiet=true;
     System.setProperty("java.net.useSystemProxies", "true");
+  }
+
+  void switchSpeeder(boolean sw) {
+    speeder=sw;
+    if (speeder) petspeed=new Petspeed(this);
+    statements.speeder=speeder; // static- on the class itself will it work? yes, any will get this
+    if (speeder || verbose) { System.out.printf("Petspeed switched %s\n",speeder?"ON":"OFF"); }
   }
   //////////////////////////////////
   // Machine configuration
@@ -212,6 +223,8 @@ public class Machine {
     variables.verbose=verbosekeep;
     program_saved_executionpoint=(-1); // cant continue any more
     //!!! should forloopstack be cleared too? // no -statements clears it
+    if (speeder) petspeed=new Petspeed(this); // just for now just respawn the lot!
+    //statements.speeder=speeder; // return to original state //? is this right?
   }
 
   //////////////////////////////////
@@ -234,6 +247,10 @@ public class Machine {
   }
   GenericType getvariable(String variable, int param, int p1, int p2, int p3) {
     return variables.getvariable(variable,param,p1,p2,p3);
+  }
+
+  int getvarindex(String variable) {
+    return variables.getvarindex(variable);
   }
 
   GenericType getvariable(String variable) {
@@ -282,6 +299,7 @@ public class Machine {
   int topforloopstack=0;
   int forloopstack[]=new int[MAXFORS];
   String forloopstack_var[]=new String[MAXFORS];
+  int forloopstack_varpnt[]=new int[MAXFORS];
   double forloopstack_to[]=new double[MAXFORS];
   double forloopstack_step[]=new double[MAXFORS];
 
@@ -314,6 +332,7 @@ public class Machine {
             forloopstack_var[j]=forloopstack_var[j+1];
             forloopstack_to[j]=forloopstack_to[j+1];
             forloopstack_step[j]=forloopstack_step[j+1];
+	    forloopstack_varpnt[j]=forloopstack_varpnt[j+1]; // because we can switch this on and off after compile  - need to always do this
           }
         }
         topforloopstack--;
@@ -323,6 +342,7 @@ public class Machine {
     if (verbose) { System.out.printf("processing FOR %s to %f step %f at current=%d at FORSTACK=%d\n",variable,forto,forstep,current,topforloopstack); }
     forloopstack[topforloopstack]=current;
     forloopstack_var[topforloopstack]=variable;
+    forloopstack_varpnt[topforloopstack]=variables.getvarindex(variable); // because we can switch this on and off after compile  - need to always do this
     forloopstack_to[topforloopstack]=forto;
     forloopstack_step[topforloopstack]=forstep;
     if (topforloopstack==MAXFORS-1) throw new BasicException("OUT OF MEMORY");
@@ -334,8 +354,24 @@ public class Machine {
     // could be multiple steps?, no, this should be dealt with by the statements parser
     int fl=topforloopstack;
     executionpoint=current;
+    int vv=-2; if (speeder && !var.equals("")) { vv=variables.getvarindex(var); }
     while(fl>0) {
       fl--;
+      //if (speeder && forloopstack_varpnt[fl]>=0) {
+      if (speeder && (vv==-2 || forloopstack_varpnt[fl]==vv)) {
+        // not compiled, but just a lot faster for the looping part
+	int v=forloopstack_varpnt[fl];
+	variables.variablevalue[v]+=forloopstack_step[fl];
+	if (forloopstack_step[fl]>0 && variables.variablevalue[v] > forloopstack_to[fl]
+	  || forloopstack_step[fl]<0 && variables.variablevalue[v] < forloopstack_to[fl]) {
+          topforloopstack=fl; // at least one
+          return false;
+	} else {
+          executionpoint=forloopstack[fl];
+          topforloopstack=fl+1;
+          return true;
+	}
+      }
       if (forloopstack_var[fl].startsWith("_")) break; // matches c64 behavior 
       if (var.equals("") || forloopstack_var[fl].equals(var)) {
       //if (var.equals("") && !forloopstack_var[fl].startsWith("_") || forloopstack_var[fl].equals(var)) {
@@ -373,6 +409,7 @@ public class Machine {
   {
     forloopstack[topforloopstack]=current;
     forloopstack_var[topforloopstack]="_GOSUB";
+    forloopstack_varpnt[topforloopstack]=-1; // because we can switch this on and off after compile  - need to always do this
     //forloopstack_to[topforloopstack]=forto;
     //forloopstack_step[topforloopstack]=forstep;
     if (topforloopstack==MAXFORS-1) throw new BasicException("OUT OF MEMORY"); // FORMULA TO COMPLEX in c128
@@ -591,6 +628,7 @@ public class Machine {
   void dumpstate() {
     variables.dumpstate();
     forloopdumpstate();
+    if (speeder) petspeed.dumpstate();
     System.out.printf("Current Line No = %s\n",currentLineNo);
    // temp debugging
     //for (int i=0; i<256; ++i) { System.out.printf("%d =%d\n",i,(int)machinescreen.petconvert((char)i)); }
@@ -746,7 +784,9 @@ public class Machine {
     if (memloc==40000) {
       PlaySound a = new PlaySound("test.wav");
     } else if (memloc==198) {
-      // clear the key buffer if you get this
+      // clear the key buffer if you get this // FIX
+    } else if (memloc==199) { // ijk64 special - switch to fast mode
+      ksfast=(memval>0)?true:false;
     } else if (memloc==53281) {
       // background
       // if it is already set - dont do it again (expensive!)
@@ -847,6 +887,7 @@ public class Machine {
   }
 /* for now -slow down a geta$ - will do a givemekey which has a sleep in it*/
   String getkey() {
+    if (ksfast) return machinescreen.givemefastkey();
     machinescreen.slowinput();
     if (machinescreen.hasinput()) {
       return ""+machinescreen.givemekey();
@@ -1599,7 +1640,9 @@ void chewcr() {
 
     program_name=filename; // keep a copy of what we loaded
     if (reset) {
-      machinescreen.setTitle(baseTitle+" - "+program_name); // try this
+      //machinescreen.setTitle(baseTitle+" - "+program_name); // try this
+      machinescreen.setTitle(program_name+" - "+baseTitle); // try this
+      if (graphicsDevice!=null) graphicsDevice.setTitle(program_name+" - "+baseTitle+" graphics");
   
       program_saved_executionpoint=(-1);
       program_modified=false;
@@ -1629,7 +1672,9 @@ void chewcr() {
     }
     if (ret) {
       program_name=filename; // keep a copy of what we last saved
-      machinescreen.setTitle(baseTitle+" - "+program_name); // try this
+      //machinescreen.setTitle(baseTitle+" - "+program_name); // try this
+      machinescreen.setTitle(program_name+" - "+baseTitle); // try this
+      if (graphicsDevice!=null) graphicsDevice.setTitle(program_name+" - "+baseTitle+" graphics");
       program_modified=false;
     }      
     return ret;
@@ -1729,6 +1774,7 @@ void chewcr() {
     }
     // not the interpretted immediate line!
     program_running=true;
+    statements.speeder=speeder; // return to original state
     new statements(programText, this, program_saved_executionpoint); // passing along the machine too
     program_saved_executionpoint=save_executionpoint; // only done on running a program
     program_running=false;
@@ -1746,6 +1792,7 @@ void chewcr() {
 
       // assumes lines have been cached
       //gotoLine(lineNo);
+      statements.speeder=speeder; // return to original state
       new statements(programText, this, executionpoint,lineNo);
       program_saved_executionpoint=save_executionpoint; // only done on running a program
       program_running=false;
@@ -1755,6 +1802,7 @@ void chewcr() {
       }
       // not the interpretted immediate line!
       program_running=true;
+      statements.speeder=speeder; // return to original state
       new statements(programText, this, program_saved_executionpoint); // passing along the machine too
       program_saved_executionpoint=save_executionpoint; // only done on running a program
       program_running=false;
@@ -1773,6 +1821,7 @@ void chewcr() {
     }
     // not the interpretted immediate line!
     program_running=true;
+    statements.speeder=speeder; // return to original state
     new statements(programText, this, restartat); // passing along the machine too
     program_saved_executionpoint=save_executionpoint; // only done on running a program
     program_running=false;
@@ -1782,6 +1831,13 @@ void chewcr() {
   boolean runProgram()
   {
     program_running=true;
+    // fix me!!!!
+    // now done in variables_clr
+    //if (speeder) petspeed=new Petspeed(this); // just for now just respawn the lot!
+
+    ksfast=false; // reset this!!
+
+    statements.speeder=speeder; // return to original state
     new statements(programText, this); // passing along the machine too
     program_saved_executionpoint=save_executionpoint; // only done on running a program
     program_running=false;
@@ -1790,8 +1846,12 @@ void chewcr() {
 
   boolean runImmediate(String arg) //runDirect mode
   {
+    // very inefficient, just for now
+    //if (speeder) petspeed=new Petspeed(this); // just for now just respawn the lot!
     // by giving 0, it will not clear the Machine state
+    statements.speeder=false; // our Machine based optimisation relate to programText only
     new statements(arg, this, 0); // tell the statements class who I am
+    statements.speeder=speeder; // return to original state
     return true;
   }
 
@@ -1853,7 +1913,9 @@ void chewcr() {
           programText + line;
       }
       program_modified=true;
-      machinescreen.setTitle(baseTitle+" - "+program_name+"*"); // try this
+      //machinescreen.setTitle(baseTitle+" - "+program_name+"*"); // try this
+      machinescreen.setTitle("*"+program_name+" - "+baseTitle); // try this
+      if (graphicsDevice!=null) graphicsDevice.setTitle("*"+program_name+" - "+baseTitle+" graphics");
       return true;
     } else
       return false;
