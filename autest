@@ -1,4 +1,10 @@
 #!/bin/bash
 cd basic/autests
-time java -jar ../../jar/ijk64.jar -r -a"goto5000" -x autest*basic | sed "s/([^)]*)//g" | sed "s/fail/***fail***/g" | sed "s/Basic Error/                                   ***Basic Error***/g"  | egrep --color "rem program = |testresult=|Basic Error" 
+time java -jar ../../jar/ijk64.jar -r -a"goto5000" -x autest*basic | \
+	sed "s/([^)]*)//g" | sed "s/fail/***fail***/g" | sed "s/Basic Error/                                   ***Basic Error***/g"  | \
+	egrep --color "rem program = |testresult=|Basic Error" | \
+	GREP_COLORS="mc=00;36:ms=31:mt=01;31" egrep -i --color=always  "...Fail...|$" | \
+	GREP_COLORS="mt=01;38" egrep -i --color=always "Basic Error|$" | \
+	GREP_COLORS="mt=01;32" egrep -i --color=always "good|$"
 # | sed "s/good/\[\033[01;32m\]good\[\033[00m\]/"
+#// 35 pink

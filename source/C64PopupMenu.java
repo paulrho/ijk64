@@ -133,7 +133,10 @@ public class C64PopupMenu implements ActionListener, ItemListener {
         popup.add(menuItem);
 
         icon = createImageIcon("images/applet-critical-blank.png");
-        menuItem = new JMenuItem("Break run",icon);
+        menuItem = new JMenuItem("Break run   [Shift-Esc]",icon);
+	//this works but takes up too much room
+	//menuItem.setAccelerator(KeyStroke.getKeyStroke(
+				        //KeyEvent.VK_ESCAPE, ActionEvent.SHIFT_MASK));
         menuItem.addActionListener(this);
         popup.add(menuItem);
 

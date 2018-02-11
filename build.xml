@@ -59,7 +59,8 @@
     />
   </target>
 
-  <target name="dist" depends="compile,javadocs"
+  <!--- depends"compile,javadocs" -->
+  <target name="dist" depends="compile"
         description="generate the distribution" >
     <!-- Create the distribution directory -->
     <mkdir dir="${dist}"/>
@@ -117,8 +118,15 @@
 
   <!-- spawn="yes" would be good - but we see no output!-->
   <!-- normal "run" is transparent and no frames - this now requires command line options -->
-  <target name="run" description="run the program" depends="dist">
+  <target name="run128" description="run the program" depends="dist">
     <java jar="${dist}/ijk64.jar" fork="true" maxmemory="128m" dir="basic">
+       <arg value="-c"/>
+       <arg value="-2"/>
+    </java>
+  </target>
+
+  <target name="run" description="run the program" depends="dist">
+    <java jar="${dist}/ijk64.jar" fork="true" dir="basic">
        <arg value="-c"/>
        <arg value="-2"/>
     </java>
@@ -129,6 +137,32 @@
        <jvmarg value="-server"/>
        <arg value="-c"/>
        <arg value="-2"/>
+    </java>
+  </target>
+
+  <target name="runz" description="run the program in server mode" depends="dist">
+    <java jar="${dist}/ijk64.jar" fork="true" maxmemory="128m" dir="basic">
+       <jvmarg value="-server"/>
+       <arg value="-c"/>
+       <arg value="-2"/>
+       <arg value="-z"/>
+    </java>
+  </target>
+
+  <target name="freerunz" description="run the program in server mode" depends="dist">
+    <java jar="${dist}/ijk64.jar" fork="true" dir="basic">
+       <jvmarg value="-server"/>
+       <arg value="-c"/>
+       <arg value="-2"/>
+       <arg value="-z"/>
+    </java>
+  </target>
+
+  <target name="frun" description="run the program in server mode" depends="dist">
+    <java jar="${dist}/ijk64.jar" fork="true" dir="basic">
+       <arg value="-c"/>
+       <arg value="-2"/>
+       <arg value="-z"/>
     </java>
   </target>
 
@@ -173,6 +207,17 @@
       maxmemory="128m"
     >
        <jvmarg value="-Xrunhprof:cpu=samples,interval=1,depth=10,thread=y" />
+       <arg value="../basic/tests/mp2.basic"/>
+       <arg value="-r"/>
+       <arg value="-x"/>
+    </java>
+  </target>
+
+  <target name="timingjar_profile_2" description="timing test the program using the jar with profiling" depends="dist">
+    <java jar="${dist}/ijk64.jar" dir="basic" fork="true"
+      maxmemory="128m"
+    >
+       <jvmarg value="-Xrunhprof:cpu=samples,interval=1,depth=10,thread=n" />
        <arg value="../basic/tests/mp2.basic"/>
        <arg value="-r"/>
        <arg value="-x"/>

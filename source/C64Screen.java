@@ -2363,6 +2363,19 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
     return rets;
   }
 
+  public void startupscreen(int fg, int bg, int cc, boolean starttext) {
+    setcursColour((short)cc);
+    backgroundColour = fullcolour[fg];
+    borderColour = fullcolour[bg];
+    clearscreen();
+    reshapeScreen();            // just to see - this is a dodgy work around!!! when changing background or border colours, must reshape screen
+    if (!starttext) {
+      println("");
+      println(" **** c=64 approximator basic v2ae ****");
+      println("");
+      println(" java ram system  many basic bytes free");
+    }
+  }
   public void startupscreen_blank() {
     setcursColour("LIGHT BLUE"); // now done here
     backgroundColour = fullcolour[6];
@@ -2400,6 +2413,35 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
   }
 
 /// key stuff
+//  little extra key stuff - FAST REPEAT option
+//
+
+  // key stack - mini array of just held down keys only
+  static int MAXKS=10; // only five keys at same time
+  int ks_code[]=new int[MAXKS];
+  char ks_key[]=new char[MAXKS];
+  int ks_total=0;
+  long ks_last=0;
+  int ks_lastkey=0;
+  //int ks_next=0;
+  void keypush(int code, char key) {
+    int i;
+    if (verbose) System.out.printf("got keypush [%d,%d]\n",code,(int)key);
+    for (i=0; i<MAXKS; ++i) if (ks_code[i]==code) { ks_key[i]=key; return; }
+    for (i=0; i<MAXKS; ++i) if (ks_code[i]==0) { ks_total++; ks_code[i]=code; ks_key[i]=key; return; }
+    ks_code[0]=code; ks_key[0]=key; return; // overflow - just replace the first one
+    //ks_next++; if (ks_next==MAXKS) ks_next=0;
+    //ks_code[ks_next]=code; ks_key[ks_next]=key; return;
+  }
+
+  void keyrelease(int code) {
+    int i;
+    if (verbose) System.out.printf("got keyrelease [%d] total=%d\n",code,ks_total);
+    for (i=0; i<MAXKS; ++i) if (ks_code[i]==code) { ks_code[i]=0; ks_total--; return; }
+  }
+
+//
+//
   boolean altdown = false;
   boolean ctrldown = false;
   boolean tabdown = false;
@@ -2407,11 +2449,17 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
   public void addkey2buf(char key) {
         keybuf[keybuftop] = key;
         keybuftop++; if (keybuftop >= keybufmax) { keybuftop = 0; }
+
+	//
+	keypush(ks_lastkey,key);
   }
   
   public void keyPressed(KeyEvent e) {
   // first look at it to see if it is just a shift/control/alt event
     if (verbose) { System.out.printf("\n[keycode=%d keychar=%d] ",(int)e.getKeyCode(),(int)e.getKeyChar()); }
+    //
+    ks_lastkey=e.getKeyCode();
+
     if (e.getKeyCode() == KeyEvent.VK_ALT) {
       altdown = true;
     }
@@ -2481,8 +2529,7 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
     if (e.getKeyChar()==27) {
       if (e.isShiftDown()) { // force it to be shifted (i.e. shift-runstop)
         has_controlC=true; // but chew it up
-        keybuf[keybuftop++] = BREAK_KEY; // just anything really - force givemekey to return
-        if (keybuftop >= keybufmax) keybuftop = 0;
+        addkey2buf((char)BREAK_KEY); // just anything really - force givemekey to return
         return;
       } else {
         return; // chew it up anyway
@@ -2604,6 +2651,11 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
       } else if (tabdown && keybuf[keybuftop] >= '@' && keybuf[keybuftop] <= '[') {
         keybuf[keybuftop] = (char)(keybuf[keybuftop]-'A'+1); // try this
       }
+
+      //
+      
+      keypush(ks_lastkey,keybuf[keybuftop]);
+      
       keybuftop++;
       if (keybuftop >= keybufmax) {
         keybuftop = 0;
@@ -2714,6 +2766,8 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
     if (sendToBack) {
       this.toBack(); // put it in the background
     }
+    //
+    keyrelease(e.getKeyCode());
   }
 
   public void keyTyped(KeyEvent e) {
@@ -2794,6 +2848,26 @@ boolean has_controlC;
       cursVisible = false;
     }                           //repaint(); 
     return returnval;
+  }
+
+  // you will always get the original one - plus hold down repeats if empty and key still down
+  public String givemefastkey() {
+    char returnval;
+
+    // use the mini array - when all empty in here - push entire set on
+    if (keybuftop==keybufbot) 
+      for (int i=0; i<MAXKS; ++i) if (ks_code[i]!=0) {
+        keybuf[keybuftop]=ks_key[i];
+        keybuftop++;
+        if (keybuftop >= keybufmax) { keybuftop = 0; }
+      }
+    if (keybuftop==keybufbot) 
+      return "";
+
+    returnval = keybuf[keybufbot];
+    keybufbot++;
+    if (keybufbot >= keybufmax) { keybufbot = 0; }
+    return ""+returnval;
   }
 
 // TRY this

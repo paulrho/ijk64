@@ -1,0 +1,58 @@
+9 forpp=1to5:rem allows petsppeder to kick in - note, doesnt do anything on print
+10 print"(clr)";
+20 x=4.5
+30 print"sin=" sin(x)
+40 print"cos=" cos(x)
+50 print"tan=" tan(x)
+60 print"atn=" atn(x)
+70 print"exp=" exp(x)
+80 print"log=" log(x)
+90 print"int=" int(x)
+100 print"sqr=" sqr(x)
+110 print"abs=" abs(x)
+120 print"abs-=" abs(-x)
+130 print"sgn=" sgn(x)
+140 print"sgn-=" sgn(-x)
+150 print"sgn0=" sgn(0)
+999 nextpp
+4100 data"sin=-0.977530117665097                  "
+4110 data"cos=-0.2107957994307797                 "
+4120 data"tan= 4.637332054551185                  "
+4130 data"atn= 1.3521273809209546                 "
+4140 data"exp= 90.01713130052181                  "
+4150 data"log= 1.5040773967762742                 "
+4160 data"int= 4                                  "
+4170 data"sqr= 2.1213203435596424                 "
+4180 data"abs= 4.5                                "
+4190 data"abs-= 4.5                               "
+4200 data"sgn= 1                                  "
+4210 data"sgn-=-1                                 "
+4220 data"sgn0= 0                                 "
+4900 dataend
+4990 end
+5000 restore:gosub6000
+5010 print
+5020 meta-verbose 2
+5025 list-1
+5030 ifre=1thenprint"testresult=pass good=";n
+5040 ifre<1thenprint"testresult=fail at row=";int(-re/40)+1;"col=";-re-int(-re/40)*40+1
+5060 print"fin"
+5080 meta-verbose 0
+5085 meta-dumpstate
+5090 end
+6000 rem screen check
+6010 n=0:re=1
+6020 readd$:d=val(d$):ifd$="end"then6050
+6022 ifmid$(d$,1,1)="#"thend=0:d$=mid$(d$,2)
+6025 ifd$="-spc-"thenreadx:gosub6200:n=n-1:goto6038
+6027 ifd$<>"0"andd=0thengosub6300:n=n-1:goto6038
+6030 ifpeek(1024+n)<>dthenre=-n:print"expecting";d;"got";peek(1024+n)
+6038 ifre<1thenreturn
+6040 n=n+1:goto6020
+6050 return
+6200 fori=1tox:ifpeek(1024+n)<>32thenre=-n:return
+6210 n=n+1:next:return
+6300 fori=1tolen(d$):a$=mid$(d$,i,1):d=asc(a$)-64:ifd<0thend=d+64
+6310 ifpeek(1024+n)<>dthenre=-n:print"exp";d;"got";peek(1024+n):return
+6320 n=n+1:next
+6340 return

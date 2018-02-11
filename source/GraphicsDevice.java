@@ -278,7 +278,11 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
          command_ANTIALIAS(1);
      } else {
        lsize=w;
-       newoffGraphics.setStroke(new BasicStroke(w));
+       if (blitting) {
+         newoffGraphicsB[0].setStroke(new BasicStroke(w));
+         newoffGraphicsB[1].setStroke(new BasicStroke(w));
+       } else
+         newoffGraphics.setStroke(new BasicStroke(w));
      }
    }
 

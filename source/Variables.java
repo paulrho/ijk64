@@ -79,6 +79,9 @@ class Variables {
         // str
         variablename[topvariable]=variable;
         variablearraystring1[topvariable]=new String[p1+1];
+	for (int i=0; i<p1+1; ++i) 
+          variablearraystring1[topvariable][i]=""; // do this to be able to safetly read with acode
+	   // should also do this with 2x string array!
         variablearraystring1[topvariable][pset]=contents.str();
         variabletype[topvariable]=V_ARRAY_STRING1;
       }
@@ -204,6 +207,16 @@ class Variables {
   //not used yet//   else
   //not used yet//     return V_DOUBLE;
   //not used yet// }
+
+  // this is not finished yet - used for speedcompile
+  int getvarindex(String variable) {
+    for (int i=0; i<topvariable; ++i) {
+      if (variable.equals(variablename[i])) {
+	      return i;
+      }
+    }
+    return -1;
+  }
 
   GenericType getvariable(String variable) {
     // if we try to get a non existant variable, create it and set its value to 0.0
