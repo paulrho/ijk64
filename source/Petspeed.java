@@ -118,7 +118,7 @@ class Petspeed
     try { // safety catch!
     for (int i=acpointer[x]; /* i<MAX*/true; ++i) {
       //if (prog[i]==I_HLT) break;
-      if (verbose) System.out.printf("\nEXECUTING %d %d %d %f %s  ",i,prog[i],pargmem[i],pargD[i],pargS[i]);
+      /// just for now to gain 5.5% speed// if (verbose) System.out.printf("\nEXECUTING %d %d %d %f %s  ",i,prog[i],pargmem[i],pargD[i],pargS[i]);
       switch(prog[i]) {
         case I_HLT: 
           if (verbose) {
@@ -130,11 +130,11 @@ class Petspeed
 	  gatop=atop-gatop; //? CHECK
 	  return nextpnt(x);
 	case I_PRF | T_Str :
-          if (verbose) System.out.printf("Return parameter %d flagged as a string stack=%d ",gatop,atop);
+          //speedup// if (verbose) System.out.printf("Return parameter %d flagged as a string stack=%d ",gatop,atop);
           listadd(astack_s[gatop]);
 	  break;
 	case I_PRF | T_Dbl :
-          if (verbose) System.out.printf("Return parameter %d flagged as a double stack=%d ",gatop,atop);
+          //speedup// if (verbose) System.out.printf("Return parameter %d flagged as a double stack=%d ",gatop,atop);
           listadd(astack_d[gatop]);
 	  break;
 	// most common at top
