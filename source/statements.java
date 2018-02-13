@@ -1585,20 +1585,21 @@ GenericType PSReadExpressionEvaluate() throws BasicException
 boolean ProcessIFstatement() throws BasicException
 {
   
-  GenericType gt;
   if (speeder && machine.petspeed.is_compiled(pnt)) { 
        if (verbose) System.out.printf("Found compiled at %d\n",pnt); 
        try {
          pnt=machine.petspeed.execute(pnt);
          // jump the pointer
        } catch (EvaluateException e) { throw new BasicException(e.getMessage()); }
-       gt= new GenericType(machine.petspeed.result());
-       //pnt=machine.petspeed.nextpnt(pnt);
-       if (gt.equals(0.0)) { // num only returns a num
+       // expensive - just use doubles
+       //gt= new GenericType(machine.petspeed.result());
+       //if (gt.equals(0.0)) { // num only returns a num
+       if (machine.petspeed.result()==0.0) { // num only returns a num
          pnt=machine.petspeed.nextpnt(pnt-1); // special case - false eval, stored one before the THEN bit
 	 return true;
        }
   } else {
+     GenericType gt;
 
      if (speeder) { machine.petspeed.savestart(pnt); }
       ReadExpression();
