@@ -349,6 +349,34 @@ public class Machine {
     topforloopstack++;
   }
 
+  // ready for the next stage
+  boolean processNEXTspeeder(int vv) throws BasicException {
+    // vv==-2 if blank, otherwise
+    //  vv is a pointer to the index
+    int fl=topforloopstack;
+    while(fl>0) {
+      fl--;
+      if (forloopstack_varpnt[fl]<0) break; // matches c64 behavior 
+      if (vv==-2 || forloopstack_varpnt[fl]==vv) {
+	int v=forloopstack_varpnt[fl];
+
+	variables.variablevalue[v]+=forloopstack_step[fl];
+
+	if (forloopstack_step[fl]>0 && variables.variablevalue[v] > forloopstack_to[fl]
+	  || forloopstack_step[fl]<0 && variables.variablevalue[v] < forloopstack_to[fl]) {
+          topforloopstack=fl; // at least one
+          return false;
+	} else {
+          executionpoint=forloopstack[fl];
+          topforloopstack=fl+1;
+          return true;
+	}
+      }
+    }
+    topforloopstack=fl; // unwound them all
+    throw new BasicLineNotFoundError("NEXT WITHOUT FOR ERROR");
+  }
+
   boolean processNEXT(int current, String var) throws BasicException {
     if (verbose) { System.out.printf("processing NEXT %s at current=%d\n",var,current); }
     // could be multiple steps?, no, this should be dealt with by the statements parser
