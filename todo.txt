@@ -53,3 +53,6 @@ DEF FN - compile it
 
 
 
+4)
+optimise the NEXT - currently string processing -
+at least turn it into near-a-code NEXT [mem] statements (where mem could be -2 (none))
