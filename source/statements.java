@@ -2195,6 +2195,13 @@ boolean ProcessOPENstatement() throws BasicException
        gt.gtlist[3].str()
      );
      return true;
+  } else if (gt.gttop==3) {
+     machine.OpenFile(
+       (int)gt.gtlist[0].num(),
+       (int)gt.gtlist[1].num(),
+       ""
+     );
+     return true;
   } else if (gt.gttop==2) {
      machine.OpenFile(
        (int)gt.gtlist[0].num(),

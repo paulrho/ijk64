@@ -1071,12 +1071,13 @@ public class Machine {
      String format="seq";
      char type='R';
      boolean overwrite=false;
+     if (dev==4) { overwrite=false; param="printer,s,w"; }
      if (param.startsWith("@")) {
        overwrite=true;
        param=param.substring(1);
        if (verbose) { System.out.printf("overwrite\n"); }
      }
-     if (param.charAt(1)==':') {
+     if (param.length()>0 && param.charAt(1)==':') {
        if (verbose) { System.out.printf("got 0: format\n"); }
        String[] data = param.split(":"); // throw away the num for now
        param=data[1];
