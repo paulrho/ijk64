@@ -210,6 +210,7 @@ class Variables {
 
   // this is not finished yet - used for speedcompile
   int getvarindex(String variable) {
+    if (variable.length()==0) return -2; // this is done for NEXT
     for (int i=0; i<topvariable; ++i) {
       if (variable.equals(variablename[i])) {
 	      return i;

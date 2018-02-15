@@ -676,6 +676,7 @@ if (dofulltiming) startTime2+=System.currentTimeMillis();
       } else if (partType==PT_TOKEN) {
                                                           if (dofulltiming) { start_timing(TIME_ReadStatement); }
         /* speeder Opt 10 - chaining */
+        //needmore testing for this //if (speeder && gotToken!=ST_NEXT) machine.petspeed.lastassign=-1; // invalidate  // see if this allows next chaining
         if (speeder) machine.petspeed.lastassign=-1; // invalidate
         if (!ReadStatement()) {
           throw new BasicException("SYNTAX ERROR : BAD TOKEN");
@@ -1770,32 +1771,70 @@ boolean ProcessRETURNstatement() throws BasicException
 
 boolean ProcessNEXTstatement() throws BasicException
 {
-  keepExpression=""; // for the scenario it is nothing!
-  ReadExpression(); // not really, should just be a variable!!
-  // split up between commas
-  int at=0; 
-  int start=0;
-  while (at<keepExpression.length()) {
-    if (keepExpression.substring(at,at+1).equals(",")) {
+  if (speeder && !machine.petspeed.is_compiled(pnt)) {
+      // will compile
+      int pntkeep=pnt;
+      machine.petspeed.savestart(pnt); 
+      keepExpression=""; // for the scenario it is nothing!
+      ReadExpression(); // not really, should just be a variable!!
+    
+      // split up between commas
+      int at=0; 
+      int start=0;
+      while (at<keepExpression.length()) {
+        if (keepExpression.substring(at,at+1).equals(",")) {
+	  // add to pseudo-machine-instruction - recording only - not running
+          machine.petspeed.addInstr(Petspeed.I_NXT,machine.variables.getvarindex(keepExpression.substring(start,at).toLowerCase().trim()));
+          start=at+1;
+        }
+        at++;
+      }
       // skip spaces with trim!
-      if (machine.processNEXT(pnt,keepExpression.substring(start,at).toLowerCase().trim())) {
+      machine.petspeed.addInstr(Petspeed.I_NXT,machine.variables.getvarindex(keepExpression.substring(start,keepExpression.length()).toLowerCase().trim()));
+      //machine.petspeed.addInstr(Petspeed.I_HLT,pnt);/// not quite -see below
+      machine.petspeed.saveacode(pnt);
+      // try without!///machine.petspeed.lastassign=-1; // invalidate // CHECK, is this the best spot for it?
+      pnt=pntkeep;
+
+  } 
+  // both
+  if (speeder && machine.petspeed.is_compiled(pnt)) {
+       // already  (or just) compiled
+       if (verbose) System.out.printf("Found compiled at %d\n",pnt); 
+	try {
+	  pnt=machine.petspeed.execute(pnt);
+	  // and jump the pointer
+	} catch (EvaluateException e) { throw new BasicException(e.getMessage()); }
+  } else {
+      // wont or didn't compile
+      keepExpression=""; // for the scenario it is nothing!
+      ReadExpression(); // not really, should just be a variable!!
+    
+      // split up between commas
+      int at=0; 
+      int start=0;
+      while (at<keepExpression.length()) {
+        if (keepExpression.substring(at,at+1).equals(",")) {
+          // skip spaces with trim!
+          if (machine.processNEXT(pnt,keepExpression.substring(start,at).toLowerCase().trim())) {
+            // we did loop
+            pnt=machine.executionpoint;
+            return true; // we skip the following ones
+          }
+          start=at+1;
+        }
+        at++;
+      }
+      // skip spaces with trim!
+      if (machine.processNEXT(pnt,keepExpression.substring(start,keepExpression.length()).toLowerCase().trim())) {
         // we did loop
         pnt=machine.executionpoint;
         return true; // we skip the following ones
       }
-      start=at+1;
+      if (verbose) { System.out.printf("Finished the next loops\n"); }
     }
-    at++;
-  }
-  // skip spaces with trim!
-  if (machine.processNEXT(pnt,keepExpression.substring(start,keepExpression.length()).toLowerCase().trim())) {
-    // we did loop
-    pnt=machine.executionpoint;
-    return true; // we skip the following ones
-  }
-  if (verbose) { System.out.printf("Finished the next loops\n"); }
-  ReadColon();
-  return true;
+    ReadColon();
+    return true;
 }
 
 boolean ProcessFORstatement() throws BasicException

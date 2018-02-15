@@ -110,7 +110,7 @@ class Petspeed
   //
   //
   ///////////////////////////////////////////////////////////////////////
-  int execute(int x) throws EvaluateException {
+  int execute(int x) throws EvaluateException,BasicException {
     int atop=gatop;
     if (atop!=0) throw new EvaluateException("STACK CREEP");
     //listtop=atop; // extra overhead - want to avoid this if can - FIX
@@ -460,6 +460,15 @@ class Petspeed
 	  i=(int)astack_d[--atop]; // pop the pc // better to be int
 	  continue;
 	   **/
+ 	case I_NXT : 
+	  { int p;
+	    if ((p=using_machine.processNEXTspeeder(pargmem[i]))>=0) {
+              // jump
+              return p;
+	    }
+	  }
+	  break; // just go to next instruction
+
 	default:
           if (verbose) System.out.printf("X ");
           System.out.printf("Instruction Fault at %d instruction %d\n",i,prog[i]);
@@ -469,6 +478,10 @@ class Petspeed
 	  //break;
       } // case
     } // for
+      } catch (BasicLineNotFoundError e) { 
+        e.printStackTrace();
+	gatop=atop;
+        throw e;
       } catch (ArrayIndexOutOfBoundsException e) { 
         e.printStackTrace();
 	gatop=atop;
@@ -681,6 +694,8 @@ class Petspeed
   static final int F_frm=33;
   static final int F_NOP=34;
   static final int F_JMP=35;
+  static final int F_NXT=36;
+  static final int I_NXT=I_FNC | F_NXT; 
   //static final int F_JSR=36;
   //static final int F_RTN=37;
 
@@ -691,7 +706,7 @@ class Petspeed
   static String F_strings[]={"HLT___","sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",
 	                     "len","val","asc","mid$","left$","right$","str$","chr$","instr",
                              "ti","st","ti$","mathpi",
-                             "peek","fre","pos","tab","spc","frm","NOP___","JMP___" /*,"JSR___","RTN___" */ };
+                             "peek","fre","pos","tab","spc","frm","NOP___","JMP___","NXT__" /*,"JSR___","RTN___" */ };
   //enum { I_PRF, I_PSH, I_STO, I_FNC, I_HLT };           //0..5  (3 bits)
 
   // enum { T_Dbl, T_Str };                                //0..1  (1 bit)

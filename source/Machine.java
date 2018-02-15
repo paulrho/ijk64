@@ -350,8 +350,8 @@ public class Machine {
   }
 
   // ready for the next stage
-  boolean processNEXTspeeder(int vv) throws BasicException {
-    // vv==-2 if blank, otherwise
+  int processNEXTspeeder(int vv) throws BasicException {
+    // vv==-1 if blank, otherwise
     //  vv is a pointer to the index
     int fl=topforloopstack;
     while(fl>0) {
@@ -365,11 +365,11 @@ public class Machine {
 	if (forloopstack_step[fl]>0 && variables.variablevalue[v] > forloopstack_to[fl]
 	  || forloopstack_step[fl]<0 && variables.variablevalue[v] < forloopstack_to[fl]) {
           topforloopstack=fl; // at least one
-          return false;
+          return -1; // fall through
 	} else {
           executionpoint=forloopstack[fl];
           topforloopstack=fl+1;
-          return true;
+          return executionpoint; // loop around
 	}
       }
     }
