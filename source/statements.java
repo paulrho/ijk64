@@ -1833,7 +1833,7 @@ boolean ProcessNEXTstatement() throws BasicException
       }
       if (verbose) { System.out.printf("Finished the next loops\n"); }
     }
-    ReadColon();
+    //  for now - dont read this here // ReadColon();
     return true;
 }
 
