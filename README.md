@@ -14,16 +14,20 @@ $ java -jar ../jar/ijk64.jar
 Using the <I>latest</I>:
 download latest/C64.jar - standalone
 
+<PRE>
 $ java -jar C64.jar
+</PRE>
 
 Run (default) Oracle java 8 on raspberry pi (when using graphics mode)
 
 Load files from cloud
+<PRE>
    READY.
    DIR"%"
    ..
    LOAD"%mp2"
    ..
    RUN
+</PRE>
 
 <IMG SRC="http://www.futex.com.au/ijk64/b.php" />
