@@ -1,9 +1,0 @@
-10 goto 20
-20 print "hello"
-30 gosub100
-40 for i = 1 to 10 step 2
-45 print i
-50 next i
-90 end
-100 print "this is a subroutine"
-120 return
