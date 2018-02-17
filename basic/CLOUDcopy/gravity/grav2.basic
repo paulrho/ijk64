@@ -1,0 +1,75 @@
+10 dim xo(20),yo(20),xvo(20),yvo(20)
+12 remprint"(clr)";
+15 info=0
+20 label start
+100 for obj=1to2
+110 cls
+112 xmax=600:ymax=600
+115 screen1
+120 re=40:re=4
+130 rem circle xmax/2,ymax/2,Re color 10 filled
+
+150 xo(0)=100:yo(0)=100: xvo(0)=0.02:yvo(0)=0.01
+160 xo(1)=50:yo(1)=50:   xvo(1)=0.2:yvo(1)=-0.01
+160 xo(2)=0:yo(2)=150:   xvo(2)=-0.05:yvo(2)=0.02
+
+200 xo(4)=10: yo(4)=-60
+210 xvo(4)=-(0.20+0.10)*1
+220 yvo(4)=-0.03
+
+230 xo(3)=-10: yo(3)=200
+240 xvo(3)=-0.20/2
+250 yvo(3)=-0.3/100
+
+260 GM=5.0
+270 rem '6.632e-11*5.98e24
+
+300 dt=1
+310 dt=dt*dt
+
+400 label iter
+410 t=t+dt
+420 for obj=1 to 4
+430 xv=xvo(obj): yv=yvo(obj)
+440 x=xo(obj): y=yo(obj)
+rem if info then locate 1,1
+rem 'print x;" ";y;"  ";xa;" ";ya
+450 if info then print x;" ";y;"  "
+rem if info then print sqr(xv*xv+yv*yv)
+rem 'pset int(x+xmax/2),int(y+ymax/2) color 11
+rem 'line STEP 2,2 color 1
+460 r2=x*x+y*y
+470 r=sqr(r2)
+480 if r<=re then print"obj";obj;"crashed":end:sleep2000:print"restart":goto start
+rem 'print (r*r)/(r2)*2;" ";r*r;" ";r2:pause
+500 a=GM/r2*dt
+510 xa=-a*x/r: ya=-a*y/r
+rem if info then print sqr(xa*xa+ya*ya)
+rem 'pause
+520 x=x+xv*dt+0.5*xa*dt
+530 y=y+yv*dt+0.5*ya*dt
+540 xv=xv+xa
+550 yv=yv+ya
+
+600 rem'correction
+610 oxa=xa: oya=ya
+620 r2=x*x+y*y
+630 r=sqr(r2)
+640 a=GM/r2*dt
+650 xa=-a*x/r: ya=-a*y/r
+660 cxa=xa-oxa: cya=ya-oya
+670 x=x+cxa*dt/6.0
+680 y=y+cya*dt/6.0
+690 xv=xv+0.5*cxa
+695 yv=yv+0.5*cya
+
+rem 'erase old
+700 rem pset int(xo(obj)+xmax/2),int(yo(obj)+ymax/2) color 8'11 '6
+705 line int(xo(obj)+xmax/2),int(yo(obj)+ymax/2),int(xo(obj)+xmax/2),int(yo(obj)+ymax/2),2
+710 rem pset int(x+xmax/2),int(y+ymax/2) color 0
+715 line  int(x+xmax/2),int(y+ymax/2),int(x+xmax/2),int(y+ymax/2),1
+800 remsleep20
+810 xo(obj)=x: yo(obj)=y
+820 xvo(obj)=xv: yvo(obj)=yv
+830 next obj
+990 goto iter

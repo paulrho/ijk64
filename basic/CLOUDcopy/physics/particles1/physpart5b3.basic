@@ -1,0 +1,76 @@
+1 goto1000
+20 rn=5:rr=rnd(-rn)
+30 screen1
+40 nn=30:nn=200:rem400
+50 dimx(nn),y(nn),xv(nn),yv(nn)
+60 dt=0.15:remdt=1
+70 c=1000000
+100 n=nn:rem200
+120 fori=1ton:x(i)=rnd(rn)*100+200:y(i)=rnd(rn)*100
+130   xv(i)=25*(rnd(rn)*2-1):yv(i)=25*(rnd(rn)*2-1)
+140 nexti
+200 rem
+210 fori=1ton
+212 yv(i)=yv(i)-0.2*dt
+218 x(i)=x(i)+xv(i)*dt
+220 y(i)=y(i)+yv(i)*dt
+222 gosub500
+230 nexti
+300 cls:fori=1ton:r=4
+310   circlex(i)-r,200-y(i)-r,r*2,5,0
+320 next
+380 t=t+dt
+385 c=c+1:imagesave"part53b"+str$(c)
+390 goto200
+500 rem
+505 ify(i)>200theny(i)=200:yv(i)=-yv(i)
+510 ify(i)<-100theny(i)=-100:yv(i)=-yv(i)
+520 ifx(i)<0thenx(i)=0:xv(i)=-xv(i)
+530 ifx(i)>500thenx(i)=500:xv(i)=-xv(i)
+540 forj=1ton:ifi=jthen580
+550 ifabs(x(i)-x(j))<r*2 and abs(y(i)-y(j))<r*2then600
+552 rem
+580 nextj
+590 return
+600 rem possible col
+610 d=sqr((x(i)-x(j))^2+(y(i)-y(j))^2)
+620 ifd>r*2thenreturn
+630 rem collided
+640 mx=(x(i)+x(j))/2:my=(y(i)+y(j))/2
+642 mvx=(xv(i)+xv(j))/2:mvy=(yv(i)+yv(j))/2:remvv0=sqr(mvx^2+mvy^2)
+644 vv0=sqr((xv(i)-xv(j))^2+(yv(i)-yv(j))^2)/2
+650 xv(i)=vv0*(rnd(rn)*2-1):yv(i)=vv0*(rnd(rn)*2-1)
+652 remxv(j)=-xv(i)+mvx:yv(j)=-yv(i)+mvy
+654 vv=sqr(xv(i)^2+yv(i)^2)
+656 remxv(i)=xv(i)+mvx:yv(i)=yv(i)+mvy
+660 x(i)=mx+xv(i)/vv*r*1.1:y(i)=my+yv(i)/vv*r*1.1
+662 x(j)=mx-xv(i)/vv*r*1.1:y(j)=my-yv(i)/vv*r*1.1
+672 xv(j)=-xv(i)+mvx:yv(j)=-yv(i)+mvy
+674 xv(i)=xv(i)+mvx:yv(i)=yv(i)+mvy
+690 return
+1000 vx1=+47:vy1=40:x1=10:y1=4
+1002 vx2=-20:vy2=1 :x2=11:y2=3.1
+1008 vy1=0:vy2=0
+1010 remvy1=0:vy2=0:y1=0:y2=0
+1011 remvx1=0:vx2=0:x1=0:x2=0
+1012 print"v1="sqr(vx1^2+vy1^2)
+1014 print"v2="sqr(vx2^2+vy2^2)
+1020 d=sqr((x2-x1)^2+(y2-y1)^2):printd
+1030 unx=(x2-x1)/d:uny=(y2-y1)/d
+1040 utx=-uny:uty=unx
+1042 v1t=utx*vx1+uty*vy1
+1043 v1n=+(unx*vx1+uny*vy1):print"v1tn="sqr(v1t^2+v1n^2)
+1044 v2t=utx*vx2+uty*vy2
+1045 v2n=+(unx*vx2+uny*vy2):print"v2tn="sqr(v2t^2+v2n^2)
+1050 vx1u=v1t*utx+v2n*unx
+1060 vy1u=v1t*uty+v2n*uny
+1070 print"new vx1,vy1"vx1u;vy1u
+1080 vx2u=v2t*utx+v1n*unx
+1090 vy2u=v2t*uty+v1n*uny
+1100 print"new vx2,vy2"vx2u;vy2u
+1105 print"ke1="0.5*(vx1^2+vy1^2),sqr(vx1^2+vy1^2)
+1107 print"ke2="0.5*(vx2^2+vy2^2),sqr(vx2^2+vy2^2)
+1108 print"keT="0.5*(vx1^2+vy1^2)+0.5*(vx2^2+vy2^2),sqr(vx1^2+vy1^2)+sqr(vx2^2+vy2^2)
+1110 print"ke1u="0.5*(vx1u^2+vy1u^2),sqr(vx1u^2+vy1u^2)
+1120 print"ke2u="0.5*(vx2u^2+vy2u^2),sqr(vx2u^2+vy2u^2)
+1130 print"keTu="0.5*(vx1u^2+vy1u^2)+0.5*(vx2u^2+vy2u^2),sqr(vx1u^2+vy1u^2)+sqr(vx2u^2+vy2u^2)

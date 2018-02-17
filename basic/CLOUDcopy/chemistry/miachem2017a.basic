@@ -1,0 +1,20 @@
+100 print"enter:"
+110 print"flask   volume mL, +/-error mL";
+120 inputfv,fe
+125 print"error=";fe/fv*100;"%"
+130 print"pipette volume mL, +/-error mL";
+140 inputpv,pe
+145 print"error=";pe/pv*100;"%"
+150 print"burette zero   mL, +/-error mL";
+160 inputzv,ze
+165 print"error=";ze/zv*100;"%"
+170 print"burette volume mL, +/-error mL";
+180 inputbv,be
+185 print"error=";be/bv*100;"%"
+190 bp=(be+ze)/bv*100:print"total percent error = ";bp;"%"
+200 print"3C6H8O6 :(SHIFT-SPACE)KIO":c=0.002
+210 print"    x   : c =";c;"m = m/L"
+220 print" n(KIO) used = c V"
+230 print"             =";c*bv/1000;"+/-";(bp);"%"
+240 print".: n(C6H6O6) = 3*(";c*bv/1000;"+/-";(bp);"%)"
+250 print"             =";3*c*bv/1000;"+/-";(bp);"%"

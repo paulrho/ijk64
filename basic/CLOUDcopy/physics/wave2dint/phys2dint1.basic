@@ -1,0 +1,12 @@
+10 screen1
+50 si=0.5
+60 mx=30:my=30
+190 beginframe:cls
+200 forx=0to20stepsi
+210   fory=0to20stepsi
+212     d=sqr(x^2+y^2)
+215     xx=sin(d)*10:yy=cos(d)*10
+220     linex*mx,y*my,x*mx+xx,y*my+yy,4
+260   nexty
+270 nextx
+390 endframe:sleep10

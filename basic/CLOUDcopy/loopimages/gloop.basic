@@ -1,0 +1,9 @@
+10 screen1
+90 n=1035281
+92 n=1000001
+95 i=0
+100 imageload"im/part5b"+str$(n)+".png"
+110 drawimage-1,0,0,1,0
+120 n=n+1:remi=i+1:ifi>19theni=0
+125 printn;"(up)"
+130 goto 100

@@ -1,0 +1,8 @@
+10 d=100
+20 c=2.99e8
+30 t=d/c
+40 print t
+45 m=1:p=0.99999
+50 forb=1to300000:m=m*p:next
+60 printm
+70 print t*b "seconds"

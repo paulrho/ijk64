@@ -1,0 +1,46 @@
+10 se=5:xx=rnd(-se):screen1
+100 rem assume scatter
+110 mx=200000
+120 dim x(mx),y(mx)
+150 gosub1000
+160 remgosub2000
+170 gosub3000
+200 gosub1200:rem plot
+490 end
+1000 fori=0tomx-1
+1010 x(i)=rnd(se)*1000
+1020 y(i)=rnd(se)*100+50*sin(x(i)/20)
+1022 remy(i)=50*sin(x(i)/20)
+1030 nexti:return
+1200 cls:rem simple plot
+1210 forj=1tomx-1
+1220 linex(j-1),200-y(j-1),x(j),200-y(j),4:rem1+int(j/mx*14):rem4
+1250 next:return
+2000 rem old sort
+2010 fori=0tomx-2:v=i:h=x(i)
+2020   forj=i+1tomx-1
+2030     ifx(j)>hthenv=j:h=x(j)
+2040   nextj
+2045 ifv<>ithent=x(i):x(i)=x(v):x(v)=t:t=y(i):y(i)=y(v):y(v)=t
+2050 nexti
+2060 return
+3000 rem new sort - very fast
+3005 rem expect dim x(0..mx-1)
+3006 ml=300
+3008 dim be(ml),en(ml)
+3010 rem pv,l,r,s
+3016 be(0)=0:en(0)=mx:i=0
+3100 ifi<0thenreturn
+3110   l=be(i):r=en(i)-1
+3115 ifti-lt>600thengosub1200:lt=ti
+3120   ifl>=rtheni=i-1:goto3100
+3125    pv=x(l):py=y(l)
+3130    ifl>=rthen3170
+3140    ifx(r)>=pvthenifl<rthenr=r-1:goto3140
+3145    ifl<rthenx(l)=x(r):y(l)=y(r):l=l+1
+3150    ifx(l)<=pvthenifl<rthenl=l+1:goto3150
+3155    ifl<rthenx(r)=x(l):y(r)=y(l):r=r-1
+3160   goto3130
+3170   x(l)=pv:y(l)=py:be(i+1)=l+1:en(i+1)=en(i):en(i)=l:i=i+1
+3180   ifen(i)-be(i)>en(i-1)-be(i-1)thens=be(i):be(i)=be(i-1):be(i-1)=s:s=en(i):en(i)=en(i-1):en(i-1)=s
+3190 goto 3100

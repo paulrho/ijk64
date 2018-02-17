@@ -1,0 +1,78 @@
+10 screen1
+15 circle0
+20 t0=ti:t1=t0:t=0:dt=0.25:dt=0.125:remdt=0.21:print60/(2*(mathpi)/(60*dt));"bpm pred"
+30 bp=94:rem n0
+32 bp=86:rem sound of silence
+34 rembp=170/2:rem stressed out
+40 bp=125:rem 80s dance
+42 rem bp=134:rem gangnam style
+44 rem bp=60:rem green bottles
+90 dt=bp/3600*2*(mathpi):printdt
+92 printbp"(left) bpm set"
+95 f1=1:f2=0:f3=9:f4=50:  f1=0:f2=10:f2=4:f3=9:f4=50:f5=10
+100 beginframe
+110 cls
+115 bx=500-cos(t/24)*20+20:by=100-sin(t)*15
+117 circlebx+x+xn,by+y,f4,f3,f1
+118 bl=0:ifsin(t/16)<-0.9thenbl=-1
+119 ifblthenlinebx+x+15+xn,by+y+22,bx+x+15+xn+3,by+y+22+2,f2
+120 ifblthenlinebx+x+5+xn,by+y+20,bx+x+5+xn+3,by+y+20,f2
+121 ifnotblthencirclebx+x+15+xn,by+y+22,5+a,f2,1ornot(a>0anda<0.9)
+122 ifnotblthencirclebx+x+5+xn,by+y+20,4+a,f2,1ornot(a>0anda<1)
+123 linebx+x+10+xn,by+y+34+4,bx+x+13+xn,by+y+34+5,f5
+124 linebx+x+13+xn,by+y+34+5,bx+x+15+xn,by+y+34+3,f5
+125 linebx+x+50+xn,by+y,bx+x+50+xn+sin(.4-sin(t)*.6)*30,by+y+cos(.4-sin(t)*.6)*44,9:rem6
+126 linebx+x+20+xn,by+y-5,bx+x+20+xn+sin(5.0+sin(t)*.6)*15,by+y-5+cos(5.0+sin(t)*.6)*15,9:rem6
+127 linebx+x+32+xn,by+y+5,bx+x+32+xn+sin(.6-sin(t)*.6)*20,by+y+5+cos(.6-sin(t)*.6)*20,9:rem6
+128 t=(ti-t0)*dt
+129 sz=20:ifti-t0<60*5thensz=1
+130 x=--sin(t)*sz:y=-sin(t)*sz
+132 ifclandsin(t-.35)<0thencl=0:gosub1000:printt1-t0;int(3600/(ti-mm)*100)/100;"(left) bpm   (up)":mm=ti
+133 ifcl=0andsin(t-.30)>0thencl=1
+135 a=(sin(t)*50+45)/180*(mathpi)
+136 xn=cos(t/8)*sz
+137 x3=bx+40-x/6:y3=by+200-y/6-15:rem hip point
+140 remlinebx+30+x/3,by+60+y/3,bx+40-x/6,by+200-y/6,5
+142 remlinebx+30+x/3-cos(t/4)*5,by+60+y/3,x3,y3,5:rem body
+150 x1=bx+30+x/3+xn:y1=by+60+y/3
+152 linex1,y1,x3,y3,5:rem body
+160 x2=x1+sin(a)*80:y2=y1+cos(a)*80
+165 ifsin(t/48)<0andcos(t/48)<0thenx2=x1+sin(a+sin(t/8)*10)*80:y2=y1+cos(a+sin(t/8)*10)*80
+170 linex1,y1,x2,y2,5
+175 xh=x2+sin(a*1.1-2.385+.4)*50:yh=y2+cos(a*1.1-2.35+.4)*50
+180 linex2,y2,xh,yh,5
+185 circlexh,yh,4,5,1
+250 remx1=bx+30+x/3:y1=by+60+y/3
+260 linex1,y1,x1-sin(a)*80,y1+cos(a)*80,5
+270 x2=x1-sin(a)*80:y2=y1+cos(a)*80
+272 aa=a:ifsin(t/48)<0andcos(t/48)>0then a=-a
+273 ifsin(t/48)>0andcos(t/48)<0.5then a=0
+275 xh=x2+sin(a*1.1-2.385+1)*50:yh=y2-cos(a*1.1-2.35+1)*50:a=aa
+280 linex2,y2,xh,yh,5
+285 circlexh,yh,4,5,1
+300 remx3=bx+40-x/6:y3=by+200-y/6
+310 x4=x3+sin(-a/4*1.1-2.3)*70:y4=y3-cos(-a/4*1.11-2.3)*70
+320 linex3,y3,x4,y4,5
+330 x5=x4+sin(-a/9*1.1-(mathpi)/2*2)*70:y5=y4-cos(-a/3*1.11-(mathpi)/2*2)*70
+335 x5=bx+1:y5=450-sin(t)*5-4
+340 linex4,y4,x5,y5,5
+345 circlex5-7,y5,8,5,1
+410 x4=x3+sin(-a/4*1.1-2.3-.7)*70:y4=y3-cos(-a/4*1.11-2.3-.7)*70
+420 linex3,y3,x4,y4,5
+435 x5=bx+40+sin(t)*2:y5=450
+440 linex4,y4,x5,y5,5
+445 circlex5-7+2,y5,8,5,1
+470 endframe
+480 sleep20
+482 geta$
+483 ifa$="/"thenfori=1to10000000:geta$:ifa$=""thennext
+484 ifa$=","thent0=t0-1
+485 ifa$=";"thenbp=bp-1:dt=bp/3600*2*(mathpi):print"(up)"bp"(left) bpm set   "
+486 ifa$="."thent0=t0+1
+487 ifa$="'"thenbp=bp+1:dt=bp/3600*2*(mathpi):print"(up)"bp"(left) bpm set   "
+488 ifa$=chr$(13)thent0=t1
+489 ifa$="\"thent0=ti+(mathpi)/dt
+490 goto100
+1000 remalert3
+1010 load"../sound/drumheavykick.wav"
+1020 return

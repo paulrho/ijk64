@@ -1,0 +1,9 @@
+10 print"setting up pi basic"
+20 load"http://futex.com.au/images/piback4.png"
+30 meta-bgtrans2:meta-cols60:meta-rows40:meta-scale2
+40 poke53281,1:rem to get correct list colours
+50 print"(clr)(blk)"
+60 print"         **** (blu)c=64(blk) approximator (grn)basic(blk) v2ae ****"
+70 print
+80 print"      (lred)java(blk) ram system ";fre(0);"basic bytes free"
+90 print"(blu)";

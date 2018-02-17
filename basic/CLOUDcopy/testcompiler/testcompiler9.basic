@@ -1,0 +1,5 @@
+10 fori=1to2
+20 a$="four"
+30 x=len(a$)
+40 printx
+50 next

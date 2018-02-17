@@ -1,0 +1,64 @@
+100 screen1
+200 p=0:rem cycle 4(mathpi) = 1 complete cycle
+210 dt=0.0003
+215 dt=0.0008
+216 dt=0.000030
+217 rem dt=0.0040:dt=0.008
+218 rem dt=0.0001
+220 s=3000*2*(mathpi)/60:rem engine speed
+230 px=0:py=200:sx=100
+300 pp(1)=p+(5-1)*(mathpi)
+302 pp(2)=p+(5-2)*(mathpi)
+304 pp(3)=p+(5-4)*(mathpi)
+306 pp(4)=p+(5-3)*(mathpi)
+340 gosub1000
+360 p=p+s*dt
+480 sleep20
+490 goto300
+1000 rem draw piston positions
+1010 beginframe
+1020 cls
+1030 forc=1to4
+1031 cp(c)=sin(pp(c)):cs(c)=cos(pp(c))
+1032 linec*100,100,c*100+80,100,2
+1034 linec*100,100,c*100,300,2
+1036 linec*100+80,100,c*100+80,300,2
+1040 linec*100,200+cp(c)*80,c*100+80,200+cp(c)*80,4
+1042 linec*100,200+cp(c)*80+60,c*100+80,200+cp(c)*80+60,4
+1044 linec*100,200+cp(c)*80,c*100,200+cp(c)*80+60,4
+1046 linec*100+80,200+cp(c)*80,c*100+80,200+cp(c)*80+60,4
+1050 sk=0:sr=4*((pp(c)+(mathpi)/2)/4/(mathpi)-int((pp(c)+(mathpi)/2)/4/(mathpi))):ifsr<0.6orsr>3.9thensk=1:rem was+.3
+1052 ifskthenlinec*100+40,100,c*100+40+10,110,1:linec*100+40,100,c*100+40-10,110,1:linec*100+40,100,c*100+40,114,1:gosub2000:rem yellow=6
+1053 ifsk=0thenaa(c)=0
+1054 rem 0=power 1=exhaust 2=intake 3=compression
+1056 x=c*100:ys=cp(c)*80:gosub1100
+1060 linec*100+5,100,c*100+20,100,-(sr<2orsr>=3)*2
+1062 linec*100+60,100,c*100+75,100,-(sr<1orsr>=2)*2
+1070 linec*100+40-15-cs(c)*5,cp(c)*80+450,c*100+40+15+cs(c)*5,cp(c)*80+450,3
+1072 linec*100+40-15,cp(c)*80+200+60,c*100+40-15-cs(c)*5,cp(c)*80+450,3
+1074 linec*100+40+15,cp(c)*80+200+60,c*100+40+15+cs(c)*5,cp(c)*80+450,3
+1076 y1=450-20:y2=450+20:y3=cp(c)*80+450
+1078 ify3-20<y1theny1=y3-20
+1079 ify3>y2theny2=y3
+1080 linec*100+60,y1,c*100+80,y1,3
+1082 linec*100+60,y2,c*100+80,y2,3
+1084 linec*100+80-100,450-20,c*100+120-100,450-20,3
+1085 linec*100+80-100,450+20,c*100+120-100,450+20,3
+1086 fori=1to2
+1087 ifcs(i)>0thenlinec*100+80-100,450+20*cp(i),c*100+120-100,450+20*cp(i),13
+1088 nexti
+1096 nextc
+1098 endframe
+1099 return
+1100 rem gas!
+1110 t=rnd(-c-20):rem was -c
+1115 l=1
+1120 fori=1to20:rem was 20
+1130 ifsr>=0andsr<1orsr>=3thenx1=x+5+rnd(0)*70:y1=100-(-20+200-80-(200+ys))*rnd(0):linex1,y1,x1+2,y1,14+9*(sr<1)-3*(sr<1andl=0)
+1150 ifsr>=1andsr<3thenx1=x+5+rnd(0)*70:       y1=100-(-20+200-80-(200+80))*rnd(0)+ys-80:ify1>=100thenlinex1,y1,x1+2,y1,5-9*(sr>=2)
+1152 ifsr>=1andsr<3andy1<100thenx1=(x1-x)*.2+x+60+60*(sr>=2):linex1,y1,x1+2,y1,5-9*(sr>=2)
+1160 nexti
+1165 iflandsr<1thenl=0:goto1120
+1170 return
+2000 ifaa(c)=0thenaa(c)=1:alert3
+2010 return

@@ -1,0 +1,35 @@
+0 rem a demonstration program for mia : on 25 june 2011
+10 clearscr$="(clr)":rem clear screen
+20 yel$="(yel)":white$="(wht)":white$="(blk)"
+30 lblu$="(lblu)"
+100 print clearscr$;lblu$;
+110 print "this is a program"
+120 print "what is your name? ";
+130 input name$
+140 print "hello ";name$;", how are you? ";
+150 input feeling$
+160 print "interesting ";name$;", to hear that you are ";feeling$;"."
+180 print "if you would like to run the program again, type:  ";yel$;"run <enter>";lblu$
+190 print "to see the program, type:  ";yel$;"list <enter>";lblu$
+200 print "bye ";name$;"."
+210 print "hope that you have a great day ";name$; ". "
+220 print "what is your sister's name? ";
+230 input sister$
+240 print "hope that ";sister$;" behaving today."
+250 print "is she? ";
+260 input answer$
+270 if answer$ = "yes" then print "that is good ";name$;"!"
+280 if answer$ = "no" then print "that is no good ";name$;":("
+290 print "hello ";name$;" this is a program "
+300 print "we are going to ask you a few questions ";name$;" is that okay? "
+310 input suggest$
+320 if suggest$ = "yes" then print " okay here we go "
+330 if suggest$ = "no" then print " okay good bye you are now finished ";name$;
+340 print
+350 print " what is your favourite colour ";name$;" ? "
+360 input colour$
+370 print "wow i like ";colour$;" too!"
+380 print " what is your brother's name";name$;"?"
+390 input brother$
+400 print "is ";brother$;" being good?"
+410 input brothergood$

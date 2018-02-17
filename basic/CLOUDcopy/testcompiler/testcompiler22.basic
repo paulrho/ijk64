@@ -1,0 +1,6 @@
+10 fori=1to3
+20 a=a+1+i
+30 b=b+2+i
+40 c=c+3+i
+42 printa;b;c
+50 next

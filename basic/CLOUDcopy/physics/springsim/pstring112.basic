@@ -1,0 +1,43 @@
+10 rem to step through simulation of filters
+20 rem starting with a simple spring and numberical simulation
+100 screen1
+110 cls
+120 print"(clr)"
+130 n=5:dimx(n),xv(n),k(n),pk(n),dr(n)
+150 dt=0.1*5:d2=dt*dt
+160 t=0
+170 fori=1ton
+172   k(i)=0.01
+174   x(i)=0:xv(i)=1*0
+180   dr(i)=1/10/100:  rem 1/10/(10*2*(mathpi))=1/628
+182 nexti
+190 xs=1/10:ys=0.5
+195 fs=1.000:fs=1.0028:remfs=1.100:remfs=1.9
+200 print"(home)";fs;"t=";t;int(t/(2*(mathpi)*10)*10)/10
+300 fori=1ton
+301 printi
+302 print"x=";int(x(i)*1000)/1000:print"xv=";int(xv(i)*1000)/1000:print"pk=";int(pk(i)*1000)/1000;"        "
+303 print"db=";int(10*log((pk(i)/1000)^2)/log(10)*1000)/1000;"        "
+305 x(i)=x(i)+xv(i)*dt
+310 f=-k(i)*x(i)
+320 xv(i)=xv(i)+f*dt
+330 xv(i)=xv(i)-xv(i)*d2*dr(i)
+340 ifi=1andt<3000e9thenxv(i)=xv(i)+cos(t*0.100*fs)*1.0*d2*dr(i)*100
+342 ifi>=2andt<3000e9thenxv(i)=xv(i)+xv(i-1)*1.0*d2*dr(i)
+370 ifx(i)>pk(i)thenpk(i)=x(i)
+375 nexti
+380 t=t+dt
+400 pl=pl+1:ifpl=10thenpl=0
+405 ifpl>0then490
+410 fori=1ton
+412 remline100+t*1,400+x*10,100+t*1,400,5
+420 line100+t*0.1*xs,400+x(i)*ys,100+t*0.1*xs,400,5+i*2-2
+430 remline100+t*0.1*xs,400+log(x(i))*140*ys,100+t*0.1*xs,400,5+i*2-2
+440 nexti
+450 kl=kl+1:ifkl=10thenkl=0:geta$:ifa$<>""then500
+480 remendframe:beginframe:remcls
+490 goto200
+500 ifa$="r"thenfori=1ton:pk(i)=0:next
+590 goto200
+600 printsqr(10^(-60/10))
+610 print10*log(0.016^2)/log(10)

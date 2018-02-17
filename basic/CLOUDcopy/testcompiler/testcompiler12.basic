@@ -1,0 +1,4 @@
+5 fori=1to2
+10 if"a">"b"thenprint"what?!"
+20 if"a"<"b"thenprint"good!"
+99 next

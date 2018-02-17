@@ -1,0 +1,5 @@
+10 poke53281,0
+20 chdir"&&":rem for https
+30 print"(wht)";
+40 meta-rows60
+50 meta-charset1

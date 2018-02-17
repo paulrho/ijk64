@@ -1,0 +1,10 @@
+0 META-VERBOSE
+5 x=48
+10 DEFFNF(X)=2*X
+20 P=FNF(4)
+30 PRINT P
+50 print"----------"
+110 deffnw(y)=2*y
+120 p=fnw(5)
+130 printp
+140 printx

@@ -1,0 +1,164 @@
+1 dbg=0
+5 n=16:rem 16 divisions
+10 dim x(5+n*2),y(5+n*2),z(5+n*2)
+15 dim xs(n+1,2),ys(n+1,2)
+20 screen1:cls
+22 lset0,4: rem special to set anti alias to off
+24 xo=500:yo=250:xk=600:yk=600
+26 rect0,0,800,yo+tan(-.25)*yk,14:rem256*45+64
+28 rect0,yo+tan(-.25)*yk,800,1000,12:rem256*45+64
+30 x0=0.2
+40 ut=ti
+100 rem test of plotting
+110 zv=1
+120 rem ss=1 top shaded
+122 rem ss=3 left shaded
+200 x(0)=-1:y(0)=-2:z(0)=3+zv
+202 x(1)=-1:y(1)=-1:z(1)=3+zv
+204 x(2)=-1:y(2)=-1:z(2)=2+zv
+206 x(3)=-1:y(3)=-2:z(3)=2+zv
+208 tx=1:sh=0.5:ss=0:gosub1000
+210 x(0)=-1:y(0)=-1:z(0)=3+zv
+212 x(1)=-2:y(1)=-1:z(1)=3+zv
+214 x(2)=-2:y(2)=-1:z(2)=2+zv
+216 x(3)=-1:y(3)=-1:z(3)=2+zv
+220 tx=1:sh=1:ss=0:gosub1000
+230 x(0)=-1:y(0)=-2:z(0)=2+zv
+232 x(1)=-1:y(1)=-1:z(1)=2+zv
+234 x(2)=-2:y(2)=-1:z(2)=2+zv
+236 x(3)=-2:y(3)=-2:z(3)=2+zv
+240 tx=1:sh=0.8:ss=0:gosub1000
+250 x(0)=+1:y(0)=-2:z(0)=2+zv
+252 x(1)=+1:y(1)=-2:z(1)=3+zv
+254 x(2)=+0:y(2)=-2:z(2)=3+zv
+256 x(3)=+0:y(3)=-2:z(3)=2+zv
+258 tx=2:sh=1:ss=1:gosub1000
+260 x(0)=+0:y(0)=-2:z(0)=1+zv
+262 x(1)=+0:y(1)=-2:z(1)=2+zv
+264 x(2)=-1:y(2)=-2:z(2)=2+zv
+266 x(3)=-1:y(3)=-2:z(3)=1+zv
+268 tx=6:sh=1:ss=0:gosub1000
+270 x(0)=+0:y(0)=-2:z(0)=4+zv
+272 x(1)=+0:y(1)=-2:z(1)=5+zv
+274 x(2)=-1:y(2)=-2:z(2)=5+zv
+276 x(3)=-1:y(3)=-2:z(3)=4+zv
+278 tx=2:sh=1:ss=0:gosub1000
+280 x(0)=-1:y(0)=-2:z(0)=1+zv
+282 x(1)=-1:y(1)=-2:z(1)=2+zv
+284 x(2)=-2:y(2)=-2:z(2)=2+zv
+286 x(3)=-2:y(3)=-2:z(3)=1+zv
+288 tx=6:sh=1:ss=1:gosub1000
+290 x(0)=+0:y(0)=-2:z(0)=2+zv
+292 x(1)=+0:y(1)=-2:z(1)=3+zv
+294 x(2)=-1:y(2)=-2:z(2)=3+zv
+296 x(3)=-1:y(3)=-2:z(3)=2+zv
+298 tx=6:sh=1:ss=3:gosub1000
+300 x(0)=+0:y(0)=-2:z(0)=1+zv
+302 x(1)=+0:y(1)=-2:z(1)=2+zv
+304 x(2)=+1:y(2)=-2:z(2)=2+zv
+306 x(3)=+1:y(3)=-2:z(3)=1+zv
+308 tx=0:sh=1:ss=0:gosub1000
+310 x(0)=+2:y(0)=-2:z(0)=2+zv
+312 x(1)=+2:y(1)=-2:z(1)=3+zv
+314 x(2)=+1:y(2)=-2:z(2)=3+zv
+316 x(3)=+1:y(3)=-2:z(3)=2+zv
+318 tx=2:sh=1:ss=0:gosub1000
+320 x(0)=+2:y(0)=-2:z(0)=12+zv
+322 x(1)=+2:y(1)=-2:z(1)=13+zv
+324 x(2)=+1:y(2)=-2:z(2)=13+zv
+326 x(3)=+1:y(3)=-2:z(3)=12+zv
+328 tx=2:sh=1:ss=0:gosub1000
+330 x(0)=-2:y(0)=-2:z(0)=22+zv
+332 x(1)=-2:y(1)=-2:z(1)=23+zv
+334 x(2)=-3:y(2)=-2:z(2)=23+zv
+336 x(3)=-3:y(3)=-2:z(3)=22+zv
+338 tx=2:sh=1:ss=0:gosub1000
+340 x(0)=+3:y(0)=-2:z(0)=6+zv
+342 x(1)=+3:y(1)=-2:z(1)=7+zv
+344 x(2)=+2:y(2)=-2:z(2)=7+zv
+346 x(3)=+2:y(3)=-2:z(3)=6+zv
+348 tx=6:sh=1:ss=3:gosub1000
+350 x(0)=+0:y(0)=-2:z(0)=3+zv
+352 x(1)=+0:y(1)=-1:z(1)=3+zv
+354 x(2)=+1:y(2)=-1:z(2)=3+zv
+356 x(3)=+1:y(3)=-2:z(3)=3+zv
+358 tx=7:sh=0.8:ss=0:gosub1000:rem ss=2 good
+360 x(0)=+1:y(0)=-1:z(0)=3+zv
+362 x(1)=+1:y(1)=-1:z(1)=4+zv
+364 x(2)=+0:y(2)=-1:z(2)=4+zv
+366 x(3)=+0:y(3)=-1:z(3)=3+zv
+368 tx=6:sh=1:ss=0:gosub1000
+900 print(ti-ut)/60
+999 x0=x0+0.02:endframe:sleep1:beginframe:cls:goto40:end
+1000 rem pass in quads x(0)->x(3)  y,z
+1002 rem special move
+1003 gosub3100:rem rotate
+1004 x(0)=x(0)-x0:x(1)=x(1)-x0:x(2)=x(2)-x0:x(3)=x(3)-x0
+1005 beginframe
+1010 i=2:j=3:c=4:rem do front. keep xyz values
+1012 gosub2000
+1020 i=1:j=0:c=5+n:rem do back.  keep xyz values
+1022 gosub2000
+1030 i=2:j=1:c=0:t=0:rem do first row. toggle t keep xs
+1032 gosub2000
+1040 forl=1ton
+1042 ifdbg=1thenprint"line";l
+1050 i=4+l:j=5+n+l:c=0:t=1-t
+1052 gosub2000
+1060 gosub3000:rem plot points
+1070 nextl
+1080 endframe
+1090 return
+2000 rem do line pass in i and j index into x,y,z
+2010 dx=(x(j)-x(i))/n
+2020 dy=(y(j)-y(i))/n
+2030 dz=(z(j)-z(i))/n
+2032 xi=x(i)
+2034 yi=y(i)
+2036 zi=z(i)
+2037 xs(0,t)=xi/zi*xk+xo
+2038 ys(0,t)=-yi/zi*yk+yo
+2039 ifc>0thenx(c+0)=xi:y(c+0)=yi:z(c+0)=zi
+2040 fork=1ton
+2050 xi=xi+dx
+2052 yi=yi+dy
+2054 zi=zi+dz
+2060 xs(k,t)=xi/zi*xk+xo
+2065 ys(k,t)=-yi/zi*yk+yo
+2067 ifc>0thenx(c+k)=xi:y(c+k)=yi:z(c+k)=zi
+2070 next
+2080 ifdbg=2thenfork=0ton:printk;xs(k,t);ys(k,t):next
+2099 return
+3000 rem plot row pixels are (l,p)
+3002 ifl=1thenx=rnd(-52): rem seed the block
+3005 forp=0ton-1
+3010 rem r=3:b=11:g=124:goto3045
+3011 r=-1:cl=rnd(0)*64*64*256+100000+256*128*256:iftx=0thencl=(2+t+p)and15
+3012 iftx=1and(l=1orp=0)thencl=cl or (128)*256*256+(128)*256+(128)
+3013 iftx=2thencl=rnd(0)*256*256*64
+3014 iftx=4thencl=rnd(0)*256*64+218497192
+3015 iftx=3thenr=(180+int(rnd(0)*20)):g=200+int(rnd(0)*20):b=200+int(rnd(0)*20)
+3016 iftx=5thenr=10+int(rnd(0)*20):g=20+int(rnd(0)*20):b=20+int(rnd(0)*20)
+3017 iftx=6thenin=rnd(0):r=70+int(in*35):g=90+int(in*130):b=50+in*40
+3018 rem ftx=7thenin=rnd(0):cl=(70+int(in*35))*256*256+(90+int(in*130))*256+50+in*40:ifl>4orrnd(0)>0.85then cl=(70+int(in*35))*256*256+(70+int(in*35))*256+in*20
+3019 iftx=7thenin=rnd(0):r=70+int(in*35):g=90+int(in*130):b=50+in*40:ifl>4orrnd(0)>0.85then r=60+int(in*55):g=45+int(in*45):b=in*5
+3045 ifr=-1thenr=cl/256/256:g=int(cl/256)and255:b=cland255
+3047 ts=sh
+3050 ifss=1and(l<8)thents=ts*(l/8*0.3+0.7)
+3051 ifss=2and(l>7)thents=ts*((n-l)/8*0.3+0.7)
+3052 ifss=3and(p<8)thents=ts*(p/8*0.3+0.7)
+3053 ifss=4and(p>7)thents=ts*((n-p)/8*0.3+0.7)
+3056 cl=int(r*ts)*256*256+int(g*ts)*256+int(b*ts)
+3058 rectxs(p,t),ys(p,t),xs(p+1,t),ys(p+1,t),xs(p+1,1-t),ys(p+1,1-t), xs(p,1-t),ys(p,1-t),cl
+3060 nextp
+3090 return
+3100 rr=-.25:forv=0to3
+3110 y1=y(v)*cos(rr)-z(v)*sin(rr)
+3111 z1=y(v)*sin(rr)+z(v)*cos(rr)
+3112 y(v)=y1:z(v)=z1
+3113 nextv
+3115 return
+3120 linexs(p,t),ys(p,t),xs(p+1,t),ys(p+1,t),1
+3130 linexs(p,1-t),ys(p,1-t),xs(p+1,1-t),ys(p+1,1-t),1
+3140 linexs(p,1-t),ys(p,1-t),xs(p,t),ys(p,t),1
+3150 linexs(p+1,1-t),ys(p+1,1-t),xs(p+1,t),ys(p+1,t),2

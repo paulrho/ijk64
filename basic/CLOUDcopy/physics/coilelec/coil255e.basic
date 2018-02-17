@@ -1,0 +1,61 @@
+10 screen1:cls
+100 ra=0.2
+110 l=5:tl=50
+115 pt=0.10: rem pitch
+120 s=0.1
+180 sc=100:xo=500:yo=100:s2=0.010
+190 it=0
+200 :
+210 x=(2+ra+it*pt*.1)*cos(it):y=(2+ra+it*pt*.1)*sin(it*2)
+220 z=it*pt*0.1+1
+280 rem printint(x*100)/100,int(y*100)/100,int(z*100)/100
+285 remlinex0*sc,y0*sc,x*sc,y*sc,5
+286 remlinex0*sc+xo,z0*sc+yo,x*sc+xo,z*sc+yo,5
+287 if0anditthenlinex0*sc+xo,(z0+y0/2)*sc+yo,x*sc+xo,(z+y/2)*sc+yo,5
+288 ifitthenlinex0*sc+xo,(z0*1+y0/2*0)*sc+yo,x*sc+xo,(z*1+y/2*0)*sc+yo,5
+289 if0anditthenlinex0*sc+xo,(z0*0+y0/2*2+2)*sc+yo,x*sc+xo,(z*0+y/2*2+2)*sc+yo,5
+290 it=it+s
+292 x0=x:y0=y:z0=z
+295 remifz<lthen200
+297 ifit<tlthen200
+300 forzp=-0.5to7step.15
+302 remforzp=1.25to1.25step.15
+310   forxp=-10/2+0.00to10/5step0.3:print"xp=";int(xp*100)/100
+312   remforxp=0.00to0step0.3:print"xp=";int(xp*100)/100
+320     remforyp=-10/2to10/2step0.3
+321     foryp=0to0step0.1
+322       tx=0:ty=0:tz=0
+330       gosub1000
+332       remprint"v=";sqr(tx*tx+ty*ty+tz*tz)
+333 cl=7:iftz<0thencl=10
+334       remlinexp*sc+xo,(zp+yp/2)*sc+yo,(xp+tx*s2)*sc+xo,((zp+tz*s2)+(yp+ty*s2)/2)*sc+yo,cl
+335       linexp*sc+xo,(zp*1+yp/2*0)*sc+yo,(xp+tx*s2)*sc+xo,((zp+tz*s2)*1+(yp+ty*s2)/2*0)*sc+yo,cl
+336       remlinexp*sc+xo,(zp*0+yp/2*2+2)*sc+yo,(xp+tx*s2)*sc+xo,((zp+tz*s2)*0+(yp+ty*s2+2)/2*2)*sc+yo,cl
+337       remlinexp*sc+xo,(zp+yp/2)*sc+yo,(xp+.1)*sc+xo,((zp+.1)+(yp+.1)/2)*sc+yo,cl
+340     nextyp
+350   nextxp
+360 nextzp
+990 end
+1000 it=0
+1010 x=(2+ra+it*pt*.1)*cos(it):y=(2+ra+it*pt*.1)*sin(it*2)
+1020 z=it*pt*0.1+1
+1050 ifit=0then1090
+1052 gosub1100
+1090 it=it+s
+1092 x0=x:y0=y:z0=z
+1095 remifz<lthen1010
+1096 ifit<tlthen1010
+1099 return
+1100 rem vector cross product
+1110 rem unit r-hat vector
+1120 xr=xp-x:yr=yp-y:zr=zp-z:r=sqr(xr*xr+yr*yr+zr*zr)
+1125 xn=xr/r:yn=yr/r:zn=zr/r
+1130 xl=x-x0:yl=y-y0:zl=z-z0
+1132 rem le=sqr(xl*xl+yl*yl+zl*zl):xl=xl/le:yl=yl/le:zl=zl/le
+1140 ax=(yl*zn-zl*yn)/r/r
+1142 ay=(zl*xn-xl*zn)/r/r
+1144 az=(xl*yn-yl*xn)/r/r
+1150 rem print"v=";sqr(ax*ax+ay*ay+az*az)
+1160 tx=tx+ax:ty=ty+ay:tz=tz+az
+1180 rem print r
+1190 return

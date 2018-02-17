@@ -1,0 +1,22 @@
+5 print"(clr)";
+10 t$=ti$
+20 rem needs at least v3.4.0b1779
+50 x=val(left$(t$,2))-10
+60 l=x +10:gosub200:print"aest(down)"
+70 l=x - 7:gosub100:print"pst(down)"
+72 l=x + 0:gosub100:print"utc(down)"
+74 l=x - 4:gosub100:print"atl(down)"
+80 sleep100
+90 print"(home)(lblu)";:goto10
+100 ifl<0thenl=l+24
+102 ifl<0thenl=l+24
+110 ifl>=24thenl=l-24
+112 ifl>=24thenl=l-24
+120 print"(lblu)"mid$(str$(l+100),3);":"mid$(t$,3,2);"     (wht)";
+130 return
+200 ifl<0thenl=l+24
+202 ifl<0thenl=l+24
+210 ifl>=24thenl=l-24
+212 ifl>=24thenl=l-24
+220 print"(lblu)"mid$(str$(l+100),3);":"mid$(t$,3,2)":(blu)"right$(t$,2);" (wht)";
+230 return

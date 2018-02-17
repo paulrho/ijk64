@@ -1,0 +1,9 @@
+10 print"read SR"
+20 open8,8,8,"srdata1.csv,r"
+30 i=i+1:input#8,ca$,a2$,cn$,cr$,a5$,a6$,a7$,a8$,a9$,ac$,su$,b1$,b2$,b3$,b4$,b5$,b6$,b7$,c3$,c4$,c5$,c6$,c7$,c8$,c9$,d1$,d2$,d3$,z$
+40 remprintca$,a2$,cn$,cr$,a5$,a6$,a7$,a8$,a9$,ac$,su$,b1$,b2$,b3$,b4$,b5$,b6$,b7$,c3$,c4$,c5$,c6$,c7$,c8$,c9$,d1$,d2$,d3$,z$
+45 printcn$,ac$,b3$,b4$,b5$,b6$
+46 printcn$,ac$,b3$,b4$,b5$,b6$
+47 remstop
+50 ifst=0then30
+90 close8

@@ -1,0 +1,8 @@
+1 fori=1to2
+10 a$="abc"
+20 x$=left$(a$,3):printx$
+30 x$=left$(a$,2):printx$
+40 x$=left$(a$,4):printx$;"x"
+50 x$=left$(a$,0):printx$;"x"
+60 x$=left$(a$,-1):printx$;"x"
+99 next

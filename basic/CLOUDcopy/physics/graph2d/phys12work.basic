@@ -1,0 +1,60 @@
+10 rem physics question workbook
+50 remscreen1
+100 rem setup variables
+110 xo=50:yo=50:xsc=1200-xo*2:ysc=1000-yo*2
+120 kx=10:ky=-kx*ysc/xsc
+130 xc=0:yc=3:xp=1:yp=1
+190 screen1,xsc+xo*2,ysc+yo*2
+200 rem grid
+210 beginframe:cls
+230 forx=int((-kx/2+xc))*xptoint((+kx/2+xc))*xpstepxp
+232   sx=xo+((x-xc)/kx+0.5)*xsc
+234   linesx,yo,sx,yo+ysc,4-(x<>0)*11
+235   ifx=0thenxxo=sx
+236 next
+240 fory=int(-ky/2+yc)*yptoint(+ky/2+yc)*ypstep-yp
+242   sy=yo+((y-yc)/ky+0.5)*ysc
+244   linexo,sy,xo+xsc,sy,4-(y<>0)*11
+245   ify=0thenyyo=sy
+246 next
+250 forx=int((-kx/2+xc)*10)*xptoint((+kx/2+xc)*10)*xpstepxp
+252   sx=xo+((x/10-xc)/kx+0.5)*xsc
+254   linesx,yyo-10,sx,yyo+10,4-(x<>0)*11
+256 next
+260 fory=int((-ky/2+yc)*10*yp)toint((+ky/2+yc)*10*yp)step-yp
+262   sy=yo+((y/10-yc)/ky+0.5)*ysc
+264   linexxo-10,sy,xxo+10,sy,4-(y<>0)*11
+266 next
+280 linexo,yo,xo+xsc,yo,4
+282 linexo,yo+ysc,xo+xsc,yo+ysc,4
+284 linexo,yo,xo,yo+ysc,4
+286 linexo+xsc,yo,xo+xsc,yo+ysc,4
+290 circlexxo,yyo,5,4,0
+300 rem draw function(s)
+310 forx=(-kx/2+xc)to(+kx/2+xc)stepkx*0.0001
+350   y=-4.5/8*x^2+1*x+1.5
+352   sx=xo+((x-xc)/kx+0.5)*xsc
+354   sy=yo+((y-yc)/ky+0.5)*ysc
+356   ifsx>=xoandsx<=xsc+xo and sy>=yoandsy<=ysc+yothencirclesx,sy,2,3,1:rempsetsx,sy,3
+358   remifsx>=xoandsx<=xsc+xo and sy>=yoandsy<=ysc+yothenlinelx,ly,sx,sy,3:lx=sx:ly=sy
+360   y=-2*4.5/8*x+1
+362   sx=xo+((x-xc)/kx+0.5)*xsc
+364   sy=yo+((y-yc)/ky+0.5)*ysc
+368   ifsx>=xoandsx<=xsc+xo and sy>=yoandsy<=ysc+yothenpsetsx,sy,1
+370   y=-2*4.5/8
+372   sx=xo+((x-xc)/kx+0.5)*xsc
+374   sy=yo+((y-yc)/ky+0.5)*ysc
+378   ifsx>=xoandsx<=xsc+xo and sy>=yoandsy<=ysc+yothenpsetsx,sy,2
+390 next
+490 endframe
+600 rem loop
+610 geta$:ifa$=""thensleep10:goto610
+620 ifa$="(up)"thenyc=yc+0.1*kx/10
+622 ifa$="(down)"thenyc=yc-0.1*kx/10
+624 ifa$="(left)"thenxc=xc-0.1*kx/10
+626 ifa$="(rght)"thenxc=xc+0.1*kx/10
+630 ifa$="+"thenkx=kx*1.2:ky=ky*1.2
+632 ifa$="-"thenkx=kx/1.2:ky=ky/1.2
+640 ifa$="*"thenkx=kx*1.2:remky=ky*1.2
+642 ifa$="/"thenkx=kx/1.2:remky=ky/1.2
+690 goto200

@@ -1,0 +1,5 @@
+5 fori=1to2
+10 a$="abc"
+20 x$=mid$(a$,3,1)
+30 printx$
+99 next

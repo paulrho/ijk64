@@ -1,0 +1,81 @@
+5 open8,8,8,"@0:scores1,s,w"
+10 screen1,800,400:cls
+20 rr=1000+72:tg=0.001
+30 dimrx(10)
+32 rx(0)=0.5:rx(1)=0.0:rx(2)=0.9:rx(3)=0.6:rx(4)=0.2:rx(5)=0.7:rx(6)=0.4:rx(7)=0.8:rx(8)=0.1:rx(9)=0.3
+100 n=10:at=0:de=1
+110 dimr(1,n),g(1,n)
+115 dimtn$(n)
+117 restore:fori=1ton:readtn$(i):next
+118 dataalpha,beta,gamma,lions,dogs,hawks,pugs,nogs,lugs,dons
+120 xx=rnd(-rr)
+122 s1=0:s2=0
+125 goto1000
+130 fori=1ton:r(at,i)=1.0+rnd(rr)*0.4:r(de,i)=1.0+rnd(rr)*0.4:next
+200 rem random teams play in each round (for ease)
+205 rd=rd+1:print"(down)round ";rd:rg=0
+207 fori=1ton:x(i)=0:next
+210 rg=rg+1
+215 t1=int(rnd(rr)*n+1):ifx(t1)then215
+217 x(t1)=1
+220 t2=int(rnd(rr)*n+1):ifx(t2)then220
+222 x(t2)=1
+230 printleft$(tn$(t1)+"       ",7);" v ";left$(tn$(t2)+"       ",7);
+240 s1=r(at,t1)/r(de,t2)*15
+250 s2=r(at,t2)/r(de,t1)*15
+260 print":  ";mid$(str$(int(s1*10)/10+100.01),3,4);" ";mid$(str$(int(s2*10)/10+100.01),3,4)
+270 ifrg<5then210
+274 fori=1ton:forj=0to1:r(j,i)=r(j,i)*(1+(rnd(rr)-0.5)*.2)
+275 circlerd*10+j*2*120,300-r(j,i)*100+1,10,15,1
+276 circlerd*10+j*2*120,300-r(j,i)*100,10,i+3,1
+277 ifj=0thencirclerd*10+j*2*120,300-r(j,i)*100,10,1,0
+278 nextj,i
+280 ifrd<18then205
+1000 rem play game
+1001 line100,100,100+4*20*10/2,100,7
+1002 forq=0to4:line100+q*20*10/2,100-20,100+q*20*10/2,100+20,7:nextq
+1010 sx=40:x=sx/2:q=1:yv=2:y=0:xv=0:t=0
+1020 t=t+1/100:remx=x+(rnd(rr)-0.5)*2*4
+1021 ift>20*0  thent=0:q=q+1:sleep1000:yv=2:y=0:xv=0:x=sx/2:ifq=5thengosub1300:rr=rr+1:goto120
+1022 x=x+xv:y=y+yv:yv=yv-1
+1024 remify<0theny=0:gosub1400:yv=(rn-0.5)*2*1.3:gosub1400:xv=-(int(rn*2)*2-1)*yv
+1025 ify<0theny=0:gosub1400:yv=(rn-0.5)*2*1.3:gosub1400:xv=-(int(rn*2)*2-1)*yv
+1026 ifxv<0thena1=a1-xv
+1028 ifxv>0thena2=a2+xv
+1030 beginframe:gosub1200:line100,300,100+sx*10,300,2
+1031 line100+10*sx/2,300,100+sx/2*10,310,5
+1032 circlex*10+100-5,300-y*10-10,10,10,1
+1033 gprintstr$(int(s1*10+0.01)/10),30,300,5
+1034 gprintstr$(int(s2*10+0.01)/10),100+10*sx+10,300,5
+1035 gprint"Q"+mid$(str$(q),2)+str$(int(t*10)/10),100+10*sx/2+10,340,5
+1036 remcircle(((q-1)*20)+t)*10/2+100,100-(s1-s2)*5,3,1,1
+1037 line(((q-1)*20)+t)*10/2+100,100-(ld)*5*2,(((q-1)*20)+t)*10/2+100,100-(s1-s2)*5*2,1:ld=s1-s2
+1039 endframe:sleep20
+1040 ifx<0thenx=0+sx/6:gosub1100:s1=s1+ss
+1050 ifx>sxthenx=sx-sx/6:gosub1100:s2=s2+ss
+1055 print(a1-a2)/a1;"(up)"
+1060 goto1020
+1100 ss=0.1:yv=0:gosub1400:ifrn<0.5thenss=1:x=sx/2:yv=2:xv=0
+1105 y=0:xv=0
+1110 return
+1200 rect10,180,sx*10+90+150,360,0
+1210 return
+1300 print:print"avg ran=";tt/tc
+1301 print#8,"":print#8,"avg ran=";tt/tc:tt=0:tc=0
+1305 a1=0:a2=0:printrr,str$(int(s1*10+0.01)/10),
+1306 print#8,"scores" rr,str$(int(s1*10+0.01)/10),
+1310 printstr$(int(s2*10+0.01)/10)
+1311 print#8,str$(int(s2*10+0.01)/10)
+1320 return
+1400 rn=rnd(rr)
+1410 tt=tt+rn:tc=tc+1:return
+1420 md=md+1:ifmd=2thenmd=0:tg=1-tg
+1430 rn=tg:return
+1440 md=md+1:ifmd=10thenmd=0
+1450 rn=1-(rx(md)+.05):return
+1460 md=md+1:ifmd=100thenmd=0
+1470 rn=(md/100+.005):return
+1480 rn=rnd(rr)-0.5:ifrn<0.0thenrn=rn+1
+1490 tt=tt+rn:tc=tc+1:return
+1500 rn=rnd(rr):xx=rnd(rr):rem throw
+1510 tt=tt+rn:tc=tc+1:return

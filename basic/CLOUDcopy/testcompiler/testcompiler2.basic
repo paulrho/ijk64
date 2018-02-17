@@ -1,0 +1,6 @@
+10 printa,b
+40 a=5
+50 b=6
+60 printa,b
+100 fori=1to10000:c=7:nexti
+110 printc

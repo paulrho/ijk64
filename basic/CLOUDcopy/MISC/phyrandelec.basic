@@ -1,0 +1,14 @@
+100 screen1
+150 n=1:dt=1
+200 ex=rnd(0)-0.5:ey=rnd(0)-0.5
+210 d=sqrt(ex^2+ey^2)
+220 pe=-1.0/d
+230 ke=2-pe:v=sqrt(ke/2)
+250 t=t+dt
+300 printt;int(d*1000)/1000;int(ke*1000)/1000;int(pe*1000)/1000;ke+pe
+310 circle400,400,10,5,1
+320 circle400+ex*100,400+ey*100,5,6,1
+330 line400+ex*100,400+ey*100,400+ex*100+ey*50/d*v,400+ey*100-ex*50/d*v,1
+370 sleep200
+380 endframe:beginframe:cls
+390 goto200

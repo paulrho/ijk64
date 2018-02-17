@@ -1,0 +1,13 @@
+100 gosub200
+110 gosub300
+120 print"got to end okay"
+199 end
+200 fori=1to10
+210 print"200";i
+220 return
+300 meta-dumpstate
+305 fori=1to20
+310 print"300";i
+315 meta-dumpstate:stop
+320 next
+330 return

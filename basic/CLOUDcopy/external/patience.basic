@@ -1,0 +1,197 @@
+   10 rem"{20}{20}{20}{20}{20}{20}{20}patience - conversion from spectrum to  commodore basic
+   15 rem"{20}{20}{20}{20}{20}{20}{20}
+19 poke650,128:printchr$(8)chr$(142):poke53281,1:poke53280,0:poke808,225
+   20 dims(52),fp(4),wp(7,20),pw(7),ep(7)
+   30 sl$="(home)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)":cl$="(blk)(wht)(red)(cyn)(grn)(blu)(yel)"
+   40 sp$="                                        ":su$="(red)S(blk)X(red)Z(blk)A"
+   50 sn$="a23456789tjqk"
+   60 cm$(0)="stop cheating!":cm$(1)="learn the rules!"
+   70 cm$(2)="cheating, eh?"
+  100 gosub9000
+  110 rem -- shuffle pack --
+  120 print"(clr)(down)(down)(down)(down)"tab(10)"please wait - i'm(down)(down)"
+  130 forn=1to52:printmid$(cl$,int(rnd(1)*7)+1,1);
+140 print"(rvon) s h u f f l i(BLOCK)n g   t h e   p a c k .  (rvof)(up)";:gosub15000
+141 sleep100
+  150 p=int(rnd(1)*52)+1:ifs(p)<>0then150
+  160 s(p)=n:next:forn=1to4:fp(n)=0:next:sp=52
+  165 print"(clr)(gry1)1(blk)U(HLINE)(HLINE)I(gry1)2(blk)U(HLINE)(HLINE)I(gry1)3(blk)U(HLINE)(HLINE)I(gry1)4(blk)U(HLINE)(HLINE)I(gry1)5(blk)U(HLINE)(HLINE)I(gry1)6(blk)U(HLINE)(HLINE)I(gry1)7(blk)U(HLINE)(HLINE)I(blk)"
+  166 printleft$(sl$,23)tab(36)"(gry1)f~"
+  167 print"(down)  p~(blk)(home)"
+  170 c=0:forn=1to7:form=1ton:gosub9550
+  180 wp(n,m)=s(sp):sp=sp-1:next:pw(n)=n:ep(n)=n:next
+  190 forn=1to7:m=pw(n):c=wp(n,m):gosub9550:next
+  200 fory=2to17step5:x=35:c=0:s1$=mid$(su$,((y-2)/2.5)+1,2):s2$=s1$:gosub9700
+  205 printleft$(sl$,y+1)tab(x)"U(HLINE)(HLINE)I":next
+  210 dc=sp:g=0:ch=0
+  300 rem -- main loop --
+  305 ifdc<0thendc=dc+3
+  310 g=g+1:c=s(dc):x=1:y=19:gosub9600
+  315 printleft$(sl$,20)" U(HLINE)(HLINE)I"
+  320 printleft$(sl$,21)tab(6)"please enter ":printtab(6)" your move.       "
+  325 printleft$(sl$,23)tab(6)"             "
+  330 printleft$(sl$,23)tab(9)"(rvon) (rvof)";:geta$:ifa$<"1"ora$>"p"then330
+  335 p1=val(a$):print"(left)"a$;
+  340 ifp1>0andp1<8then390
+  350 ifa$="p"then390
+  360 ifa$="e"then10000
+  370 ifa$="d"then1000
+  380 goto320
+  390 print" to (rvon) (rvof)";
+  400 geta$:ifa$<chr$(20)ora$>"f"then400
+  405 ifa$<>chr$(20)thenprint"(left)"a$;
+  410 p2=val(a$):ifa$=chr$(20)then320
+  420 ifp2>0andp2<8then440
+  430 ifa$<>"f"thenprint"(left)(rvon) (rvof)";:goto400
+  440 rem -- input has valid syntax --
+  445 ifp1=p2andp1>0thenem$="why try that?":gosub2000:goto300
+  450 ifp1=0andp2>0thengosub11000
+  460 ifp1=0andp2=0thengosub12000
+  470 ifp1>0andp2=0thengosub13000
+  480 ifp1>0andp2>0thengosub14000
+  490 fi=1:forn=1to4:iffp(n)<13thenfi=0
+  500 next:iffi=0then300
+  510 rem -- success!! --
+  520 print"(clr)(down)(down)(down)(down)(down)(down)(down)(rvon)    c o n g r a t u l a t i o n s ! !   (rvof)"
+  530 print"(down)(down)(down)"tab(12)"you've finished!"
+  540 printtab(9)"(down)you took "g" goes, and"
+  550 ifch=0thenprinttab(15)"(down)(down)didn't cheat!":goto600
+  560 printtab(8)"(rvon)(red)tried to cheat "ch"(left)  time";:ifch>1thenprint"s";
+  570 print".(rvof)(blk)"
+  600 print"(down)(down)(down)(rvon)   would you like to try again? (y/n)   (rvof)"
+  610 geta$:ifa$="n"ora$="N"then700
+  620 ifa$<>"y"anda$<>"Y"then610
+  630 printtab(10)"(down)(down)o.k. - you asked for it!"
+  640 forn=0to52:s(n)=0:next:goto110
+  700 print"(down)(down)(down)(down)          c o w a r d !(BLOCK)!(BLOCK)!(BLOCK)!"
+  710 print"(down)(down) i will self-destruct in    seconds!!":poke808,237:ti$="000000"
+  720 printtab(24)"(up)"10-val(ti$)"(left) ":ifval(ti$)<10then720
+  730 print"(down)(down)(rvon) bang!"
+  740 rem this ending could equally well new the program or reset the machine with
+  750 rem    sys 64738 : rem -- rem the start of this line before running it!!!!!
+  760 fort=1to2000:nextt
+  770 print"(clr)":end
+ 1000 rem -- deal new card --
+ 1010 dc=dc-3:ifdc<1thendc=dc+sp
+ 1020 goto300
+ 2000 rem -- error report --
+ 2001 x$="               ":ifch/10=int(ch/10)thenx$=cm$(int(rnd(1)*3))
+ 2010 ch=ch+1:printleft$(sl$,21)tab(6)"(rvon)"em$"(rvof)":printtab(6)x$
+ 2020 em$="":n=0:poke54276,0
+ 2030 forwa=15to0step-1:getw$:ifw$<>""thenwa=0:n=1000
+ 2035 poke54296,wa:poke54276,129:poke54277,15:poke54273,15-(wa):poke54272,wa*5
+ 2040 fork=1ton:next:next:return
+ 3000 rem -- derive suit & card no. from data --
+ 3010 s1=int((c1-1)/13)+1:t1=c1-(13*(s1-1))
+ 3020 s2=int((c2-1)/13)+1:t2=c2-(13*(s2-1))
+ 3030 c1$="(blk)":c2$="(blk)":ifs1/2=int(s1/2)thenc1$="(red)"
+ 3040 ifs2/2=int(s2/2)thenc2$="(red)"
+ 3050 return
+ 4000 rem -- reprint column (co) --
+ 4005 cp=1060+(co*5)
+ 4010 print"(home)";
+ 4011 printtab(((co-1)*5)+1)"    "
+ 4012 ifpeek(cp)=66thencp=cp+40:goto4011
+ 4015 printtab(((co-1)*5)+1)"    "
+ 4020 ifpw(co)<1thenpw(co)=0:return
+ 4030 print"(home)"tab(((co-1)*5)+1)"U(HLINE)(HLINE)I"
+ 4040 n=co:form=1topw(n):c=wp(n,m):ifm<ep(n)thenc=0
+ 4050 gosub9550:next:return
+ 9000 rem instructions
+ 9010 print"(clr)";tab(13)"(blk)(rvon) patience. (rvof)(down)"
+ 9020 print"(red)  from one to seven cards are dealt into";
+ 9030 print"seven columns, the last card only being dealt face up.(down)"
+ 9040 print"  exposed cards are moved in ascending"
+ 9050 print"suit sequence to the aces, as these"
+ 9060 print"appear, and in a decending sequence of"
+ 9070 print"alternate colours to the columns."
+ 9080 print"complete sequences of cards may be moved";
+ 9090 print"between columns, but empty columns may"
+ 9100 print"only be filled by sequences of cards    starting with a king.(down)"
+ 9110 print"  the rest of the pack is dealt three"
+ 9120 print"cards at a time to a waste pile, the top";
+ 9130 print"card of which is always available."
+ 9135 print"(down)  any number of redeals are allowed."
+ 9140 gosub9500
+ 9150 print"(clr)";tab(13)"(blk)(rvon) patience. (rvof)(blu)(down)"
+ 9160 print"  cards are moved by typing the number"
+ 9170 print"of the original column, or 'p' for the"
+ 9180 print"waste pile, followed by the destination"
+ 9190 print"column number, or 'f' for the foundationpile. (aces going up.)(down)(down)(down)"
+ 9200 print"         other commands are :-(down)(down)"
+ 9210 print" 'd' - deals another group of 3 cards."
+ 9220 print"(down) 'e' - ends the game (if you get stuck)"
+ 9500 printsl$"   (rvon) please press any key to continue (rvof)";
+ 9510 printsl$sp$;
+ 9520 getw$:ifw$=""then9500
+ 9530 return
+ 9550 rem -- print card (c) at col (n), number (m) --
+ 9560 x=((n-1)*5)+1:y=m-1
+ 9600 rem -- draw card c at x,y --
+ 9605 f$="  ":ifc=0thenf$="(blu)VV(blk)"
+ 9610 ifc=0thens1$="(blu)V(blk)":s2$="(blu)V(blk)":goto9700
+ 9620 s=int((c-1)/13)+1:s2$=mid$(su$,(s*2)-1,2)
+ 9630 t=c-(13*(s-1)):s1$=mid$(sn$,t,1)
+ 9700 printleft$(sl$,y+2)tab(x)"B"s2$"(left)"s1$s2$"(blk)H"
+ 9710 printtab(x)"B"f$"H":printtab(x)"B"s2$s1$"(blk)H":printtab(x)"JFFK";
+ 9720 ifc>0thengosub15000
+ 9730 return
+10000 rem -- end routine (e pressed) --
+10001 printleft$(sl$,21)tab(6)"are you sure?"
+10002 printtab(6)"   (y/n)    ":printtab(6)"    end"
+10003 geta$:ifa$="y"then10010
+10004 ifa$="n"then300
+10005 goto10003
+10010 em$="":gosub2000:ch=ch-1
+10020 printleft$(sl$,21)tab(6)"   the cards were laid out"
+10022 printtab(15)"like this ..."
+10025 printtab(6)"  press any key to continue."
+10030 forco=1to7:ep(co)=0:gosub4000:next
+10040 geta$:ifa$=""then10040
+10050 print"(home)"
+10060 forn=1to25:print"(rvon)(red)"sp$;:next
+10070 forn=1to25:print"(up)(up)(rvon)(pur)"sp$;:next
+10080 print"(blk)(down)(down)    well - i would have carried on      "
+10085 print"(down)      a bit longer & finished it!"
+10086 print"(rvon)(red)(down)but then, you haven't got much patience!(down)"
+10090 goto540
+11000 rem -- pack -> working piles --
+11005 ifsp<1thenem$="  no cards!  ":goto2000
+11010 c1=s(dc):c2=wp(p2,pw(p2)):gosub3000
+11015 if(t1=13)and(pw(p2)<1)thenpw(p2)=0:goto11040
+11020 if(t1<>t2-1)orpw(p2)<1thenem$="illegal move!":goto2000
+11030 d=s1-s2:ifd/2=int(d/2)thenem$="wrong colour!":goto2000
+11040 pw(p2)=pw(p2)+1:wp(p2,pw(p2))=c1:co=p2
+11050 c=0:x=1:y=19:gosub9600
+11060 sp=sp-1:forn=dctosp:s(n)=s(n+1):next:gosub4000
+11070 ifdc>spthendc=sp
+11080 return
+12000 rem -- pack -> foundation --
+12005 ifsp<1thenem$="  no cards!  ":goto2000
+12010 c1=s(dc):gosub3000
+12020 iffp(s1)<>t1-1thenem$="illegal move!":goto2000
+12030 fp(s1)=t1:c=0:x=1:y=19:gosub9600
+12040 sp=sp-1:forn=dctosp:s(n)=s(n+1):next:ifdc>spthendc=sp
+12050 c=c1:x=35:y=(s1*5)-3:gosub9600:return
+13000 rem -- working pack -> foundation --
+13010 c1=wp(p1,pw(p1)):gosub3000
+13020 iffp(s1)<>t1-1thenem$="illegal move!":goto2000
+13030 fp(s1)=t1:c=0:x=1:y=19:gosub9600
+13040 pw(p1)=pw(p1)-1:ifep(p1)>pw(p1)thenep(p1)=pw(p1)
+13050 co=p1:gosub4000:goto12050
+14000 rem -- working pack -> working pack --
+14005 ifep(p1)<1andpw(p1)>0thenep(p1)=1
+14010 c1=wp(p1,ep(p1)):c2=wp(p2,pw(p2)):gosub3000
+14015 if(t1=13)and(pw(p2)<1)thenpw(p2)=0:goto14040
+14020 if(t1<>t2-1)orpw(p2)<1thenem$="illegal move!":goto2000
+14030 d=s1-s2:ifd/2=int(d/2)thenem$="wrong colour!":goto2000
+14040 m=0:forn=ep(p1)topw(p1):m=m+1
+14050 wp(p2,pw(p2)+m)=wp(p1,n):next
+14060 pw(p2)=pw(p2)+m:pw(p1)=pw(p1)-m:ifpw(p1)<ep(p1)thenep(p1)=pw(p1)
+14070 co=p1:gosub4000:co=p2:gosub4000:return
+15000 rem -- sound for card turning --
+15010 v=54296:w=54276:a=54277:h=54273:l=54272
+15020 pokew,0:pokev,10
+15030 forcs=15to55step5:pokew,129:pokea,127:pokeh,cs:pokel,0:next
+15040 pokev,0:return
+60000 save"(clr)(blk)patience 64(lred)"

@@ -1,0 +1,15 @@
+10 dt=0.01
+20 screen1,200,200
+30 cls
+100 k1=1:k2=-0.5
+110 x1=-10:x2=10
+120 v1=0:v2=0
+200 v1=v1+((x2-x1)*k1-(x2-x1)*k2)*dt
+210 x1=x1+v1*dt
+220 rem printint(t*100)/100;int(x1*100)/100;int(v1*100)/100
+260 beginframe:remcls
+270 line100+x1,10+t*5,100+x1,10+t*5,5
+272 sleep1
+275 endframe
+280 t=t+dt
+290 goto200

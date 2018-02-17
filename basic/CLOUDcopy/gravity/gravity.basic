@@ -1,0 +1,63 @@
+10 rem print"(clr)";
+20 info=0
+100 label start
+110 screen1
+115 lset0,4: rem secret setting to switch off antialias
+120 cls
+130 rect0,0,1000,1000,4: rem black
+150 xmax=600/2:ymax=600/2
+200 dim xo(20),yo(20),xvo(20),yvo(20)
+202 xo(0)=100:yo(0)=100: xvo(0)=0.02:yvo(0)=0.01
+210 xo(1)=50:yo(1)=50:   xvo(1)=0.2:yvo(1)=-0.01
+220 xo(2)=0:yo(2)=150:   xvo(2)=-0.05:yvo(2)=0.02
+230 xo(3)=-10: yo(3)=200
+232 xvo(3)=-0.20/2
+234 yvo(3)=-0.3/100
+240 xo(4)=10: yo(4)=-60
+242 xvo(4)=-(0.20+0.10)*1
+244 yvo(4)=-0.03
+300 re=4
+310 gm=5.0
+320 rem '6.632e-11*5.98e24
+330 rem circle xmax/2,ymax/2,Re color 10 filled
+340 dt=0.5
+350 d2=dt*dt
+400 label iter
+410 t=t+dt
+420 for obj=1 to 4
+430 xv=xvo(obj): yv=yvo(obj)
+440 x=xo(obj): y=yo(obj)
+450 rem if info then print x;" ";y;"  ";xa;ya
+460 r2=x*x+y*y
+470 r=sqr(r2)
+480 if r<re then print"obj";obj;"crashed":end:sleep2000:print"restart":goto start
+500 a=gm/r2*dt
+510 xa=-a*x/r: ya=-a*y/r
+520 x=x+xv*dt+0.5*xa*dt
+530 y=y+yv*dt+0.5*ya*dt
+540 xv=xv+xa
+550 yv=yv+ya
+
+600 rem'correction
+610 oxa=xa: oya=ya
+620 r2=x*x+y*y
+630 r=sqr(r2)
+640 a=gm/r2*dt
+650 xa=-a*x/r: ya=-a*y/r
+660 cxa=xa-oxa: cya=ya-oya
+670 x=x+cxa*dt/6.0
+680 y=y+cya*dt/6.0
+690 xv=xv+0.5*cxa
+695 yv=yv+0.5*cya
+697 remprint cxa*cya;
+    rem 'erase old
+705 line xo(obj)+xmax,yo(obj)+ymax,xo(obj)+xmax,yo(obj)+ymax,8:rem 2
+    rem 'mark new
+715 line x+xmax,y+ymax,x+xmax,y+ymax,1
+    rem 'delay 20
+750 remifcxa*cya>1e-5thendt=dt/2
+810 xo(obj)=x: yo(obj)=y
+820 xvo(obj)=xv: yvo(obj)=yv
+830 next obj
+840 rem print
+990 goto400:goto iter :rem label slow!

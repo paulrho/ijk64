@@ -1,0 +1,707 @@
+    0 rem meta-scale3
+    0 meta-charset 1
+    1 open5,2,3,chr$(7)+chr$(0):dl$=chr$(20):cr$=chr$(13)
+    2 fast:remtrap9000
+    3 goto6
+    4 print#5,x$:printx$:return
+    5 print#5,x$;:printx$;:return
+    6 nj=46:jn=1:mw=15000:print"(clr)(lblu)";:d$=chr$(20)+".":printchr$(14);chr$(8);:ms=180
+    7 poke53280,0:poke53281,0:lj=2
+   10 dimnj%(46,11),w$(50),c$(12),ob$(176),op%(180),ot%(180),gp(46),gb(176)
+   12 gb(21)=160:gb(0)=500:dimvl(176),mx(176),d$(46),f$(99),f%(99),im%(40),t%(99)
+   14 dimp%(40),p$(36),pp%(40),pt%(40),sm%(40),sk%(40),ex(40),sf(176),gg(36),rb$(10),rb%(10)
+   15 p%(1)=1:rem player person 1 is logical 1
+   16 rb=10:printchr$(142);"entering junction data"
+   20 fori=1tonj:foru=0to11:readnj%(i,u):nextu,i:ex=0:gb(22)=3*2*(4^2*10^2+1^5)
+   21 print"entering vocabulary"
+   22 fori=1to1000:readw$(i):ifw$(i)="%"thennw=i-1:goto26
+   24 next:print"too many"
+   26 fori=0to1000:readc$(i):ifc$(i)="%"then92
+   28 next:print"too many c"
+   30 data+0,0,2,8,0,0,0,0,0,0,0,0,+1,0,3,0,0,0,0,9,0,0,0,0
+   32 data+2,0,0,4,0,0,0,0,0,0,0,0,+0,3,0,5,9,0,30,0,0,0,0,0
+   34 data+6,4,0,0,0,0,0,0,0,0,0,0,+7,0,5,0,0,9,0,0,0,0,0,0
+   36 data+0,8,6,0,0,0,0,0,0,0,0,0,+0,1,0,7,0,0,9,0,0,0,0,0
+   38 data+10,0,0,0,0,0,0,0,8,2,4,6,+0,11,9,12,18,0,0,0,0,0,0,0
+   40 data+17,0,0,10,0,0,0,0,0,0,0,0,+13,10,0,0,0,0,0,0,0,0,0,0
+   42 data+14,0,12,0,0,18,0,0,0,0,0,0,+0,15,13,0,0,0,0,0,0,0,0,0
+   44 data+0,16,0,14,25,0,18,0,0,0,0,0,+0,0,17,15,0,0,0,0,0,0,0,0
+   46 data+16,19,11,0,0,0,0,18,0,0,0,0,+21,24,23,22,0,0,0,0,15,17,10,13
+   48 data+20,43,0,17,0,0,0,0,0,0,0,0,+0,0,19,0,0,0,0,0,0,0,0,0
+   50 data+0,0,18,0,0,0,0,0,0,0,0,0,+0,18,0,0,0,0,0,0,0,0,0,0
+   52 data+18,0,0,0,0,0,0,0,0,0,0,0,+0,0,0,18,0,0,0,0,0,0,0,0
+   54 data+27,26,29,28,0,0,0,0,0,0,15,0,+0,0,0,25,0,0,0,0,0,0,0,0
+   56 data+0,0,25,0,0,0,0,0,0,0,0,0,+0,25,0,0,0,0,0,0,0,0,0,0
+   58 data+25,0,0,0,0,0,0,0,0,0,0,0,+0,0,31,0,0,0,0,0,4,0,0,0
+   60 data+30,0,32,,,,,,,,,,+31,37,33,36,,,,,,,,,+32,39,34,40,,,,,,,,
+   62 data+33,41,35,42,,,,,,,,,+34,0,38,0,,,,,,,,,+0,32,0,0,,,,,,,,
+   64 data+0,0,0,32,,,,,,,,,+35,0,0,0,,,,,,,,
+   66 data+0,0,0,33,,,,,,,,,+0,33,0,0,,,,,,,,,+0,0,0,34,,,,,,,,
+   68 data+0,34,0,0,,,,,,,,,+0,45,0,19,,,,,,,,,+0,0,46,0,,,,,,,,0
+   70 data+0,46,0,43,,,,,,,,0,+44,0,0,45,,,,,,,,0
+   92 print"skimming objects"
+   94 fori=1to1000:readt$,op%(i),vl(i),mx(i):printi;"(up)":ift$="%"thenno=i-1:goto97
+   95 ifleft$(t$,1)="*"thent$=right$(t$,len(t$)-1):ot%(i)=2
+   96 gosub1600:ob$(i)=t$:next:print"too many"  :rem (i)**
+   97 print"reading books":gosub5400:  p5=1:pl=1:p6=pl+10000: rem needs to be here
+   98 print"entering junction descriptions":gosub2600:x$="(clr)"+chr$(14):gosub5:gosub1020
+   99 rem must set p5=1 first! 2006
+  100 jn(p5)=jn:ex(p5)=ex:lj(p5)=lj:wc(p5)=wc:la(p5)=la:p5=1:pl=1:p6=pl+10000
+  101 jn=jn(p5):ex=ex(p5):lj=lj(p5):wc=wc(p5):la=la(p5)
+  102 gosub2900:x$="(down)(wht)What do you want to do? ((lred)"+p$(pl)+"(wht))(cyn)":gosub4:ls=0:ld=0:sk%(pl)=20+int(ex/1000)
+  103 fori=1to10:f$(i)="":f%(i)=0:next
+  110 gosub8100
+  117 remopen1,0:input#1,a$:close1:print"(lblu)":z$=a$:ifa$="w"then100
+  118 a$=left$(a$,80):x$="(lblu)":gosub4:z$=a$:ifa$="edit1"thenx=0:gosub5800:goto100
+  119 ifa$="edit2"thenx=0:gosub5900:goto100
+  120 gl=0
+  122 i=instr(a$," "):ifithenf$(gl)=left$(a$,i-1):gl=gl+1:a$=mid$(a$,i+1):goto122
+  124 f$(gl)=a$:goto150
+  128 gl=0:fori=1tolen(a$):g$=mid$(a$,i,1)
+  130 ifg$=" "thenf$(gl)=left$(a$,i-1):a$=right$(a$,len(a$)-i):gl=gl+1:i=0
+  140 next:f$(gl)=a$
+  150 fori=0togl:t$=f$(i):foru=1tonw
+  160 ift$=w$(u)thenf%(i)=u:t%(i)=0:goto180
+  170 nextu:f%(i)=0
+  180 nexti
+  182 fori=0togl:t$=f$(i):iff%(i)<>0then188
+  183 foru=1tono
+  184 ift$=ob$(u)thenf%(i)=u:t%(i)=1:goto188
+  186 nextu:f%(i)=0
+  188 nexti:fori=2to3
+  190 iff%(0)<>0andf%(1)=0theniff$(i)<>""thenf$(1)=f$(1)+" "+f$(i):f$(i)="":goto150
+  192 next:iff%(1)=0andf$(1)<>""thengosub5000
+  196 t1=t%(0):t2=t%(1):t3=t%(2)
+  198 f1=f%(0):f2=f%(1):f3=f%(2)
+  200 wg=0:iff1=3andf2=4thenwd=0:wg=1
+  202 iff1=3andf2=5thenwd=1:wg=1
+  204 iff1=3andf2=6thenwd=2:wg=1
+  206 iff1=3andf2=7thenwd=3:wg=1
+  210 iff1=2andf2=4thenwd=4:wg=1
+  212 iff1=2andf2=5thenwd=5:wg=1
+  214 iff1=2andf2=6thenwd=6:wg=1
+  216 iff1=2andf2=7thenwd=7:wg=1
+  220 iff1=1andf2=4thenwd=8:wg=1
+  222 iff1=1andf2=5thenwd=9:wg=1
+  224 iff1=1andf2=6thenwd=10:wg=1
+  226 iff1=1andf2=7thenwd=11:wg=1
+  250 ifwg=1thengosub1000:goto100:rem and mp
+  252 iff1=10andt2=1thenif(puorot%(im%(pl)=18))anddr=0thengosub1100:goto100
+  254 iff1=11andt2=1thengosub1200:goto100
+  256 iff1=13thengosub1300:goto100
+  258 iff1=12andf2=0thenx$="(clr)":gosub5:gosub1020:goto100
+  259 iff1=12andt2=3andf2<>0thengosub4900:goto100
+  260 iff1=12thengosub1400:goto100
+  262 iff1=14andf2<>0andt2=1thengosub1440:goto100
+  264 iff1=16andf2<>0thengosub1700:goto100
+  266 iff1=17andf2<>0thengosub1800:goto100
+  268 iff1=18andf2<>0thengosub1810:goto100
+  270 iff1=10andt2=0andf2=19thengosub1850:goto100
+  272 iff1=20andputhengosub1900:goto100
+  274 iff1=21thengosub2000:goto100
+  276 iff1=22thengosub2100:goto100
+  278 iff1=23thengosub2200:goto100
+  280 iff1=24andputhengosub2300:goto100
+  282 iff1=25andputhengosub2400:goto100
+  284 iff1=26andob$(no+1)<>""thenno=no+1:goto100
+  286 iff1=27thenno=no-1:goto100
+  288 iff1=11andt2=0andf2=19thengosub2850:goto100
+  290 ft=0:iff1=28orf1=35orf1=38orf1=39thenls=0:ld=1:gosub3000:goto100
+  292 iff1=11andt2=0andf2=29andputhengosub3300:goto100
+  293 iff1=10andt2=0andf2=29thengosub3600:goto100
+  294 iff1=31thengosub3400:goto100
+  296 iff1=32thenx$="(pur)Stamina is(lred)"+str$(sm%(pl))+"(lblu)":gosub4:goto100
+  298 iff1=30thengosub3500:goto100
+  300 remiff1=33thennx=nx+1:goto100
+  302 remiff1=34andnx>0thennx=nx-1:goto100
+  304 iff1=36andf2<>0thengosub3700:goto100
+  306 iff1=41andf2<>0thengosub3900:goto100
+  308 iff1=40andf2<>0thengosub4000:goto100
+  310 iff1=14andt2=3andf2<>0thengosub4800:goto100
+  312 iff1=42thenx$="Experience is"+str$(ex):gosub4:goto100
+  314 iff1=43andf2<>0thengosub5300:goto100
+  316 iff1=44andf2<>0thengosub5500:goto100
+  318 iff1=45andf2<>0thengosub5600:goto100
+  320 iff1=46thengosub5700:goto100
+  330 iff1=47thenx$="Skill is"+str$(sk%(pl)):gosub4:goto100
+  340 iff1=48thenx$="Vocabulary:":gosub4:fori=1tonw:x$=w$(i)+",":gosub5:next:x$=d$:gosub4:goto100
+  980 x$="Request not taken.":gosub4
+  990 ls=1:goto100
+ 1000 kk$=" is blocking the way.":ifot%(im%(pl))=18then1004
+ 1002 ifpu=0andpt%(pi)>0andnj%(jn,wd)<>ljandsm%(pi)>10thenx$=p$(pi)+kk$:gosub4:ls=1:return
+ 1004 ifnj%(jn,wd)<>0thenlj=jn:jn=nj%(jn,wd):x$="(clr)":gosub5:gosub1020:return
+ 1010 x$="That is Impossible!":gosub4:return
+ 1020 gosub2700:ks=0:x$="(yel)You can see :(lblu)":gosub4:gosub1050:ifks=0thenx$="nothing much.":gosub4
+ 1021 ifksthenx$=d$:gosub4
+ 1022 ifgp(jn)<>0thenx$="(left)"+str$(gp(jn))+" gold pieces.":gosub4
+ 1024 gosub5200:x$="(yel)You can :(lblu)":gosub4
+ 1025 fori=0to11:t=nj%(jn,i):ift=0thennext:x$=d$:gosub4:return
+ 1030 iflen(c$(i))+pos(0)>38thenx$="":gosub4
+ 1035 x$=c$(i)+",":gosub5:next:x$=d$:gosub4:return
+ 1050 rr=0:fori=1tonp:gosub7420
+ 1051 ifpl<>iandpp%(i)=jnandrr=0andsm%(i)>=0andsm%(i)<10thenx$="(pur)(unconsious)(lblu)":gosub5
+ 1052 ifpl<>iandpp%(i)=jnandrr=0thenx$="":gosub4
+ 1053 next:fori=1tono:ifop%(i)<>jnthennext:return
+ 1054 ifpos(0)+len(ob$(i))-(ot%(i)=15)*8>38thenx$="":gosub4
+ 1055 ks=1:x$=ob$(i):gosub5:ifot%(i)=15thenx$="(empty)":gosub5
+ 1060 x$=",":gosub5:next:return
+ 1100 tp=ot%(f2):iftp=3thenx$="Cannot pick up a bare Liquid.":gosub4:return
+ 1102 iftp=4ortp=7thenx$="This Object is not Movable.":gosub4:return
+ 1110 ifop%(f2)=jnthenifwc+vl(f2)<mwthenop%(f2)=p6:wc=wc+vl(f2):x$="Got it.":gosub4:return
+ 1112 ifwc+vl(f2)>=mwthenx$="Too much.":gosub4:return
+ 1120 x$="No I can not.":gosub4:return
+ 1200 :
+ 1210 ifop%(f2)=p6thenop%(f2)=jn:wc=wc-vl(f2)
+ 1220 return
+ 1300 ifgg(pl)<>0thenx$="(left)"+str$(gg(pl))+" gold pieces.":gosub4
+ 1310 ks=0:fori=1tono:ifop%(i)<>p6andop%(i)<>-30000+plthennext:goto1340
+ 1312 ifop%(i)=-30000+plthenx$="(yel)":gosub5
+ 1320 ifpos(0)+len(ob$(i))>38thenx$="":gosub4
+ 1330 x$=ob$(i)+"(lblu),":ks=1:gosub5:next
+ 1340 ifksthenx$=d$:gosub4:return
+ 1350 x$="nothing much.":gosub4:return
+ 1400 gosub1480:ks=0:ifgb(f2)<>0thenx$="Found:"+str$(gb(f2))+" gold pieces.":gosub4
+ 1402 ife=1thenx$="Can not.":gosub4:return
+ 1410 fori=1tono:if(-op%(i))=f2thenx$="Found:"+ob$(i)+".":gosub4:ks=1:next:return
+ 1420 next:ifks=0thenx$="Nothing there.":gosub4:return
+ 1422 return
+ 1440 gosub1480:t$="gold pieces."
+ 1442 ifgb(f2)<>0thenx$=str$(gb(f2))+" "+t$:gosub4:gp(jn)=gp(jn)+gb(f2):gb(f2)=0
+ 1444 ife=1thenx$="Can not.":gosub4:return
+ 1450 fori=1tono:if(-op%(i))=f2thenop%(i)=jn:x$="Emptied:"+ob$(i)+".":gosub4:next:return
+ 1460 next:x$="Nothing Else.":gosub4:return
+ 1480 e=0:ifop%(f2)=jnorop%(f2)=p6thenreturn
+ 1482 e=1:return
+ 1600 ifleft$(t$,1)="@"thent$=right$(t$,len(t$)-1):ot%(i)=3
+ 1602 ifleft$(t$,1)="~"thent$=right$(t$,len(t$)-1):ot%(i)=4
+ 1604 ifleft$(t$,1)="!"thent$=right$(t$,len(t$)-1):ot%(i)=5
+ 1606 ifleft$(t$,1)="$"thent$=right$(t$,len(t$)-1):ot%(i)=6
+ 1608 ifleft$(t$,1)="%"thent$=right$(t$,len(t$)-1):ot%(i)=7
+ 1610 ifleft$(t$,1)="&"thent$=right$(t$,len(t$)-1):ot%(i)=8
+ 1612 ifleft$(t$,1)="'"thent$=right$(t$,len(t$)-1):ot%(i)=9
+ 1614 ifleft$(t$,1)="+"thent$=right$(t$,len(t$)-1):ot%(i)=10
+ 1616 ifleft$(t$,1)="-"thent$=right$(t$,len(t$)-1):ot%(i)=11
+ 1618 ifleft$(t$,1)="|"thent$=right$(t$,len(t$)-1):ot%(i)=12
+ 1620 ifleft$(t$,1)=""thent$=right$(t$,len(t$)-1):ot%(i)=14
+ 1622 ifright$(t$,1)="}"thent$=left$(t$,len(t$)-1):readsf(i)
+ 1624 ifleft$(t$,1)="/"thent$=right$(t$,len(t$)-1):ot%(i)=16
+ 1626 ifleft$(t$,1)="?"thent$=right$(t$,len(t$)-1):ot%(i)=17
+ 1628 ifleft$(t$,1)="#"thent$=right$(t$,len(t$)-1):ot%(i)=18
+ 1690 return
+ 1700 tp=ot%(f2):remiftp<>5thenprint"Cannot read it.":return
+ 1702 pg=0:fori=1torb:ifrb%(i)=f2thenpg=pg+1
+ 1704 nexti:ifpg=0thenx$="Nothing to read.":gosub4:return
+ 1706 pw=1:ifpg>1thengosub6000
+ 1712 a=0:fori=1torb:ifrb%(i)=f2thena=a+1:ifa=pwthenx$="(clr)"+rb$(i):gosub4:i2=i:goto1730
+ 1720 nexti:x$="No Contents.":gosub4:return
+ 1730 fori=i2+1torb:ifrb%(i)<>-f2thenreturn
+ 1735 x$=rb$(i):gosub4
+ 1740 nexti:return
+ 1790 return
+ 1800 ifdr<>0thenx$="Already drawn something.":gosub4:return
+ 1801 ifop%(f2)=p6andot%(f2)=10thenop%(f2)=-30000+pl:x$="O.k.It is drawn.":gosub4:dr=f2:goto1804
+ 1802 ifop%(f2)=p6andot%(f2)=12thenop%(f2)=-30000+pl:x$="O.k.It is drawn.":gosub4:dr=f2:goto1804
+ 1803 ls=1:x$="I Can Not.":gosub4:return
+ 1804 ifpu=0andpi>0andpt%(pi)=2thenpt%(pi)=3
+ 1805 fori=1tono:y=ot%(i)
+ 1806 ifop%(i)=p6andy<>11andy<>12andy<>10andy<>14andy<>17andy<>18thenop%(i)=jn
+ 1808 next:return:gp(jn)=gp(jn)+gn(pl):gn(pl)=0
+ 1810 ifop%(f2)=-30000+plthenop%(f2)=p6:x$="O.k.It is not drawn.":gosub4:dr=0:return
+ 1812 x$="I Can Not.":gosub4:return
+ 1850 ifval(f$(2))=0thengg(pl)=gg(pl)+gp(jn):gp(jn)=0:return
+ 1852 t=val(f$(2)):ifgp(jn)<=tthengg(pl)=gg(pl)+t:gp(jn)=gp(jn)-t:return
+ 1854 ls=1:x$="Can not":gosub4:return
+ 1900 iff$(1)=""thenx$="Missing file name.":gosub4:return
+ 1902 open8,8,8,"@0:st/"+f$(1)+",s,w"
+ 1903 print#8,ex
+ 1904 print#8,no:fori=1tono:print#8,ob$(i):print#8,op%(i):print#8,ot%(i)
+ 1905 print#8,vl(i):print#8,mx(i):print#8,sf(i)
+ 1906 nexti:print#8,jn:print#8,nj:fori=1tonj:foru=0to11:print#8,nj%(i,u):nextu,i
+ 1908 fori=0tono:print#8,gb(i):next:fori=1tonj:print#8,gp(i):next
+ 1920 print#8,np:fori=0tonp:print#8,p$(i):print#8,p%(i):print#8,pp%(i):print#8,pt%(i):print#8,sm%(i):print#8,sk%(i)
+ 1921 print#8,gg(i):next:fori=1to10:print#8,jn(i):print#8,ex(i):print#8,lj(i):print#8,wc(i):next
+ 1990 close8:x$="Finished":gosub4:return
+ 2000 iff$(1)=""thenx$="Missing file name.":gosub4:return
+ 2001 open15,8,15
+ 2002 open8,8,8,"st/"+f$(1)+",s,r"
+ 2003 input#15,a,b$,c,d:ifa>20thenx$="Error":gosub4:close15:close8:return
+ 2004 input#8,ex:input#8,no:fori=1tono:input#8,ob$(i):input#8,op%(i):input#8,ot%(i)
+ 2005 input#8,vl(i):input#8,mx(i):input#8,sf(i)
+ 2006 nexti:input#8,jn:input#8,nj:fori=1tonj:foru=0to11:input#8,nj%(i,u):nextu,i
+ 2008 fori=0tono:input#8,gb(i):next:fori=1tonj:input#8,gp(i):next
+ 2020 input#8,np:fori=0tonp:input#8,p$(i):input#8,p%(i):input#8,pp%(i):input#8,pt%(i)
+ 2021 input#8,sm%(i):input#8,sk%(i):input#8,gg(i):next
+ 2022 fori=1to10:input#8,jn(i):input#8,ex(i):input#8,lj(i):input#8,wc(i):next
+ 2090 close15:close8:x$="Finished":gosub4:return
+ 2100 pg=0:ift2=0andf2=19thenag=val(f$(2)):pg=1:ifag>gg(pl)thenx$="Not enough.":gosub4:return
+ 2102 ifpg=1thenx$="OK":gosub4:return
+ 2110 ifop%(f2)<>p6andf2<>0thenx$="Not here.":gosub4:return
+ 2120 wo=f2:ls=1:return
+ 2200 ifpg=1andmx(f2)=0thenx$="Can't.":gosub4:return
+ 2201 ifop%(f2)=jnandpu=0thenx$="Can't.":gosub4:return
+ 2202 ifpg=1and(op%(f2)=jnorop%(f2)=p6)thengb(f2)=gb(f2)+ag:gg(pl)=gg(pl)-ag:x$="OK":gosub4
+ 2203 ifpg=1thenreturn
+ 2204 cw=0:fori=1tono:if(-op%(i))=f2thencw=cw+vl(i)
+ 2205 next
+ 2206 ifop%(f2)<>p6andop%(f2)<>jnandf2<>0thenx$="Not here.":gosub4:return
+ 2210 ifcw+vl(wo)>mx(f2)thenx$="Too big to put in there.":gosub4:return
+ 2216 ifop%(f2)=p6thenwc=wc+vl(wo)
+ 2218 ifop%(wo)=p6thenwc=wc-vl(wo)
+ 2220 op%(wo)=-f2:return
+ 2300 :
+ 2310 ifop%(f2)<>p6andop%(f2)<>jnthenx$="Not here.":gosub4:return
+ 2320 w2=f2:return
+ 2400 ift2=0andf2=19thengg(pl)=gg(pl)+gb(w2):gb(w2)=0:x$="OK":gosub4:return
+ 2402 ift2=0andf2=19thenx$="No":gosub4:return
+ 2410 if(-op%(f2))=w2thenx$="Got it.":gosub4:op%(f2)=p6:wc=wc+vl(f2):return
+ 2412 x$="Not there.":gosub4:return
+ 2600 fori=1tonj:readn:ifn<>ithenx$="Mismatch (2600)":gosub4
+ 2610 reada$:ifright$(a$,1)=""thend$(i)=d$(i)+left$(a$,len(a$)-1):goto2610
+ 2620 d$(i)=d$(i)+a$:next
+ 2625 x$="Entering People":gosub4:rem read them now return
+ 2630 fori=0to1e2:readp$(i),pp%(i),pt%(i),sm%(i),sk%(i):ifp$(i)="%"thennp=i-1:return
+ 2635 ifpp%(i)<0thenpp%(i)=-pp%(i):readgg(i)
+ 2640 next:end
+ 2700 x$="(yel)You are :(lblu)"+cr$+d$(jn):gosub4:return
+ 2850 ifval(f$(2))=0thengp(jn)=gp(jn)+gg(pl):gg(pl)=0:return
+ 2851 t=val(f$(2))
+ 2852 ifgg(pl)>=tthengp(jn)=gp(jn)+t:gg(pl)=gg(pl)-t:return
+ 2854 x$="Can not":gosub4:return
+ 2900 goto2950
+ 2901 tx=nx:pu=1:mp=1:pi=0:fori=1tonp:pu=1:le=0:ifp%(i)>0then2910
+ 2902 ifpp%(i)=jnthenp2=i
+ 2903 ifpp%(i)=jnandsm%(i)=>10thenpu=0
+ 2904 ifpp%(i)=jnandsm%(i)=>0thenpi=i:goto2912
+ 2910 next
+ 2912 fori=0tonp
+ 2914 ifi<>0andpi<>iandpp%(i)=jnandsm%(i)>10andsm%(pi)<10thenpi=i:pu=0
+ 2915 ifot%(im%(i))=18andls=0thenj=im%(i):mx(j)=mx(j)+1:jj=mx(j)/vl(j)
+ 2916 ifot%(im%(i))=18andjj-int(jj)=0thenim%(i)=0:gosub7400
+ 2917 next
+ 2918 fori=1tonp:ifp%(i)>0then2922
+ 2920 ifpi<>iandpp%(i)=jnandsm%(i)>10andpt%(i)>pt%(pi)thenpi=i:goto2925
+ 2922 next
+ 2925 ifpu=0andpt%(pi)=2anddr<>0andot%(im%(pl))<>18thenpt%(pi)=3
+ 2927 ifpu=0andpt%(pi)=3andls=0and(ot%(im%(pl))<>18orla)thengosub6100:gosub3100
+ 2930 la=0:ifdr<>0thenpu=0:mp=0
+ 2935 ifsm%(pl)<0thenx$="(lred)You have died.(lblu)":gosub4:goto5100
+ 2937 ifsm%(pl)<10thenx$="You have been rendered unconscious.  You   come to.":gosub4
+ 2938 ifsm%(pl)<10thensm%(pl)=11
+ 2948 return
+ 2950 ifls=1then2901
+ 2951 tt=int(rnd(ti)*np)+1:ifsm%(tt)<10then2962
+ 2952 tj=int(rnd(ti)*12):ta=pp%(tt):ifnj%(ta,tj)=0then2952
+ 2954 ifpp%(tt)=jnandnj%(ta,tj)=ljthen2962
+ 2956 remprint"(lblu)";p$(tt);" moved to";nj%(ta,tj);"from";ta;"(left).(wht)"
+ 2957 i=tt:ifnj%(ta,tj)=jnthengosub2996
+ 2958 ifpp%(tt)=jnthengosub2999
+ 2960 pp%(tt)=nj%(ta,tj)
+ 2962 ee=-(ot%(im%(pl))=18):fori=1tonp
+ 2963 ifsm%(i)>0andsm%(i)<=10thensm%(i)=sm%(i)+1-int(rnd(ti)>.7)*2
+ 2964 ifeethen2970
+ 2965 ifpp%(i)=jnandpt%(i)=3andsm%(i)<45andsm%(i)>=10thenj=0:gosub2997:ifjthenpp%(i)=j
+ 2966 ifpp%(i)=ljandpt%(i)=3andsm%(i)>85andrnd(ti)>.9thenpp%(i)=jn:gosub2996
+ 2970 nexti
+ 2990 :
+ 2995 goto2901
+ 2996 x$="(lgrn)"+p$(i)+" entered.(wht)":gosub4:return
+ 2997 tj=int(rnd(ti)*12):ta=pp%(i):rr=nj%(ta,tj):ifrr=0orrr=ljthenj=j+1:ifj<10then2997
+ 2998 j=nj%(ta,tj):ifj=ljorj=0thenj=0:return
+ 2999 x$="(lgrn)"+p$(i)+":(lblu)"+c$(tj)+"(wht)":gosub4:return
+ 3000 ft=1:remifop%(dr)=-30000anddr<>0thenft=1
+ 3002 ifot%(dr)=12thengosub3800
+ 3010 ifpu=0andpi<>0andpt%(pi)=>0thenpt%(pi)=3
+ 3020 ifft=1thengosub3200
+ 3098 return
+ 3100 a$="The "+p$(pi):ifot%(im%(pi))=18thena$="something"
+ 3102 x$=a$+ff$:gosub4:rr=1:ifot%(im%(pl))=18thenrr=.1
+ 3106 rr=int(rnd(ti)*sk%(pl)*ld-rnd(ti)*sk%(pi)*tn*rr)
+ 3110 ifrr<0thenx$="(pur)You got hit(lblu)"+str$(-rr):gosub5:sm%(pl)=sm%(pl)+rr:x$=" (lred)"+str$(sm%(pl))+"(lblu)":gosub4
+ 3120 ifrr=>0thenx$="(lblu)You fended yourself."+str$(rr):gosub4
+ 3138 ifsm%(pl)<0thenx$= "You are dead."+cr$+"You got killed by your enemy.":gosub4:goto5100
+ 3140 ifsm%(pl)<10thenx$="You are unconsious."+cr$+"You get killed by your enemy.":gosub4:goto5100: rem forgot : before gosub
+ 3190 le=pi:return
+ 3200 ak$="":ifdr=0thenak$=" punch ":gg=.30
+ 3202 hh=(ot%(im%(pi))=18):jj=1:ifsm%(pi)<10thenjj=0
+ 3203 g2=0:ifdr<>0theng2=ot%(dr)
+ 3204 ifg2=12thengg=3.5:ak$=" shoot at "
+ 3205 ifg2=10thengg=1:ak$=" attack "
+ 3206 ifpi=0or(hhandle=0)thenx$="You"+ak$+"the air.":gosub4:return
+ 3207 kl=kl%-pi*(kl%=0):x$="You"+ak$:gosub5:ifhh=0thenx$="the "+p$(kl):gosub5
+ 3208 x$="":gosub4:rr=1:ifot%(im%(pi))=18thenrr=.1
+ 3209 rr=int(rnd(ti)*sk%(kl)*jj-rnd(ti)*sk%(pl)*gg*rr)
+ 3210 ifrr<0thenx$="You hit!"+str$(-rr):gosub5:sm%(kl)=sm%(kl)+rr:x$="(pur)"+str$(sm%(kl))+"(lblu)":gosub4:la=1
+ 3220 a$="the "+p$(kl):ifrr=>0thenx$="Fended against you."+str$(rr):gosub4
+ 3225 ifhhthena$="something"
+ 3230 ifsm%(kl)<0thenx$="You have killed the "+a$:gosub4:ex=int(ex+sk%(kl)^2+.1)
+ 3232 ifsm%(kl)<0thenx$="Experience is"+str$(ex):gosub4
+ 3290 kl%=0:kl=0:return
+ 3300 :
+ 3306 fori=1tono:ifop%(i)=p6thenop%(i)=jn
+ 3310 next:gp(jn)=gp(jn)+gn(pl):gn(pl)=0:return
+ 3400 ifop%(f2)<>p6then3450
+ 3406 t=ot%(f2):ift=8thenop%(f2)=-29000:sm%(pl)=sm%(pl)+vl(f2)/2:x$="Nice Food.":gosub4
+ 3410 ifsm%(pl)>msthensm%(pl)=ms
+ 3448 return
+ 3450 x$="Not here.You do not have telepathic     eating abilities!":gosub4:return
+ 3498 return
+ 3500 ifop%(f2)<>p6then3570
+ 3506 t=ot%(f2):ift=9thensm%(pl)=sm%(pl)+vl(f2)/2:x$="Nice Drink.":gosub4:goto3550
+ 3540 x$="I Can't.":gosub4
+ 3548 return
+ 3550 ob$(f2)=""+ob$(f2):ot%(f2)=15
+ 3560 ifsm%(pl)>msthensm%(0)=ms
+ 3568 return
+ 3570 x$="Not Here.You do not have telepathic     drinking abilities!":gosub4
+ 3598 return
+ 3600 fori=1tono
+ 3602 tp=ot%(f2):iftp=3thennext:return
+ 3604 iftp=4ortp=7thennext:return
+ 3608 ifop%(f2)=jnthenifwc+vl(f2)<mwthenop%(f2)=p6:wc=wc+vl(f2):next:return
+ 3610 next:return
+ 3700 ifot%(f2)=17then7200
+ 3701 ifot%(f2)=18then7300
+ 3702 ifot%(f2)<>14thenls=1:x$="This is not castable.":gosub4:return
+ 3703 ifop%(f2)<>p6thenx$="You do not have it.":gosub4:return
+ 3704 ifmx(f2)>=0thenx$="Spell is used up.":gosub4:return
+ 3705 iff3<>0then7100
+ 3706 ifpu=0andpt%(pi)=>1thenpt%(pi)=3:rem dr<>0
+ 3707 mx(f2)=mx(f2)+1:gg=10:ak$=" cast upon ":goto3207
+ 3708 stop
+ 3800 fori=1tono:ifot%(i)=11andop%(i)=-drthen3820
+ 3810 next
+ 3812 ft=0:x$="No bullets.":gosub4:return
+ 3820 ifmx(i)>=0then3812
+ 3822 mx(i)=mx(i)+1:ft=1:return
+ 3900 ifpi=0thenx$="You cannot buy it if there is no one    there.":gosub4:return
+ 3902 ifpt%(pi)=3thenx$="I'm not going to sell you anything now.":gosub4:return
+ 3904 ifop%(f2)<>jnthenx$="I do not have that sorry.":gosub4:return
+ 3906 ifsf(f2)=0thenx$="That is not for sale,sorry.":gosub4:return
+ 3910 ifgp(jn)>=sf(f2)thengg(pi)=gg(pi)+gp(jn):gp(jn)=0:goto3950
+ 3940 x$="Sorry,thats not enough.":gosub4:return
+ 3950 wc=wc+vl(f2):op%(f2)=p6:x$="Gives it to you.":gosub4:return
+ 4000 ifpi=0thenx$="You cannot buy it if there is no one    there.":gosub4:return
+ 4002 ifpt%(pi)=3thenx$="I'm not going to sell you anything now.":gosub4:return
+ 4004 ifsf(f2)=0thenx$="That is not for sale,sorry.":gosub4:return
+ 4010 ifop%(f2)=jnthenx$="That would be about"+str$(sf(f2))+cr$+"gold pieces.":gosub4:return
+ 4012 x$="I do not have that sorry.":gosub4:return
+ 4800 ifpp%(f2)<>jnorsm%(f2)=>10thenx$=p$(f2)+" wont let me.":gosub4:return
+ 4810 fori=1tono:ifop%(i)=10000+f2thenx$="Emptied:"+ob$(i):gosub4:op%(i)=jn
+ 4820 next:ifgg(f2)>0thenx$="Emptied"+str$(gg(f2))+"Gold pieces.":gosub4
+ 4830 gp(jn)=gp(jn)+gg(f2):gg(f2)=0
+ 4890 return
+ 4900 ifpp%(f2)<>jnorsm%(f2)=>10thenx$=p$(f2)+" wont let me.":gosub4:return
+ 4910 fori=1tono:ifop%(i)=10000+f2thenx$="Found:"+ob$(i):gosub4
+ 4920 next:ifgg(f2)>0thenx$="Found"+str$(gg(f2))+"Gold pieces.":gosub4
+ 4990 return
+ 5000 foru=1tonp:iff$(i)=p$(u)thenf%(i)=u:t%(i)=3:return
+ 5010 nextu
+ 5020 return
+ 5100 x$="(down)Experience:"+str$(ex):gosub4:goto7000
+ 5200 x$="(yel)You have:(lblu)":gosub4:gosub1300:return
+ 5300 xx=op%(f2):ifot%(f2)<>16thenx$="Can Not.":gosub4:return
+ 5310 if(xx=jnorxx=0)andjn=44thenop%(f2)=9999:ex=ex+vl(f2)*10:gosub5330:return
+ 5320 x$="No.":gosub4:return
+ 5330 x$="(down)Experience:"+str$(ex):gosub4:return
+ 5400 rb%(1)=12+1:a$="This magazine is about Futex Corporation":r$=chr$(13)
+ 5402 a$=a$+"and how it succeded in destroying all of"
+ 5404 a$=a$+"the last Sagan Spheroids, and most of   the Sagan Spherelings."
+ 5406 rb$(1)=a$:rb%(2)=160:rb%(3)=-160:rb%(4)=-160:rb%(5)=-160
+ 5410 a$="The first page starts of:"+chr$(13)
+ 5412 a$=a$+"In the beginning the Universe was"+r$+"created."
+ 5414 a$=a$+"This has made a lot of people   angry and"
+ 5416 a$=a$+"been widely regarded as a bad  move."+r$:rb$(2)=a$
+ 5418 a$="Many races believe that it was created  by some sort of god, though"
+ 5420 a$=a$+" the"+r$+"Jatravartid people of Viltvodle VI"+r$
+ 5422 a$=a$+"believe that the entire Universe was in fact sneezed out of the "
+ 5424 a$=a$+"nose of a being called the Great Green Arkleseizure."+r$
+ 5425 rb$(3)=a$
+ 5426 a$="The Jatravartids, who live in perpetual fear of the time they call"
+ 5428 a$=a$+" The Coming ofThe Great White Handkerchief, are small "
+ 5430 a$=a$+"blue creatures with more than fifty armseach, who are therefore"
+ 5432 a$=a$+" unique in being the only race in history to have":rb$(4)=a$
+ 5434 a$="invented the aerosol deodorant before   the wheel."
+ 5440 rb$(5)=a$:rb%(6)=160
+ 5442 a$="There is a theory which states that if  ever anyone discovers exactly"
+ 5443 a$=a$+" what the  Universe "
+ 5444 a$=a$+"is for and why it is here, it  will instantly disappear"
+ 5446 a$=a$+" and be replacedby something even more bizarre and"+r$
+ 5450 a$=a$+"inexplicable.":rb$(6)=a$+r$:rb%(7)=-160
+ 5452 a$="There is another theory which states    that this has already happened."
+ 5454 rb$(7)=a$
+ 5499 return
+ 5500 ifop%(f2)<>p6thenx$="You do not have it.":gosub4:return
+ 5510 ifpi=0thenx$="You cannot sell it if there is no one    there.":gosub4:return
+ 5512 ifpt%(pi)=3thenx$="I'm not going to buy anything from you  now.":gosub4:return
+ 5520 ifsf(f2)=0thenx$="I don't want to buy that.":gosub4:return
+ 5530 ifgg(pi)<sf(f2)thenx$="I don't have enough money.":gosub4:return
+ 5540 gg(pi)=gg(pi)-sf(f2):gg(pl)=gg(pl)+sf(f2)
+ 5550 x$="He Gives You"+str$(sf(f2))+"for it.":gosub4
+ 5560 wc=wc-vl(f2):op%(f2)=jn
+ 5590 return
+ 5600 ifop%(f2)<>0thenx$="You do not have it.":gosub4:return
+ 5610 ifpi=0thenx$="You cannot sell it if there is no one    there.":gosub4:return
+ 5612 ifpt%(pi)=3thenx$="I'm not going to buy anything from you  now.":gosub4:return
+ 5620 ifsf(f2)=0thenx$="I don't want to buy that.":gosub4:return
+ 5630 ifgg(pi)<sf(f2)thenx$="I don't have enough money.":gosub4:return
+ 5650 x$="I will give you"+str$(sf(f2))+"for it.":gosub4
+ 5690 return
+ 5700 ifdr<>0thenx$="You are not able to (You have drawn.)":gosub4:return
+ 5701 fori=1tonp:ifsm%(i)>15andpp%(i)=jnandpt%(i)>0thenx$="You are not able to.":gosub4:return
+ 5702 nexti
+ 5710 fori=1tonp:ifpp%(i)<>jnthen5720
+ 5712 gg(pl)=gg(pl)+gg(i):x$="You got"+str$(gg(i))+"gp from "+p$(i):gosub4
+ 5715 gg(i)=0
+ 5716 forj=1tono:ifop%(j)-25000=ithenx$=ob$(j)+",":gosub5:op%(j)=p6
+ 5718 nextj:x$="":gosub4
+ 5720 nexti:return
+ 5800 print"(clr)(wht)What Object Number ?(cyn)"
+ 5805 a$="":open1,0:input#1,a$:close1:print:ifval(a$)<>0thenx=val(a$)
+ 5806 ifa$=""thenx=x+1
+ 5807 ifa$="end"thenreturn
+ 5808 ifa$="+"thenx=x+1
+ 5809 ifa$="-"andx>1thenx=x-1
+ 5810 print"(clr)(wht)Name($a0)    ,";ob$(x)
+ 5814 print"(down)Position,";op%(x)
+ 5816 print"(down)Volume  ,";vl(x)
+ 5820 print"(down)Maximum ,";mx(x)
+ 5824 print"(down)Price   ,";sf(x)
+ 5826 print"(down)Type    ,";ot%(x)
+ 5830 print"(down)(down)Number  ,";no
+ 5834 print"(down)END     (blk),(wht)(up)(up)"
+ 5840 poke198,1:poke631,17
+ 5841 print"(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)";:open1,0:input#1,a$,b$:close1:print
+ 5842 a$=left$(a$,3):b=val(b$)
+ 5850 ii=0:ifa$="Nam"thenob$(x)=b$:ii=1
+ 5852 ifa$="Pos"thenop%(x)=b:ii=1
+ 5854 ifa$="Vol"thenvl(x)=b:ii=1
+ 5856 ifa$="Max"thenmx(x)=b:ii=1
+ 5858 ifa$="Pri"thensf(x)=b:ii=1
+ 5860 ifa$="Typ"thenot%(x)=b:ii=1
+ 5862 ifa$="Num"thenno=b:ii=1
+ 5864 ifa$="END"then5800
+ 5870 ifii=0then5840
+ 5872 goto5810
+ 5900 print"(clr)(wht)What Person Number ?(cyn)"
+ 5905 a$="":open1,0:input#1,a$:close1:print:ifval(a$)<>0thenx=val(a$)
+ 5906 ifa$=""thenx=x+1
+ 5907 ifa$="end"thenreturn
+ 5908 ifa$="+"thenx=x+1
+ 5909 ifa$="-"andx>1thenx=x-1
+ 5910 print"(clr)(wht)Name($a0)    ,";p$(x)
+ 5914 print"(down)Position,";pp%(x)
+ 5916 print"(down)Skill   ,";sk%(x)
+ 5920 print"(down)Stamina ,";sm%(x)
+ 5924 print"(down)Money   ,";gg(x)
+ 5926 print"(down)Type    ,";pt%(x)
+ 5930 print"(down)(down)Number  ,";np
+ 5934 print"(down)END     (blk),(wht)(up)(up)"
+ 5940 poke198,1:poke631,17
+ 5941 print"(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)";:open1,0:input#1,a$,b$:close1:print
+ 5942 a$=left$(a$,3):b=val(b$)
+ 5950 ii=0:ifa$="Nam"thenp$(x)=b$:ii=1
+ 5952 ifa$="Pos"thenpp%(x)=b:ii=1
+ 5954 ifa$="Ski"thensk%(x)=b:ii=1
+ 5956 ifa$="Sta"thensm%(x)=b:ii=1
+ 5958 ifa$="Mon"thengg(x)=b:ii=1
+ 5960 ifa$="Typ"thenpt%(x)=b:ii=1
+ 5962 ifa$="Num"thennp=b:ii=1
+ 5964 ifa$="END"then5900
+ 5970 ifii=0then5940
+ 5972 goto5910
+ 6000 x$="There are"+str$(pg)+"pages."+cr$+"Which page would you like to read ?(lred)":gosub4
+ 6010 gosub8100:x$="(lblu)":gosub5:a=val(a$):ifa<1ora>pgthenx$="(up)(up)":gosub4:goto6010
+ 6020 pw=a:return
+ 6100 tn=.3:us=0:ff$=" punches you."
+ 6110 fori=us+1tono:ifop%(i)<>jnandop%(i)-25000<>pithennexti:us=0:return
+ 6112 x=ot%(i):xu=ot%(us)
+ 6120 ifx=14thenus=i:goto6150
+ 6122 ifx=12thenifxu<>14thenus=i:goto6150
+ 6124 ifx=10thenifxu<>12andxu<>14thenus=i:goto6150
+ 6130 next:us=0:return
+ 6150 ifx=12thengosub6300
+ 6160 ifx=14thengosub6200
+ 6162 ifx=10thengosub6400
+ 6170 ifff=0thentn=1:goto6110
+ 6172 return
+ 6200 ff=0:ifmx(us)>=0thenff=0:return
+ 6204 mx(us)=mx(us)+1:tn=10:ff$=" Cast upon you "+ob$(us):ff=1:return
+ 6300 ff=0:fori=1tono:ifot%(i)=11andop%(i)=-usthen6320
+ 6310 next
+ 6312 ff=0:return
+ 6320 ifmx(i)>=0then6312
+ 6322 mx(i)=mx(i)+1:ff=1:ff$=" Shoots at you.":tn=3.5:return
+ 6400 tn=1:ff=1:ff$=" attacks you.":return
+ 7000 fori=1tono:ifot%(i)<>17thennexti:goto7050
+ 7010 ifmx(i)=>0orop%(i)<>p6thennexti:goto7050
+ 7020 mx(i)=mx(i)+1:x$="(lred)But you are revived by your own         "+ob$(i)+".(wht)":gosub4
+ 7030 sm%(pl)=30:return
+ 7050 return:rem end!!!!
+ 7099 end
+ 7100 ifpp%(f3)<>jnthenx$="Not here.":gosub4:return
+ 7110 ifpu=0andpt%(f3)=2thenpt%(pi)=3
+ 7120 kl%=f3:mx(f2)=mx(f2)+1:gg=10:ak$=" cast upon ":goto3207
+ 7200 ifmx(f2)>=0thenx$="Spell worn out.":gosub4:return
+ 7205 x$="(wht)(down)Cast on whom?(lred)":gosub4
+ 7210 gosub8100:x$="(lblu)":gosub4
+ 7220 fori=1tonp:ifp$(i)<>a$thennexti:x$="No such person.":gosub4:ls=1:return
+ 7230 ifpp%(i)<>jnthenx$="Not here.":gosub4:ls=1:return
+ 7240 ifsm%(i)>15thenx$="No need.":gosub4:return
+ 7250 sm%(i)=30:mx(f2)=mx(f2)+1:x$="Revived.":gosub4:return
+ 7300 ifmx(f2)>=0thenx$="Spell worn out.":gosub4:return
+ 7305 x$="(wht)(down)Cast on whom?(lred)":gosub4
+ 7310 gosub8100:x$="(lblu)":gosub4:ifa$=""theni=pl:goto7330
+ 7320 fori=1tonp:ifp$(i)<>a$thennexti:x$="No such person.":gosub4:ls=1:return
+ 7330 ifpp%(i)<>jnandi<>plthenx$="Not here.":gosub4:ls=1:return
+ 7340 ifim%(i)<>f2andim%(i)<>0thenx$="Already a spell.":gosub4:return
+ 7350 im%(i)=f2:mx(f2)=mx(f2)+1:x$="You have turned the "+p$(i)+" invisible.":gosub4:return
+ 7400 ifi=plthenx$="(lgrn)You reappear.(lblu)":gosub4:return
+ 7410 ifpp%(i)=jnthenx$=p$(i)+"(lgrn) reappears.(lblu)":gosub4:return
+ 7415 return
+ 7420 ifot%(im%(i))=18thenrr=1:return
+ 7422 ifpp%(i)=jnandi<>plthenx$="(pur)"+p$(i)+".(lblu)":gosub5:ifsm%(i)<0thenx$="(pur)(dead)(lblu)":gosub5
+ 7425 return
+ 8100 a$="":print"(rvon) (rvof)(left)";
+ 8111 get#5,aa$:ifaa$=""then8115
+ 8112 ifaa$=chr$(13)thenprint" ";:return: rem changes this to 10 and the below one to 8 from cr$ and dl$
+ 8113 ifaa$=chr$(20)thenifa$>""thena$=left$(a$,len(a$)-1):print#5,dl$;:printdl$;:goto8115
+ 8114 ifaa$<>dl$thena$=a$+aa$:print#5,aa$;:printaa$;"(rvon) (rvof)(left)";
+ 8115 getaa$:ifaa$=""then8111
+ 8116 goto8112
+ 9000 x$="Error Trap: "+err$(er)+str$(el):gosub4:end
+60000 datajump,fall,go,north,east,south,west,up,down,get,drop,look,inventory
+60002 dataempty,smash,read,draw,undraw,gold,save,load,put,in,search,for,inc,dec
+60004 datastab,everything,drink,eat,stamina,next,back,shoot,cast,recite,kill
+60006 datapunch,ask,buy,experience,score,sell,quote,steal,skill,help,plist
+60990 data%
+61000 datago north,go east,go south,go west,fall north
+61002 datafall east,fall south,fall west
+61004 datajump north,jump east,jump south,jump west,%
+61100 dataclock},9,30,,240,watch,9,3,,bell},9,30,,120,lamp},9,80,,99,hammer,6,50,
+61101 data$bottle 1,4,150,150,white silk,-6,150,0,box 1,1,300,300,box 2,8,300,300
+61102 databox 3,5,300,300,box 4,7,300,300,stamps,-10,20,,!computer magazine},9
+61103 data20,0,45,~book shelf,9,2000,3000,silver cross,-11,35,0
+61104 datagolden cross,-9,35,,emrald chest,21,170,150
+61105 dataoakwood desk,21,6000,4000,rubber,-18,5,0
+61106 datagolden pen,-18,4,1,leather wallet,-18,14,15,handicard,-21,3,0
+61108 datapocket knife,-18,10,,screw driver,-18,6,,velvet arm chair,21,7000,0
+61109 data$glass goblet,15,70,24,~open fire,23,5000,2000,~large oak desk
+61110 data23,6000,4000,~top drawer,23,1300,1200,~middle drawer,23,1300,1200
+61112 data~bottom drawer,23,1300,1200,desk lamp,23,80,,cash book,23,40,3
+61113 data$small fish bowl,23,200,180,~button,23,2,0
+61114 datapaper clips,-29,30,,calculator,-29,30,2,plastic pen
+61116 data-29,6,1,pencil,-29,6,,yellow rubber,-29,8,,white paper,-29,8,
+61117 datatin box,-29,90,85,pill box,-29,4,3
+61118 datajumper,-30,230,20,&vege sanger,-30,40,0,digital watch,-30,9,0
+61119 datatalking clock,-30,80,6
+61120 datajunk box,-30,200,200,transistor,-48,1,0,magic book,-48,150,2
+61121 datalarge tin box,-31,190,180
+61122 data1983 tandy catalog,-31,60,4,1984 tandy catalog,-31,60,4
+61124 datablue paper,-31,65,0,fish food container,-31,50,48
+61125 data20 sided dice,-55,3,0,national tv,20,1000,0
+61126 datapen set,20,240,220,vic 20 computer,20,400,,data set,20,180,25
+61128 datawooden book case,20,3000,2000,science book 1,20,130,0,green book,20
+61129 data130,0,chemistry set 2,20,500,470
+61130 datagarden seeds,-66,25,0,~old desk,20,2200,1600,pine bed,20,10000,2700
+61132 data~wardrobe,20,6000,4000,socket set,20,170,120,amco tape,20,20,0
+61133 datawales money box,20,70,50
+61134 datared torch,20,80,50,commodore 64,21,400,0,disk drive,21,550,30
+61135 dataquintrix tv,21,1000,0,hanimex lamp,21,70,0,book case,21,2500,2000
+61136 datacreaky bed,21,8000,2500,cupboard,21,6000,4000,dataset 2,21,180,25
+61137 dataroller table,21,320,0,black port},21,420,410,240
+61138 dataswivle chair,21,480,0,card box 1,21,750,740
+61140 datayellow spider,21,3,0,brown floppy disk,21,20,0,green floppy disk,21
+61142 data20,0,yellow floppy disk,21,20,0,blue casette,21,25,0
+61144 datapine desk,6,2200,1600,pink lamp,5,70,0,poster,3,15,0,golden earing
+61146 data28,4,1,silver earing,26,4,1,hair dryer,29,120,0,grandfather clock
+61148 data26,5000,200,'summer wine,18,50,0,'bay spumante,24,50,0
+61150 datared lounge chair,22,3000,0,pink lounge chair,27,3000,0
+61152 datalarge fish tank,13,600,580,old glass,14,40,32,old newspaper,11
+61154 data70,0,national video recorder,28,800,120,wooden rack,29,600,400
+61156 datawhite pillow,20,450,30,dinner chair,20,1000,0,cassette player,20
+61158 data900,60,pioneer speaker,20,70,0,ghost buster record,20,40,0,blue pen,20
+61160 data20,2,black felt pen,20,20,2,old feather bed,29,8000,2500,large bed,16
+61162 data8000,2500,left bed drawer,4,500,400,right bed drawer,6,500,400
+61164 datablue sheet,15,500,,green sheet,15,500,,yellow sheet,15,500,0
+61166 datapink sheet,15,500,,white sheet,15,500,,blue blanket,15,900,0
+61168 datagreen blanket,15,900,,yellow blanket,15,900,,pink blanket,15,900,0
+61170 datawhite blanket,15,900,,blue pillow,15,600,,green pillow,15,600,0
+61172 datayellow pillow,15,600,,pink pillow,15,600,0,woollen blanket,15,900,0
+61174 dataredwood bed,26,10000,2800,red sheet,26,500,,red blankets,26,900,0
+61176 datared pillow,26,600,0,+large sword,0,80,0,&steak and eggs,0,40,0
+61178 data&apple custard,0,35,0,&roast beef,37,50,0,&chocolate mousse,37,30,0
+61180 data'apple cider,37,25,0,&fish and chips,38,20,0,'coca cola,38,15,0
+61182 data|old gun,0,40,25,-cartridge,0,20,-6,|silver gun,38,40,25
+61184 datalightning bolt spell,8,30,-2
+61186 data-super bullets,0,20,-36
+61188 data&chicken and chips},40,45,,70,&fried sausages},40,40,,55,&fried bacon}
+61190 data40,35,,35
+61192 data'soft drink,31,30,-30,'rasberry cordial},40,40,-45,30
+61194 data-green super bullets,41,20,-16
+61990 data%,0,0,0
+62000 data1,"On a tiled path."
+62010 data2,"On a tiled path."
+62020 data3,"On a tiled path."
+62030 data4,"On a tiled path."
+62040 data5,"On a tiled path."
+62050 data6,"On a tiled path."
+62060 data7,"On a tiled path."
+62070 data8,"In a medium sized Red Palace.Walls are  made of strange"
+62072 data" substances."
+62080 data9,"In a vast room.Tiled floor.The ceiling  seems like miles away."
+62090 data10,"On a carpeted path."
+62100 data11,"On a yellow path."
+62110 data12,"On a yellow path."
+62120 data13,"In a wooden room.Vynal floor."
+62130 data14,"On a path."
+62140 data15,"In a crystal room.Crystal walls,floor & ceiling."
+62150 data16,"On a path."
+62160 data17,"On a path."
+62170 data18,"In a vast room.The roof seems like milesaway."
+62180 data19,"In a large room.Tiled floor.High roof.
+62190 data20,"In a sunlit room.Sky light.Tinted wall  paper.Matted floor."
+62200 data21,"In a carpeted room."
+62210 data22,"In a room."
+62220 data23,"In a carpeted room.Clean white walls.   Window overlooking a street."
+62230 data24,"In a small cosy room.Woolly carpet."
+62240 data25,"In a vast dark room.It seems there is noroof."
+62250 data26,"In a small room.Dark coloured walls."
+62260 data27,"In a room.Cosey carpeted walls & floor."
+62270 data28,"In a bright yellow room.Yellow carpet."
+62280 data29,"In a old wooden log room.But very clean.Window that looks into"
+62282 data" a green pasture."
+62284 data30,"In a vast open room.Can see light from  the roof."
+62286 data31,"In a rock hallway.Torch lit.Dirt floor."
+62288 data32,"In a hallway.Vynal floor,walls and roof.Lamps to light the way."
+62290 data33,"In a hallway.Blue carpeted floor.White  walls."
+62292 data34,"In a bright hallway.Tinted walls.Wooly  carpet."
+62294 data35,"In a glass hallway.Walls & roof made of glass.You can see "
+62296 data"the ground is many    miles down."
+62300 data36,"In an office type room.Window looking   over an ocean."
+62310 data37,"In an office type room.Window looking   over a desert."
+62314 data38,"In an tiled hallway.Red tiles.Mirrored  walls."
+62320 data39,"In a Sun room.Orange tinted sun roof andwindows."
+62324 data40,"In a small room.White walls."
+62326 data41,"In a Cosey room.Woolly carpet."
+62330 data42,"In a Cosey bedroom.Sunlight glowing     through the curtains."
+62334 data43,"In a Hallway.Metal walls.Overhead Lightsvynal floor."
+62336 data44,"In the Treasure room.Red walls.Overhead Lighting.vinal floor."
+62340 data45,"Overhead Lighting.vinal floor."
+62344 data46,"Overhead Lighting.vinal floor.Bubbler."
+63000 open15,8,15:input#15,a,b$,c,d:close15:printa;b$:end
+63002 data"(left)(left)(left)(left)youself",1,0,100,20,young warrior,29,1,100,20,old shop keeper,9
+63004 data0,80,15,retired magician,13,0,50,22,lonely tramp,11,0,65,12,goblin,26,3
+63006 data45,8,moon dog,6,3,40,6,holy angle,15,0,30,12,first guard,38,2,100,17
+63008 datasecond guard,38,2,100,15,third guard,38,2,80,12,evil tyrant,26,2,100,16
+63010 datapoor peseant,31,1,40,9,young buisness man,37,2,90,18
+63012 datanicely dressed lady,37,0,50,6,technician,36,0,80,16,assistant,36,0,60
+63014 data12,green groole,27,0,40,8,serpant queen,27,2,90,22
+63016 datapowerful magician,23,3,180,28,little druid,23,-1,120,16
+63018 datagiant monitaur,30,3,160,12,martian slave,8,1,50,9,martian prince,8
+63020 data1,90,17,ruthless martian king,8,2,190,22,powerful martian queen,8,2
+63022 data160,30,pretty martian princess,8,-1,50,6
+63024 datalittle schoolboy,20,2,60,12,large hemmerock,19,3,180,14
+63026 dataabsent minded scientist,21,0,120,18
+63028 dataerderly cook,40,2,140,22,young girl,42,-1,40,12,old politician,41,0
+63030 data60,14,weary time traveller,39,2,90,19
+63990 data%,0,0,0,0

@@ -1,0 +1,124 @@
+10 screen1
+15 cls
+20 line54,23,100,200,2
+30 line54,323,100,200,4
+50 n=10
+60 dimx(n),y(n)
+65 m=20
+70 dimwa(m),wb(m),ww(m)
+80 ji=0*5.0:jl=0*10.0
+85 p1=0
+87 p=10
+90 cls
+180 rem assume these are actual - calc weight
+190 remgosub2050
+290 m=0:n=0:remm=12:n=8
+300 readaa,x(n),y(n)
+310 ifaa>=0thenn=n+1:goto300
+320 readwa(m),wb(m),ww(m)
+340 ifwa(m)>=0thenm=m+1:goto320
+400 rem gosub2000
+410 fori=0ton:x(i)=x(i)+200:next
+500 printww(3);ww(4)
+1000 t=t+1
+1002 beginframe
+1005 cls
+1007 tx=0:ty=0
+1010 fori=0tom-1
+1020 dx=x(wa(i))-x(wb(i)):dy=y(wa(i))-y(wb(i))
+1030 d=sqrt(dx*dx+dy*dy):ifd=0thend=0.001
+1040 c=((ww(i)+rnd(0)*0.1)/d*50.0-1.0)*3.5:ifc>1999thenc=1
+1042 c=(ww(i)*50.0+rnd(0)*jl-d):ifc>1999thenc=1
+1043 c=c*0.500
+1045 remprinti;d;c
+1047 ifwa(i)=porwb(i)=pthen gprint str$(int(d/50*100)/100),(x(wa(i))+x(wb(i)))/2,(y(wa(i))+y(wb(i)))/2+(wa(i)=8)*20,5
+1048 ifwa(i)=porwb(i)=pthengosub2100
+1050 x(wa(i))=x(wa(i))+c*dx/d+(rnd(0)-0.5)*ji
+1060 x(wb(i))=x(wb(i))-c*dx/d+(rnd(0)-0.5)*ji
+1070 y(wa(i))=y(wa(i))+c*dy/d+(rnd(0)-0.5)*ji
+1080 y(wb(i))=y(wb(i))-c*dy/d+(rnd(0)-0.5)*ji
+1150 next
+1180 rem normalise
+1190 remx(0)=300
+1191 y(0)=300
+1192 y(1)=300
+1194 rem x(8)=500:y(8)=400
+1196 rem y(9)=400
+1200 fori=0ton-1
+1210 linex(i)-5,y(i)+5,x(i)+5,y(i)-5,3
+1220 linex(i)-5,y(i)-5,x(i)+5,y(i)+5,3
+1290 next
+1300 fori=0tom-1
+1310 linex(wa(i)),y(wa(i)),x(wb(i)),y(wb(i)),2
+1390 next
+1400 geta$:ifa$="2"theny(2)=y(2)+100*rnd(0)-50:x(2)=x(2)+100*rnd(0)-50
+1410 ifa$="1"theny(1)=y(1)+100*rnd(0)-50:x(1)=x(1)+100*rnd(0)-50
+1430 ifa$="3"theny(3)=y(3)+100*rnd(0)-50:x(3)=x(3)+200*rnd(0)-100
+1440 ifa$="4"theny(4)=y(4)+100*rnd(0)-50:x(4)=x(4)+100*rnd(0)-50
+1450 ifa$="r"thengosub2050
+1460 ifa$="j"andji=0thenji=10:jl=5:goto1464
+1462 ifa$="j"andjithenji=0:jl=0
+1464 ifa$="l"thengosub2070
+1470 ifa$="h"thengosub2200
+1472 ifa$="p"thenp1=1-p1
+1474 ifa$="0"theny(10)=y(10)+100*rnd(0)-50:x(10)=x(10)+200*rnd(0)-100
+1480 endframe
+1485 sleep1
+1490 goto1000
+2000 rem x(0)=300:y(0)=300
+2002 rem y(1)=300
+2005 fori=0tom-1
+2010 dx=x(wa(i))-x(wb(i)):dy=y(wa(i))-y(wb(i))
+2020 d=sqrt(dx*dx+dy*dy)
+2030 ww(i)=d/50
+2040 next
+2045 return
+2050 fori=0ton-1
+2052 x(i)=x(i)+rnd(0)*100-50
+2054 y(i)=y(i)+rnd(0)*100-50
+2056 next
+2060 return
+2070 fori=0tom-1
+2072 ww(i)=ww(i)*(0.8+0.410*rnd(0))
+2076 next
+2080 return
+2100 rem plot pull
+2110 ux=-c*dx/d*10000:uy=-c*dy/d*10000
+2115 tx=tx+ux:ty=ty+uy:remprinttx;ty
+2120 ifp1thenlinex(p),y(p),x(p)+ux,y(p)+uy,7
+2130 ifp1thenifwa(i)=porwb(i)=pthenlinex(p),y(p),x(p)+tx,y(p)+ty,1
+2140 return
+2200 rem help
+2205 print "":print"-----------"
+2210 print"1,2,3,4 randomise location of #"
+2220 print"j - jiggle toggle"
+2230 print"p - plot toggle"
+2290 return
+3000 data  0 , 300,  300
+3010 data  1 , 181.16823205782904,  300
+3020 data  2 , 100.71343007624742,  131.7411170961378
+3030 data  3 ,-0.022594344222088836,  26.337421884603792
+3040 data  4 , 134.89658526880075,  164.91518055796178
+3050 data  5 , 379.5306181626632,  618.0298074958006
+3060 data  6 , 168.0048775354956,  152.79343406888415
+3070 data  7 , 424.7261799539912,  539.2047564571666
+3080 data  8 , 500,  400
+3090 data  9 , 782.3408976808024,  400
+3100 data  10,  887.1898623295909,  399.9999999999952
+3990 data  -1, -1, -1
+4000 data 0,  1,  1.6745477313207024
+4010 data 0,  2,  4.194494965275093
+4020 data 1,  2,  4.560445649096251
+4030 data  1,  3,  8.689303977017563
+4040 data  2,  3,  2.1101510886669064
+4050 data  6,  2,  2.890023870890085
+4060 data  4,  0,  1.3419043543783333
+4070 data  5,  0,  0.7490978638568889
+4080 data  6,  5,  13.539831929539824
+4090 data  6,  1,  0.8382211236939013
+4100 data  4,  2,  0.9526818116217627
+4110 data  5,  7,  1.8172536946587283
+4120 data  8,  9,  0.12015035061607685
+4130 data  8,  10,  10.507131048091805
+4140 data  9,  10,  2.0969792929757713
+4990 data -1, -1, -1

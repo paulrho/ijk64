@@ -1,0 +1,69 @@
+10 tr=5:xx=rnd(-tr):rem seed it
+20 screen1,1000,500
+100 mx=1000
+110 dimb(mx),a(mx),e(mx),p(mx),s(mx),z(mx)
+115 remb=begin, a=aim, e=end (done), p=priority, s=size
+120 n=0
+130 rg=1/5*0.99:rga=0:rem generate rate per day
+140 rr=1:rra=0:rem pickup rate per day
+150 qm=1000
+152 dimq(2,qm),qw(2,qm)
+154 qh=0:qt=0
+200 gosub1000:sleep10
+210 ift>90thengosub1300:ifk>=0thengosub1400:goto210:rem get all work
+220 gosub1600:rem do one days work
+290 goto200
+1000 rem day cycle
+1010 t=t+1:print"day = ";t
+1015 rga=rga+rg
+1020 ifrga>1thengosub1100:rga=rga-1:goto1020:rem gen
+1025 remrra=rra+rr
+1030 remifrra>1thengosub1200:rra=rra-1:goto1030:rem do
+1080 beginframe:cls:gosub2000:gosub2100:endframe:rem plot
+1090 return
+1100 b(n)=t:a(n)=t+int(rnd(tr)*80)+10
+1110 e(n)=-1:rem not done
+1120 p(n)=2:s(n)=5:rem 5 days to do
+1125 z(n)=0:rem not committed
+1130 n=n+1:return
+1200 rem scan the work to q more up to x days
+1210 rem as each picked off - it can be calculated the new end time
+1220 gosub1300:rem find best next
+1230 ifk>=0thengosub1400:rem push onto queue
+1290 return
+1300 rem find next piece of work and return in k (or k=-1)
+1310 k=-1:ifn=0thenreturn
+1320 fori=0ton-1:ifz(i)<>0then1340
+1330   ifk<0thenk=i
+1335   ifa(i)<a(k)thenk=i
+1340 next
+1350 print"best next = ";k
+1390 return
+1400 rem push more work on queue
+1410 q(0,qt)=k:qw(0,qt)=s(k):rem work done
+1440 qt=qt+1:ifqt>qmthenqt=0
+1450 z(k)=1:rem committed
+1490 return
+1500 rem pop off queue
+1510 qh=qh+1:ifqh>qmthenqh=0
+1520 return
+1600 rem do work
+1610 ifqh=qtthenreturn:rem no work to do
+1620 qw(0,qh)=qw(0,qh)-1
+1630 ifqw(0,qh)<=0thenk=q(0,qh):e(k)=t:z(k)=2:gosub1500
+1690 return
+2000 yy=300:y2=480:xs=1:fori=0ton-1
+2005 c=6+z(i):ifz(i)=2thenc=5
+2010 lineb(i)*xs,yy-i,a(i)*xs,yy-i,c
+2020 ife(i)>a(i)thenlinea(i)*xs,yy-i,e(i)*xs,yy-i,1
+2040 next
+2090 return
+2100 ifqh=qtthenreturn
+2110 qi=qh:qc=0
+2112 i=q(0,qi)
+2115 c=6+z(i):ifz(i)=2thenc=5
+2120 lineb(i)*xs,y2-qc,a(i)*xs,y2-qc,c
+2130 ife(i)>a(i)thenlinea(i)*xs,y2-qc,e(i)*xs,y2-qc,1
+2140 qi=qi+1:qc=qc+1:ifqi>qmthenqi=0
+2150 ifqi<>qtthen2112
+2190 return

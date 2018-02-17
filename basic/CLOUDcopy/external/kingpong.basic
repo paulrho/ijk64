@@ -1,0 +1,138 @@
+   20 rem
+   30 poke53280,14:poke53281,6
+   40 printchr$(5);chr$(147)
+   50 pb=256*peek(648):cb=55296
+   60 vt$=chr$(19)
+   70 fork=1to40
+   80 vt$=vt$+chr$(13):ht$=ht$+chr$(29)
+   90 sp$=sp$+chr$(32):as$=as$+chr$(42)
+  100 nextk
+  110 m$=chr$(147)+left$(sp$,16)+"kingpong"+chr$(13)
+  120 m$=m$+as$
+  130 printm$
+  140 print"hi there. my name is kevin. i work"
+  150 print"for david l. heiserman.  dave is always"
+  160 print"changing my programs, trying to make"
+  170 print"them better and better.  this is a"
+  180 print"program that dave (or you for that"
+  190 print"matter) can easily change to suit your"
+  200 print"own taste."
+  210 print:print"the basic game is the familiar 'pong'"
+  220 print"game. you can use the menues (sic) to"
+  230 print"select the colors and speed of the"
+  240 print"game."
+  250 print:printtab(5)"-- kevin"
+  260 printleft$(vt$,21);"strike any key ...";
+  270 gosub1320
+  280 forn=1to8:readca$(n)
+  290 readcc(n):nextn
+  300 a$="field"
+  310 ni=8:gosub1200
+  320 fc=cd:a$="ball":gosub1200
+  330 bc=cd:a$="paddle":gosub1200
+  340 pc=cd:printm$
+  350 print:print"how fast should the ball travel (1-5)?";
+  360 gosub1320
+  370 ifk$<"1"ork$>"5"then360
+  380 tc=5
+  390 iffc=7orfc=1thentc=151
+  400 printchr$(tc);
+  410 sd=val(k$)*10
+  420 pp=0:cs=0
+  430 poke53280,9:poke53281,fc
+  440 printchr$(147);
+  450 fork=0to1:forv=0+kto17+kstep17:forh=0to39
+  460 kn=40*v+h
+  470 pokecb+kn,pc:pokepb+k,160
+  480 next h,v,k
+  490 fork=0to1:forh=0+kto38+kstep38:forv=0to18
+  500 kn=40*v+h
+  510 pokecb+kn,pc:pokepb+kn,160
+  520 nextv,h,k
+  530 df=-1:dr=0
+  540 ps=10:gosub990
+  550 x=20:y=10:nx=2:ny=10
+  560 dr=int(rnd(1)*4-2)
+570 fort=sdto50:nextt:sleep(50-sd)+50
+  580 getk$
+  590 gosub980
+  600 nx=x+df:ny=y+dr
+  610 if(peek(cb+40*ny+nx)and15)<>pcthen910
+  620 ifnx=35andabs(ps-ny)<2thenpp=pp+1
+  630 ifnx>2andnx<34thendr=dr*-1:goto730
+  640 ifnx<3ornx>34thendf=df*-1
+  650 ifx<35then700
+  660 cs=cs+1
+  670 x=20:nx=20:y=10:ny=10
+  680 df=-1
+690 fort=1to1000:nextt:sleep1000
+  700 ifdr>0thendr=int(rnd(1)*3)
+  710 ifdr<0thendr=-int(rnd(1)*3):goto730
+  720 ifdr=0thendr=int(rnd(1)*3-1)
+  730 ifpp<21andcs<21then830
+  740 printm$
+  750 print:print
+  760 ifpp>=21thenprinttab(13)"** you win **"
+  770 ifcs>=21thenprinttab(9)"** computer wins **"
+  780 printleft$(vt$,21);"want to play again (y/n)?";
+  790 gosub1320
+  800 ifk$="y"then300
+  810 ifk$<>"n"then790
+  820 goto1370
+  830 getk$:ifk$<>""then830
+  840 printleft$(vt$,21);left$(sp$,38);
+  850 printleft$(vt$,21)"you have"pp"pts."spc(10)
+  860 print"d=down"
+  870 printleft$(vt$,22);left$(sp$,38);
+  880 printleft$(vt$,22)"computer has"cs"pts."spc(6)
+  890 print"u=up"
+  900 goto600
+  910 kn=40*y+x
+  920 pokecb+kn,fc:pokepb+kn,160
+  930 x=nx:y=ny
+  940 ifnx>35then630
+  950 kn=40*ny+nx
+  960 pokecb+kn,bc:pokepb+kn,160
+  970 goto570
+  980 ifk$<>"u"then1090
+  990 fork=ps-1tops+1:kn=40*k+35
+ 1000 pokecb+kn,fc:pokepb+kn,160
+ 1010 nextk
+ 1020 ps=ps-2
+ 1030 ifps<2thenps=ps+2
+ 1040 ifps=2thenps=ps+1
+ 1050 fork=ps-1tops+1:kn=40*k+35
+ 1060 pokecb+kn,pc:pokepb+kn,160
+ 1070 nextk
+ 1080 goto1190
+ 1090 ifk$<>"d"then1190
+ 1100 fork=ps-1tops+1:kn=40*k+35
+ 1110 pokecb+kn,fc:pokepb+kn,160
+ 1120 nextk
+ 1130 ps=ps+2
+ 1140 ifps>16thenps=ps-2
+ 1150 ifps=16thenps=ps-1
+ 1160 fork=ps-1tops+1:kn=40*k+35
+ 1170 pokecb+kn,pc:pokepb+kn,160
+ 1180 nextk
+ 1190 return
+ 1200 printm$
+ 1210 forn=1toni
+ 1220 print:printtab(10);n;spc(3)ca$(n)
+ 1230 nextn
+ 1240 print
+1250 print"select a color for ";a$" (1-8)";
+ 1260 gosub1320
+ 1270 ifk$<"1"ork$>"8"then1260
+ 1280 k=val(k$):cd=cc(k)
+ 1290 return
+ 1300 data black,0,dark blue,6,light blue,14
+ 1310 data green,5,orange,8,grey,12,yellow,7,white,1
+ 1320 printchr$(18);chr$(97);chr$(146);
+ 1330 getk$:ifk$<>""then1330
+ 1340 getk$:ifk$=""then1340
+ 1350 printchr$(142);
+ 1360 return
+ 1370 poke53280,14:poke53281,6
+ 1380 printchr$(147);chr$(154)
+ 1390 end

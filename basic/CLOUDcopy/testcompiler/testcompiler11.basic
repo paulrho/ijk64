@@ -1,0 +1,6 @@
+5 fori=1to2
+10 x=asc("a")
+20 printx
+25 a$=chr$(65)
+27 printa$
+30 next
