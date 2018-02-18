@@ -50,6 +50,7 @@ IF THEN #
 3) 
 DEF FN - compile it
   (currently marked as reject)
+  DONE!!
 
 
 
@@ -59,4 +60,7 @@ at least turn it into near-a-code NEXT [mem] statements (where mem could be -2 (
 
 
 5) allow sounds to load off web too
+
+
+when you list"prog" and it is not there - it should not do the list
 

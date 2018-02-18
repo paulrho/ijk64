@@ -286,200 +286,204 @@
 <span class="sourceLineNo">278</span>         command_ANTIALIAS(1);<a name="line.278"></a>
 <span class="sourceLineNo">279</span>     } else {<a name="line.279"></a>
 <span class="sourceLineNo">280</span>       lsize=w;<a name="line.280"></a>
-<span class="sourceLineNo">281</span>       newoffGraphics.setStroke(new BasicStroke(w));<a name="line.281"></a>
-<span class="sourceLineNo">282</span>     }<a name="line.282"></a>
-<span class="sourceLineNo">283</span>   }<a name="line.283"></a>
-<span class="sourceLineNo">284</span><a name="line.284"></a>
-<span class="sourceLineNo">285</span>        <a name="line.285"></a>
-<span class="sourceLineNo">286</span>   public void command_GPRINT(String text, int x, int y, int col) {<a name="line.286"></a>
-<span class="sourceLineNo">287</span>      if (text == null) text=""; // stop bad error if a numeric was passed<a name="line.287"></a>
-<span class="sourceLineNo">288</span>      //Font font= new Font ("Monospaced", Font.BOLD, fsize); //maybe keep this global?<a name="line.288"></a>
-<span class="sourceLineNo">289</span>      Font font= new Font (fontuse, Font.BOLD, fsize); //maybe keep this global?<a name="line.289"></a>
-<span class="sourceLineNo">290</span>      newoffGraphics.setFont(font);<a name="line.290"></a>
-<span class="sourceLineNo">291</span>      newoffGraphics.setColor(colorindex[col]);<a name="line.291"></a>
-<span class="sourceLineNo">292</span>      newoffGraphics.drawString(text,x,y+tby);<a name="line.292"></a>
-<span class="sourceLineNo">293</span>      if (!inframe) doupdate();<a name="line.293"></a>
-<span class="sourceLineNo">294</span>   }<a name="line.294"></a>
-<span class="sourceLineNo">295</span>   <a name="line.295"></a>
-<span class="sourceLineNo">296</span>   // these only make sense if they get called with the right addresses<a name="line.296"></a>
-<span class="sourceLineNo">297</span>   public void command_POKE(int address, int val) {<a name="line.297"></a>
-<span class="sourceLineNo">298</span>           if (address==1024) valevent=val&amp;0xFF;<a name="line.298"></a>
-<span class="sourceLineNo">299</span>   }<a name="line.299"></a>
-<span class="sourceLineNo">300</span><a name="line.300"></a>
-<span class="sourceLineNo">301</span>   public int command_PEEK(int address) {<a name="line.301"></a>
-<span class="sourceLineNo">302</span>           if (address==1024) { return valevent; }<a name="line.302"></a>
-<span class="sourceLineNo">303</span>           if (address==1030) { return valx&amp;0xFF; }<a name="line.303"></a>
-<span class="sourceLineNo">304</span>           if (address==1031) { return (valx&gt;&gt;8)&amp;0xFF; }<a name="line.304"></a>
-<span class="sourceLineNo">305</span>           if (address==1032) { return valy&amp;0xFF; }<a name="line.305"></a>
-<span class="sourceLineNo">306</span>           if (address==1033) { return (valy&gt;&gt;8)&amp;0xFF; }<a name="line.306"></a>
-<span class="sourceLineNo">307</span>           return 0;<a name="line.307"></a>
-<span class="sourceLineNo">308</span>   }<a name="line.308"></a>
-<span class="sourceLineNo">309</span>   <a name="line.309"></a>
-<span class="sourceLineNo">310</span>   /* new things for drawing images*/<a name="line.310"></a>
-<span class="sourceLineNo">311</span>   int topimage=0;<a name="line.311"></a>
-<span class="sourceLineNo">312</span>   private static final int MAXIMAGE=100;<a name="line.312"></a>
-<span class="sourceLineNo">313</span>   BufferedImage[] imgarray= new BufferedImage[MAXIMAGE]; // bad hard code at moment<a name="line.313"></a>
-<span class="sourceLineNo">314</span>   <a name="line.314"></a>
-<span class="sourceLineNo">315</span>   public void command_SAVEIMAGE(String filename) {<a name="line.315"></a>
-<span class="sourceLineNo">316</span>       save(filename);<a name="line.316"></a>
-<span class="sourceLineNo">317</span>   }<a name="line.317"></a>
-<span class="sourceLineNo">318</span><a name="line.318"></a>
-<span class="sourceLineNo">319</span>   public int command_LOADIMAGE(String filename) {<a name="line.319"></a>
-<span class="sourceLineNo">320</span>     if (filename.startsWith("+")) { //temp<a name="line.320"></a>
-<span class="sourceLineNo">321</span>       save(filename.substring(1));<a name="line.321"></a>
-<span class="sourceLineNo">322</span>       return -1;<a name="line.322"></a>
-<span class="sourceLineNo">323</span>     }<a name="line.323"></a>
-<span class="sourceLineNo">324</span>         //if (topimage+1==20) return -1;<a name="line.324"></a>
-<span class="sourceLineNo">325</span>         if (topimage+1==MAXIMAGE) topimage=0; // instead, wind it back<a name="line.325"></a>
-<span class="sourceLineNo">326</span>     try {<a name="line.326"></a>
-<span class="sourceLineNo">327</span>       if (filename.startsWith("http")) {<a name="line.327"></a>
-<span class="sourceLineNo">328</span>          URL url = new URL(filename);<a name="line.328"></a>
-<span class="sourceLineNo">329</span>         imgarray[topimage] = ImageIO.read(url.openStream());<a name="line.329"></a>
-<span class="sourceLineNo">330</span>       } else {<a name="line.330"></a>
-<span class="sourceLineNo">331</span>         imgarray[topimage] = ImageIO.read(new File(filename));<a name="line.331"></a>
-<span class="sourceLineNo">332</span>       }<a name="line.332"></a>
-<span class="sourceLineNo">333</span>     } catch (IOException e) {<a name="line.333"></a>
-<span class="sourceLineNo">334</span>                 return -1;<a name="line.334"></a>
-<span class="sourceLineNo">335</span>     }<a name="line.335"></a>
-<span class="sourceLineNo">336</span>     return topimage++;<a name="line.336"></a>
-<span class="sourceLineNo">337</span>   }<a name="line.337"></a>
-<span class="sourceLineNo">338</span><a name="line.338"></a>
-<span class="sourceLineNo">339</span>   public void command_DRAWIMAGE(int imgno, int x, int y, double scale, double rotation) {<a name="line.339"></a>
-<span class="sourceLineNo">340</span>       if (imgno&lt;0) imgno=topimage-1; //display the last one<a name="line.340"></a>
-<span class="sourceLineNo">341</span>       AffineTransform tx = AffineTransform.getScaleInstance(scale, scale);<a name="line.341"></a>
-<span class="sourceLineNo">342</span>//       tx.translate(x,y+(double)tby/scale); // was but scales the x,y too<a name="line.342"></a>
-<span class="sourceLineNo">343</span>       tx.translate(x/scale,(y+(double)tby)/scale);<a name="line.343"></a>
-<span class="sourceLineNo">344</span>       if (rotation!=0.0) tx.rotate(rotation); <a name="line.344"></a>
-<span class="sourceLineNo">345</span>       //AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);<a name="line.345"></a>
-<span class="sourceLineNo">346</span>       //newoffGraphics.drawImage(imgarray[imgno],tx,null);<a name="line.346"></a>
-<span class="sourceLineNo">347</span>       AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BICUBIC);<a name="line.347"></a>
-<span class="sourceLineNo">348</span>       newoffGraphics.drawImage(imgarray[imgno],op,0,0);<a name="line.348"></a>
-<span class="sourceLineNo">349</span><a name="line.349"></a>
-<span class="sourceLineNo">350</span>     if (!inframe) doupdate();<a name="line.350"></a>
-<span class="sourceLineNo">351</span>   }<a name="line.351"></a>
-<span class="sourceLineNo">352</span>   <a name="line.352"></a>
-<span class="sourceLineNo">353</span>   <a name="line.353"></a>
-<span class="sourceLineNo">354</span>/*******************************************************************************************/<a name="line.354"></a>
-<span class="sourceLineNo">355</span><a name="line.355"></a>
-<span class="sourceLineNo">356</span>  public void mousePressed(MouseEvent e)<a name="line.356"></a>
-<span class="sourceLineNo">357</span>  {<a name="line.357"></a>
-<span class="sourceLineNo">358</span>    valx=e.getX();<a name="line.358"></a>
-<span class="sourceLineNo">359</span>    valy=e.getY()-tby;<a name="line.359"></a>
-<span class="sourceLineNo">360</span>    // also set type to 1<a name="line.360"></a>
-<span class="sourceLineNo">361</span>    valevent=1;    <a name="line.361"></a>
-<span class="sourceLineNo">362</span>  }<a name="line.362"></a>
-<span class="sourceLineNo">363</span><a name="line.363"></a>
-<span class="sourceLineNo">364</span>  public void mouseReleased(MouseEvent e)<a name="line.364"></a>
-<span class="sourceLineNo">365</span>  {<a name="line.365"></a>
-<span class="sourceLineNo">366</span>    valx=e.getX();<a name="line.366"></a>
-<span class="sourceLineNo">367</span>    valy=e.getY()-tby;<a name="line.367"></a>
-<span class="sourceLineNo">368</span>    // also set type to 1<a name="line.368"></a>
-<span class="sourceLineNo">369</span>    valevent=3;    <a name="line.369"></a>
-<span class="sourceLineNo">370</span>  }<a name="line.370"></a>
-<span class="sourceLineNo">371</span><a name="line.371"></a>
-<span class="sourceLineNo">372</span>  public void mouseDragged(MouseEvent e)<a name="line.372"></a>
-<span class="sourceLineNo">373</span>  {<a name="line.373"></a>
-<span class="sourceLineNo">374</span>    valx=e.getX();<a name="line.374"></a>
-<span class="sourceLineNo">375</span>    valy=e.getY()-tby;<a name="line.375"></a>
-<span class="sourceLineNo">376</span>    // also set type to 1<a name="line.376"></a>
-<span class="sourceLineNo">377</span>    valevent=2;    <a name="line.377"></a>
-<span class="sourceLineNo">378</span>  }<a name="line.378"></a>
-<span class="sourceLineNo">379</span>   <a name="line.379"></a>
-<span class="sourceLineNo">380</span>   <a name="line.380"></a>
-<span class="sourceLineNo">381</span>   void dothings() {<a name="line.381"></a>
-<span class="sourceLineNo">382</span>     // just in a loop<a name="line.382"></a>
-<span class="sourceLineNo">383</span><a name="line.383"></a>
-<span class="sourceLineNo">384</span>     command_CLS();<a name="line.384"></a>
-<span class="sourceLineNo">385</span>     while (true) {<a name="line.385"></a>
-<span class="sourceLineNo">386</span><a name="line.386"></a>
-<span class="sourceLineNo">387</span>       // do out of paint drawing<a name="line.387"></a>
-<span class="sourceLineNo">388</span>       <a name="line.388"></a>
-<span class="sourceLineNo">389</span>       //newoffGraphics.drawLine(124,24,235,252);<a name="line.389"></a>
-<span class="sourceLineNo">390</span>       command_LINE(<a name="line.390"></a>
-<span class="sourceLineNo">391</span>         (int)(generator.nextDouble()*1000)<a name="line.391"></a>
-<span class="sourceLineNo">392</span>         ,(int)(generator.nextDouble()*1000)<a name="line.392"></a>
-<span class="sourceLineNo">393</span>         ,(int)(generator.nextDouble()*1000)<a name="line.393"></a>
-<span class="sourceLineNo">394</span>         ,(int)(generator.nextDouble()*1000)<a name="line.394"></a>
-<span class="sourceLineNo">395</span>         ,(int)(generator.nextDouble()*16)<a name="line.395"></a>
-<span class="sourceLineNo">396</span>       );<a name="line.396"></a>
-<span class="sourceLineNo">397</span>       command_GPRINT("x",(int)(generator.nextDouble()*1000)<a name="line.397"></a>
-<span class="sourceLineNo">398</span>         ,(int)(generator.nextDouble()*1000),3);<a name="line.398"></a>
-<span class="sourceLineNo">399</span><a name="line.399"></a>
-<span class="sourceLineNo">400</span>       if (command_PEEK(1024)!=0) {<a name="line.400"></a>
-<span class="sourceLineNo">401</span>         command_GPRINT("m="+command_PEEK(1024),<a name="line.401"></a>
-<span class="sourceLineNo">402</span>           command_PEEK(1030)+command_PEEK(1031)*256,<a name="line.402"></a>
-<span class="sourceLineNo">403</span>           command_PEEK(1032)+command_PEEK(1033)*256<a name="line.403"></a>
-<span class="sourceLineNo">404</span>           ,9<a name="line.404"></a>
-<span class="sourceLineNo">405</span>         );<a name="line.405"></a>
-<span class="sourceLineNo">406</span>         command_POKE(1024,0);<a name="line.406"></a>
-<span class="sourceLineNo">407</span>           }<a name="line.407"></a>
-<span class="sourceLineNo">408</span>         <a name="line.408"></a>
-<span class="sourceLineNo">409</span>       doupdate();<a name="line.409"></a>
-<span class="sourceLineNo">410</span>       try {<a name="line.410"></a>
-<span class="sourceLineNo">411</span>         Thread.sleep(1);       // in the extreme slowdown<a name="line.411"></a>
-<span class="sourceLineNo">412</span>       }<a name="line.412"></a>
-<span class="sourceLineNo">413</span>       catch(InterruptedException e) {<a name="line.413"></a>
-<span class="sourceLineNo">414</span>       }<a name="line.414"></a>
-<span class="sourceLineNo">415</span>     }<a name="line.415"></a>
-<span class="sourceLineNo">416</span><a name="line.416"></a>
-<span class="sourceLineNo">417</span>   }<a name="line.417"></a>
-<span class="sourceLineNo">418</span> <a name="line.418"></a>
-<span class="sourceLineNo">419</span>  public void mouseExited(MouseEvent e)<a name="line.419"></a>
-<span class="sourceLineNo">420</span>  {<a name="line.420"></a>
-<span class="sourceLineNo">421</span>  }<a name="line.421"></a>
-<span class="sourceLineNo">422</span><a name="line.422"></a>
-<span class="sourceLineNo">423</span>  public void mouseEntered(MouseEvent e)<a name="line.423"></a>
+<span class="sourceLineNo">281</span>       if (blitting) {<a name="line.281"></a>
+<span class="sourceLineNo">282</span>         newoffGraphicsB[0].setStroke(new BasicStroke(w));<a name="line.282"></a>
+<span class="sourceLineNo">283</span>         newoffGraphicsB[1].setStroke(new BasicStroke(w));<a name="line.283"></a>
+<span class="sourceLineNo">284</span>       } else<a name="line.284"></a>
+<span class="sourceLineNo">285</span>         newoffGraphics.setStroke(new BasicStroke(w));<a name="line.285"></a>
+<span class="sourceLineNo">286</span>     }<a name="line.286"></a>
+<span class="sourceLineNo">287</span>   }<a name="line.287"></a>
+<span class="sourceLineNo">288</span><a name="line.288"></a>
+<span class="sourceLineNo">289</span>        <a name="line.289"></a>
+<span class="sourceLineNo">290</span>   public void command_GPRINT(String text, int x, int y, int col) {<a name="line.290"></a>
+<span class="sourceLineNo">291</span>      if (text == null) text=""; // stop bad error if a numeric was passed<a name="line.291"></a>
+<span class="sourceLineNo">292</span>      //Font font= new Font ("Monospaced", Font.BOLD, fsize); //maybe keep this global?<a name="line.292"></a>
+<span class="sourceLineNo">293</span>      Font font= new Font (fontuse, Font.BOLD, fsize); //maybe keep this global?<a name="line.293"></a>
+<span class="sourceLineNo">294</span>      newoffGraphics.setFont(font);<a name="line.294"></a>
+<span class="sourceLineNo">295</span>      newoffGraphics.setColor(colorindex[col]);<a name="line.295"></a>
+<span class="sourceLineNo">296</span>      newoffGraphics.drawString(text,x,y+tby);<a name="line.296"></a>
+<span class="sourceLineNo">297</span>      if (!inframe) doupdate();<a name="line.297"></a>
+<span class="sourceLineNo">298</span>   }<a name="line.298"></a>
+<span class="sourceLineNo">299</span>   <a name="line.299"></a>
+<span class="sourceLineNo">300</span>   // these only make sense if they get called with the right addresses<a name="line.300"></a>
+<span class="sourceLineNo">301</span>   public void command_POKE(int address, int val) {<a name="line.301"></a>
+<span class="sourceLineNo">302</span>           if (address==1024) valevent=val&amp;0xFF;<a name="line.302"></a>
+<span class="sourceLineNo">303</span>   }<a name="line.303"></a>
+<span class="sourceLineNo">304</span><a name="line.304"></a>
+<span class="sourceLineNo">305</span>   public int command_PEEK(int address) {<a name="line.305"></a>
+<span class="sourceLineNo">306</span>           if (address==1024) { return valevent; }<a name="line.306"></a>
+<span class="sourceLineNo">307</span>           if (address==1030) { return valx&amp;0xFF; }<a name="line.307"></a>
+<span class="sourceLineNo">308</span>           if (address==1031) { return (valx&gt;&gt;8)&amp;0xFF; }<a name="line.308"></a>
+<span class="sourceLineNo">309</span>           if (address==1032) { return valy&amp;0xFF; }<a name="line.309"></a>
+<span class="sourceLineNo">310</span>           if (address==1033) { return (valy&gt;&gt;8)&amp;0xFF; }<a name="line.310"></a>
+<span class="sourceLineNo">311</span>           return 0;<a name="line.311"></a>
+<span class="sourceLineNo">312</span>   }<a name="line.312"></a>
+<span class="sourceLineNo">313</span>   <a name="line.313"></a>
+<span class="sourceLineNo">314</span>   /* new things for drawing images*/<a name="line.314"></a>
+<span class="sourceLineNo">315</span>   int topimage=0;<a name="line.315"></a>
+<span class="sourceLineNo">316</span>   private static final int MAXIMAGE=100;<a name="line.316"></a>
+<span class="sourceLineNo">317</span>   BufferedImage[] imgarray= new BufferedImage[MAXIMAGE]; // bad hard code at moment<a name="line.317"></a>
+<span class="sourceLineNo">318</span>   <a name="line.318"></a>
+<span class="sourceLineNo">319</span>   public void command_SAVEIMAGE(String filename) {<a name="line.319"></a>
+<span class="sourceLineNo">320</span>       save(filename);<a name="line.320"></a>
+<span class="sourceLineNo">321</span>   }<a name="line.321"></a>
+<span class="sourceLineNo">322</span><a name="line.322"></a>
+<span class="sourceLineNo">323</span>   public int command_LOADIMAGE(String filename) {<a name="line.323"></a>
+<span class="sourceLineNo">324</span>     if (filename.startsWith("+")) { //temp<a name="line.324"></a>
+<span class="sourceLineNo">325</span>       save(filename.substring(1));<a name="line.325"></a>
+<span class="sourceLineNo">326</span>       return -1;<a name="line.326"></a>
+<span class="sourceLineNo">327</span>     }<a name="line.327"></a>
+<span class="sourceLineNo">328</span>         //if (topimage+1==20) return -1;<a name="line.328"></a>
+<span class="sourceLineNo">329</span>         if (topimage+1==MAXIMAGE) topimage=0; // instead, wind it back<a name="line.329"></a>
+<span class="sourceLineNo">330</span>     try {<a name="line.330"></a>
+<span class="sourceLineNo">331</span>       if (filename.startsWith("http")) {<a name="line.331"></a>
+<span class="sourceLineNo">332</span>          URL url = new URL(filename);<a name="line.332"></a>
+<span class="sourceLineNo">333</span>         imgarray[topimage] = ImageIO.read(url.openStream());<a name="line.333"></a>
+<span class="sourceLineNo">334</span>       } else {<a name="line.334"></a>
+<span class="sourceLineNo">335</span>         imgarray[topimage] = ImageIO.read(new File(filename));<a name="line.335"></a>
+<span class="sourceLineNo">336</span>       }<a name="line.336"></a>
+<span class="sourceLineNo">337</span>     } catch (IOException e) {<a name="line.337"></a>
+<span class="sourceLineNo">338</span>                 return -1;<a name="line.338"></a>
+<span class="sourceLineNo">339</span>     }<a name="line.339"></a>
+<span class="sourceLineNo">340</span>     return topimage++;<a name="line.340"></a>
+<span class="sourceLineNo">341</span>   }<a name="line.341"></a>
+<span class="sourceLineNo">342</span><a name="line.342"></a>
+<span class="sourceLineNo">343</span>   public void command_DRAWIMAGE(int imgno, int x, int y, double scale, double rotation) {<a name="line.343"></a>
+<span class="sourceLineNo">344</span>       if (imgno&lt;0) imgno=topimage-1; //display the last one<a name="line.344"></a>
+<span class="sourceLineNo">345</span>       AffineTransform tx = AffineTransform.getScaleInstance(scale, scale);<a name="line.345"></a>
+<span class="sourceLineNo">346</span>//       tx.translate(x,y+(double)tby/scale); // was but scales the x,y too<a name="line.346"></a>
+<span class="sourceLineNo">347</span>       tx.translate(x/scale,(y+(double)tby)/scale);<a name="line.347"></a>
+<span class="sourceLineNo">348</span>       if (rotation!=0.0) tx.rotate(rotation); <a name="line.348"></a>
+<span class="sourceLineNo">349</span>       //AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);<a name="line.349"></a>
+<span class="sourceLineNo">350</span>       //newoffGraphics.drawImage(imgarray[imgno],tx,null);<a name="line.350"></a>
+<span class="sourceLineNo">351</span>       AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BICUBIC);<a name="line.351"></a>
+<span class="sourceLineNo">352</span>       newoffGraphics.drawImage(imgarray[imgno],op,0,0);<a name="line.352"></a>
+<span class="sourceLineNo">353</span><a name="line.353"></a>
+<span class="sourceLineNo">354</span>     if (!inframe) doupdate();<a name="line.354"></a>
+<span class="sourceLineNo">355</span>   }<a name="line.355"></a>
+<span class="sourceLineNo">356</span>   <a name="line.356"></a>
+<span class="sourceLineNo">357</span>   <a name="line.357"></a>
+<span class="sourceLineNo">358</span>/*******************************************************************************************/<a name="line.358"></a>
+<span class="sourceLineNo">359</span><a name="line.359"></a>
+<span class="sourceLineNo">360</span>  public void mousePressed(MouseEvent e)<a name="line.360"></a>
+<span class="sourceLineNo">361</span>  {<a name="line.361"></a>
+<span class="sourceLineNo">362</span>    valx=e.getX();<a name="line.362"></a>
+<span class="sourceLineNo">363</span>    valy=e.getY()-tby;<a name="line.363"></a>
+<span class="sourceLineNo">364</span>    // also set type to 1<a name="line.364"></a>
+<span class="sourceLineNo">365</span>    valevent=1;    <a name="line.365"></a>
+<span class="sourceLineNo">366</span>  }<a name="line.366"></a>
+<span class="sourceLineNo">367</span><a name="line.367"></a>
+<span class="sourceLineNo">368</span>  public void mouseReleased(MouseEvent e)<a name="line.368"></a>
+<span class="sourceLineNo">369</span>  {<a name="line.369"></a>
+<span class="sourceLineNo">370</span>    valx=e.getX();<a name="line.370"></a>
+<span class="sourceLineNo">371</span>    valy=e.getY()-tby;<a name="line.371"></a>
+<span class="sourceLineNo">372</span>    // also set type to 1<a name="line.372"></a>
+<span class="sourceLineNo">373</span>    valevent=3;    <a name="line.373"></a>
+<span class="sourceLineNo">374</span>  }<a name="line.374"></a>
+<span class="sourceLineNo">375</span><a name="line.375"></a>
+<span class="sourceLineNo">376</span>  public void mouseDragged(MouseEvent e)<a name="line.376"></a>
+<span class="sourceLineNo">377</span>  {<a name="line.377"></a>
+<span class="sourceLineNo">378</span>    valx=e.getX();<a name="line.378"></a>
+<span class="sourceLineNo">379</span>    valy=e.getY()-tby;<a name="line.379"></a>
+<span class="sourceLineNo">380</span>    // also set type to 1<a name="line.380"></a>
+<span class="sourceLineNo">381</span>    valevent=2;    <a name="line.381"></a>
+<span class="sourceLineNo">382</span>  }<a name="line.382"></a>
+<span class="sourceLineNo">383</span>   <a name="line.383"></a>
+<span class="sourceLineNo">384</span>   <a name="line.384"></a>
+<span class="sourceLineNo">385</span>   void dothings() {<a name="line.385"></a>
+<span class="sourceLineNo">386</span>     // just in a loop<a name="line.386"></a>
+<span class="sourceLineNo">387</span><a name="line.387"></a>
+<span class="sourceLineNo">388</span>     command_CLS();<a name="line.388"></a>
+<span class="sourceLineNo">389</span>     while (true) {<a name="line.389"></a>
+<span class="sourceLineNo">390</span><a name="line.390"></a>
+<span class="sourceLineNo">391</span>       // do out of paint drawing<a name="line.391"></a>
+<span class="sourceLineNo">392</span>       <a name="line.392"></a>
+<span class="sourceLineNo">393</span>       //newoffGraphics.drawLine(124,24,235,252);<a name="line.393"></a>
+<span class="sourceLineNo">394</span>       command_LINE(<a name="line.394"></a>
+<span class="sourceLineNo">395</span>         (int)(generator.nextDouble()*1000)<a name="line.395"></a>
+<span class="sourceLineNo">396</span>         ,(int)(generator.nextDouble()*1000)<a name="line.396"></a>
+<span class="sourceLineNo">397</span>         ,(int)(generator.nextDouble()*1000)<a name="line.397"></a>
+<span class="sourceLineNo">398</span>         ,(int)(generator.nextDouble()*1000)<a name="line.398"></a>
+<span class="sourceLineNo">399</span>         ,(int)(generator.nextDouble()*16)<a name="line.399"></a>
+<span class="sourceLineNo">400</span>       );<a name="line.400"></a>
+<span class="sourceLineNo">401</span>       command_GPRINT("x",(int)(generator.nextDouble()*1000)<a name="line.401"></a>
+<span class="sourceLineNo">402</span>         ,(int)(generator.nextDouble()*1000),3);<a name="line.402"></a>
+<span class="sourceLineNo">403</span><a name="line.403"></a>
+<span class="sourceLineNo">404</span>       if (command_PEEK(1024)!=0) {<a name="line.404"></a>
+<span class="sourceLineNo">405</span>         command_GPRINT("m="+command_PEEK(1024),<a name="line.405"></a>
+<span class="sourceLineNo">406</span>           command_PEEK(1030)+command_PEEK(1031)*256,<a name="line.406"></a>
+<span class="sourceLineNo">407</span>           command_PEEK(1032)+command_PEEK(1033)*256<a name="line.407"></a>
+<span class="sourceLineNo">408</span>           ,9<a name="line.408"></a>
+<span class="sourceLineNo">409</span>         );<a name="line.409"></a>
+<span class="sourceLineNo">410</span>         command_POKE(1024,0);<a name="line.410"></a>
+<span class="sourceLineNo">411</span>           }<a name="line.411"></a>
+<span class="sourceLineNo">412</span>         <a name="line.412"></a>
+<span class="sourceLineNo">413</span>       doupdate();<a name="line.413"></a>
+<span class="sourceLineNo">414</span>       try {<a name="line.414"></a>
+<span class="sourceLineNo">415</span>         Thread.sleep(1);       // in the extreme slowdown<a name="line.415"></a>
+<span class="sourceLineNo">416</span>       }<a name="line.416"></a>
+<span class="sourceLineNo">417</span>       catch(InterruptedException e) {<a name="line.417"></a>
+<span class="sourceLineNo">418</span>       }<a name="line.418"></a>
+<span class="sourceLineNo">419</span>     }<a name="line.419"></a>
+<span class="sourceLineNo">420</span><a name="line.420"></a>
+<span class="sourceLineNo">421</span>   }<a name="line.421"></a>
+<span class="sourceLineNo">422</span> <a name="line.422"></a>
+<span class="sourceLineNo">423</span>  public void mouseExited(MouseEvent e)<a name="line.423"></a>
 <span class="sourceLineNo">424</span>  {<a name="line.424"></a>
 <span class="sourceLineNo">425</span>  }<a name="line.425"></a>
 <span class="sourceLineNo">426</span><a name="line.426"></a>
-<span class="sourceLineNo">427</span>  public void mouseClicked(MouseEvent e)<a name="line.427"></a>
+<span class="sourceLineNo">427</span>  public void mouseEntered(MouseEvent e)<a name="line.427"></a>
 <span class="sourceLineNo">428</span>  {<a name="line.428"></a>
-<span class="sourceLineNo">429</span>        }<a name="line.429"></a>
-<span class="sourceLineNo">430</span>        <a name="line.430"></a>
-<span class="sourceLineNo">431</span>        public void mouseMoved(MouseEvent e)<a name="line.431"></a>
+<span class="sourceLineNo">429</span>  }<a name="line.429"></a>
+<span class="sourceLineNo">430</span><a name="line.430"></a>
+<span class="sourceLineNo">431</span>  public void mouseClicked(MouseEvent e)<a name="line.431"></a>
 <span class="sourceLineNo">432</span>  {<a name="line.432"></a>
 <span class="sourceLineNo">433</span>        }<a name="line.433"></a>
-<span class="sourceLineNo">434</span>          <a name="line.434"></a>
-<span class="sourceLineNo">435</span>   <a name="line.435"></a>
-<span class="sourceLineNo">436</span>  public synchronized void paint(Graphics g) {<a name="line.436"></a>
-<span class="sourceLineNo">437</span>    Graphics2D g2d = (Graphics2D) g;<a name="line.437"></a>
-<span class="sourceLineNo">438</span><a name="line.438"></a>
-<span class="sourceLineNo">439</span><a name="line.439"></a>
-<span class="sourceLineNo">440</span>    if(blitting) {<a name="line.440"></a>
-<span class="sourceLineNo">441</span>      //if(!inframe)<a name="line.441"></a>
-<span class="sourceLineNo">442</span>          //g2d.drawImage(newoffImageB[1-blit], 0, 0, this);<a name="line.442"></a>
-<span class="sourceLineNo">443</span>      //else<a name="line.443"></a>
-<span class="sourceLineNo">444</span>       if (!inframe || paintblit!=blit)<a name="line.444"></a>
-<span class="sourceLineNo">445</span>          g2d.drawImage(newoffImageB[paintblit], 0, 0, this);<a name="line.445"></a>
-<span class="sourceLineNo">446</span>    } else {<a name="line.446"></a>
-<span class="sourceLineNo">447</span>      if(!inframe)<a name="line.447"></a>
-<span class="sourceLineNo">448</span>          g2d.drawImage(newoffImage, 0, 0, this);<a name="line.448"></a>
-<span class="sourceLineNo">449</span>    }<a name="line.449"></a>
-<span class="sourceLineNo">450</span><a name="line.450"></a>
-<span class="sourceLineNo">451</span>  }<a name="line.451"></a>
-<span class="sourceLineNo">452</span><a name="line.452"></a>
-<span class="sourceLineNo">453</span>  public void update(Graphics g) {<a name="line.453"></a>
-<span class="sourceLineNo">454</span>    if(!inframe)<a name="line.454"></a>
-<span class="sourceLineNo">455</span>      paint(g);<a name="line.455"></a>
-<span class="sourceLineNo">456</span>  }<a name="line.456"></a>
-<span class="sourceLineNo">457</span><a name="line.457"></a>
-<span class="sourceLineNo">458</span>        public static void main(String[] args) {<a name="line.458"></a>
-<span class="sourceLineNo">459</span>                //JFrame frame = new JFrame();<a name="line.459"></a>
-<span class="sourceLineNo">460</span>                //Canvas gui = new Canvas();<a name="line.460"></a>
-<span class="sourceLineNo">461</span>                //frame.getContentPane().add(gui);<a name="line.461"></a>
-<span class="sourceLineNo">462</span>                /*Thread gameThread = new Thread(new GameLoop(gui));*/<a name="line.462"></a>
-<span class="sourceLineNo">463</span>                /*gameThread.setPriority(Thread.MIN_PRIORITY);*/<a name="line.463"></a>
-<span class="sourceLineNo">464</span>                /*gameThread.start();  start Game processing.*/<a name="line.464"></a>
-<span class="sourceLineNo">465</span>                GraphicsDevice graphicsDevice= new GraphicsDevice();<a name="line.465"></a>
-<span class="sourceLineNo">466</span>                graphicsDevice.dothings();<a name="line.466"></a>
-<span class="sourceLineNo">467</span>        }<a name="line.467"></a>
-<span class="sourceLineNo">468</span>  <a name="line.468"></a>
-<span class="sourceLineNo">469</span><a name="line.469"></a>
-<span class="sourceLineNo">470</span>} /* class */<a name="line.470"></a>
-<span class="sourceLineNo">471</span><a name="line.471"></a>
-<span class="sourceLineNo">472</span>/////////<a name="line.472"></a>
-<span class="sourceLineNo">473</span>// END //<a name="line.473"></a>
-<span class="sourceLineNo">474</span>/////////<a name="line.474"></a>
+<span class="sourceLineNo">434</span>        <a name="line.434"></a>
+<span class="sourceLineNo">435</span>        public void mouseMoved(MouseEvent e)<a name="line.435"></a>
+<span class="sourceLineNo">436</span>  {<a name="line.436"></a>
+<span class="sourceLineNo">437</span>        }<a name="line.437"></a>
+<span class="sourceLineNo">438</span>          <a name="line.438"></a>
+<span class="sourceLineNo">439</span>   <a name="line.439"></a>
+<span class="sourceLineNo">440</span>  public synchronized void paint(Graphics g) {<a name="line.440"></a>
+<span class="sourceLineNo">441</span>    Graphics2D g2d = (Graphics2D) g;<a name="line.441"></a>
+<span class="sourceLineNo">442</span><a name="line.442"></a>
+<span class="sourceLineNo">443</span><a name="line.443"></a>
+<span class="sourceLineNo">444</span>    if(blitting) {<a name="line.444"></a>
+<span class="sourceLineNo">445</span>      //if(!inframe)<a name="line.445"></a>
+<span class="sourceLineNo">446</span>          //g2d.drawImage(newoffImageB[1-blit], 0, 0, this);<a name="line.446"></a>
+<span class="sourceLineNo">447</span>      //else<a name="line.447"></a>
+<span class="sourceLineNo">448</span>       if (!inframe || paintblit!=blit)<a name="line.448"></a>
+<span class="sourceLineNo">449</span>          g2d.drawImage(newoffImageB[paintblit], 0, 0, this);<a name="line.449"></a>
+<span class="sourceLineNo">450</span>    } else {<a name="line.450"></a>
+<span class="sourceLineNo">451</span>      if(!inframe)<a name="line.451"></a>
+<span class="sourceLineNo">452</span>          g2d.drawImage(newoffImage, 0, 0, this);<a name="line.452"></a>
+<span class="sourceLineNo">453</span>    }<a name="line.453"></a>
+<span class="sourceLineNo">454</span><a name="line.454"></a>
+<span class="sourceLineNo">455</span>  }<a name="line.455"></a>
+<span class="sourceLineNo">456</span><a name="line.456"></a>
+<span class="sourceLineNo">457</span>  public void update(Graphics g) {<a name="line.457"></a>
+<span class="sourceLineNo">458</span>    if(!inframe)<a name="line.458"></a>
+<span class="sourceLineNo">459</span>      paint(g);<a name="line.459"></a>
+<span class="sourceLineNo">460</span>  }<a name="line.460"></a>
+<span class="sourceLineNo">461</span><a name="line.461"></a>
+<span class="sourceLineNo">462</span>        public static void main(String[] args) {<a name="line.462"></a>
+<span class="sourceLineNo">463</span>                //JFrame frame = new JFrame();<a name="line.463"></a>
+<span class="sourceLineNo">464</span>                //Canvas gui = new Canvas();<a name="line.464"></a>
+<span class="sourceLineNo">465</span>                //frame.getContentPane().add(gui);<a name="line.465"></a>
+<span class="sourceLineNo">466</span>                /*Thread gameThread = new Thread(new GameLoop(gui));*/<a name="line.466"></a>
+<span class="sourceLineNo">467</span>                /*gameThread.setPriority(Thread.MIN_PRIORITY);*/<a name="line.467"></a>
+<span class="sourceLineNo">468</span>                /*gameThread.start();  start Game processing.*/<a name="line.468"></a>
+<span class="sourceLineNo">469</span>                GraphicsDevice graphicsDevice= new GraphicsDevice();<a name="line.469"></a>
+<span class="sourceLineNo">470</span>                graphicsDevice.dothings();<a name="line.470"></a>
+<span class="sourceLineNo">471</span>        }<a name="line.471"></a>
+<span class="sourceLineNo">472</span>  <a name="line.472"></a>
+<span class="sourceLineNo">473</span><a name="line.473"></a>
+<span class="sourceLineNo">474</span>} /* class */<a name="line.474"></a>
+<span class="sourceLineNo">475</span><a name="line.475"></a>
+<span class="sourceLineNo">476</span>/////////<a name="line.476"></a>
+<span class="sourceLineNo">477</span>// END //<a name="line.477"></a>
+<span class="sourceLineNo">478</span>/////////<a name="line.478"></a>
 
 
 
