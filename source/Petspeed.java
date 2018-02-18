@@ -11,6 +11,10 @@
 // Opt10 chaining : 16-30% faster again
 //      .. todo - i think every jmp should just be a NOP
 // Opt11 NOP, ordered instr -> no increase/decrease - but NOP makes more sense
+// Opt   use vv internal 
+// Opt   IF return values - avoid creating tmp GenericType (just use int)
+// Opt   NEXT no more string usage
+// Opt15 (DEF) FN now in-line compiled (was not even compiled at all before)
 // 
 ////////////////////////////////////////////////
 class Petspeed

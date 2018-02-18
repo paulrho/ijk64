@@ -256,7 +256,8 @@ class Variables {
           variablearraystring1[i].length);
       } else if (variabletype[i]==V_ARRAY_STRING2) {
         System.out.printf("  variable %s (array of strings 2 dimension) size = %d,%d\n",variablename[i],
-        variablearraystring2[i][0].length);
+          variablearraystring2[i].length,
+          variablearraystring2[i][0].length);
       } else {
         System.out.printf("  unknown type %s\n",variablename[i]);
       }
