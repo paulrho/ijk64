@@ -1716,6 +1716,14 @@ boolean ProcessONstatement() throws BasicException
 
 boolean ProcessGOTOstatement() throws BasicException
 {
+  // we have a goto - see if we have a pointer to next
+  int fpnt=pnt;
+  if (speeder && machine.petspeed.nextpnt(pnt)>0) {
+    if (machine.enabledmovement && machine.program_running) {
+         pnt=machine.petspeed.nextpnt(fpnt);
+	 return true; // ignore colon read
+    }
+  }
   SkipSpaces(); // added this in as there may be leading spaces (probably a better way to do this)
   ReadExpression(); // not really, should just be a numberic??? maybe an expression is good
   // lets go!
@@ -1725,6 +1733,7 @@ boolean ProcessGOTOstatement() throws BasicException
       machine.gotoLine(keepExpression);
       if (verbose) { System.out.printf("goto, moving to executionpoint %d\n",machine.executionpoint); }
       pnt=machine.executionpoint; // we should now have a different execution point
+      if (speeder) machine.petspeed.acpointer_next[fpnt]=pnt;
     } else {
       //BasicCONTrestart
       if (verbose) System.out.printf("Got a GOTO in direct mode\n");
