@@ -1753,13 +1753,23 @@ boolean ProcessGOTOstatement() throws BasicException
 
 boolean ProcessGOSUBstatement() throws BasicException
 {
+  int fpnt=pnt;
+  if (speeder && machine.petspeed.nextpnt(pnt)>0) {
+    if (machine.enabledmovement && machine.program_running) {
+         machine.push_fl_gosub(machine.petspeed.nextpnt(pnt+1)); // store the AFTER setting one after the gosub
+         pnt=machine.petspeed.nextpnt(fpnt);
+	 return true; // ignore colon read
+    }
+  }
   SkipSpaces(); // added this in as there may be leading spaces (probably a better way to do this)
   ReadExpression(); // not really, should just be a numberic??? maybe an expression is good
   if (machine.enabledmovement) {
     if (machine.program_running) {
       machine.gosubLine(keepExpression,pnt);
       if (verbose) { System.out.printf("gosub, moving to executionpoint %d\n",machine.executionpoint); }
+      if (speeder) machine.petspeed.acpointer_next[fpnt+1]=pnt;
       pnt=machine.executionpoint; // we should now have a different execution point
+      if (speeder) machine.petspeed.acpointer_next[fpnt]=pnt;
     } else {
       throw new BasicException("GOSUB NOT IMPLEMENTED IN DIRECT MODE");
       //nodoesntwork//lets try this
