@@ -1642,6 +1642,11 @@ boolean ProcessIFstatement() throws BasicException
   }
 
 
+  int fpnt=pnt-2; // one back from the other above - places it in the TH[E]N keyword
+  if (speeder && machine.petspeed.nextpnt(fpnt)>0) {
+         pnt=machine.petspeed.nextpnt(fpnt);
+	 return true; // ignore colon read
+  }
 
   SkipSpaces(); // really - spaces arent good for anything
   // it might be just a line # - try and read it - if it isn't keep going  
@@ -1649,6 +1654,7 @@ boolean ProcessIFstatement() throws BasicException
     if (machine.enabledmovement) {
       machine.gotoLine(keepLine);
       pnt=machine.executionpoint; // we should now have a different execution point
+      if (speeder) machine.petspeed.acpointer_next[fpnt]=pnt;
     }
     // then read out till end of line
     //while (pnt<linelength && !line.substring(pnt,pnt+1).equals("\n")) {
@@ -1661,6 +1667,7 @@ boolean ProcessIFstatement() throws BasicException
     ReadExpression();
     machine.gotoLine(keepExpression);
     pnt=machine.executionpoint; // we should now have a different execution point
+    if (speeder) machine.petspeed.acpointer_next[fpnt]=pnt;
   }
   return true;
 }
