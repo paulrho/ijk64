@@ -749,6 +749,7 @@ boolean hasFocus=false;
   // try this too
   // no didnt work
   public // synchronized 
+  synchronized  // yes - do this to allow paiting of background etc to be finished before painting (was leaving big blocks)
   void reshapeScreen() {
 
   ///pgs - force it black ///
@@ -2058,7 +2059,8 @@ if (verbose) System.out.printf("%d,%d to %d,%d\n",ox,oy,x,y);
   boolean dots2[][];
   boolean dots2x1[][];
   boolean dots3[][];
-  public void drawchar_init() {
+  public synchronized // we dont want to be clearing this as we are painting
+	  void drawchar_init() {
     dots = new boolean[32 * 8][8 * 8];
   //System.out.println("Allocated space for dots");
     if (dots == null) {

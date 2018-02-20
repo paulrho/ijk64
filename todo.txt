@@ -67,6 +67,9 @@ LIST a,b,c=1,2,3  (now does a,b,c=3,2,1 ) - can be done
 
 9) check the goto gosub ifthen # optimisations to affect edge case (where the next instructions might overlap)
 
+10) FOR -> compile this too!
+
+11) allow break from an io (especially net)
 ---
 END
 ---

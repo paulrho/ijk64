@@ -80,18 +80,18 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
     addKeyListener(screen);       // for listening to key strokes
   }
       
-  void save(String filename) {
+  void save(String filename) throws IOException {
     //Graphics2D cg = newoffImage.createGraphics();
-    try {
+    //try {
       BufferedImage image;
       if (blitting) { image = (BufferedImage)newoffImageB[paintblit]; }
       else  image=(BufferedImage)newoffImage;
       if (ImageIO.write(image, "png", new File(filename+".png"))) {
         System.out.println("-- saved");
       }
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    //} catch (IOException e) {
+      //e.printStackTrace();
+    //}
   }
 
   void createDisplay() {
@@ -316,11 +316,11 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
    private static final int MAXIMAGE=100;
    BufferedImage[] imgarray= new BufferedImage[MAXIMAGE]; // bad hard code at moment
    
-   public void command_SAVEIMAGE(String filename) {
+   public void command_SAVEIMAGE(String filename) throws IOException {
        save(filename);
    }
 
-   public int command_LOADIMAGE(String filename) {
+   public int command_LOADIMAGE(String filename) throws IOException {
      if (filename.startsWith("+")) { //temp
        save(filename.substring(1));
        return -1;

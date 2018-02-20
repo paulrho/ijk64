@@ -1180,11 +1180,16 @@ boolean ReadStatement() throws BasicException
           GenericType gt=machine.evaluate(keepExpression);
           if (gt.gttop==1) {
               if (verbose) System.out.printf("load the image to reference\n");
-              int imgno=machine.graphicsDevice.command_LOADIMAGE(
-                machine.fileUnalias(gt.str())
-               );
-               // special case here! so if it works
-              machine.assignment("imgno="+imgno);
+              try { 
+                int imgno=machine.graphicsDevice.command_LOADIMAGE(
+                  machine.fileUnalias(gt.str())
+                 );
+                 // special case here! so if it works
+                machine.assignment("imgno="+imgno);
+              } catch (Exception e) {
+                if (verbose) { e.printStackTrace(); }
+                throw new BasicException("IMAGE LOAD ERROR");
+              }
               return true;
           } else //throw new BasicException("INCORRECT PARAMETERS");
             throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
