@@ -1,0 +1,54 @@
+10 screen1:cls
+20 lset0,4:rem switch off anti alias
+50 remps=2*8:si=0.5*2/4*ps/8
+60 mx=32:my=32
+65 rr=3.14/1.25*1:f1=2.0*2.0*1
+66 rr=rr/2*1.5*2:f1=f1*4*2/4/1
+67 rem rr=rr/32:f1=f1*64*2
+70 x1=10-rr:x2=10+rr:y1=15:y2=15+2
+80 f2=f1-0.0:m1=10:m2=m1*1
+85 rr=rr/4:f1=f1/4:f2=f2/4 : f1=f1*1
+87 tt=0
+88 remm2=m1*1.5:remf2=f2*1.15
+89 tt=-12.566/4-0.1326
+90 ps=2*8/2:si=0.5*2/4*ps/8
+100 remifcn<18-1thencn=cn+1:oo=oo+2*(mathpi)/4/3/2/f1:goto100
+190 rembeginframe:cls
+200 forx=0to25-0.001stepsi
+210   fory=14*0to30-0.001stepsi
+212     d1=sqr((x-x1)^2+(y-y1)^2):m11=0:ifd1<4*(mathpi)+(tt+1*(mathpi))thenm11=(d1-(tt+1*(mathpi)))/(4*(mathpi)):ifm11<0thenm11=0
+213 m11=-52.9993*m11^5+104.892*m11^4-67.1767*m11^3+15.5697*m11^2-0.285353*m11
+214     d2=sqr((x-x2)^2+(y-y2)^2):m22=0:ifd2<12.566+ttthenm22=(d2-tt)/12.566:ifm22<0thenm22=0
+215 m22=-52.9993*m22^5+104.892*m22^4-67.1767*m22^3+15.5697*m22^2-0.285353*m22
+216     g1=-f1*sin((d1)*f1-oo*2)*m1*m11:aa=cos((d1)*f1-oo*2)*m1*m11
+217     if1theng2=-f2*sin((d2)*f2-oo*2)*m2*m22:aa=aa+cos((d2)*f2-oo*2)*m2*m22
+218     remifttthenyy=sqr(xx^2+yy^2)/3:xx=1
+219     cc=4:if1-ttthenaa=aa/3:remifyy<0thena=xx:xx=yy:yy=a:cc=7
+221     remlinex*mx,y*my,x*mx+xx,y*my+yy,cc
+222     gx=g1*(x-x1)/d1:gy=g1*(y-y1)/d1
+223     gx=gx+g2*(x-x2)/d2:gy=gy+g2*(y-y2)/d2
+224 th=atn(gy/100):al=atn(gx/100):remprint"gx=";gy;gx;th;al
+225 nx=cos(th-0.2)*sin(al):ny=sin(th-0.2)
+226 aa=   ( (sqr(nx^2+ny^2))*20):remprint"g1=";g1;"g2=";g2;"gy=";gy;"aa=";aa:rem 0 to 1
+227 aa=aa*1+    (sqr(nx^2+ny^2))*40/7:remprint"g1=";g1;"g2=";g2;"gy=";gy;"aa=";aa:rem 0 to 1
+228 aa=aa*2-10.5:aa=-aa:remaa=aa*40/0.5:rem aa=gx/3
+229 hu=0:hu=0.75+sin(th)*0.25:remifth<0thenaa=-aa
+230 it=(aa)/10/1.5:ifit>1thenit=1
+231 ifit<0thenit=-it:cf=256^2*255+256*int((1-it)*255)+int((1-it)*255):goto234
+232 remcf=256^2*int((1-it)*255)+256*int((1-it)*255)+int((1-it)*255)
+233 cf=256^2*int((1-it*hu)*255)+256*int((1-it)*255)+int((1-it*(1-hu))*255)
+234  rectx*mx,y*my,x*mx+ps,y*mx,x*mx+ps,y*mx+ps,x*mx,y*my+ps,cf
+260   nexty
+270 nextx
+280 antialias1:circlex1*mx+ps/2,y1*my+ps/2,5,3,0
+282 circlex2*mx+ps/2,y2*my+ps/2,5,3,0:antialias0
+390 rem endframe:sleep10
+392 rem oo=oo+0.5
+393 ifps<=1then400
+394 ps=ps/2:si=si/2
+395 goto100
+400 oo=oo+2*(mathpi)/4/3/2/f1/5*5:rem oo=oo+0.5
+402 tt=tt+0.1326
+405 cn=cn+1
+407 imagesave"waveb"+str$(1000+cn)
+410 goto90

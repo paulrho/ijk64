@@ -1,0 +1,19 @@
+10 screen1
+100 n=3
+105 xx=rnd(-1)
+110 fori=1ton:x(i)=rnd(1):y(i)=rnd(1):next
+120 fori=1ton:xv(i)=1*(rnd(1)-0.75)/100:yv(i)=1*(rnd(1)-0.3)/100:next
+130 y(1)=y(1)+2:yv(1)=yv(1)-0.010
+140 x(2)=x(2)-30
+200 beginframe:cls
+210 fori=1ton:line500+x(i)*10,500+y(i)*10,500+x(i)*10+1,500+y(i)*10+1,5
+215 remprinti,x(1);y(1)
+220 next:endframe
+250 fori=1ton:
+260 forj=1ton:ifi=jthen270
+262 xd=x(i)-x(j):yd=y(i)-y(j)
+265 d=sqrt(xd^2+yd^2):k=-0.000001*d:rem?d
+267 ifd>0thenxv(i)=xv(i)+k*xd/d:yv(i)=yv(i)+k*yd/d
+268 x(i)=x(i)+xv(i):y(i)=y(i)+yv(i)
+270 nextj:nexti
+299 goto 200

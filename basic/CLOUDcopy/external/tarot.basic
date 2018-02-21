@@ -1,0 +1,422 @@
+    2 rem * "(red)=ctrl/3  (wht)=ctrl/2  (yel)=ctrl/8 *
+    3 rem * "(rvon)=ctrl/9  (rvof)=ctrl/0  (rght)=csr/rt *
+    4 rem * "(down)=csr/dn  (grn)=ctrl/6  (gry1)=comm/4 *
+    5 rem * "(up)=sh/csr(up)    (left)=sh/csr(lt) *
+    6 rem *********************************
+    7 rem *******************************
+    8 rem * paint screen & border black *
+    9 rem *******************************
+   10 poke 53280,0:poke 53281,0
+   17 rem *********************
+   18 rem * dimension arrays *
+   19 rem *********************
+   20 dim c(10),t$(3),f$(3),c$(4)
+   27 rem *****************
+   28 rem * build strings *
+   29 rem *****************
+   30 tlc$="UCCCCCCCCI":mlc$="(down)(left)(left)(left)(left)(left)(left)(left)(left)(left)(left)B        B":blc$="(down)(left)(left)(left)(left)(left)(left)(left)(left)(left)(left)JCCCCCCCCK"
+   40 lc$=tlc$+mlc$+mlc$+mlc$+mlc$+mlc$+mlc$+mlc$+mlc$+mlc$+mlc$+blc$
+   50 tsc$="UCCCI":msc$="(down)(left)(left)(left)(left)(left)B(blu)xxx(wht)B":bsc$="(down)(left)(left)(left)(left)(left)JCCCK":of$="of(down)(left)(left)(left)(left)(left)"
+   60 sc$=tsc$+msc$+msc$+msc$+msc$+bsc$:bla$="(down)(left)(left)(left)(left)(left)     ":d$=chr$(13)
+   70 clear$="                                       ":tab$="(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)"
+   80 blank$="     "+bla$+bla$+bla$+bla$+bla$
+   87 rem ***************
+   88 rem * print title *
+   89 rem ***************
+   90 print"(clr)(yel)(down)(down)(down)(down)(down)(down)(down)(down)(down)   tarot    a      rota    r   otaro"
+  100 print"     t     a r     o   t  a r    o"
+  110 print"     t    a   r    o   t a   r   o"
+  120 print"     t   arotaro   taro  t   a   r"
+  130 print"     o  t       a  r  o   t a    r"
+  140 print"     o t         a r   o   t     a"
+  150 print"(down)(down)(down)(down)(down)(down)(down)      (red)press space bar to continue";
+  157 rem *****************************
+  158 rem * music until space pressed *
+  159 rem *****************************
+  160 s=54272:for l=0 to 24:poke s+l,0:next:poke s+3,8:poke s+5,32:poke s+6,72
+  170 poke s+24,15:poke s+4,17:for k=1 to 12:for i=1 to 33:poke s+1,i:poke s,i
+  180 next:next k
+  190 get z$:if z$="" then goto 160
+  200 for l=0 to 24:poke s+l,0:next
+  993 rem ******************************
+  994 rem * instructions:in lower case *
+  995 rem * graphics symbols will be   *
+  996 rem * upper case and are         *
+  997 rem * created by shift and       *
+  998 rem * appropriate key            *
+  999 rem ******************************
+ 1000 printchr$(14)"(clr)(wht)   The (red)TAROT(wht) is an ancient method of
+ 1010 print"fortune telling which makes use of a
+ 1020 print"pack of 78 cards. These are divided into";
+ 1030 print"two sections - the (red)MAJOR(wht) and (red)MINOR(wht)
+ 1040 print"(red)ARCANAS(wht)."d$"   The (red)MAJOR ARCANA(wht) is a set of
+ 1050 print"pictorial cards depicting people and
+ 1060 print"objects."d$"   The (red)MINOR(BLOCK)ARCANA(wht) is similar to
+ 1070 print"an ordinary pack of playing cards with
+ 1080 print"an extra card, the (red)PAGE(wht), in each suit.
+ 1090 print"   The four suits are named (red)WANDS(wht), (red)CUPS(wht),";
+ 1100 print"(red)SWORDS(wht) and (red)PENTACLES(wht).
+ 1110 print"   The (red)MAJOR(wht) and (red)MINOR ARCANAS(wht) are
+ 1120 print"shuffled together and dealt out, face
+ 1130 print"down, in one of several arrangements
+ 1140 print"known as (red)LAYS(wht)."d$"   The cards are revealed one at a time,";
+ 1150 print"and read according to their individual
+ 1160 print"meanings and their positions in relation";
+ 1170 print"to the other cards. I shall read from
+ 1180 print"the (red)TEN(BLOCK)CARD(wht) or (red)CELTIC(wht) lay.
+ 1190 gosub 3000
+ 1200 restore:print"(clr)Before we start, I need to know some
+ 1210 print"things about you in order to assign you
+ 1220 print"one of the (red)COURT(BLOCK)CARDS(wht) as your
+ 1230 print"(red)SIGNIFICATOR(wht).
+ 1240 print"(down)Are you male or female? ";
+ 1250 geta$:ifa$="m"ora$="M"thenprint"Male":c=12:goto 1280
+ 1260 ifa$<>"f"anda$<>"F"then goto 1250
+ 1270 print"Female":c=11
+ 1280 print"(down)Are you over 40 (be honest!)? ";
+ 1290 geta$:ifa$="y"ora$="Y"then print "Yes":c=c+2:goto 1320
+ 1300 if a$<>"n"anda$<>"N"then goto 1290
+ 1310 print"No"
+ 1320 print"(down)What is the colour of your hair (1-5)?"
+ 1330 print"1. Very fair"d$"2. Grey"d$"3. Light brown"d$"4. Dark brown
+ 1340 print"5. Black
+ 1350 get a$:if a$<"1" or a$>"5" then goto 1350
+ 1360 print"(up)":h=val(a$):if h<>5 then for a=1 to 5-h:print"(up)";:next a
+ 1370 for a=1 to 5:gosub 4000:print"(up)(red)(SHIFT-PLUS)":gosub 4000:print"(up)(wht)(left)";h:next a
+ 1380 if c=11 then c$="Page":cd$="(rght)(rght)page(down)(left)(left)(left)"
+ 1390 if c=12 then c$="Knight":cd$="(rght)knight(down)(left)(left)(left)(left)"
+ 1400 if c=13 then c$="Queen":cd$="(rght)queen(down)(left)(left)(left)(left)"
+ 1410 if c=14 then c$="King":cd$="(rght)(rght)king(down)(left)(left)(left)"
+ 1420 if h<3 then s$="Wands":c=c+64:st$="(rght)wands"
+ 1430 if h=3 then s$="Cups":c=c+50:st$="(rght)(rght)cups"
+ 1440 if h=4 then s$="Swords":c=c+36:st$="(rght)swords"
+ 1450 if h=5 then s$="Pentacles":c=c+22:st$="(rght)penta-(down)(left)(left)(left)cles":rem pgs
+ 1460 g$=c$+" of "+s$:c(0)=c:si$="(yel)"+cd$+of$+st$+"(wht)"
+ 1470 for a=1 to 5-h:print"(down)";:next a:ifh<>5 then print"(down)";
+ 1480 print"Thank you."d$d$"Your (red)SIGNIFICATOR(wht) is (yel)"g$"(wht)":if h<>5 then printd$;
+ 1490 print"This card is placed face up on the table";
+ 1500 print"and the first two cards of the lay are
+ 1510 print"normally placed on top of it as they are";
+ 1520 print"dealt.":gosub 3000
+ 1996 rem ***************************
+ 1997 rem * print significator and  *
+ 1998 rem * deal ten cards          *
+ 1999 rem ***************************
+ 2000 printchr$(142)"(clr)"lc$"(home)(red)(down)(rght)signifi-(down)(left)(left)(left)(left)(left)cator";:gosub 4000:small$=sc$
+ 2010 print"(home)(down)(down)(down)(down)(down)(down)(rght)"si$;:gosub 4000:for a=1 to 5:read b:print"(home)";:gosub5000
+ 2020 print"(home)(down)(down)(down)(down)(down)(down)";:gosub5000:nexta
+ 2030 print"CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC(down)(down)(down)(down)":m=1
+ 2040 print"  please concentrate on any matter of     concern before pressing (red)";
+ 2050 print"space bar (wht)to":print"            begin the reading"
+ 2060 get z$:if z$<>chr$(32) then goto 2060
+ 2067 rem **************************
+ 2068 rem * clear bottom of screen *
+ 2069 rem **************************
+ 2070 print"(home)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)";:for z=1 to 12:print clear$;:next z
+ 2077 rem ***************************
+ 2078 rem * read and print headings *
+ 2079 rem ***************************
+ 2080 restore:for a=1 to 5:read b:next a:for a=1 to m:read heading$:next a
+ 2090 print"(home)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(gry1)"m;"(left). "heading$;:gosub 4000
+ 2096 rem *************************
+ 2097 rem * clear next small card *
+ 2098 rem * which is turned over  *
+ 2099 rem *************************
+ 2100 small$=blank$:restore:for a=1 to int((m+1)/2):read b:next a
+ 2110 if m/2<>int(m/2) then print "(home)";:goto2130
+ 2120 print"(home)(down)(down)(down)(down)(down)(down)";
+ 2127 rem *****************
+ 2128 rem * get card data *
+ 2129 rem *****************
+ 2130 gosub 5000:print"(home)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(wht)"lc$;
+ 2140 c=int(rnd(0)*156)+1
+ 2150 for a=0 to m:if c=c(a) then goto 2140
+ 2160 next a:c(m)=c:restore:for a=1 to 5:read b: next a:for a=1 to 10:read h$
+ 2170 next a:if c>78 then c=c-78:print"(rvon)";
+ 2180 for a=1 to c
+ 2190 read c$(1),c$(2),c$(3),c$(4),t$(1),t$(2),t$(3),f$(1),f$(2),f$(3):next a
+ 2196 rem ***************************
+ 2197 rem * and print data to large *
+ 2198 rem * card (as turned over)   *
+ 2199 rem ***************************
+ 2200 print"(home)(grn)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)";:if c$(1)="" then goto2220
+ 2210 print"(rght)(rght)(rght)the(left)(left)(left)(left)(left)(left)";
+ 2220 print "(down)";:if right$(c$(2),1)="-" then print "(rght)"c$(2);:goto2240
+ 2230 l=int((10-len(c$(2)))/2):for i=1 to l:print "(rght)";:nexti:print c$(2);
+ 2240 print "(home)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)";
+ 2250 if c$(3)="" then goto 2280
+ 2260 if right$(c$(3),1)="-" then print "(rght)"c$(3);:goto2280
+ 2270 l=int((10-len(c$(3)))/2):for i=1 to l:print "(rght)";:next i:print c$(3);
+ 2280 print "(home)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)";
+ 2290 l=int((10-len(c$(4)))/2):for i=1 to l:print "(rght)";:next i:print c$(4);
+ 2296 rem ****************************
+ 2297 rem * print the meaning of the *
+ 2298 rem * card                     *
+ 2299 rem ****************************
+ 2300 if c(m)>78 then print "(rvof)"
+ 2310 print"(home)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(wht)"tab$;
+ 2320 if c(m)>78 then print "this (rvon)reverse(rvof) card implies:":goto2340
+ 2330 print "this card implies"
+ 2340 print"(down)(wht)"tab$;
+ 2350 if c(m)>78 then print f$(1):goto2370
+ 2360 print t$(1)
+ 2370 print tab$;
+ 2380 if c(m)>78 then print f$(2):goto2400
+ 2390 print t$(2)
+ 2400 print tab$;:remprint"(up)"tab$;
+ 2410 if c(m)>78 then print f$(3):goto 2430
+ 2420 print t$(3)
+ 2426 rem *************************
+ 2427 rem * wait for return to be *
+ 2428 rem * pressed for next card *
+ 2429 rem *************************
+ 2430 m=m+1:print tab$"(red)(down)   press return to continue(wht)";
+ 2440 gosub 3020
+ 2450 if m=11 then goto 2470
+ 2460 goto 2070
+ 2466 rem ***************************
+ 2467 rem * all cards turned over - *
+ 2468 rem * menu                    *
+ 2469 rem ***************************
+ 2470 print"(clr)(down)(down)(down)(down)(wht)press:":print"(red)(down)(down)a   (wht)for another reading":print"(down)or"
+ 2480 print"(down)(red)r   (wht)for a resume of the current reading":print"(down)or"
+ 2490 print"(down)(red)q   (wht)to quit"
+ 2497 rem ***************
+ 2498 rem * menu - quit *
+ 2499 rem ***************
+ 2500 get z$:if z$="q" then print"(clr)":end
+ 2507 rem **************************
+ 2508 rem * menu - another reading *
+ 2509 rem **************************
+ 2510 if z$="a" then print "(clr)"chr$(14):goto 1200
+ 2520 if z$<>"r" then goto 2500
+ 2526 rem ****************************
+ 2527 rem * menu - resume of current *
+ 2528 rem * reading                  *
+ 2529 rem ****************************
+ 2530 print"(clr)";:m=1
+ 2537 rem ***************************
+ 2538 rem * read and print headings *
+ 2539 rem ***************************
+ 2540 restore:for i=1 to 5:read b:next i:for i=1 to m:read heading$:next i
+ 2550 print "(grn)"heading$"(wht)  ";:lh=len(heading$)+2:c=c(m):if c>78 then c=c-78
+ 2560 restore:for i=1 to 5:read b:next i:for i=1 to 10:read heading$:next i
+ 2564 rem *****************************
+ 2565 rem * the data is now converted *
+ 2566 rem * from short lines (as      *
+ 2567 rem * previously used) to suit  *
+ 2568 rem * the full screen           *
+ 2569 rem *****************************
+ 2570 for i=1toc:readc$(1),c$(2),c$(3),c$(4),t$(1),t$(2),t$(3),f$(1),f$(2),f$(3)
+ 2580 next i:if c(m)>78 then re$=f$(1)+" "+f$(2)+" "+f$(3):goto2600
+ 2590 re$=t$(1)+" "+t$(2)+" "+t$(3)
+ 2600 lr=len(re$):left=40-lh
+ 2610 first$=left$(re$,left):if right$(first$,1)=" " then goto 2640
+ 2620 left=left-1:if left=0 then left=39:goto 2650
+ 2630 goto 2610
+ 2640 re$=right$(re$,lr-left):print left$(first$,left-1):left=39
+ 2650 lr=len(re$):if lr<40 then print re$:goto 2680
+ 2660 se$=left$(re$,left):if right$(se$,1)<>" " then left=left-1:goto2660
+ 2670 re$=right$(re$,lr-left):print left$(se$,left-1):print re$
+ 2680 m=m+1:if m<11 then goto 2540
+ 2690 print"(red)        press return to continue";
+ 2700 gosub 3020
+ 2710 goto 2470
+ 2997 rem *****************************
+ 2998 rem * 'press return' subroutine *
+ 2999 rem *****************************
+ 3000 print"(home)":for i=1 to 23:print"(down)";:next i
+ 3010 print"        Press (cyn)RETURN(BLOCK)(wht)to continue";
+ 3020 get a$:ifa$<>d$ then goto 3020
+ 3030 return
+ 3997 rem **************
+ 3998 rem * delay loop *
+ 3999 rem **************
+ 4000 for i=1 to 300:next i:return:sleep 300
+ 4997 rem *********************
+ 4998 rem * print small cards *
+ 4999 rem *********************
+ 5000 for d=1 to b:print"(rght)";:next d:print small$;:return
+ 6996 rem ***************************
+ 6997 rem * data for printing small *
+ 6998 rem * cards                   *
+ 6999 rem ***************************
+ 7000 data 11,17,23,29,35
+ 7997 rem *****************************
+ 7998 rem * data for general headings *
+ 7999 rem *****************************
+ 8000 data your general surroundings,current problems,your aims and ideals
+ 8010 data the background situation,what is behind you,what is ahead of you
+ 8020 data your attitude to the matter,your current environment
+ 8030 data your hopes and fears,the final outcome
+ 8997 rem *************************
+ 8998 rem * data for card reading *
+ 8999 rem *************************
+ 9000 data "",the,magician,""
+ 9010 data "either the need for, or","the skills of, diplomacy.",""
+ 9020 data disquiet and a feeling,that all is not right.,"",the,high,priest-
+ 9030 data"     ess","mystery and the future, or",a woman with psychic powers.,""
+ 9040 data the physical side of,love - passion. a very,strong card.,"",the
+ 9050 data empress,"",fruitfulness in all its,associations -  initiative.,""
+ 9060 data light and truth in matters.,complex problems revealed.,"","",the
+ 9070 data emperor,"",stability in life.,the aid of a powerful,person.
+ 9080 data benevolence of others,towards you.,"","",the,hiero-,"   phant"
+ 9090 data associations with others,and particularly marriage.,""
+ 9100 data an increase in your,understanding of society.,"","",the,lovers,""
+ 9110 data all forms of love and,attraction to beautiful,things.
+ 9120 data certain projects may be,foolishly thought out.,"","",the,chariot
+ 9130 data "",triumph only through,perseverence and,doggedness.
+ 9140 data a dispute.,possible legal,complications.,"",strength,"",""
+ 9150 data the just outcome of,problems.,""
+ 9160 data a tendency to bias.,watch against bigotry.,"","",the,hermit,""
+ 9170 data corruption.,others may try to betray,you.
+ 9180 data an incautious attitude.,think things out - then,act.,t,wheel,of
+ 9190 data fortune,"the forces of luck, and",therefore success.,""
+ 9200 data abundance of the good,things in life. enjoy,them.,"",justice,"",""
+ 9210 data a time for taking courage,and acting energetically.,""
+ 9220 data an abuse of power through,weakness.,"","",the,hanged,man
+ 9230 data intuition - your own or,advice from one who has.,""
+ 9240 data obstruction through,selfishness. take heed.,"","",death,"",""
+ 9250 data the end of a cycle of,events. change and,renewal.
+ 9260 data lethargy. inaction could,cause problems.,"","",temp-,"  erance",""
+ 9270 data a need for economy and good,management.,""
+ 9280 data connections with the church,or religion look,well.,"",the,devil,""
+ 9290 data the effect of extra,effort - possibly violence.,""
+ 9300 data blindness to what is right.,pettiness.,"","",the,tower,""
+ 9310 data adversity and distress.,misery caused by conflict.,""
+ 9320 data problems caused by argument,or disagreement.,"","",the,star,""
+ 9330 data loss by theft of material,or spiritual things.,""
+ 9340 data loss by theft of material,or spiritual things.,"","",the,moon,""
+ 9350 data a warning of hidden enemies,who will deceive.,""
+ 9360 data instability and,inconsistency of those,about you.,"",the,sun,""
+ 9370 data material happiness.,contentment through good,marriage.
+ 9380 data contentment on material and,spiritual planes.,"","",judge-,"    ment"
+ 9390 data "",change of position. renewal,and rebirth.,""
+ 9400 data weakness through an,over-simplification of,events.,"",the,world,""
+ 9410 data assured success via a,voyage or change of,place.
+ 9420 data inertia or fixity may,cause stagnation.,"","",the,fool,""
+ 9430 data a time to consider your,career - consolidation.,""
+ 9440 data folly through extravagence,or pleasure- seeking.,"",t,ace,of pent-
+ 9450 data "   acles",perfect contentment - also,financial reward.,""
+ 9460 data bad intelligence. the evil,side of wealth.,"",t,two,of pent-
+ 9470 data "   acles",a time for gaiety and,recreation. perhaps good,news.
+ 9480 data a facade of enjoyment to,keep others happy.,"",t,three,of pent-
+ 9490 data "   acles",craftsmanship and the need,to use practical gifts.,""
+ 9500 data mediocrity in work. a,tendency to pettiness.,"",t,four,of pent-
+ 9510 data "   acles",gift or legacy. the,acquisition of new,possessions.
+ 9520 data delay to some project,through others',opposition.,t,five,of pent-
+ 9530 data "   acles","material difficulties,",but love is well looked,on.
+ 9540 data disorder or chaos.,it may spell ruin for,some project.,t,six
+ 9550 data of pent-,"   acles"
+ 9560 data gratification through,gifts or other pleasures.,""
+ 9570 data "envy and jealousy, which",lead to illusory desires.,"",t,seven
+ 9580 data of pent-,"   acles",ingenuity in business and,money matters.,""
+ 9590 data quarrels over money or,possessions.,"",t,eight,of pent-,"   acles"
+ 9600 data a creative period in craft,or business.,""
+ 9610 data a tendency to vanity. this,may stand against ambition.,"",t,nine
+ 9620 data of pent-,"   acles",prudence. safety and,accomplishment from this.,""
+ 9630 data deception. beware of others,keeping bad faith.,"",t,ten,of pent-
+ 9640 data "   acles",gain in monetary or family,matters.,""
+ 9650 data monetary loss through,gambling or robbery. take,no chances.
+ 9660 data t,page,of pent-,"   acles"
+ 9670 data a time for scholarship or,reflection. look to your,affairs.
+ 9680 data unfavourable news causing,worry.,"",t,knight,of pent-,"   acles"
+ 9690 data the effect of someone with,your affairs at heart.,""
+ 9700 data idleness and lack of,energy. stagnation.,"",t,queen,of pent-
+ 9710 data "   acles","the effects of an opulent,",though generous woman.,""
+ 9720 datasuspicion and mistrust may,affect your reasoning.,"",t,king,of pent-
+ 9730 data "   acles"
+ 9740 data "intellect, particularly",mathematics. look to,business.
+ 9750 data the temptation of vice.,watch for weakness.,"",t,ace,of,swords
+ 9760 data great force in love or,hate. triumph through,this.
+ 9770 data great force in love or,hate. not to the good.,"",t,two,of,swords
+ 9780 data "conformity, and the",stability this may bring.,""
+ 9790 data lies and disloyalty. beware,of untruths.,"",t,three,of,swords
+ 9800 data a feeling of loss of,someone or something.,""
+ 9810 data confusion and a feeling of,intellectual}isolation.,"",t,four,of
+ 9820 data swords,the need for solitude. a,time for contemplation.,""
+ 9830 data precautions. be careful,what you do.,"",t,five,of,swords
+ 9840 data loss or destruction of,something close to you.,""
+ 9850 data loss or destruction of,something close to you.,"",t,six,of,swords
+ 9860 data "a journey, which may",include travel by or,over water.
+ 9870 data "a proposal of love, or",other declaration.,publicity.
+ 9880 data t,seven,of,swords
+ 9890 data annoyance at the failure of,a plan through,disagreement.
+ 9900 data good advice from a wise,person. take heed of it.,"",t,eight,of
+ 9910 data swords,bad news of an illness,or other crisis.,""
+ 9920 data difficulties and,opposition. treachery.,"",t,nine,of,swords
+ 9930 data "deep disappointment,",possibly through death.,""
+ 9940 data suspicion cast on you or a,feeling of shame.,"",t,ten,of,swords
+ 9950 data pain and sadness. all is,not well.,""
+ 9960 data transitory profit or,advantage. make hay...,"",t,page,of,swords
+ 9970 data examination. the ability to,study details normally,missed.
+ 9980 data the use of observation to,bad ends. spying.,"",t,knight,of,swords
+ 9990 data skill and bravery. the time,to use such virtues.,""
+10000 data foolishness. the inability,to think soundly.,"",t,queen,of,swords
+10010 datasadness or embarrassment,for you (if female),or a woman close to you.
+10020 data a closed mind. watch,against bigotry or deceit.,"",t,king,of
+10030 data swords,the effects of one with,authority to make,decisions.
+10040 data a tendency to cruelty or,perversity. watch this.,"",t,ace,of,cups
+10050 data contentment with all,relationships.,""
+10060 data discontentment. the desire,to put right your,problems.,t,two,of
+10070 data cups,love and passion.,the inter-relation of,the sexes.
+10080 data love and passion.,the inter-relation of,the sexes.,t,three,of,cups
+10090 data a happy conclusion.,merriment and fulfilment.,""
+10100 data a new venture or holiday.,achievement from this.,"",t,four,of,cups
+10110 data tiredness and imaginary,worries caused by a,strict routine.
+10120 data new relationships and a,delight in novelty.,"",t,five,of,cups
+10130 data receipt of a gift.,this results in another,loss.
+10140 data the chance of new,alliances. business looks,well.,t,six,of,cups
+10150 data reflections on the past,and childhood.,""
+10160 data the chance of fresh,excitements. renewal.,"",t,seven,of,cups
+10170 data imagination. a good time,"for creative work,",though transitory.
+10180 data a desire to succeed. force,of will.,"",t,eight,of,cups
+10190 data dejection over things as,they are. this will,pass.
+10200 data great joy and happiness.,a celebration.,"",t,nine,of,cups
+10210 data a victory in something,you desire.,""
+10220 data loyalty of others to you.,honesty and good advice.,"",t,ten,of,cups
+10230 data contentment with things as,they are and your,present surroundings.
+10240 data indignation at an affront,in love. a violent,response.,t,page
+10250 dataof,cups,the effects of a fair and,studious young man.,he may help you.
+10260 data a taste for risk could,lead to deception.,"",t,knight,of
+10270 datacups,a proposition or,invitation.,"",a trick or fraud.
+10280 data be on your guard.,"",t,queen,of,cups
+10290 data the effects of a fair,"woman. she is dreamy, but",also visionary.
+10300 data the influence of a,distinguished woman.,don't trust her.,t,king,of
+10310 data cups
+10320 data the effects of a creative,"man in business, law",or the church.
+10330 data the effect of a rogue or,scandal monger.}he is,dishonest.,t,ace,of
+10340 data wands,the beginning of new,things - creation.,possibly a birth.
+10350 data a fall in fortune. ruin,of something established.,"",t,two,of
+10360 data wands
+10370 dataphysical suffering or,sadness. dissatisfaction,through possessions.
+10380 data surprise and wonder,leading to disquiet.,"",t,three,of,wands
+10390 data strength in trade and,dealings with people.,""
+10400 data the end of troubles.,adversity is over.,"",t,four,of,wands
+10410 data a happy life. peace and,prosperity.,""
+10420 data prosperity and increase.,an appreciation of beauty.,"",t,five,of
+10430 data wands,imitation or sham. a,superficial view.,""
+10440 data contradiction and the,tendency of others to,trick you.,t,six,of
+10450 data wands,success in undertakings or,great news.,""
+10460 data apprehension and the fear,of defeat.,"",t,seven,of,wands
+10470 data a need to work by,discussion and negotiation.,final success.
+10480 data perplexity. embarrassments,and worries.,"",t,eight,of,wands
+10490 data haste towards a favourite,outcome. change.,""
+10500 data quarrels arising from,jealousy or envy.,"",t,nine,of,wands
+10510 data delay caused by opposition,to your ideas.,""
+10520 data obstacles to your ideas.,possible calamity.,"",t,ten,of,wands
+10530 data financial gain but,opposition in law.,""
+10540 data difficulties and the,intrigue of others against,you.,t,page,of
+10550 data wands,the influence of a dark,young man. he may bring,news.
+10560 data bad news or announcements.,indecision.,"",t,knight,of,wands
+10570 data departure or absence. a,move or even emigration.,""
+10580 data discord. interruption of,the present status quo.,"",t,queen,of
+10590 data wands,the influence of a country,woman who is loving and,honourable.
+10600 data problems of jealousy -,deceipt or infidelity.,"",t,king,of
+10610 data wands
+10620 data the influence of a friendly,countryman who is honest
+10630 data and conscientious.,the influence of a good
+10640 data but severe man. he is,"austere, yet tolerant."
+20000 restore
+20005 reada$:ifa$<>""thenprint">>"a$"<<"
+20010 goto20005

@@ -1,0 +1,61 @@
+10 remscreen1
+15 cls
+20 forx=0to2*(mathpi)step(mathpi)/4
+30 y=-2:gosub200:lx=xp:ly=yp
+40 y=+2:gosub200:linelx,ly,xp,yp,3
+50 next:lx=-1
+60 fory=-2to2step0.25
+61 lc=3:ify=0thenlc=1
+62 x=0:gosub200:lx=xp:ly=yp
+64 x=2*(mathpi):gosub200:linelx,ly,xp,yp,lc
+66 next:lx=-1
+100 a=25/180*(mathpi)
+102 tt=0:ty=0:forx=0to2*(mathpi)+0.1step(mathpi)/4/10
+110 gosub2300:ty=ty+y:tt=tt+1
+112 if1=1thena=a+y*(mathpi)/4/60:y=a:y=y/(2*(mathpi)*.25)
+114 y=y/2
+118 gosub200
+120 iflx>=0thenlinelx,ly,xp,yp,4
+150 lx=xp:ly=yp
+160 next:printty/tt
+190 end
+200 yp=-y*200+500
+210 xp=x*100+50
+220 return
+2100 y=0+sin(x  + 1.8)*0.5
+2111 y=y+sin(x*2+ 0.0)*0.2
+2112 y=y+sin(x*3+ 0.5)*0.2
+2113 y=y+sin(x*4+ 0.0)*0.1
+2114 y=y+sin(x*5+ 3.5)*0.0
+2120 return
+2200 y=0+sin(x  + 3.14)*1.0
+2211 y=y+sin(x*2+ 0.0)*0.0
+2212 y=y+sin(x*3+ 0.5)*0.0
+2213 y=y+sin(x*4+ 3.14)*0.1
+2214 y=y+sin(x*5+ 2.5)*0.2
+2216 y=y+sin(x*6+ 3.5)*0.0
+2217 y=y+sin(x*7+ 3.5)*0.0
+2218 y=y+sin(x*8+ 3.5)*0.0
+2220 return
+2300 y=3050+cos(x+ 2.945)*16718
+2311 y=y+cos(x*2-0.336 )*3267
+2312 y=y+cos(x*3+0.7345)*4993
+2313 y=y+cos(x*4+2.5158)*764
+2314 y=y+cos(x*5-2.4983)*738
+2316 y=y+cos(x*6-1.2177)*815
+2317 y=y+cos(x*7-1.4712)*346
+2318 y=y+cos(x*8+2.3477)*114
+2319 y=y+cos(x*9+3.0337)*192
+2320 y=y+cos(x*10-2.474)*159
+2322 y=y/32/180*(mathpi)-1.65:return
+2400 y=1120+cos(x- 2.041)*21650
+2411 y=y+cos(x*2+0.571 )*18712
+2412 y=y+cos(x*3+0.4688)*3040
+2413 y=y+cos(x*4-0.0469)*2178
+2414 y=y+cos(x*5-3.0946)*3168
+2416 y=y+cos(x*6-2.7822)*380
+2417 y=y+cos(x*7-1.0978)*920
+2418 y=y+cos(x*8+1.7103)*757
+2419 y=y+cos(x*9-1.5719)*154
+2420 y=y+cos(x*10+0.144)*682
+2422 y=y/32/180*(mathpi)-0.6:return

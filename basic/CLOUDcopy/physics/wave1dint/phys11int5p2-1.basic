@@ -1,0 +1,48 @@
+1 tt=ti
+5 mx=20*2*2:my=2
+10 screen1,20*mx+100,420
+50 o1=0:o2=0
+60 m=0.2:m=0.3:m=0.1
+70 a1o=-999:a2o=-999:at0=-999
+75 ss=1
+80 print"p=pause"
+82 print"s=toggle show total"
+84 print"v=change velocity (v inc, shift-v dec)"
+100 o1=o1-m
+110 o2=o2+m
+180 a1o=0:a2o=0:at0=0:xo=0
+190 beginframe:cls
+195 remprint".";
+200 forx=0to20step0.05*5/4
+210   a1=sin(x*6+o1)*1.0
+220   a2=sin(x*1.2*6-20+o2)
+225   at=a1+a2:xx=x*mx:ifa1o=-999then260
+230   line50+xo,200-a1o*50*my,50+xx,200-a1*50*my,5
+232   line50+xo,200-a2o*50*my,50+xx,200-a2*50*my,3
+240   ifssthenlset2,0:line50+xo,200-at0*50*my,50+xx,200-at*50*my,1:lset1,0
+250   a1o=a1:a2o=a2:at0=at:xo=xx
+260 nextx
+265 line50,200,50+20*mx,200,4
+266 line50+lx*mx,200-100*my,50+lx*mx,200+100*my,7
+267 circle50-3,200-3,6,5,1
+268 circle50-3+20*mx,200-3,6,3,1
+270 remprint"(left)x";
+272 forj=-2to2step0.5
+274   ifjthenline50+lx*mx-10,200+j*my*50,50+lx*mx+10,200+j*my*50,7:rem was 3
+276 nextj
+277 line50+lx*mx-5,200-sin(lx+o1)*my*50,50+lx*mx+5,200-sin(lx+o1)*my*50,5
+278 line50+lx*mx-5,200-sin(lx-20+o2)*my*50,50+lx*mx+5,200-sin(lx-20+o2)*my*50,3
+279 line50+lx*mx-5,200-(sin(lx+o1)+sin(lx-20+o2))*my*50,50+lx*mx+5,200-(sin(lx+o1)+sin(lx-20+o2))*my*50,1
+280 y=sin(lx+o1):gprintstr$(int(y*100)/100),50-50+lx*mx,200-y*my*50,4
+290 endframe
+291 geta$:ifa$=""then299
+292 ifa$="p"thengosub400
+293 ifa$="s"thenss=1-ss
+294 ifa$="v"thenm=m*1.5:ifm>0.5thenm=0.5
+295 ifa$="V"thenm=m/1.5:ifm<0.0125/4thenm=0.0125/4
+296 ifa$="(left)"thenlx=lx-0.5/mx:goto291
+297 ifa$="(rght)"thenlx=lx+0.5/mx:goto291
+299 ff=ff+1:printint(ff/((ti-tt)/60)*100)/100;"(left)          (up)"
+300 goto100
+400 geta$:ifa$=""then400
+410 return

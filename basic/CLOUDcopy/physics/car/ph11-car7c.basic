@@ -1,0 +1,110 @@
+10 screen1,800,500:cls
+20 circle0
+100 lset5,0
+110 line100,100,200,100,4
+120 line200,100,200,150,4
+130 line200,150,100,150,4
+140 line100,150,100,100,4
+150 imageload"%carnw42p.png"
+152 remimageload"tree1.png":i2=1
+153 imageload"%tree2.jpg":i2=1
+154 imageload"%driver1.png":i3=2
+190 td=0.03:a=0:v=0:s=0:td=0.0625
+200 xx=300:yy=200:sp=0.0:av=0.0:mu=0.35:mu=0.90:g=9.8
+205 beginframe:cls
+206 remdrawimage im,100,100,0.42,0
+207 gosub1000
+208 remdrawimage im,100,100,1,.05
+210 remsp=sin(t*10)
+212 ift>=0andt<1thena=5:a=4.66:ifap<=0thenss=s:ts=t:ap=1
+214 remift>=4.7*1.24andt<10thena=0
+215 ift>=3.0413*2andt<10thena=0
+216 ift>=10andt<12thena=-g*mu:ifap>=0thenss=s:ts=t:ap=-1
+218 remift>=12thena=0:v=0
+219 ift>=10andv<=0thena=0:v=0
+220 ift>=20thent=0:v=0:ap=0
+225 remoldway sp=(sp*7+a/10)/8
+230 v=v+a*td:s=s+v*td
+280 t=t+td
+285 gprint"v="+str$(int(v*1000*3.6)/1000)+" km/h",10,30,10
+286 gprint"t="+str$(int(t*1000)/1000)+" s",10,50,10
+287 gprint"dt="+str$(int((t-ts)*1000)/1000)+" s",150,50,10
+288 gprint"s="+str$(int(s*10)/10)+" m",10,70,10
+289 gprint"ds="+str$(int((s-ss)*10)/10)+" m",150,70,10
+290 gprint"a="+str$(int((a)*100)/100)+" m/s/s",10,90,10
+380 geta$:ifa$="s"thenimagesave"carbrake.png"
+385 fr=fr+1:ifti$<>lt$thenprint"fps=";fr;1/fr;td:fr=0:lt$=ti$
+390 endframe:sleep20:goto205
+990 end
+1000 rem draw car
+1005 remtree1 drawimage i2,800-(s/20*0.5-int(s/20*0.5))*1500,yy-238,1,0
+1006 drawimage i2,800-(s/20*0.5-int(s/20*0.5))*1500,yy-238-300,1,0
+1007 drawimage i2,-1024+800-(s/20*0.5-int(s/20*0.5))*1500,yy-238-300,1,0
+1008 drawimage i2,+1024+800-(s/20*0.5-int(s/20*0.5))*1500,yy-238-300,1,0
+1009 drawimage i3,xx-70,yy-100,0.55,0
+1010 rem xx,yy is middle bottom of car (assuming wheels)
+1015 xw=150:xs=200:wh=64:x0=20:rem size of car
+1017 fo=0.9:fo=0.6:ro=0.78:rem wheel offsets to cofg
+1018 bh=wh/2:yg=30+80-40-40:xg=+10:rem base of car under cofg height, xg,yg from centre base
+1020 rem th = angle radians
+1021 lset2,0:line0,yr+wh/2+4*0,800,yr+wh/2+4*0,3
+1022 lset2,0:rect0,yr+wh/2+4*0,800,yr+wh/2+4*0,800,yr+wh/2+50,0,yr+wh/2+50,8
+1023 lset5,0
+1032 th=sin(sp*10/xw):remth=th*10
+1035 x7=xx+xg*cos(th)-yg*sin(th)-40*sin(th):y7=yy-xg*sin(th)-yg*cos(th)
+1040 x1=xx-xs*cos(th)-40*sin(th):y1=yy+xs*sin(th)
+1042 x2=xx+(xs*1.2-x0)*cos(th)-40*sin(th):y2=yy-(xs*1.2-x0)*sin(th)
+1044 xr=xx-xw*ro:yr=yy+wh/2-30
+1046 xf=xx+xw*fo:yf=yy+wh/2-30
+1048 x3=xx-(xs*.95)*cos(th)-40*sin(th)-70*sin(th):y3=yy+(xs*.95)*sin(th)-70*cos(th)
+1049 x4=xx+(xs*0.9-x0)*cos(th)-40*sin(th)-70*sin(th):y4=yy-(xs*.9-x0)*sin(th)-70*cos(th)
+1050 goto1059:linex1,y1,x2,y2,4
+1052 linex3,y3,x4,y4,4
+1054 linex3,y3,x1,y1,4
+1056 linex2,y2,x4,y4,4
+1059 drawimage im,x3-10,y3-30,1,-th
+1060 remcirclexr-wh/2,yr-wh/2,wh,0,1
+1061 circlexr-wh/2,yr-wh/2,wh,4,1
+1062 circlexr-wh/2*.5,yr-wh/2*.5,wh*.5,0,1
+1065 circlexf-wh/2,yf-wh/2,wh,4,1
+1066 circlexf-wh/2*.5,yf-wh/2*.5,wh*.5,0,1
+1070 lset1,0:linexf,yf,xf+wh/2*sin(s/0.7*2),yf-wh/2*cos(s/0.7*2),5
+1072 linexr,yr,xr+wh/2*sin(s/0.7*2),yr-wh/2*cos(s/0.7*2),5
+1080 rem force lines
+1082 x1=xf:y1=yf+wh/2:x2=xf+rt*a*25:y2=yf+wh/2:gosub1250
+1083 x1=xr:y1=yr+wh/2:x2=xr+(1-rt)*a*25:y2=yr+wh/2:gosub1250
+1084 if0thenx1=xx+xg:y1=yy-yg:x2=xx+xg:y2=yy+g*25-yg:gosub1200
+1085 if0thencirclexx-6+xg,yy-yg-4,12,1,1:remyy-30-6
+1086 x1=x7:y1=y7:x2=x7:y2=y7+g*25:gosub1200
+1087 circlex7-6,y7-4,12,5,1:remyy-30-6
+1088 remcirclexx-40*sin(th)-6,yy-4,12,5,9
+1089 print"(home)(down)(down)(down)(down)(down)":gosub1100
+1090 x1=xf:y1=yf+wh/2:x2=xf:y2=yf+wh/2-25*nf:gosub1200
+1092 x1=xr:y1=yr+wh/2:x2=xr:y2=yr+wh/2-25*nr:gosub1200
+1099 return
+1100 af=atn((yg+bh)/(xw*fo-xg)):?"cos af=";cos(af);"(left)     "
+1110 ar=atn((yg+bh)/(xw*ro+xg)):?"cos ar=";cos(ar);"(left)     "
+1112 remifar<0thenar=(mathpi)-ar
+1113 remifaf<0thenaf=(mathpi)-af
+1115 ifa<0thenrt=0.75
+1117 ifa>0thenrt=0.5
+1120 dn=(rt*a*sin(af)+(1-rt)*a*sin(ar))/(cos(af)+cos(ar)):print"delta n=";dn;"(left)     "
+1130 wf=cos(ar)/(cos(ar)+cos(af))
+1140 nf=(g*wf-dn):nr=(g*(1-wf)+dn)
+1145 sp=(sp*5+(nr-nf)*0.13)/6
+1150 m=cos(af)*nf:ms=m
+1160 m=sin(af)*a*(rt):ms=ms+m
+1165 m=sin(ar)*a*(1-rt):ms=ms+m
+1170 m=-cos(ar)*nr:ms=ms+m:print"t net=";int(ms*1e6)/1e6;"(left)     "
+1180 print"f tot=";nr+nf;"(left)    "
+1190 return
+1200 rem draw force line from x1,y1 to x2,y2
+1205 al=atn((y2-y1)/(x2-x1))
+1210 lset4,0:linex1,y1,x2,y2,3
+1220 rectx2,y2,x2-7,y2,x2,y2+15*sin(al),x2+7,y2,3
+1240 return
+1250 rem draw force line from x1,y1 to x2,y2
+1255 al=atn((y2-y1)/(x2-x1)):ifx1<x2thenal=al+(mathpi)
+1260 lset4,0:linex1,y1,x2,y2,3
+1270 rectx2,y2,x2,y2-7*cos(al),x2-15*cos(al),y2,x2,y2+7*cos(al),3
+1280 return

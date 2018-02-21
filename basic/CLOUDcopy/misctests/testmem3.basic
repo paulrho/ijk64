@@ -1,0 +1,6 @@
+10 mb=1024*1024
+20 print"actfree";right$("         "+str$(int(fre(0)/mb)),7);" mb"
+30 print"free   ";right$("         "+str$(int(fre(1)/mb)),7);" mb"
+40 print"alloc  ";right$("         "+str$(int(fre(2)/mb)),7);" mb"
+50 print"total  ";right$("         "+str$(int(fre(3)/mb)),7);" mb"
+60 print"max    ";right$("         "+str$(int(fre(4)/mb)),7);" mb"

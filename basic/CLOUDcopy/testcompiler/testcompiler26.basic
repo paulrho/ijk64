@@ -1,0 +1,4 @@
+1 fori=1to4
+10 a,b,c=1,2,3
+20 printa;b;c
+99 next

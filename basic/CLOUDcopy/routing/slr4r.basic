@@ -1,0 +1,75 @@
+1 print"(clr)";:screen1
+2 goto40
+5 tp=7-1:re=1:gosub2000:c=0:gosub3200
+7 c=c+1:gosub2010:remif re then7
+8 remifc>100thenend
+9 if re then7
+10 print c
+20 end
+40 mx=20
+50 dimn$(mx),x(mx),y(mx),d(mx),da(mx,mx)
+100 restore:i=0:print"street level routing"
+110 readn$(i),x(i),y(i),d(i)
+112 remgoto 120
+115 x(i)=rnd(0)*100
+116 y(i)=rnd(0)*100
+120 ifn$(i)=""thentp=i-1:goto200
+130 i=i+1:goto110
+200 print"read ";tp+1;"points"
+300 gosub3000
+310 re=1:c=0:gosub2000:mn=9999999:gosub3200
+320 c=c+1:gosub3000:iftt<mnthenmn=tt:printc;tt:gosub4000:ifc=1thenmx=tt:sleep1000
+330 gosub2020:if re then320
+350 gosub4100
+360 print"reduced to ";int(mn/mx*1e4)/100.0;"percent"
+370 sleep2000:goto100
+1000 datao1, 10,100,25
+1010 datao2, 50, 30,25
+1020 datao3, 29, 20,25:remwas29,20 then60
+1030 datao4, 10, 90,25
+1040 datao5, 40, 25,25
+1050 datao6, 90, 10,25
+1060 datao7, 90, 80,25
+1070 remdatao8, 20, 20,25
+1080 remdatao9,  5,  5,25
+1090 remdatao10,45, 45,25
+1290 data"",1,1,1
+1990 end
+2000 dimp(tp):fori=0totp:p(i)=i:next:return
+2010 rem find last i<i+1
+2015 if0then printc;:fori=0totp:printp(i);:next:print
+2020 fori=tp-1to0step-1:ifp(i)>=p(i+1)thennexti:print"done!";c:re=0:goto2090
+2030 forj=tpto0step-1:ifp(i)>=p(j)thennextj:print"not sure what to do!":re=0:goto2090
+2040 t=p(i):p(i)=p(j):p(j)=t
+2045 ifi+1=tpthen2090
+2050 fork=i+1to(i+tp)/2
+2060   t=p(i+1+tp-k)
+2062   p(i+1+tp-k)=p(k)
+2065   p(k)=t
+2070 nextk
+2090 return
+3000 tt=0:l=tp+1:forj=0totp:i=p(j)
+3010 tt=tt+da(i,l)
+3020 l=i:next
+3050 return
+3200 x(tp+1)=10:y(tp+1)=10
+3210 fori=0totp:forj=0totp+1
+3220 ifi<>jthenda(i,j)=sqr((x(i)-x(j))^2+(y(i)-y(j))^2)+ 0.5*d(i)
+3230 nextj,i
+3240 return
+4000 cls:alert1
+4010 forj=0totp
+4020 i=p(j):ifjthenl=p(j-1)
+4022 linex(i)*4-3,y(i)*4-3,x(i)*4+3,y(i)*4+3,1
+4025 linex(i)*4-3,y(i)*4+3,x(i)*4+3,y(i)*4-3,1
+4027 ifj=0thenline10,10,x(i)*4,y(i)*4,4
+4030 ifj=0then4070
+4040 linex(l)*4,y(l)*4,x(i)*4,y(i)*4,4
+4070 next
+4090 return
+4100 alert3:fori=0totp
+4110 co=2
+4120 linex(i)*4-3,y(i)*4-3,x(i)*4+3,y(i)*4+3,co
+4130 linex(i)*4-3,y(i)*4+3,x(i)*4+3,y(i)*4-3,co
+4140 next
+4150 return

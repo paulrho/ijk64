@@ -1,0 +1,6 @@
+10 print"(lgrn)"
+100 open8,8,8,"test6,s,w"
+110 fori=1to1000:
+120   print#8,"1.2,3.4,5.6,7.8,test value 1"
+130 nexti
+140 close8

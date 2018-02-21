@@ -1,0 +1,16 @@
+10 screen1
+90 n=1035281
+92 n=1001
+95 i=0
+100 imageload"n11wave/wave"+str$(n)+".png"
+110 drawimage-1,0,0,0.75,0
+120 n=n+1:remi=i+1:ifi>19theni=0
+122 ifn>1017-5+12-1*0thenn=1001
+125 printn;"(up)"
+127 geta$:ifa$="r"then90
+128 ifa$="x"thenend
+129 sleep100/4*2
+130 ifa$="p"thengosub200
+140 goto 100
+200 geta$:ifa$=""then200
+210 return

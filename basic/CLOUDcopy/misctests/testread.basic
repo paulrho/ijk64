@@ -1,0 +1,6 @@
+100 open9,9,9,"test1,s,r"
+110 input#9,w,x,y,z,a$
+120 ifstthen140
+125 rem w=val(w):x=val(x):y=val(y):z=val(z)
+130 print w;x;y;z;a$:goto110
+140 close9

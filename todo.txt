@@ -33,23 +33,43 @@ DOC
 profiling:
 java -agentlib:hprof=cpu=samples,depth=100,interval=5,lineno=y,thread=y,file=out.hprof -jar C64.jar -z m.basic -r -x
 
-make poke198,0 clear the buffer!
-
 
 ==============
+done:
+
+2) GOTO #
+   GOSUB #
+   IF THEN #
+     DONE!!
+
+3) DEF FN - compile it
+    (currently marked as reject)
+    DONE!!
+
+4) optimise the NEXT - currently string processing -
+  at least turn it into near-a-code NEXT [mem] statements (where mem could be -2 (none))
+    DONE!!
+(these three changes take it from 6800 to 7500 benchmark)
+
+--------------------
+not done:
 1)
 LIST a,b,c=1,2,3  (now does a,b,c=3,2,1 ) - can be done
    but note, this is a unintended language extension that I don't use anyway - 
    could mark it as reject in the meantime
+5) allow sounds to load off web too
 
-2)
-GOTO #
-GOSUB #
-IF THEN #
+6) when you list"prog" and it is not there - it should not do the list
 
-3) 
-DEF FN - compile it
-  (currently marked as reject)
+7) make poke198,0 clear the buffer!
 
+8) make REM truely take no running time after compiling
 
+9) check the goto gosub ifthen # optimisations to affect edge case (where the next instructions might overlap)
 
+10) FOR -> compile this too!
+
+11) allow break from an io (especially net)
+---
+END
+---

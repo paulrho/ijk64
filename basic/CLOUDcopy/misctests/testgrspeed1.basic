@@ -1,0 +1,13 @@
+5 meta-timing1
+7 tt=ti
+10 screen1
+15 lset1,4
+20 beginframe:cls
+22 forj=1to300step3
+23   linernd(0)*1000,x-rnd(0)*100,1000,x+j,5+rnd(0)*10
+24 next
+25 gprintstr$(int(1/((ti-tt)/60/x)*10)/10)+" fps",20,20,5
+26 endframe
+27 sleep1
+30 x=x+1:printx;"(up)":ifx<1000then20
+40 meta-timing1

@@ -1,0 +1,12 @@
+5 rem this is an extended function
+10 printfrm("%+03.4f",-(mathpi))
+20 fori=1to10:x=x+0.1
+30 printfrm("%+03.4f",x)
+35 x$=frm("%9.2f",x)
+37 printx$
+40 next
+50 printfrm("%10.4e",-x)
+60 printfrm("%+10.4e",-x)
+70 printfrm("%10.4e",x)
+80 printfrm("%+10.4e",x)
+90 printfrm("%11.4e",x)

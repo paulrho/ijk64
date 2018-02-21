@@ -1,0 +1,74 @@
+1 print"(clr)";
+2 goto40
+5 tp=9-1:re=1:gosub2000:c=0
+7 c=c+1:gosub2010:remif re then7
+8 remifc>100thenend
+9 if re then7
+10 print c
+20 end
+40 mx=20
+50 dimn$(mx),x(mx),y(mx),d(mx)
+100 restore:i=0
+110 readn$(i),x(i),y(i),d(i)
+112 remgoto 120
+115 x(i)=rnd(0)*100
+116 y(i)=rnd(0)*100
+120 ifn$(i)=""thentp=i-1:goto200
+130 i=i+1:goto110
+200 print"read 0 to ";tp
+300 gosub3000
+310 re=1:c=0:gosub2000:mn=9999999
+320 c=c+1:gosub3000:iftt<mnthenmn=tt:printc;tt:gosub4000:ifc=1thensleep500
+330 gosub2010:if re then320
+350 gosub4100:sleep2000:goto100
+1000 datao1, 10,100,25
+1010 datao2, 50, 30,25
+1020 datao3, 29, 20,25:remwas29,20 then60
+1030 datao4, 10, 90,25
+1040 datao5, 40, 25,25
+1050 datao6, 90, 10,25
+1060 datao7, 90, 80,25
+1070 remdatao8, 20, 20,25
+1080 remdatao9,  5,  5,25
+1290 data"",1,1,1
+1990 end
+2000 dimp(tp):fori=0totp:p(i)=i:next:return
+2010 rem find last i<i+1
+2015 if0then printc;:fori=0totp:printp(i);:next:print
+2020 f=-1:fori=0totp-1:ifp(i)<p(i+1)thenf=i
+2022 nexti:i=f:iff<0thenprint"done!":re=0:goto2090
+2025 remprint"i=";i;p(i);p(i+1)
+2030 f=-1:forj=0totp:ifp(i)<p(j)thenf=j
+2032 nextj:j=f:iff<0thenprint"not sure what to do!":re=0:goto2090
+2034 remprint"i;j=";i;j
+2040 t=p(i):p(i)=p(j):p(j)=t
+2047 up=int((i+1+tp-1)/2)
+2050 fork=i+1toup
+2060   t=p(i+1+tp-k)
+2062   p(i+1+tp-k)=p(k)
+2065   p(k)=t
+2070 nextk
+2090 return
+3000 td=0:tt=0:forj=0totp:i=p(j):ifjthenl=p(j-1)
+3010 td=d(i):tt=tt+td
+3012 ifj=0thend=sqr((x(i)-10)^2+(y(i)-10)^2):tt=tt+0.50*d
+3015 ifj>0thend=sqr((x(i)-x(l))^2+(y(i)-y(l))^2):tt=tt+0.50*d:rem print" d=";int(d*10)/10
+3020 next
+3040 remprint"tt=";tt
+3050 return
+4000 screen1:cls:alert1
+4010 forj=0totp
+4020 i=p(j):ifjthenl=p(j-1)
+4022 linex(i)*4-3,y(i)*4-3,x(i)*4+3,y(i)*4+3,1
+4025 linex(i)*4-3,y(i)*4+3,x(i)*4+3,y(i)*4-3,1
+4027 ifj=0thenline10,10,x(i)*4,y(i)*4,4
+4030 ifj=0then4070
+4040 linex(l)*4,y(l)*4,x(i)*4,y(i)*4,4
+4070 next
+4090 return
+4100 alert3:fori=0totp
+4110 co=2
+4120 linex(i)*4-3,y(i)*4-3,x(i)*4+3,y(i)*4+3,co
+4130 linex(i)*4-3,y(i)*4+3,x(i)*4+3,y(i)*4-3,co
+4140 next
+4150 return

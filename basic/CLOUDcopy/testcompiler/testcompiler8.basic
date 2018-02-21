@@ -1,0 +1,5 @@
+5 fori=1to2
+10 a$="55"
+20 b=val(a$)
+30 printb
+99 next

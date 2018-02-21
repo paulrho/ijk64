@@ -1,0 +1,9 @@
+10 print"setting up pi basic"
+20 load"piback4b.png"
+30 meta-bgtrans2:meta-cols60:meta-rows40:meta-scale2
+40 poke53281,0:rem to get correct list colours
+50 print"(clr)(wht)"
+60 print"           **** (blu)c=64(wht) approximator (grn)basic(wht) v2ae ****"
+70 print
+80 print"           (lred)java(wht) ram system  many basic bytes free"
+90 print"(blu)(wht)";

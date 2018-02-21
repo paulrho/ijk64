@@ -1,0 +1,54 @@
+10 screen1:cls
+100 ra=1
+110 l=5
+115 pt=0.1: rem pitch
+120 s=0.1
+180 sc=100:xo=500:yo=100:s2=0.010
+190 it=0
+200 :
+210 x=ra*cos(it):y=ra*sin(it*2)
+220 z=it*pt
+280 rem printint(x*100)/100,int(y*100)/100,int(z*100)/100
+285 remlinex0*sc,y0*sc,x*sc,y*sc,5
+286 remlinex0*sc+xo,z0*sc+yo,x*sc+xo,z*sc+yo,5
+287 ifitthenlinex0*sc+xo,(z0+y0/2)*sc+yo,x*sc+xo,(z+y/2)*sc+yo,5
+288 remifitthenlinex0*sc+xo,(z0*0+y0/2*2)*sc+yo,x*sc+xo,(z*0+y/2*2)*sc+yo,5
+290 it=it+s
+292 x0=x:y0=y:z0=z
+295 ifz<lthen200
+300 forzp=-0.5to7step.15
+310   forxp=-10/5+0.00to10/5step0.05:print"xp=";xp
+320     remforyp=-10/5to10/5step0.1
+321     foryp=0to0step0.1
+322       tx=0:ty=0:tz=0
+330       gosub1000
+332       remprint"v=";sqr(tx*tx+ty*ty+tz*tz)
+333 cl=7:iftz<0thencl=10
+334       linexp*sc+xo,(zp+yp/2)*sc+yo,(xp+tx*s2)*sc+xo,((zp+tz*s2)+(yp+ty*s2)/2)*sc+yo,cl
+336       remlinexp*sc+xo,(zp+yp/2)*sc+yo,(xp+.1)*sc+xo,((zp+.1)+(yp+.1)/2)*sc+yo,cl
+340     nextyp
+350   nextxp
+360 nextzp
+990 end
+1000 it=0
+1010 x=ra*cos(it):y=ra*sin(it*2)
+1020 z=it*pt
+1050 ifit=0then1090
+1052 gosub1100
+1090 it=it+s
+1092 x0=x:y0=y:z0=z
+1095 ifz<lthen1010
+1099 return
+1100 rem vector cross product
+1110 rem unit r-hat vector
+1120 xr=xp-x:yr=yp-y:zr=zp-z:r=sqr(xr*xr+yr*yr+zr*zr)
+1125 xn=xr/r:yn=yr/r:zn=zr/r
+1130 xl=x-x0:yl=y-y0:zl=z-z0
+1132 rem le=sqr(xl*xl+yl*yl+zl*zl):xl=xl/le:yl=yl/le:zl=zl/le
+1140 ax=(yl*zn-zl*yn)/r/r
+1142 ay=(zl*xn-xl*zn)/r/r
+1144 az=(xl*yn-yl*xn)/r/r
+1150 rem print"v=";sqr(ax*ax+ay*ay+az*az)
+1160 tx=tx+ax:ty=ty+ay:tz=tz+az
+1180 rem print r
+1190 return

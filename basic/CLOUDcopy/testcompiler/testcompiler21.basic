@@ -1,0 +1,4 @@
+10 fori=1to5
+15 printi
+20 x(5*i)=1
+30 next

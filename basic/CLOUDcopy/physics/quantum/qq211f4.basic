@@ -1,0 +1,62 @@
+5 screen1:cls
+10 na=1
+20 n=100
+30 dimx(n),y(n),f(n),g(n): rem f is size of clock, g is time
+40 dimfx(n),fy(n)
+50 sc=800/n:su=240
+100 r=int(sqrt(n)):r=n+1:fori=1ton
+110 x(i)=(i/r-int(i/r))*r:y(i)=int(i/r)
+115 f(i)=0:g(i)=0*.2+0*(mathpi)/2
+120 next
+121 remw=100:cw=2.0:fori=1tow:f(n/2/4+i+500)=1/sqr(w):g(n/2/4*1+i+500)=2*(mathpi)*(i/w*cw)+(mathpi):next
+122 w=100:cw=2.0:fori=1tow:f(n/2/4+i)=1/sqr(w):g(n/2/4*1+i)=2*(mathpi)*(i/w*cw)+(mathpi):next:goto150
+123 w=20:cw=2:fori=1tow:f(n/2*1+i)=1/sqr(w):g(n/2*1+i)=0:next
+125 goto150:f(n/2)=1:goto150
+130 f(n/2-0*r/2)=1/8*2:g(n/2)=0
+132 f(n/2-0*r/2+1)=1/8*2:g(n/2+1)=(mathpi)/2
+133 f(n/2-0*r/2+2)=1/8*2:g(n/2+2)=(mathpi)
+134 f(n/2-0*r/2+3)=1/8*2:g(n/2+3)=3*(mathpi)/2:goto150
+140 f(r+n/2-r/2)=1/8
+142 f(r+n/2-r/2+1)=1/8
+143 f(r+n/2-r/2+2)=1/8
+144 f(r+n/2-r/2+3)=1/8
+150:
+190 t=1.0:m=1.0:k=1e-3*1e1/5:sp=1.0:print"n=";n;"errors beyond";int((mathpi)/(m/t*k))
+200 cls
+202 fori=1ton
+210 remline20+x(i)*sc,20+y(i)*sc,20+x(i)*sc,20+y(i)*sc,5
+215 line20+x(i)*sc+f(i)*cos(g(i))*su,10*it*0+200+20+y(i)*sc-f(i)*sin(g(i))*su,20+x(i)*sc,10*it*0+200+20+y(i)*sc,5
+216 line20+x(i)*sc,10*it*0+200+20+y(i)*sc-f(i)*sin(g(i))*su,20+x(i)*sc,10*it*0+200+20+y(i)*sc,7
+217 line20+x(i)*sc,100+20+y(i)*sc,20+x(i)*sc,100+20+y(i)*sc-100,2
+218 line20+x(i)*sc,100+20+y(i)*sc,20+x(i)*sc,100+20+y(i)*sc-(f(i)^2)*su*20,10
+220 next
+225 remifit=1thenstop
+230 ifit=0thensleep2000
+232 ifit=1thenimageload"imageload"+tmp/g02-"+str$(int(t)):goto
+240 it=it+1
+300 rem iterate -> all clocks talk to each other (that are non-zero size)
+305 fori=1ton:fx(i)=cos(g(i))*f(i):fy(i)=sin(g(i))*f(i):next
+310 forj=1ton
+315 iff(j)=0then395
+320   fori=1ton:ifi=jthen390
+330   rem going from j to i
+340   d2=(x(i)-x(j))^2+(y(i)-y(j))^2
+342   a=m*d2/t*k
+350   rem wind it, then add it to existing (copy)
+352   gn=g(j)+a
+354   fx(i)=fx(i)+f(j)*cos(gn)*sp
+356   fy(i)=fy(i)+f(j)*sin(gn)*sp
+360 remifi=int(n/3)thenprinti;j;f(j)*cos(gn);f(j)*sin(gn);a/2/(mathpi)
+362 remifi=10thenprinti;j;f(j)*cos(gn);f(j)*sin(gn);a/2/(mathpi)
+390   nexti
+395 nextj
+397 i=20:print"final";i;fx(i);fy(i)
+398 i=100:print"final";i;fx(i);fy(i)
+400 tf=0:fori=1ton:f(i)=sqr(fx(i)^2+fy(i)^2):g(i)=(mathpi)/2:iffx(i)<>0theng(i)=atn(fy(i)/fx(i))
+402 iffx(i)=0andfy(i)<0theng(i)=-(mathpi)/2
+404 iffx(i)<0theng(i)=g(i)+(mathpi):iffy(i)<0theng(i)=g(i)+2*(mathpi)
+415 tf=tf+f(i)^2
+420 next
+430 dv=sqr(tf):print"tf="tf;"dv=";dv
+440 tf=0:fori=1ton:f(i)=f(i)/dv:tf=tf+f(i)^2:next:print"norm tf=";tf
+490 goto200

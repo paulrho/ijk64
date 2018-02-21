@@ -1,0 +1,92 @@
+100 screen1:cls
+105 cls
+110 n=5:mx=400:tm=1
+120 dimpa(1,n),pd(1,n)
+130 td=0.01:remtd=0.0785
+210 pa(0,0)=3*(mathpi)/2-25/180*(mathpi):pd(0,0)=0.46
+212 pa(0,1)=0.2 :pd(0,1)=0.42
+214 pa(0,2)=+0.6:pd(0,2)=0.09
+216 pa(0,3)=+1.3*(mathpi):pd(0,3)=0.26-0.04
+218 pa(0,4)=1.5*(mathpi):pd(0,4)=0.0
+220 pa(1,0)=3*(mathpi)/2:pd(1,0)=0.46
+222 pa(1,1)=1.3+0.1 :pd(1,1)=0.42
+224 pa(1,2)=+0.6:pd(1,2)=0.09
+226 pa(1,3)=+1.3*(mathpi):pd(1,3)=0.26-0.04
+228 pa(1,4)=1.5*(mathpi):pd(1,4)=0.0
+300 rem draw
+301 sleep10:beginframe:cls
+302 line0,mx,1000,mx,3
+303 iftmthenr=t*0.20:ifcos(r)>0andsin(r)>0thenline1000-cos(r)*1000,mx,1000-cos(r)*1000+200,mx,2
+304 forf=0to1:rem0:rem1
+305 a=0:x=800-t*130:y=300:sc=200:iftm=1thenx=400
+307 y=y+cos(t*2-1.7)*4:rem -1.2
+310 fori=0ton-1
+320   a=a+pa(f,i)
+325 xd=cos(a)*pd(f,i)*sc
+327 yd=-sin(a)*pd(f,i)*sc
+330 linex,y,x+xd,y+yd,4+f
+345 x=x+xd:y=y+yd
+347 ify>mxthenmx=y
+350 next
+380 nextf
+390 endframe
+395 t=t+td
+400 rem move
+415 forf=0to1
+417 sg=1:ph=0:iff=1thensg=-1:ph=(mathpi)
+420 v=t+ph:gosub2300:pa(f,0)=3*(mathpi)/2-aa:remiff=0thenprintaa*180/(mathpi)
+430 v=t+ph:gosub2400:pa(f,1)=aa:remiff=0thenprintaa*180/(mathpi)
+440 v=t+ph:gosub2500:pa(f,2)=-aa+1.8:remiff=0thenprintaa*180/(mathpi)
+450 rempa(f,2)=pa(f,2)+cos(t+ph)*0.8*td
+490 nextf
+500 rem control
+510 geta$
+520 ifa$="p"thengosub1000
+530 ifa$="f"thentd=0.38
+535 ifa$="m"thentd=0.1
+540 ifa$="s"thentd=0.01
+550 ifa$="r"thenclr:goto100
+560 ifa$="t"thentm=1-tm
+900 remt=t+td
+990 goto300
+1000 geta$:ifa$=""then1000
+1010 return
+2100 aa=0+sin(v  + 1.8)*0.5
+2110 aa=aa+sin(v*2+ 0.0)*0.2
+2120 aa=aa+sin(v*3+ 0.5)*0.2
+2130 aa=aa+sin(v*4+ 0.0)*0.1
+2140 aa=aa+sin(v*5+ 3.5)*0.0
+2190 return
+2300 aa=3050+sin(v+ 2.945)*16718
+2311 aa=aa+sin(v*2-0.336 )*3267/2
+2312 aa=aa+sin(v*3+0.7345)*4993/3
+2313 aa=aa+sin(v*4+2.5158)*764/4
+2314 aa=aa+sin(v*5-2.4983)*738/5
+2316 aa=aa+sin(v*6-1.2177)*815/6
+2317 aa=aa+sin(v*7-1.4712)*346/7
+2318 aa=aa+sin(v*8+2.3477)*114/8
+2319 aa=aa+sin(v*9+3.0337)*192/9
+2320 aa=aa+sin(v*10-2.474)*159/10
+2322 aa=aa/32/180*(mathpi):aa=aa/12+0.1:return
+2400 aa=1120+sin(v- 2.041)*21650
+2411 aa=aa+sin(v*2+0.571 )*18712/2
+2412 aa=aa+sin(v*3+0.4688)*3040/3
+2413 aa=aa+sin(v*4-0.0469)*2178/4
+2414 aa=aa+sin(v*5-3.0946)*3168/5
+2416 aa=aa+sin(v*6-2.7822)*380/6
+2417 aa=aa+sin(v*7-1.0978)*920/7
+2418 aa=aa+sin(v*8+1.7103)*757/8
+2419 aa=aa+sin(v*9-1.5719)*154/9
+2420 aa=aa+sin(v*10+0.144)*682/10
+2422 aa=aa/32/180*(mathpi):aa=aa/11.2+1.1:return
+2500 aa=225+sin(v+ 2.0684)*9300
+2511 aa=aa+sin(v*2+0.7664)*11590/2
+2512 aa=aa+sin(v*3-0.4821)*9950/3
+2513 aa=aa+sin(v*4-0.7363)*6901/4
+2514 aa=aa+sin(v*5-2.4950)*4674/5
+2516 aa=aa+sin(v*6+3.1053)*3468/6
+2517 aa=aa+sin(v*7+1.0274)*608/7
+2518 aa=aa+sin(v*8+1.7884)*543/8
+2519 aa=aa+sin(v*9-0.2944)*213/9
+2520 aa=aa+sin(v*10+2.862)*150/10
+2522 aa=aa/32/180*(mathpi):aa=aa/13+1.00:return

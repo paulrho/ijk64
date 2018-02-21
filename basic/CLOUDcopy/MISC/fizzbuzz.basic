@@ -1,0 +1,7 @@
+10 fori=1to100
+15   p=0
+20   ifi/3=int(i/3)thenprint"fizz";:p=1
+30   ifi/5=int(i/5)thenprint"buzz";:p=1
+40   ifp=0thenprinti;
+50   print
+60 next

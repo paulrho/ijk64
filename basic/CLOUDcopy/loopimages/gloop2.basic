@@ -1,0 +1,11 @@
+10 screen1
+90 n=1035281
+92 n=1000001
+95 i=0
+100 imageload"pars1b"+str$(n)+".png"
+110 drawimage-1,0,0,0.5,0
+120 n=n+5:remi=i+1:ifi>19theni=0
+125 printn;"(up)"
+127 geta$:ifa$<>""thenifa$<>"x"then90
+128 ifa$="x"thenend
+130 goto 100

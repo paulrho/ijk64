@@ -1,0 +1,14 @@
+5 meta-charset2
+10 c=3e8
+20 ev=3.1
+30 l=400e-9
+31 l=700e-9
+40 print "l=";l/1e-9;"nm"
+50 print"eV=";6.6e-34*c/l/1.6e-19
+100 ev=1.59
+105 ev=3.43e-19/1.6e-19:rem work function ceasium
+106 ev=4.26:rem Ag
+107 ev=2.87:rem Ca
+108 ev=4.08:rem Al
+110 print"eV=";ev
+120 print"l=";6.6e-34*c/ev/1.6e-19/1e-9;"nm"

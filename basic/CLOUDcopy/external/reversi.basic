@@ -1,0 +1,242 @@
+10 na$="reversi"
+20 print"(blk)";
+  110 dn$="(home)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)"
+  120 fori=1to39:e$=e$+" ":next
+  130 fori=1to39:e$=e$+"(left)":next
+  140 poke53281,1:poke53280,5
+  150 r$="(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)     "
+  160 dima(9,9),i4(8),j4(8),d$(2)
+  180 print"(clr)(down)instructions (y/n) ";
+  190 input x$
+  200 if left$(x$,1)="n"then480
+  210 print"(clr)"na$" this game is played on an 8 x 8 field"
+  220 print"rows (rvon)1(rvof) thru (rvon)8(rvof) and columns (rvon)a thru (rvon)h(rvof)"
+  230 print"in the beginning there are 4 stones"
+  240 print"in the center of the playfield"
+  250 print"try to place new stones so that it"
+  260 print"includes my stones, horizontal,vertical,"
+  270 print"or diagonal. they become your stones"
+  280 print"if, like in this example
+  290 print"   (HLINE)(HLINE)(HLINE)(SHIFT-PLUS)(HLINE)(HLINE)(HLINE)(SHIFT-PLUS)(HLINE)(HLINE)(HLINE)(SHIFT-PLUS)(HLINE)(HLINE)(HLINE)(SHIFT-PLUS)(HLINE)(HLINE)(HLINE)(SHIFT-PLUS)(HLINE)(HLINE)(HLINE)"
+  300 print"      | W | W | W | W | Q"
+  310 print"   (HLINE)(HLINE)(HLINE)(SHIFT-PLUS)(HLINE)(HLINE)(HLINE)(SHIFT-PLUS)(HLINE)(HLINE)(HLINE)(SHIFT-PLUS)(HLINE)(HLINE)(HLINE)(SHIFT-PLUS)(HLINE)(HLINE)(HLINE)(SHIFT-PLUS)(HLINE)(HLINE)(HLINE)"
+  320 print"you convert the white stones into"
+  330 print"black ones or vice versa."
+  340 i=ti:j=1:print"(home)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(rght)(rght)(rght)(rght)";
+  350 if(ti-i)>1200thengoto390
+  360 ifj=1thenprint"Q(left)";:goto380
+  370 print" (left)";
+  380 j=-1*j:fork=1to150:next:goto350
+  390 print"(home)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(rght)(rght)(rght) Q | Q | Q | Q | Q"
+  400 print"(down)enter a number for a row and a letter"
+  410 print"for a column, separated by a comma"
+  420 print"at least one stone has to be converted"
+  430 print"if this is not possible enter (rvon)0,a"
+  440 print"to pass"
+  470 f2=0
+  480 print"should i try hard (y/n) ";
+  490 s2=0
+  500 inputx$
+  510 ifleft$(x$,1)="n"then530
+  520 s2=2
+  530 b=-1:w=1
+540 d$(b+1)="(grn)W(blu)"
+  550 d$(0+1)=" "
+560 d$(w+1)="(blk)Q(blu)"
+  570 fork=1to8
+  580 readi4(k),j4(k)
+  590 next
+  600 fori=0to9:forj=0to9
+  610 a(i,j)=0
+  620 nextj,i
+  630 a(4,4)=w
+  640 a(5,5)=w
+  650 a(4,5)=b
+  660 a(5,4)=b
+  670 c1=2:h1=c1:n1=4:z=0
+  680 print"do you want black or white (b/w) ";
+  690 c=w:h=b
+  700 inputx$
+  710 ifleft$(x$,1)="w"then730
+  720 c=b:h=w
+  730 print"do you want to start ";
+  740 inputx$
+  750 print"(clr)";
+  760 gosub2160
+  770 ifleft$(x$,1)="y"then1140
+  780 printdn$;e$"i'm thinking !"
+  790 b1=-1:i3=0:j3=0:t1=c:t2=h
+  800 fori=1to8:forj=1to8
+  810 ifa(i,j)<>0then950
+  820 gosub1830
+  830 iff1=0then950
+  840 u=-1
+  850 gosub1910
+  860 ifs1=0then950
+  870 if(i-1)*(i-8)<>0then890
+  880 s1=s1+s2
+  890 if(j-1)*(j-8)<>0then910
+  900 s1=s1+s2
+  910 ifs1<b1then950
+  920 ifs1>b1then940
+  930 ifrnd(1)>0.5then950
+  940 b1=s1:i3=i:j3=j
+  950 nextj,i
+  960 ifb1>0then1010
+  970 printdn$"(down)"e$"i pass ! your turn"
+  980 ifz=1then1490
+  990 z=1
+ 1000 goto1140
+ 1010 z=0
+ 1020 printdn$"(down)"e$"i go to  (rvon)"right$(str$(i3),1)"(rvof) (rvon)"chr$(j3+64)
+ 1030 gosub2440
+ 1040 i=i3:j=j3:u=1
+ 1050 gosub1910
+ 1060 c1=c1+s1+1
+ 1070 h1=h1-s1
+ 1080 n1=n1+1
+ 1090 printdn$"(down)(down)"e$"i get  ";
+ 1100 prints1;
+ 1110 print" of your stones"
+ 1120 gosub2160
+ 1130 ifh1=0orn1=64then1490
+ 1140 t1=h:t2=c
+ 1150 printdn$;e$"it's your turn -- (rvon)row(rvof) (rvon)col(rvof)  ";
+ 1160 gosub2320
+ 1170 ifi<>0then1240
+ 1180 printdn$;e$"do you want to pass (y/n) ";
+ 1190 inputx$
+ 1200 ifleft$(x$,1)<>"y"then1150
+ 1210 ifz=1then1490
+ 1220 z=1
+ 1230 goto790
+ 1240 ifa(i,j)=0then1270
+ 1250 printdn$"(down)"e$"i'm sorry, occupied, try again !"
+ 1260 goto1350
+ 1270 gosub1830
+ 1280 iff1=1then1310
+ 1290 printdn$"(down)"e$"not right next to my stones !"
+ 1300 goto1350
+ 1310 u=-1
+ 1320 gosub1910
+ 1330 ifs1>0then1370
+ 1340 printdn$"(down)"e$"this is not according to rules !"
+ 1350 printe$
+ 1360 goto1150
+ 1370 z=0
+ 1380 printdn$"(down)"e$"you get ";
+ 1390 prints1;
+ 1400 print" of my stones":printe$
+ 1410 u=1
+ 1420 gosub1910
+ 1430 h1=h1+s1+1
+ 1440 c1=c1-s1
+ 1450 n1=n1+1
+ 1460 gosub2160
+ 1470 ifc1=0orn1=64then1490
+ 1480 goto790
+ 1490 printdn$;e$:printe$:printe$
+ 1500 printdn$;e$"you have "h1"pieces"
+ 1510 print"i have "c1"pieces"
+ 1520 ifh1=c1then1560
+ 1530 ifh1>c1then1580
+ 1540 print"i won !!"
+ 1550 goto1590
+ 1560 print"not easy !!"
+ 1570 goto1770
+ 1580 print"your victory !"
+ 1590 c1=c1-h1
+ 1600 ifc1>0then1620
+ 1610 c1=-c1
+ 1620 c1=(64*c1)/n1
+ 1630 print"this was ";
+ 1640 ifc1<11then1760
+ 1650 ifc1<25then1740
+ 1660 ifc1<39then1720
+ 1670 ifc1<53then1700
+ 1680 print"a good game."
+ 1690 goto1770
+ 1700 print"too simple."
+ 1710 goto1770
+ 1720 print"a fight"
+ 1730 goto1770
+ 1740 print"a hot game"
+ 1750 goto1770
+ 1760 print"a race !"
+ 1770 print
+ 1780 print"again (y/n) ";
+ 1790 inputx$
+ 1800 ifleft$(x$,1)="y"then600
+ 1810 print"thanks for the game."
+ 1820 stop
+ 1830 f1=0
+ 1840 fori1=-1to1
+ 1850 forj1=-1to1
+ 1860 ifa(i+i1,j+j1)=t2then1890
+ 1870 nextj1,i1
+ 1880 return
+ 1890 f1=1
+ 1900 return
+ 1910 s1=0
+ 1920 fork=1to8
+ 1930 i5=i4(k)
+ 1940 j5=j4(k)
+ 1950 i6=i+i5
+ 1960 j6=j+j5
+ 1970 s3=0
+ 1980 ifa(i6,j6)<>t2then2140
+ 1990 s3=s3+1
+ 2000 i6=i6+i5
+ 2010 j6=j6+j5
+ 2020 ifa(i6,j6)=t1then2050
+ 2030 ifa(i6,j6)=0then2140
+ 2040 goto1990
+ 2050 s1=s1+s3
+ 2060 ifu<>1then2140
+ 2070 i6=i
+ 2080 j6=j
+ 2090 fork1=0tos3
+ 2100 a(i6,j6)=t1
+ 2110 i6=i6+i5
+ 2120 j6=j6+j5
+ 2130 nextk1
+ 2140 nextk
+ 2150 return
+ 2160 print"(home)"tab(9)"  ";:fori=1tolen(na$):printmid$(na$,i,1)"  ";:next:print
+ 2170 print"(down)     a   b   c   d   e   f   g   h    "
+ 2180 print"   (CBM-A)(HLINE)(HLINE)(HLINE)(CBM-R)(HLINE)(HLINE)(HLINE)(CBM-R)(HLINE)(HLINE)(HLINE)(CBM-R)(HLINE)(HLINE)(HLINE)(CBM-R)(HLINE)(HLINE)(HLINE)(CBM-R)(HLINE)(HLINE)(HLINE)(CBM-R)(HLINE)(HLINE)(HLINE)(CBM-R)(HLINE)(HLINE)(HLINE)(CBM-S)"
+ 2190 fori=1to8
+ 2200 printi"| ";
+ 2210 forj=1to8
+ 2220 printd$(a(i,j)+1)" | ";
+ 2230 nextj
+ 2240 print
+ 2250 ifi<>8thenprint"   (CBM-Q)(HLINE)(HLINE)(HLINE)(SHIFT-PLUS)(HLINE)(HLINE)(HLINE)(SHIFT-PLUS)(HLINE)(HLINE)(HLINE)(SHIFT-PLUS)(HLINE)(HLINE)(HLINE)(SHIFT-PLUS)(HLINE)(HLINE)(HLINE)(SHIFT-PLUS)(HLINE)(HLINE)(HLINE)(SHIFT-PLUS)(HLINE)(HLINE)(HLINE)(SHIFT-PLUS)(HLINE)(HLINE)(HLINE)(CBM-W)
+ 2260 nexti
+ 2270 print"   (CBM-Z)(HLINE)(HLINE)(HLINE)(CBM-E)(HLINE)(HLINE)(HLINE)(CBM-E)(HLINE)(HLINE)(HLINE)(CBM-E)(HLINE)(HLINE)(HLINE)(CBM-E)(HLINE)(HLINE)(HLINE)(CBM-E)(HLINE)(HLINE)(HLINE)(CBM-E)(HLINE)(HLINE)(HLINE)(CBM-E)(HLINE)(HLINE)(HLINE)(CBM-X)"
+ 2280 return
+ 2290 end
+ 2300 rem subroutine input
+ 2310 printdn$"(down)"e$"wrong; try again."
+ 2320 i=-1:j=-1:k=1
+ 2330 getx$:ifx$<>""then2390
+ 2340 ifk=1thenprint"(CBM-PLUS)(left)";:goto2360
+ 2350 print" (left)";
+ 2360 k=-1*k
+2370 forl=1to200:next:sleep200
+ 2380 goto2330
+ 2390 g=asc(x$)
+ 2400 if47<gandg<58theni=g-48:print"(rvon)"x$"(rvof) ";
+ 2410 if64<gandg<74thenj=g-64:print"(rvon)"x$"(rvof) ";
+ 2420 ifi<>-1andj<>-1thenreturn
+ 2430 goto2330
+ 2440 rem blinking
+ 2450 printleft$(dn$,2*(i3-1)+5);left$(r$,4*(j3-1)+5);
+ 2460 k=1:m=0:x$=d$(c+1)
+ 2470 ifk=1thenprintx$"(left)";:goto2490
+ 2480 print" (left)";
+ 2490 k=-1*k
+2500 forl=1to200:next:sleep200
+ 2510 ifm>9thenreturn
+ 2520 m=m+1:goto2470
+ 2530 data 0,1,-1,1,-1,0,-1,-1,0,-1,1,-1,1,0,1,1

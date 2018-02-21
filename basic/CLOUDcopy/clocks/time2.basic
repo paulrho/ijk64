@@ -1,0 +1,30 @@
+5 print"(clr)";tidt$:p=3:gosub1000:k$=" "
+7 poke53280,0:poke53281,0
+10 t$=ti$
+11 tt=tisd:rem needs v3.5.3+
+12 t=tt/60/60/24:d=int(t):t=t-d
+13 t=t*24:h=int(t):t=t-h
+14 t=t*60:m=int(t):t=t-m
+15 t=t*60:s=int(t):t=t-s
+16 ifp=3thent=t*1000:dd=int(t)
+17 ifp<>3thent=t*10:dd=int(t)*100
+19 print d;right$(str$(100+h),2);":";right$(str$(100+m),2);":";right$(str$(100+s),2);".";right$(str$(1000+dd),3);
+20 rem needs at least v3.4.0b1779
+50 remprintleft$(t$,2)":"mid$(t$,3,2)":"right$(t$,2)
+60 geta$:iflt=0and(a$=chr$(13)ora$=".")thenlt=tt:l$="+":gosub100:k$=" "
+62 ifa$=chr$(13)ora$="."thenprint"(lred)(rght)(rght)(rght)+";int((tt-lt)*1000)/1000:l$="+":gosub100:lt=tt:k$=" "
+64 ifa$=" "ora$=","thenprint"(rght)(rght)(rght)(lgrn)-":lt=tt:l$="-":gosub100:k$=" "
+66 ifa$="/"thenprint"(lgrn)(rght)(rght)(rght) ";int((tt-lt)*1000)/1000:l$=" ":gosub100:k$=" "
+68 ifa$<>""thenifasc(a$)>=asc("a")andasc(a$)<=asc("z")thenprint" ";a$;:k$=a$
+70 ifa$=chr$(20)thenprint"  ";:k$=" "
+80 sleep10
+90 print:print"(lblu)(up)";:goto10
+100 rem write to file
+105 kk$=k$:ifk$<>" "thenkk$=chr$(asc(k$)+128)
+110 print#8,"  ";d;right$(str$(100+h),2);":";right$(str$(100+m),2);":";right$(str$(100+s),2);".";right$(str$(1000+dd),3);" ";kk$;" ";
+120 ifl$<>"-"thenprint#8,l$;int((tt-lt)*1000)/1000
+130 ifl$="-"thenprint#8,l$
+190 return
+1000 open8,8,8,"0:times1,s,w"
+1005 print#8,tidt$
+1010 return

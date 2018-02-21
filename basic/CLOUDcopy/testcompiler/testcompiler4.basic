@@ -1,0 +1,7 @@
+10 a=4
+15 fori=1to2
+20 b(5)=6
+30 printb(5)
+40 x=b(5)
+50 print"x=";x
+60 next

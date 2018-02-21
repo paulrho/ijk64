@@ -1,0 +1,20 @@
+100 screen1
+110 cls
+200 t=0:dt=0.001
+210 f=10:x=0:y=5:hh=0.1
+300 gosub1000
+310 rem accelerate at 90 deg
+320 m=sqrt(x^2+y^2)
+330 x=x+sin(a)*m*hh*dt
+340 y=y-cos(a)*m*hh*dt
+350 x=x+sin(t/7)*dt
+360 y=y-cos(t/7)*dt
+400 line400+x*10,400+y*10,400+x*10,400+y*10,4
+490 t=t+dt:goto300
+990 end
+1000 rem atan2
+1010 ifx>0thena=atn(y/x):return
+1020 ify>0thena=(mathpi)/2-atn(x/y):return
+1030 ify<0thena=-(mathpi)/2-atn(x/y):return
+1040 ifx<0thena=atn(y/x)+(mathpi):return:rem +/-
+1050 a=0:return:rem undefined

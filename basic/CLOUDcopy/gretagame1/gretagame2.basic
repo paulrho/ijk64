@@ -1,0 +1,78 @@
+5 meta-rows29:meta-cols40
+10 print"hello"
+20 print"holadays"
+50 print "i am going to aunty ang tomorrow"
+60 print "(lgrn) awesome "
+190 print"(lblu)";
+200 print"(clr)(lblu)";
+202 print"(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)":print"(rvon)                                        ";
+203 print"(rvon)                                        ";:print"(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)gameovertimeout"
+204 print"(rvof)";
+205 load"loopcompus.wav"
+210 xt=20:yt=20:mx=40:my=25:lv=3:sc=0:t=120:me=7
+211 xu=20:yu=10
+212 xc=20:yc=20:f1=0.1:f2=0.001
+213 xd=xc:yd=yc
+215 dimv(mx,my):fori=0tomx-1:forj=0tomy-1:v(i,j)=0:next:next
+217 gosub700
+220 cl=3:sy=46
+221 ifrnd(0)<0.01thencl=4:sy=64+23
+222 ifrnd(0)<0.1thencl=2:sy=35
+223 ifrnd(0)<0.1thencl=5:sy=64+19
+224 ifme=7thenifrnd(0)<0.1thencl=5:sy=64+19
+228 poke55296+xt+yt*40,cl
+230 poke1024+xt+yt*40,sy
+235 v(xt,yt)=cl
+240 xt=xt+int(rnd(0)*3)-1
+250 yt=yt+int(rnd(0)*3)-1
+252 c=0:ifrnd(0)<f1thenxu=xu+int(rnd(0)*3)-1:c=1
+254 ifrnd(0)<f1thenyu=yu+int(rnd(0)*3)-1:c=1
+260 x=xt:y=yt:gosub500:xt=x:yt=y
+261 ifc=1thenx=xu:y=yu:gosub500:xu=x:yu=y
+262 ifc=1thenpoke55296+xu+yu*40,2
+264 ifc=1thenpoke1024+xu+yu*40,90:v(xu,yu)=2
+270 geta$:c=0
+272 ifa$="(up)"thenyc=yc-1:c=1
+273 ifa$="(down)"thenyc=yc+1:c=1
+274 ifa$="(left)"thenxc=xc-1:c=1
+275 ifa$="(rght)"thenxc=xc+1:c=1
+276 ifa$="d"thenift>60thent=60:lv=1:me=4:gosub700:f1=0.2:f2=0.005
+277 x=xc:y=yc:gosub500:xc=x:yc=y
+278 ifc=1thenload"elecplip.wav"
+280 poke55296+xc+yc*40,5+4*(t/2-int(t/2)):rem 7
+282 poke1024+xc+yc*40,me+128
+283 sleep10:iff>0thenf=f-1:v=f-1+15:rem poke53280,v-int(v/16)*16:sleep2
+288 ifc=1thengosub600:iflv=0then200
+290 iflt$<>ti$thent=t-1:lt$=ti$:print"(home)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)t";-t:f1=f1+f2:ift=60ort=10thenload"loopcompus.wav"
+298 ift<=0thenlv=0:load"basshardc.wav":gosub900:goto200
+299 goto220
+500 ifx<0thenx=0
+510 ify<1theny=1
+520 ifx>=mxthenx=mx-1
+530 ify>=mytheny=my-1
+540 return
+600 poke55296+xd+yd*40,v(xd,yd):poke1024+xd+yd*40,32:xd=xc:yd=yc:c=0
+610 ifv(xd,yd)=5thensc=sc+1:print"(home)(lblu)";100000+sc;"(home)Q ";:v(xd,yd)=0:f=1:load"elecpop.wav"
+620 ifv(xd,yd)=2thenlv=lv-1:gosub700:v(xd,yd)=0:f=10:load"basshardc.wav":iflv=0then900
+630 ifv(xd,yd)=4thent=t+20:v(xd,yd)=0:load"guitharmonics.wav"
+650 return
+700 print"(home)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(red)";lv;
+710 fori=1tolv:print"S";:next
+720 fori=1to3-lv:print" ";:next
+730 print"(lblu)";
+740 print"(home)(lblu)";100000+sc;"(home)Q ";
+790 return
+900 print"(home)(wht)(down)(down)(down)(down)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)  game over!!!  "
+905 print"(down)(rght)(rght)(rght)(rght)(rght)(rght)  space bar to play again  "
+907 rem sleep1:iff>0thenf=f-1:v=f-1+15:poke53280,v-int(v/16)*16:sleep2:goto907
+908 print"(down)(down)(down)(down)"
+909 print"(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)       "
+910 print"(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)  ===  "
+912 print"(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght) iZ Zi "
+914 print"(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght) i ; i "
+915 ifsc>0thenprint"(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght) iUDIi "
+916 ifsc=0thenprint"(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght) iUDIi "
+917 print"(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)  ---  "
+918 print"(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)       "
+930 geta$:ifa$<>" "thensleep100:goto930
+940 return

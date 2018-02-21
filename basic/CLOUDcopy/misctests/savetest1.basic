@@ -1,0 +1,13 @@
+5 print"(clr)"
+10 t$=ti$
+11 tt=tisd:rem needs v3.5.3+
+12 t=tt/60/60/24:d=int(t):t=t-d
+13 t=t*24:h=int(t):t=t-h
+14 t=t*60:m=int(t):t=t-m
+15 t=t*60:s=int(t):t=t-s
+16 t=t*1000:dd=int(t)
+19 print d;right$(str$(100+h),2);right$(str$(100+m),2);right$(str$(100+s),2);".";right$(str$(1000+dd),3)
+20 rem needs at least v3.4.0b1779
+50 printleft$(t$,2)":"mid$(t$,3,2)":"right$(t$,2)
+80 sleep1
+90 print"(up)(up)";:goto10

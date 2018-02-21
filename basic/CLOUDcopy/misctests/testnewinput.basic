@@ -1,0 +1,9 @@
+10 open8,8,8,"hyp.file.6,s,r"
+20 input#8,a$,b$,c$,d$,e$
+30 print"value=<<"a$">>"
+32 print"value=<<"b$">>"
+34 print"value=<<"c$">>"
+36 print"value=<<"d$">>"
+38 print"value=<<"e$">>"
+40 input#8,a$:printa$:ifst=0then40
+90 close8

@@ -1,0 +1,33 @@
+10 screen1:cls
+100 ra=1
+110 l=5
+115 pt=0.1: rem pitch
+120 s=0.1
+180 sc=100:xo=500:yo=100
+190 it=0
+200 :
+210 x=ra*cos(it):y=ra*sin(it)
+220 z=it*pt
+280 rem printint(x*100)/100,int(y*100)/100,int(z*100)/100
+285 remlinex0*sc,y0*sc,x*sc,y*sc,5
+286 remlinex0*sc+xo,z0*sc+yo,x*sc+xo,z*sc+yo,5
+287 ifitthenlinex0*sc+xo,(z0+y0/2)*sc+yo,x*sc+xo,(z+y/2)*sc+yo,5
+290 it=it+s
+292 x0=x:y0=y:z0=z
+295 ifz<lthen200
+300 zp=5
+310   forxp=-10to10:print"xp=";xp
+320     foryp=-10to10
+330       gosub1000
+340     nextyp
+350   nextxp
+990 end
+1000 it=0
+1010 x=ra*cos(it):y=ra*sin(it)
+1020 z=it*pt
+1050 ifit=0then1090
+1052 :
+1090 it=it+s
+1092 x0=x:y0=y:z0=z
+1095 ifz<lthen1010
+1099 return

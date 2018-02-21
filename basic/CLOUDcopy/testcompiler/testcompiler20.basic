@@ -1,0 +1,4 @@
+10 fori=1to3
+20 rem
+25 printi
+30 next

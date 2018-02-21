@@ -1,0 +1,27 @@
+10 screen1
+100 n=5
+110 dimx(n),y(n),xv(n),yv(n)
+120 deffna(xx)=(-2.25e-28/((xx/1e9)^2)+8.838e-107/((xx/1e9)^10)):rem attraction
+130 gosub1000
+150 fori=1ton:x(i)=rnd(0)*50:y(i)=rnd(0)*50:next
+160 fori=1ton:xv(i)=(rnd(0)*3-1)/10:yv(i)=(rnd(0)*3-1)/10:next
+190 cls
+200 beginframe:cls:fori=1ton
+210 circlex(i)*10,y(i)*10,10,5,5
+220   forj=1ton:ifi=jthen240
+225     xd=(x(i)-x(j)):yd=(y(i)-y(j))
+230     d=sqrt(xd^2+yd^2)
+232     aa=fna(d)*5e9/10
+234    ifaa>1e1/10thenaa=1e1/10
+235    ifaa<-1e1/10thenaa=-1e1/10
+236     xv(i)=xd/d*aa:yv(i)=yd/d*aa
+240   nextj
+250   x(i)=x(i)+xv(i):y(i)=y(i)+yv(i)
+260 nexti
+490 endframe:goto200
+990 end
+1000 cls
+1010 ox=0:forx=0to2step1e-3
+1020   lineox*500,500-fna(ox)/3e-11,x*500,500-fna(x)/3e-11,5
+1030 ox=x:nextx
+1090 return

@@ -376,12 +376,29 @@ class evaluate {
           if (verbose) { System.out.printf("About to set %s to %f\n",param.toLowerCase(),right); }
           using_machine.setvariable(param.toLowerCase(),new GenericType(right));
           if (verbose) { System.out.printf("form:%s\n",form); }
+
+	  if (speeder_compile) {
+		  // STO current stack into param var
+	          int v = using_machine.getvarindex(param.toLowerCase());
+		  // for now - assume double! - FIX
+		  // rewind one step in compiled (to undo invalid fnc)
+		  using_machine.petspeed.rewind();
+	          using_machine.petspeed.addInstr(Petspeed.I_STO | Petspeed.T_Dbl | Petspeed.M_MEM,v);
+		  // compile the function string - should leave a sing thing on stack
+		  if (verbose) { System.out.printf("About to compile in-line the FN\n"); }
+	  }
           evaluate evaluate_engine = new evaluate(using_machine); //probably very cpu expensive
+	  if (speeder_compile) {
+	          evaluate_engine.speeder_compile=true;
+	  }
           // it is very important that we use the same random generator!!!
           evaluate_engine.generator=generator;
           evaluate_engine.verbose=verbose;
           evaluate_engine.quiet=true;
           answer=evaluate_engine.interpret_string(form).num();
+	  if (speeder_compile) {
+	          //using_machine.petspeed.addInstr(Petspeed.I_RTN); - no because I'm doing it in-line
+	  }
           if (verbose) { System.out.printf("Returned from evaluate\n"); }
           if (verbose) { show_state(); }
         } else {
@@ -1169,7 +1186,7 @@ class evaluate {
               using_defined_function=true;
 
 	      if (speeder_compile) // until we implement it!
-	          using_machine.petspeed.reject();
+	         ; ///NOT ANYMORE!!//using_machine.petspeed.reject();
 	      
             }
 
@@ -1515,6 +1532,16 @@ boolean dontallowextraclosingbrackets=true; // here for now
               if (using_machine!=null) {
                 using_machine.setvariable("fn_"+stkfunc[0].toLowerCase()+"_param",new GenericType(stkfunc[1]));
                 using_machine.setvariable("fn_"+stkfunc[0].toLowerCase()+"_function",new GenericType(intstring.substring(ispnt+1,intstring.length())));
+		// here we should compile it - and link to a pseudo variable that points to the execute point
+		// note, it should end in RTN not HLT
+		if (speeder_compile) {
+	           using_machine.petspeed.reject(); // this isn't really an assign - don this manually every time!
+			// first is to store param into variable
+			// note - for now it is global - later - this must be local - FIX
+			// and during this initial compile - need to define variables, including any others that get used (and may be defined later)
+			// OR could compile only fist time you see it 
+			// OR could just compile in line with current use
+		}
               }
             } else {
               // dont know how to trigger this error!

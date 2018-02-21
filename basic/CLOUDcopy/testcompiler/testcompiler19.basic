@@ -1,0 +1,4 @@
+5 screen1:cls
+6 fori=1to12
+10 line1+i*50,2+i*20,3+i*40,4,5
+99 next

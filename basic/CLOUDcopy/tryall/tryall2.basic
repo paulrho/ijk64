@@ -1,0 +1,92 @@
+10 rem all commands implemented
+20 rem as at 2012-04-21
+30 rem use "list" to list the program
+40 rem use "run" to run the program
+1000 for i = 1 to 5
+1010   print "hello";i
+1020 next i
+1030 for i = 14 to 10 step -2
+1040   print "more";i
+1050 next i
+1060 print"first part of line";
+1070 print" and we continue"
+1072 printspc(20)
+1074 print"spc will stay on same line"
+1080 goto 1100
+1090 print"it wont get here"
+1100 a$="something useful"
+1110 a$=a$+" and more"
+1120 print a$
+1130 b$="more things"
+1140 print b$
+1150 print "length of string";len(b$)
+1160 print "left-hand 4 ";left$(b$,4)
+1170 print "rigt-hand 4 ";right$(b$,4)
+1180 print "middle 4 ";mid$(b$,3,4)
+1190 print val("543.2")
+1200 gosub6000
+1210 print "more than one command on a line":print "yes"
+1300 rem conditional statements
+1310 x=54
+1320 if x+9=99 then print "that is strange"
+1330 if x+9=63 then print "maths works!"
+1400 print "arrays"
+1410 dim h(20),m(10,10)
+1420 h(1)=54:h(2)=12:h(3)=99
+1430 for i=4 to 10:h(i)=88:next i
+1440 for i=1 to 10:print "  ";h(i);:next
+1450 rem semicolon after print keeps it on same line
+2000 rem maths functions
+2010 x=6.7
+2020 print sin(x)
+2030 print cos(x)
+2040 print tan(x)
+2050 print atn(x)
+2060 print sqr(x)
+2070 print exp(x)
+2080 print log(x)
+2100 y=5*x^2+2*x-8: print y
+2110 if x<10 and y<300 then print "both conditions true"
+2120 if x<10 or y>999 then print "either condition true"
+2130 if x<10 or not y<999 then print "first or not second"
+2140 if x<10 and not y<999 then print "first and not second"
+2200 print "special pi variable";(mathpi)
+2400 rem data stored in program
+2410 restore:fori=1to10
+2420   read x: print x
+2430 nexti
+2440 data 44,55,66,77,88,99,11,22,33,44
+2500 x=5:print x "in words :";
+2510 on x gosub 6110,6120,6130,6140,6150,6160,6170
+2520 print"we've done that"
+2530 x = int(rnd(0)*7)+1
+2540 print"random number is ";
+2550 on x gosub 6110,6120,6130,6140,6150,6160,6170
+3000 print "press a key"
+3010 get a$: if a$="" then 3010
+3020 print "got a character!"
+3030 print "it was ";a$
+3040 print "character code ";asc(a$)
+3100 print "special var time ";ti$;" local"
+3110 print "special jiffy counter";ti
+3120 print "special time in sec";tisec;"seconds"
+5990 end
+6000 rem a subroutine ================
+6010 print "in a subroutine"
+6020 return
+6110 print"one":return
+6120 print"two":return
+6130 print"three":return
+6140 print"four":return
+6150 print"five":return
+6160 print"six":return
+6170 print"seven":return
+9000 rem editor help : keys ==========
+9010 rem scroll up/down pgup/pgdown
+9020 rem home
+9030 rem ctrl esc = break program
+9040 rem delete
+9100 rem commands ====================
+9110 rem list  run  cont  clr  stop
+9120 rem load "xxxx" : load a program
+9130 rem save "xxxx" : save a program

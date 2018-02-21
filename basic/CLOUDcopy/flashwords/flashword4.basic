@@ -1,0 +1,191 @@
+10 REM Gretas Sight Words
+15 dev=0: rem 0=c64s 1=ipad 2=iphone4
+20 MAX=500:NL=3
+22 WSEC=0:           rem section
+23 LANG$="":      rem language
+24 DIM W$(MAX,NL-1): rem word list
+25 A1=0:A2=1
+26 DIM D(MAX):       rem word has been done
+28 DIM L(MAX):       rem card list : word indices
+40 SCREEN1:CLS
+50 DEFFN PK(A)=PEEK(A)+PEEK(A+1)*256
+52 POKE1024,0
+60 mo=0:rem one card only
+61 mo=1:rem reveal other card
+62 mo=2:rem show both
+65 REM FSET"Futura-Medium",120
+70 GOSUB1000
+80 GOSUB2000: REM ReadWords
+90 GOSUB2100: REM ShuffleWords
+95 DID=0:G=0
+100 REM FLASH CARDS : MAIN LOOP
+130   REM SelectNextInDeck
+135   SH=0: REM SHOW other no
+137   ifmo=2thenSH=1
+140   IFDID=NTHEN:GOSUB2200:GOSUB2300:GOTO95:  GOTO90: REM Redeal
+150     R=L(DID)
+170     DID=DID+1
+175     IFD(R)>=100THEN140
+180     REM WR$=W$(R,0)
+200   REM PrintWord
+210     BEGINFRAME:CLS
+220     RECT0,0,1000,1005,11
+230     REM FSET"Futura-Medium",120
+231     FSET"BeginnersRegular",120
+232     REM FSET"Palatino-Bold",120
+240     X1=0:Y1=0
+250     RECT100+X1,300+Y1-200,700+X1,550+Y1-200,0
+260     GPRINTW$(R,A1),150+X1,450+Y1-200,4
+270     IFSHTHEN:RECT100+X1,300+Y1+100,700+X1,550+Y1+100,0
+280     IFSHTHEN:GPRINTW$(R,A2),150+X1,450+Y1+100,4
+290     ENDFRAME
+300   REM read screen touches
+310 bn=3:bg=12:ifmo=1andsh=0thenbn=bn+1
+312 bx(0)=100:bu(0)=200:by(0)=820:bv(0)=100:b$(0)="Back"   :bc(0)=0
+314 bx(1)=500:bu(1)=200:by(1)=700:bv(1)=100:b$(1)="Tricky" :bc(1)=9
+316 bx(2)=500:bu(2)=200:by(2)=820:bv(2)=100:b$(2)="Good"   :bc(2)=13
+318 ifmo=1andsh=0thenbx(3)=300:bu(3)=200:by(3)=500:bv(3)=100:b$(3)="Show"   :bc(3)=13
+330 gosub3100
+340 ifbu=0anddid>1thenGOSUB2400:goto130
+350 ifbu=0then330
+360 ifbu=3thensh=1:goto210
+400     FSET"Futura-Medium",12
+410     BEGINFRAME
+420     IFbu=1THEND(R)=0:GPRINT"x"+STR$(G)+"/"+STR$(DID),X+50,Y,1
+430     IFbu=2THEND(R)=1:G=G+1:GPRINT"v"+STR$(G)+"/"+STR$(DID),X+50,Y,2
+440     ENDFRAME
+480     SLEEP1
+490 GOTO100
+
+1000 REM main menu
+1005 BEGINFRAME:CLS
+1007 RECT0,0,1000,1005,11
+1008 ENDFRAME
+1010 bn=5:bg=12
+1012 bx(0)=100:bu(0)=200:by(0)=100:bv(0)=100:b$(0)="Classic":bc(0)=4
+1014 bx(1)=100:bu(1)=200:by(1)=300:bv(1)=100:b$(1)="Hidden" :bc(1)=4
+1016 bx(2)=100:bu(2)=200:by(2)=500:bv(2)=100:b$(2)="Both"   :bc(2)=4
+1022 bx(3)=500:bu(3)=200:by(3)=100:bv(3)=100:b$(3)="EN-IT"  :bc(3)=4
+1024 ifA1=0THENb$(3)=b$(3)+" *"
+1026 bx(4)=500:bu(4)=200:by(4)=300:bv(4)=100:b$(4)="IT-EN"  :bc(4)=4
+1028 ifA1=1THENb$(4)=b$(4)+" *"
+
+1030 gosub3100
+1040 ifbu=0thenMO=0
+1050 ifbu=1thenMO=1
+1060 ifbu=2thenMO=2
+1070 ifbu=3thenA1=0:A2=1:GOTO1000
+1075 ifbu=4thenA1=1:A2=0:GOTO1000
+1090 return
+
+2000 REM ReadWords, updates array w$(0..x) and number of words n
+2010 READWR$:IFWR$="RESTART"THENN=0:GOTO2010
+2011 IFWR$<>"ENG"ANDWR$<>"ITA"ANDWR$<>"MND"THEN2020
+2012   IFWR$="ENG"THENLN=0
+2013   IFWR$="ITA"THENLN=1
+2014   IFWR$="MND"THENLN=2
+2018   WL$=WR$:READ SEC:READWR$
+2020 IFLANG$<>""andwr$<>""THENLN=0:IFWL$<>LANG$THEN2010
+2025   printWR$
+2030   IFWR$<>""THEN IF SEC=WSEC OR WSEC=0 THENW$(N,LN)=WR$:N=N+1: GOTO 2010
+2040 RETURN
+
+2100 REM ShuffleWords, word list is in L(x) from 0..LC
+2110   FORI=0TON-1:D(I)=0:NEXT: REM clear did array
+2115   DID=0
+2120   R=INT(RND(0)*N)
+2130   IFD(R)>0THEN2120: REM Retry if already done
+2140   L(DID)=R
+2150   DID=DID+1:D(R)=1
+2160   IFDID<NTHEN2120
+2170 RETURN
+
+2200 REM PLAY SOUND
+2210 REM was ALERT 4 but it gave Greta a fright
+2220   FORI=1TO10:ALERT1:SLEEP100:ALERT1:SLEEP100:NEXTI
+2230 RETURN
+
+2300 REM FLAG GOOD WORDS TO SKIP
+2310   FORI=0TON-1:IFD(I)>0THEND(I)=100
+2320 NEXTI
+2330 RETURN
+
+2400 REM GO BACK, SKIPPING>=100
+2410 REM did=did-2:g=g-d(l(did))
+2420 did=did-1
+2430 did=did-1:ifdid>0andd(l(did))>=100then2430
+2440 g=g-d(l(did))
+2450 return
+
+3000 REM (SUB READ USER TAP)
+3020 XT=1030
+3030 YT=1032
+3050 T=PEEK(1024):IF T = 0 THEN GOTO 3050
+3055 POKE1024,0
+3060 X = FN PK(XT) : Y = FN PK(YT)
+3070 RETURN
+3100 rem returns bu=-1 or bu=0..bn-1
+3110 beginframe
+3115     FSET"Palatino-Bold",20
+3120 fori=0tobn-1
+3130   rectbx(i),by(i),bx(i)+bu(i),by(i)+bv(i),bg
+3140   gprintb$(i),bx(i)+bu(i)/5,by(i)+bv(i)/2,bc(i) : rem black
+3150 nexti
+3155 endframe
+3160 rem wait for a click
+3170 gosub3000:ift=0then3170
+3175 rem print t;x;y
+3180 fori=0tobn-1
+3182 ift=1andX>=bx(i)andX<=bx(i)+bu(i)andY>=by(i)andY<=by(i)+bv(i)thenbu=i:return
+3185 nexti:goto3170
+3190 return
+9000 DATA"ENG",1
+9005 data"I","in","a","it","and","is","be","the","to","am"
+9010 data"at","are","we","for","but","of","was","that","all","he"
+9020 data"as","so","are","not","her","on","his","have","had","one"
+9030 data"an","with","by","they","do","said","go","me","you","if"
+9035 data"my","him","no","our","or","who","up","from","big","much"
+9037 DATA"ENG",2
+9040 data"can","out","did","back","get","into","had","over","new","went"
+9050 data"now","two","off","been","old","just","see","them","she","call"
+9055 data"came","well","down","here","like","make","made","come","this","when"
+9060 data"were","about","must","look","only","some","will","then","your","what"
+9070 data"before","first","more","right","want","there","other","which","could","where"
+9080 DATA"ENG",3
+9100 data"after","red","eat","name","little","away","take","under","work","say"
+9110 data"again","think","give","too","long","each","their","ball","would","until"
+9120 data"any","another","good","near","man","kind","three","ear","also","because"
+9130 data"boy","dear","how","run","many","never","us","last","colour","end"
+9140 data"day","house","know","tree","put","saw","very","next","home","leave"
+9145 DATA"ENG",4
+9150 data"night","book","left","white","let","sure","should","tell","black","pretty"
+9160 data"school","four","seem","both","open","wish","way","why","found","than"
+9170 data"upon","may","use","friend","shall","box","own","bring","people","these"
+9180 data"best","play","better","men","five","girl","soon","got","stand","year"
+9190 data"far","such","find","please","live","present","where","morning","while","hand"
+
+9500 DATA"RESTART","ITA",101
+9505 data"Io","in","un","e","e`","si","sono","i","a","sono"
+9510 data"at","si","noi","per","ma","di","si","che","tutti","egli"
+9520 data"come","cosi","si","non","lei","sopra","sua","si","si","uno"
+9530 data"un","con","by","they","do","detto","go","me","tu","se"
+9535 data"mio","lui","no","nostro","o","chi","up","from","grande","molto"
+9537 DATA"ITA",102
+9540 data"puo`","out","did","back","get","into","had","oltre","nuovo","andato"
+9550 data"ora","due","off","stato","vecchio","just","vedere","loro","lei","call"
+9555 data"came","well","down","qui","vorrei","fare","fatto","come","questo","quando"
+9560 data"were","about","devono","guardare","solo","alcuni","will","then","il vostro","che cosa"
+9570 data"before","prima","altro","right","voglio","there","altro","che","potrebbe","dove"
+9580 DATA"ITA",103
+9600 data"dopo","rosso","mangiare","nome","poco","via","take","under","lavoro","dire"
+9610 data"nuovo","credo","dare","troppo","lunga","ogni","loro","palla","would","fino"
+9620 data"qualsiasi","altro","buona","near","uomo","tipo","tre","ear","anche","perche`"
+9630 data"ragazzo","cari","come","run","molti","mai","noi","ultimi","colore","fine"
+9640 data"giorno","casa","so","albero","mettere","visto","molto","next","home","lasciare"
+9645 DATA"ITA",104
+9650 data"notte","libre","sinistra","bianco","let","sicuro","dovrebbe","tell","nero","abbastanza"
+9660 data"scuola","quattro","sembra","due","aperto","vorrei","via","perche`","trovato","than"
+9670 data"sopra","may","use","amico","shall","box","proprio","portare","persone","these"
+9680 data"migliori","play","meglio","uomini","cinque","ragazza","presto","got","stand","anno"
+9690 data"lontano","such","trovare","per favore","vivere","presente","dove","mattino","mentre","mano"
+9990 DATA""

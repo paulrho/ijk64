@@ -676,6 +676,7 @@ if (dofulltiming) startTime2+=System.currentTimeMillis();
       } else if (partType==PT_TOKEN) {
                                                           if (dofulltiming) { start_timing(TIME_ReadStatement); }
         /* speeder Opt 10 - chaining */
+        //needmore testing for this //if (speeder && gotToken!=ST_NEXT) machine.petspeed.lastassign=-1; // invalidate  // see if this allows next chaining
         if (speeder) machine.petspeed.lastassign=-1; // invalidate
         if (!ReadStatement()) {
           throw new BasicException("SYNTAX ERROR : BAD TOKEN");
@@ -1179,11 +1180,16 @@ boolean ReadStatement() throws BasicException
           GenericType gt=machine.evaluate(keepExpression);
           if (gt.gttop==1) {
               if (verbose) System.out.printf("load the image to reference\n");
-              int imgno=machine.graphicsDevice.command_LOADIMAGE(
-                machine.fileUnalias(gt.str())
-               );
-               // special case here! so if it works
-              machine.assignment("imgno="+imgno);
+              try { 
+                int imgno=machine.graphicsDevice.command_LOADIMAGE(
+                  machine.fileUnalias(gt.str())
+                 );
+                 // special case here! so if it works
+                machine.assignment("imgno="+imgno);
+              } catch (Exception e) {
+                if (verbose) { e.printStackTrace(); }
+                throw new BasicException("IMAGE LOAD ERROR");
+              }
               return true;
           } else //throw new BasicException("INCORRECT PARAMETERS");
             throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
@@ -1585,20 +1591,21 @@ GenericType PSReadExpressionEvaluate() throws BasicException
 boolean ProcessIFstatement() throws BasicException
 {
   
-  GenericType gt;
   if (speeder && machine.petspeed.is_compiled(pnt)) { 
        if (verbose) System.out.printf("Found compiled at %d\n",pnt); 
        try {
          pnt=machine.petspeed.execute(pnt);
          // jump the pointer
        } catch (EvaluateException e) { throw new BasicException(e.getMessage()); }
-       gt= new GenericType(machine.petspeed.result());
-       //pnt=machine.petspeed.nextpnt(pnt);
-       if (gt.equals(0.0)) { // num only returns a num
+       // expensive - just use doubles
+       //gt= new GenericType(machine.petspeed.result());
+       //if (gt.equals(0.0)) { // num only returns a num
+       if (machine.petspeed.result()==0.0) { // num only returns a num
          pnt=machine.petspeed.nextpnt(pnt-1); // special case - false eval, stored one before the THEN bit
 	 return true;
        }
   } else {
+     GenericType gt;
 
      if (speeder) { machine.petspeed.savestart(pnt); }
       ReadExpression();
@@ -1640,6 +1647,11 @@ boolean ProcessIFstatement() throws BasicException
   }
 
 
+  int fpnt=pnt-2; // one back from the other above - places it in the TH[E]N keyword
+  if (speeder && machine.petspeed.nextpnt(fpnt)>0) {
+         pnt=machine.petspeed.nextpnt(fpnt);
+	 return true; // ignore colon read
+  }
 
   SkipSpaces(); // really - spaces arent good for anything
   // it might be just a line # - try and read it - if it isn't keep going  
@@ -1647,6 +1659,7 @@ boolean ProcessIFstatement() throws BasicException
     if (machine.enabledmovement) {
       machine.gotoLine(keepLine);
       pnt=machine.executionpoint; // we should now have a different execution point
+      if (speeder) machine.petspeed.acpointer_next[fpnt]=pnt;
     }
     // then read out till end of line
     //while (pnt<linelength && !line.substring(pnt,pnt+1).equals("\n")) {
@@ -1659,6 +1672,7 @@ boolean ProcessIFstatement() throws BasicException
     ReadExpression();
     machine.gotoLine(keepExpression);
     pnt=machine.executionpoint; // we should now have a different execution point
+    if (speeder) machine.petspeed.acpointer_next[fpnt]=pnt;
   }
   return true;
 }
@@ -1714,6 +1728,14 @@ boolean ProcessONstatement() throws BasicException
 
 boolean ProcessGOTOstatement() throws BasicException
 {
+  // we have a goto - see if we have a pointer to next
+  int fpnt=pnt;
+  if (speeder && machine.petspeed.nextpnt(pnt)>0) {
+    if (machine.enabledmovement && machine.program_running) {
+         pnt=machine.petspeed.nextpnt(fpnt);
+	 return true; // ignore colon read
+    }
+  }
   SkipSpaces(); // added this in as there may be leading spaces (probably a better way to do this)
   ReadExpression(); // not really, should just be a numberic??? maybe an expression is good
   // lets go!
@@ -1723,6 +1745,7 @@ boolean ProcessGOTOstatement() throws BasicException
       machine.gotoLine(keepExpression);
       if (verbose) { System.out.printf("goto, moving to executionpoint %d\n",machine.executionpoint); }
       pnt=machine.executionpoint; // we should now have a different execution point
+      if (speeder) machine.petspeed.acpointer_next[fpnt]=pnt;
     } else {
       //BasicCONTrestart
       if (verbose) System.out.printf("Got a GOTO in direct mode\n");
@@ -1735,13 +1758,23 @@ boolean ProcessGOTOstatement() throws BasicException
 
 boolean ProcessGOSUBstatement() throws BasicException
 {
+  int fpnt=pnt;
+  if (speeder && machine.petspeed.nextpnt(pnt)>0) {
+    if (machine.enabledmovement && machine.program_running) {
+         machine.push_fl_gosub(machine.petspeed.nextpnt(pnt+1)); // store the AFTER setting one after the gosub
+         pnt=machine.petspeed.nextpnt(fpnt);
+	 return true; // ignore colon read
+    }
+  }
   SkipSpaces(); // added this in as there may be leading spaces (probably a better way to do this)
   ReadExpression(); // not really, should just be a numberic??? maybe an expression is good
   if (machine.enabledmovement) {
     if (machine.program_running) {
       machine.gosubLine(keepExpression,pnt);
       if (verbose) { System.out.printf("gosub, moving to executionpoint %d\n",machine.executionpoint); }
+      if (speeder) machine.petspeed.acpointer_next[fpnt+1]=pnt;
       pnt=machine.executionpoint; // we should now have a different execution point
+      if (speeder) machine.petspeed.acpointer_next[fpnt]=pnt;
     } else {
       throw new BasicException("GOSUB NOT IMPLEMENTED IN DIRECT MODE");
       //nodoesntwork//lets try this
@@ -1769,32 +1802,70 @@ boolean ProcessRETURNstatement() throws BasicException
 
 boolean ProcessNEXTstatement() throws BasicException
 {
-  keepExpression=""; // for the scenario it is nothing!
-  ReadExpression(); // not really, should just be a variable!!
-  // split up between commas
-  int at=0; 
-  int start=0;
-  while (at<keepExpression.length()) {
-    if (keepExpression.substring(at,at+1).equals(",")) {
+  if (speeder && !machine.petspeed.is_compiled(pnt)) {
+      // will compile
+      int pntkeep=pnt;
+      machine.petspeed.savestart(pnt); 
+      keepExpression=""; // for the scenario it is nothing!
+      ReadExpression(); // not really, should just be a variable!!
+    
+      // split up between commas
+      int at=0; 
+      int start=0;
+      while (at<keepExpression.length()) {
+        if (keepExpression.substring(at,at+1).equals(",")) {
+	  // add to pseudo-machine-instruction - recording only - not running
+          machine.petspeed.addInstr(Petspeed.I_NXT,machine.variables.getvarindex(keepExpression.substring(start,at).toLowerCase().trim()));
+          start=at+1;
+        }
+        at++;
+      }
       // skip spaces with trim!
-      if (machine.processNEXT(pnt,keepExpression.substring(start,at).toLowerCase().trim())) {
+      machine.petspeed.addInstr(Petspeed.I_NXT,machine.variables.getvarindex(keepExpression.substring(start,keepExpression.length()).toLowerCase().trim()));
+      //machine.petspeed.addInstr(Petspeed.I_HLT,pnt);/// not quite -see below
+      machine.petspeed.saveacode(pnt);
+      // try without!///machine.petspeed.lastassign=-1; // invalidate // CHECK, is this the best spot for it?
+      pnt=pntkeep;
+
+  } 
+  // both
+  if (speeder && machine.petspeed.is_compiled(pnt)) {
+       // already  (or just) compiled
+       if (verbose) System.out.printf("Found compiled at %d\n",pnt); 
+	try {
+	  pnt=machine.petspeed.execute(pnt);
+	  // and jump the pointer
+	} catch (EvaluateException e) { throw new BasicException(e.getMessage()); }
+  } else {
+      // wont or didn't compile
+      keepExpression=""; // for the scenario it is nothing!
+      ReadExpression(); // not really, should just be a variable!!
+    
+      // split up between commas
+      int at=0; 
+      int start=0;
+      while (at<keepExpression.length()) {
+        if (keepExpression.substring(at,at+1).equals(",")) {
+          // skip spaces with trim!
+          if (machine.processNEXT(pnt,keepExpression.substring(start,at).toLowerCase().trim())) {
+            // we did loop
+            pnt=machine.executionpoint;
+            return true; // we skip the following ones
+          }
+          start=at+1;
+        }
+        at++;
+      }
+      // skip spaces with trim!
+      if (machine.processNEXT(pnt,keepExpression.substring(start,keepExpression.length()).toLowerCase().trim())) {
         // we did loop
         pnt=machine.executionpoint;
         return true; // we skip the following ones
       }
-      start=at+1;
+      if (verbose) { System.out.printf("Finished the next loops\n"); }
     }
-    at++;
-  }
-  // skip spaces with trim!
-  if (machine.processNEXT(pnt,keepExpression.substring(start,keepExpression.length()).toLowerCase().trim())) {
-    // we did loop
-    pnt=machine.executionpoint;
-    return true; // we skip the following ones
-  }
-  if (verbose) { System.out.printf("Finished the next loops\n"); }
-  ReadColon();
-  return true;
+    //  for now - dont read this here // ReadColon();
+    return true;
 }
 
 boolean ProcessFORstatement() throws BasicException
@@ -2153,6 +2224,13 @@ boolean ProcessOPENstatement() throws BasicException
        (int)gt.gtlist[0].num(),
        (int)gt.gtlist[1].num(),
        gt.gtlist[3].str()
+     );
+     return true;
+  } else if (gt.gttop==3) {
+     machine.OpenFile(
+       (int)gt.gtlist[0].num(),
+       (int)gt.gtlist[1].num(),
+       ""
      );
      return true;
   } else if (gt.gttop==2) {

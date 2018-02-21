@@ -1,0 +1,102 @@
+10 meta-charset1
+20 dim c(13,13)
+30 dim lm(13,13)
+40 tl=12:md=2:t2=ti
+50 print"(clr)";
+100 t0=ti
+105 x=int(rnd(0)*13)+0
+110 y=int(rnd(0)*13)+0
+112 ifti-t0>180thenprint"(home)(yel)Finished";int((ti-t2)/60*10)/10:print:gosub1600:clr:goto10
+118 iflv>0theniflm(x,y)=0thengeta$:goto105
+119 iflv>0andmd=2andc(x,y)>0then105
+120 tr=0:hn=0
+200 print"(home)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)                      "
+201 print"(down)(down)                        "
+202 print"(home)";
+203 gosub1200
+205 print"(home)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)(down)";
+207 ifhnthengosub1300
+210 print "  (lblu)";x;" x ";y;" =  ";
+230 gosub 1000
+250 rem print"you entered";v
+300 ifv=x*ythen gosub1500
+303 remifv=-2then202
+304 ifv=-2thengosub1200:t2=ti:goto100
+305 ifv<0thenhn=1:goto200
+310 ifv<>x*ythen print" (red)X":print"(down)(down)";tab(14);"Incorrect":load"elecbong.wav":gosub1100:tr=tr+1:iftr<3then200
+490 goto100
+990 end
+1000 rem get number
+1005 v=0:p=0
+1010 print"(rvon) (rvof)(left)";
+1015 geta$:ifa$=""then1010
+1020 ifp<5 and (a$="0" or val(a$)>0) thenprinta$;:v=v*10+val(a$):p=p+1
+1030 if(a$=chr$(20) or a$="(left)") and p>0thenprint" (left)(left)";:v=int(v/10):p=p-1
+1040 ifp>0 and a$=chr$(13)thenprint" (left)";:return
+1050 ifa$="?"thenv=-1:print" (left)???";:return
+1060 ifa$="(up)"andlv<tlthenlv=lv+1:v=-2:t2=ti:return
+1065 ifa$="(down)"andlv>0thenlv=lv-1:v=-2:t2=ti:return
+1080 goto1010
+1090 return
+1100 t=ti
+1110 geta$:ifti-t<60then1110
+1120 return
+1200 gosub1400
+1205 print"(home)";
+1210 print"(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)(rght)";
+1215 print"(gry1)0123456789012 x"
+1220 forj=0to12
+1225 printtab(22);
+1230 fori=0to12
+1232 e$="o"
+1235 ifi=0ori=1orj=0orj=1ori=10orj=10ori*j<11or(i*j/10-int(i*j/10)=0)or(i=11orj=11)andi*j<100thene$="."
+1237 ifi=jande$="o"thene$="S"
+1238 ifi=jande$="."andi>0thene$="*"
+1239 ifi>5andj>5ande$="o"thene$="O"
+1240 iflm(i,j)thenprint"(rvon)";
+1242 ifc(i,j)thenprint"(grn)"e$;"(rvof)";
+1245 ifc(i,j)=0thenprint"(gry1)"e$;"(rvof)";
+1250 nexti:print"(gry1)";j
+1260 nextj
+1290 return
+1300 rem hint
+1305 print"(up)(up)(up)(wht)"
+1307 ifx=0ory=0thenprint"Anything x 0 is 0":goto1380
+1308 ifx=1ory=1thenprint"Anything x 1 is itself":goto1380
+1310 ifx=9thenprint"Think 10 x";y;"-"y
+1320 ifx<>9andy=9thenprint"Think"x" x 10 -"x
+1330 ifx=2thenprint"Think double"y
+1332 ify=2andx<>2thenprint"Think double"x
+1340 ifx=11andy<10thenprint"Think repeat"y
+1342 ify=11andx<10thenprint"Think repeat"x
+1380 print"(down)"
+1390 return
+1400 rem mark boxes for a level
+1410 forj=0to12
+1420 fori=0to12
+1425 s=0
+1430 iflv=1and(i=1ori=2orj=1orj=2)thens=1
+1440 iflv=2and(i=3ori=4orj=3orj=4)thens=1
+1450 iflv=3and(i=5orj=5)thens=1
+1460 iflv=4and(i=6orj=6ori=7ori=8orj=7orj=8)thens=1
+1462 iflv=5and(i=9orj=9)thens=1
+1464 iflv=6and(i=11orj=11)thens=1
+1466 iflv=7and(i=12orj=12)thens=1
+1468 iflv=8and(i=3orj=3)thens=1
+1470 iflv=9and(i=4orj=4)thens=1
+1472 iflv=10and(i=6orj=6)thens=1
+1474 iflv=11and(i=7orj=7)thens=1
+1476 iflv=12and(i=8orj=8)thens=1
+1480 lm(i,j)=s
+1485 nexti:nextj
+1490 return
+1500 rem correct
+1505 t1=ti
+1510 print" (grn)V":print"(down)(down)";tab(14);"Correct"
+1520 ift1-t0<5*60then load"elecping.wav":c(x,y)=c(x,y)+1:goto1530
+1525 load"elecplip.wav"
+1530 gosub1200:gosub1100
+1590 return
+1600 print"Press Space"
+1610 geta$:ifa$<>" "then1610
+1620 return

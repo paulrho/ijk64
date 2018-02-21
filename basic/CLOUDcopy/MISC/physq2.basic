@@ -1,0 +1,14 @@
+10 dimp(360)
+80 f=2.0
+100 forx=0to6*5000
+120 b=(x/2/(mathpi)-int(x/2/(mathpi)))*360
+130 p(b)=p(b)+sin(x*f)
+150 nextx
+200 screen1:cls
+205 c=0
+210 forb=0to360
+220 lineb,400,b,400-p(b)*10,5
+225 c=c+abs(p(b))
+230 next
+240 printc
+250 printc*(mathpi)/2/30000

@@ -1,0 +1,9 @@
+10 print 9^2
+20 print sqr(10)^2-10
+30 for i=0 to 1 step 0.1:print i:next
+40 print0+""+-0
+50 end
+140 x=x+0.1:if x <> 1 then 140
+145 rem this wont complete!
+150 print x
+35072121 :

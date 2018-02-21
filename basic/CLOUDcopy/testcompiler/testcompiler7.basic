@@ -1,0 +1,6 @@
+10 fori=1to2
+20 x$=ti$
+30 printx$
+32 a=(mathpi)
+34 printa
+40 next
