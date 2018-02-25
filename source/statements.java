@@ -395,6 +395,18 @@ if (dofulltiming) { end_timing(TIME_ReadStatementToken); }
               machine.petspeed.btpnt[fpnt]=skip_spaces(basictimer_thispnt);
             machine.petspeed.pnext[fpnt]=pnt;
 	    if (verbose) System.out.printf("caching a token\n");
+
+	    /* works -but complex and not enough gain just yet
+	   if (gotToken==ST_REM) {
+              int pn=machine.petspeed.acpointer_next[fpnt];
+	              if (verbose) { System.out.printf("at REM fpnt=%d pnt=%d\n",fpnt,pnt); }
+              if (pn<0) {
+	              if (verbose) { System.out.printf("REM yes it is\n"); }
+                machine.petspeed.acpointer_next[-pn]=pnt;
+                if (machine.petspeed.acpointer_next[pnt]==0) machine.petspeed.acpointer_next[pnt]=pn;
+	      }
+	    }
+	    */
 	  }
           return true;
         } else {
@@ -681,6 +693,7 @@ if (dofulltiming) startTime2+=System.currentTimeMillis();
         if (!ReadStatement()) {
           throw new BasicException("SYNTAX ERROR : BAD TOKEN");
         }
+	// at the end of this -> further optimisation, see if there are more jumps possible and short circuit -> skipping and REMs
                                                           if (dofulltiming) { end_timing(TIME_ReadStatement); }
       } else if (partType==PT_ASSIGN) {
                                                           if (dofulltiming) { start_timing(TIME_ReadAssign); }
@@ -1449,6 +1462,7 @@ boolean ProcessPRINTstatement_original() throws BasicException
 
 boolean ProcessPRINTstatement() throws BasicException
 {
+	// just for now - as a test
   if (verbose) { System.out.printf("Processing PRINT statement\n"); }
   ReadExpression();
   if (verbose) { System.out.printf("MachinePrintEvaluate( %s )\n",keepExpression); }
@@ -1827,6 +1841,13 @@ boolean ProcessNEXTstatement() throws BasicException
       // try without!///machine.petspeed.lastassign=-1; // invalidate // CHECK, is this the best spot for it?
       pnt=pntkeep;
 
+	if (false && speeder) { // arbitrarily here
+		 // Opt17b
+		 // reoptimise
+		 machine.petspeed.reoptimise();
+		 System.out.printf("Reoptimise\n");
+	}
+
   } 
   // both
   if (speeder && machine.petspeed.is_compiled(pnt)) {
@@ -1977,6 +1998,17 @@ boolean ProcessREMstatement()
 
   if (speeder) {
     machine.petspeed.pnext[fpnt]=pnt;
+	    /* works -but complex and not enough gain just yet
+    // pull forward back link and also change that link forward
+    // Opt17
+    int pn=machine.petspeed.acpointer_next[fpnt];
+	    if (verbose) { System.out.printf("at REM fpnt=%d pnt=%d\n",fpnt,pnt); }
+    if (pn<0) {
+	    if (verbose) { System.out.printf("REM yes it is\n"); }
+      machine.petspeed.acpointer_next[-pn]=pnt;
+      if (machine.petspeed.acpointer_next[pnt]==0) machine.petspeed.acpointer_next[pnt]=pn;
+    }
+    */
     if (verbose) System.out.printf("caching a REM\n");
   }
   return true;

@@ -251,7 +251,21 @@ class C64 {
       if (machine.insertLine(result.trim())) {
         displayReady=false;
       } else {
-        machine.runImmediate(result.trim()); // and again, upon a machine
+	      // experiment - run this in another thread
+	     
+	//THREAD//final String resultthread=result.trim();
+        //THREAD//Thread t = new Thread() {   // Create an instance of an anonymous inner class that extends Thread
+          //THREAD//@Override
+          //THREAD//public void run() {      // Override run() to specify the running behaviors
+
+            machine.runImmediate(result.trim()); // and again, upon a machine
+            //THREAD//machine.runImmediate(resultthread); // and again, upon a machine
+
+          //THREAD//}
+        //THREAD//};
+        //THREAD//t.start();  // Start the thread. Call back run() in a new thread
+
+
         if (machine.signal_exit) break;
        }
     } // end while

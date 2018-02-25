@@ -53,23 +53,26 @@ done:
 
 --------------------
 not done:
-1)
-LIST a,b,c=1,2,3  (now does a,b,c=3,2,1 ) - can be done
+1) FOR -> compile this too!
+
+8) make REM truely take no running time after compiling - attempted - looking for a nicer way
+
+
+2) LIST a,b,c=1,2,3  (now does a,b,c=3,2,1 ) - can be done
    but note, this is a unintended language extension that I don't use anyway - 
    could mark it as reject in the meantime
+
 5) allow sounds to load off web too
 
 6) when you list"prog" and it is not there - it should not do the list
 
 7) make poke198,0 clear the buffer!
 
-8) make REM truely take no running time after compiling
-
 9) check the goto gosub ifthen # optimisations to affect edge case (where the next instructions might overlap)
 
-10) FOR -> compile this too!
-
 11) allow break from an io (especially net)
+
+12) check the chained case where you jump into the commands half way through
 ---
 END
 ---

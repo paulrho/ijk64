@@ -15,6 +15,8 @@
 // Opt   IF return values - avoid creating tmp GenericType (just use int)
 // Opt   NEXT no more string usage
 // Opt15 (DEF) FN now in-line compiled (was not even compiled at all before)
+// Opt16 chew NOP goes from 7500 to 8000 mp2 = 6.7%
+// Opt17 detect and short circuit boring time consuming extra jumps
 // 
 ////////////////////////////////////////////////
 class Petspeed
@@ -532,12 +534,15 @@ class Petspeed
     acpointer_next[then]=end;
   }
 
+
   void saveacode(int end) {
 	  if (record) {
 	    // push a HLT onto code
 	    addInstr(I_HLT); 
 	    acpointer[savestart_p]=savestart_ac;
 	    acpointer_next[savestart_p]=end;
+    // Opt17  // not used just yet
+    //NOTUSEDYET//if (acpointer_next[end]<=0) acpointer_next[end]=-savestart_p; // back link
 	    // this is now marked as a valid piece of code
 	    top=tmptop;
             if (verbose) System.out.printf("Saved code from %d to %d for location %d\n",savestart_ac,top,savestart_p);
@@ -554,10 +559,21 @@ class Petspeed
                   if (verbose) System.out.printf("want to change %d from HLT to GOTO %d\n",lastfinal,savestart_ac);
 		  if (lastfinal+1==savestart_ac) {
                     prog[lastfinal]=I_FNC|F_NOP; // dont have to - but just to make it look a bit nicer
+		    // crunch up the nop! (new Opt)
+		    for (int i=lastfinal; i<top-1; ++i) {
+                      prog[i]=prog[i+1];
+		      pargD[i]=pargD[i+1];
+		      pargmem[i]=pargmem[i+1];
+		      pargS[i]=pargS[i+1];
+		    }
+		    top--;
+		    acpointer[savestart_p]=savestart_ac-1; // I think I need to do this for those that jump half way in CHECK
 		  } else {
                     prog[lastfinal]=I_FNC|F_JMP; pargmem[lastfinal]=savestart_ac;
 		  }
 		  acpointer_next[lastassign]=end; // combine
+    // Opt17  // not used just yet
+    //NOTUSEDYET//if (acpointer_next[end]<=0) acpointer_next[end]=-lastassign; // back link
 	          lastfinal=top-1;
 		  return; // because we want to keep last assign at the original one!
 		}
@@ -576,6 +592,15 @@ class Petspeed
     lastassign=-1; //Opt10
   }
 
+  void reoptimise() {
+	  // look for REM chains
+	  int p;
+    for (int i=0; i<MAXPSIZE; ++i) if ((p=acpointer_next[i])>0) 
+	    while (p>0 && (pcache[p]==0 && pnext[p]>0 || pcache[p]==33 /* REM */)) {
+              acpointer_next[i]=pnext[p];
+              p=acpointer_next[i];
+            }
+  }
   //////////////////////////////////////////////////////////////
   //
   // debugging
