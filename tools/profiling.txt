@@ -1,0 +1,2 @@
+java -agentlib:hprof=cpu=samples,depth=200,interval=1,lineno=y,thread=y,file=out.hprof -jar C64.jar m.basic -r -x
+
