@@ -151,7 +151,7 @@ String[] basicTokens={
   ,"IMAGELOAD","DRAWIMAGE","DESTROYIMAGE","CIRCLE","ANTIALIAS","PSET"
   ,"IMAGESAVE"
   ,"DIR","PWD","CHDIR","MKDIR"
-  ,"ON"
+  ,"ON","ELSE"
   ,"DEF","LET","SLOW"
   ,"HELP"
 };
@@ -228,12 +228,13 @@ static final int ST_CHDIR=66;
 static final int ST_MKDIR=67;
 
 static final int ST_ON=68;
+static final int ST_ELSE=69;
 
-static final int ST_DEF=69;
-static final int ST_LET=70;
+static final int ST_DEF=70;
+static final int ST_LET=71;
 
-static final int ST_SLOW=71;
-static final int ST_HELP=72;
+static final int ST_SLOW=72;
+static final int ST_HELP=73;
 
 
 String line;
@@ -773,8 +774,10 @@ boolean ReadStatement() throws BasicException
       case ST_GOSUB: if (ProcessGOSUBstatement()) { return true; } break;
       case ST_RETURN: if (ProcessRETURNstatement()) { return true; } break;
       case ST_PRINT: if (ProcessPRINTstatement()) { return true; } break;
-      case ST_REM: 
+      case ST_REM:
                     if (ProcessREMstatement()) { return true; } break;
+      case ST_ELSE:
+                    if (ProcessELSEstatement()) { return true; } break;
       case ST_PRINThash: // because it would have gone elsewhere
         if (ProcessPRINThashstatement()) { return true; } break;
       case ST_FAST:  // I wish - wish true: compiler for expressions!
@@ -1644,16 +1647,86 @@ boolean ProcessIFstatement() throws BasicException
 
     if (verbose) { System.out.printf("  evaluates to %s\n",gt.print()); }
 
+    // for speeder : always find the "ELSE" or next line condition regardless of what actual condition is
     if (speeder && machine.petspeed.nextpnt(pnt-1)==0)  {  // only do this once
       int p2=pnt;
-      while (p2<linelength && !line.substring(p2,p2+1).equals("\n")) p2++;
+      if (true) { // FIX - this is repeated code - crunch into 1
+        boolean quote=false;
+        boolean looktoken=true; // we are ready to look for a token
+        int fpnt=pnt-1;
+        int pp=pnt;
+        while (pp<linelength) {
+          String a=line.substring(pp,pp+1);
+          if (a.equals("\n")) break;
+	  if (a.equals("\"")) { quote=!quote; if (quote) looktoken=false; }
+	  if (a.equals(":") && !quote) looktoken=true;
+	  if (looktoken && a.toLowerCase().equals("e") && line.substring(pp,pp+4).toLowerCase().equals("else")) { 
+	    pp=pp+4; 
+	    // it may be a line# -> so check
+	    int savepnt=pnt;  // dont really do this
+	    pnt=pp;
+	    if (verbose) System.out.printf("in else - looking for line #\n");
+            SkipSpaces(); // really - spaces arent good for anything
+            if (ReadLineNo()) {
+	      if (verbose) System.out.printf("in else - in readlineno\n");
+              if (machine.enabledmovement) {
+                machine.gotoLine(keepLine);
+                pnt=machine.executionpoint; // we should now have a different execution point
+                if (speeder) machine.petspeed.acpointer_next[fpnt]=pnt; // for the ELSE or failed condition
+		// ^^^ FIX - is this redundant - as we are saving the elseacode??
+              }
+            }
+	    pp=pnt;
+            pnt=savepnt; // undo it
+	    break;
+	  }
+	  pp++;
+        }
+        p2=pp;
+      } else {
+        while (p2<linelength && !line.substring(p2,p2+1).equals("\n")) p2++;
+      }
       machine.petspeed.saveelseacode(pnt-1,p2);
     }
 
     if (gt.equals(0.0)) { // num only returns a num
       // read everthing to the end of line
-      while (pnt<linelength && !line.substring(pnt,pnt+1).equals("\n")) {
-        pnt++;
+      // look for else or \n
+      if (true) {
+        boolean quote=false;
+        boolean looktoken=true; // we are ready to look for a token
+        int fpnt=pnt-1;
+        int pp=pnt;
+        while (pp<linelength) {
+          String a=line.substring(pp,pp+1);
+          if (a.equals("\n")) break;
+	  if (a.equals("\"")) { quote=!quote; if (quote) looktoken=false; }
+	  if (a.equals(":") && !quote) looktoken=true;
+	  if (looktoken && a.toLowerCase().equals("e") && line.substring(pp,pp+4).toLowerCase().equals("else")) { 
+	    pp=pp+4; 
+	    // it may be a line# -> so check
+	    pnt=pp;
+	    if (verbose) System.out.printf("in else - looking for line #\n");
+            SkipSpaces(); // really - spaces arent good for anything
+            if (ReadLineNo()) {
+	      if (verbose) System.out.printf("in else - in readlineno\n");
+              if (machine.enabledmovement) {
+                machine.gotoLine(keepLine);
+                pnt=machine.executionpoint; // we should now have a different execution point
+                if (speeder) machine.petspeed.acpointer_next[fpnt]=pnt; // for the ELSE or failed condition
+                return true;
+              }
+            }
+	    break;
+	  }
+	  pp++;
+        }
+        pnt=pp;
+      } else {
+
+        while (pnt<linelength && !line.substring(pnt,pnt+1).equals("\n")) {
+          pnt++;
+        }
       }
       return true; // parsed okay
     }
@@ -1980,47 +2053,70 @@ boolean ProcessRUNstatement() throws BasicException
   //return true;
 }
 
+boolean ProcessELSEstatement() 
+{
+	int fpnt=pnt-1;
+	// move back one for the SKIP part....
+	if (speeder && machine.petspeed.pnext[fpnt]>0) {
+		// dont jump it iff pcache is not zero, we have an empty REM
+		if (machine.petspeed.pcache[fpnt]==0) {
+			pnt=machine.petspeed.pnext[fpnt];
+			if (verbose) System.out.printf("found a cached ELSE line start pnt=%d\n",pnt);
+		} else {
+			if (verbose) System.out.printf("straight into new command pnt=%d\n",pnt); //CHECK!
+		}
+		return true;
+	}
+
+	IgnoreRestofLine();
+
+	if (speeder) {
+		machine.petspeed.pnext[fpnt]=pnt;
+		if (verbose) System.out.printf("caching a ELSE\n");
+	}
+	return true;
+}
 boolean ProcessREMstatement() 
 {
-  int fpnt=pnt;
-  if (speeder && machine.petspeed.pnext[pnt]>0) {
-	  // dont jump it iff pcache is not zero, we have an empty REM
-    if (machine.petspeed.pcache[pnt]==0) {
-      pnt=machine.petspeed.pnext[pnt];
-      if (verbose) System.out.printf("found a cached REM line start pnt=%d\n",pnt);
-    } else {
-      if (verbose) System.out.printf("straight into new command pnt=%d\n",pnt);
-    }
-    return true;
-  }
+	int fpnt=pnt;
+	if (speeder && machine.petspeed.pnext[pnt]>0) {
+		// dont jump it iff pcache is not zero, we have an empty REM
+		if (machine.petspeed.pcache[pnt]==0) {
+			pnt=machine.petspeed.pnext[pnt];
+			if (verbose) System.out.printf("found a cached REM line start pnt=%d\n",pnt);
+		} else {
+			if (verbose) System.out.printf("straight into new command pnt=%d\n",pnt);
+		}
+		return true;
+	}
 
-  IgnoreRestofLine();
+	IgnoreRestofLine();
 
-  if (speeder) {
-    machine.petspeed.pnext[fpnt]=pnt;
-	    /* works -but complex and not enough gain just yet
-    // pull forward back link and also change that link forward
-    // Opt17
-    int pn=machine.petspeed.acpointer_next[fpnt];
-	    if (verbose) { System.out.printf("at REM fpnt=%d pnt=%d\n",fpnt,pnt); }
-    if (pn<0) {
-	    if (verbose) { System.out.printf("REM yes it is\n"); }
-      machine.petspeed.acpointer_next[-pn]=pnt;
-      if (machine.petspeed.acpointer_next[pnt]==0) machine.petspeed.acpointer_next[pnt]=pn;
-    }
-    */
-    if (verbose) System.out.printf("caching a REM\n");
-  }
-  return true;
+	if (speeder) {
+		machine.petspeed.pnext[fpnt]=pnt;
+		/* works -but complex and not enough gain just yet
+		// pull forward back link and also change that link forward
+		// Opt17
+		int pn=machine.petspeed.acpointer_next[fpnt];
+		if (verbose) { System.out.printf("at REM fpnt=%d pnt=%d\n",fpnt,pnt); }
+		if (pn<0) {
+		if (verbose) { System.out.printf("REM yes it is\n"); }
+		machine.petspeed.acpointer_next[-pn]=pnt;
+		if (machine.petspeed.acpointer_next[pnt]==0) machine.petspeed.acpointer_next[pnt]=pn;
+		}
+		*/
+		if (verbose) System.out.printf("caching a REM\n");
+	}
+	return true;
 }
 
 int getlineparse(String lineno) {
-  int ret;
-  try {
-    ret=Integer.parseInt(lineno);
-  } catch (NumberFormatException e) {
-     ret = -1;
-  }
+	int ret;
+	try {
+		ret=Integer.parseInt(lineno);
+	} catch (NumberFormatException e) {
+		ret = -1;
+	}
   return ret;
 }
 

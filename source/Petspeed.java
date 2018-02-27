@@ -596,7 +596,7 @@ class Petspeed
 	  // look for REM chains
 	  int p;
     for (int i=0; i<MAXPSIZE; ++i) if ((p=acpointer_next[i])>0) 
-	    while (p>0 && (pcache[p]==0 && pnext[p]>0 || pcache[p]==33 /* REM */)) {
+	    while (p>0 && (pcache[p]==0 && pnext[p]>0 || pcache[p]==33 /* REM *//*FIX*/)) {
               acpointer_next[i]=pnext[p];
               p=acpointer_next[i];
             }

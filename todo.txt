@@ -52,6 +52,7 @@ not done:
 1) FOR -> compile this too!
 
 2) compile IF e THEN A ..... \n B    to e BEQ toB | A ... B - requires compiling both sides initially = maybe redo ALL IF function
+    or a BEQ or BNE based on the first time compiled - but not filled out until the alternative path used
 
 3) add ELSE !!!! (search through line looking for :ELSE)
 

@@ -1462,7 +1462,7 @@ int hs;
 
      String[] token={
        "REM",
-       "GOTO","GOSUB","THEN",
+       "GOTO","GOSUB","THEN","ELSE",
        "TO","STEP",
        "IF","FOR","NEXT","RETURN","PRINT#","PRINT","ENDFRAME","DIM",
        "AND","OR","NOT",
@@ -1548,15 +1548,15 @@ boolean findtoken() {
       for (i=0; i<token.length; ++i) { 
         got=token[i]; gotlen=got.length();
         if (n==1 && p==f && t.length()>=f+gotlen && t.substring(f,f+gotlen).equalsIgnoreCase(got) ||
-            n==4 && (i<=5||i>=14&&i<=16) && t.length()>=p+gotlen && t.substring(p,p+gotlen).equalsIgnoreCase(got)) {
+            n==4 && (i<=5+1||i>=14+1&&i<=16+1) && t.length()>=p+gotlen && t.substring(p,p+gotlen).equalsIgnoreCase(got)) {
           if (i==0) { out+=d6; out+=sepchar; n=0; chewcr(); return true; }
           if (n==4) cs();
           p+=gotlen;
           //if (hs==0) out+=" ";
-          if (i==3 || i==6 || i==17) { out+=sepchar+d8+got.toLowerCase()+d0+sepchar; }
-          else if (i==14 || i==15 || i==16) { out+=sepchar+d9+got.toLowerCase()+d0+sepchar; }
+          if (i==3 || i==4 || i==6 || i==17+1) { out+=sepchar+d8+got.toLowerCase()+d0+sepchar; }
+          else if (i==14+1 || i==15+1 || i==16+1) { out+=sepchar+d9+got.toLowerCase()+d0+sepchar; }
           else { out+=sepchar+d2+got.toLowerCase()+d0+sepchar; }
-          if (i<=3) n=5; else n=2;
+          if (i<=3+1) n=5; else n=2;
           return true;
         }
       }
