@@ -862,9 +862,9 @@ void ProcessSTOPstatement() throws BasicException
 
 void ProcessMETAVERBOSEstatement(GenericType gt) throws BasicException
 {
-        ReadExpression();
-        if (!keepExpression.equals("")) {
-          int level=(int)machine.evaluate(keepExpression).num();
+        if (gt.gttop>0) {
+          //int level=(int)machine.evaluate(keepExpression).num();
+          int level=(int)gt.num();
           switch(level) {
             case 1:
               verbose=true; machine.verbose=true;
