@@ -95,6 +95,9 @@ class Petspeed
   //int listtop=0; // no advantage byte - does an extra i2b
   GenericType list;
 
+  void listadd() {
+    if (gatop==0) list=new GenericType(false);
+  }
   void listadd(double d) {
     if (gatop==0) list=new GenericType(d);
     else list.add(d,20); // hard code 20 for now FIX
@@ -143,6 +146,11 @@ class Petspeed
           //speedup// if (verbose) System.out.printf("Return parameter %d flagged as a double stack=%d ",gatop,atop);
           listadd(astack_d[gatop]);
 	  break;
+	case I_PRF | O_EMPTY :
+          //listadd();
+          if (gatop==0) list=new GenericType(false);
+	  break;
+
 	// most common at top
 	case I_FNC | F_NOP : // special Opt10 - don't really have to do this - just to make it a bit nicer
 	  continue;
@@ -504,6 +512,24 @@ class Petspeed
     // return -1; // don't get here now as we let it blow the array (catch will get it)
   }
 
+  void pushEmpty() {
+          addInstr(Petspeed.I_PRF | Petspeed.O_EMPTY); // flag a double
+  }
+
+  void pushD() {
+          addInstr(Petspeed.I_PRF | Petspeed.T_Dbl); // flag a double
+  }
+
+  void pushS() {
+          addInstr(Petspeed.I_PRF | Petspeed.T_Str); // flag a string
+  }
+
+  //String result(boolean isString)
+  //{
+    //// just pop the last result
+	  //return astack_s[--gatop];
+  //}
+
   double result()
   {
     // just pop the last result
@@ -684,6 +710,7 @@ class Petspeed
   static final int O_le=15;
   static final int O_ne=16;
   static final int O_ge2=17;
+  static final int O_EMPTY=18;
 
   // these can overflow into the M bits and T, which aren't used for FNC .: 6 bits 64 vals
   static final int F_HLT=0;
@@ -731,7 +758,7 @@ class Petspeed
   static String I_strings[]={"PRF","PSH","STO","FNC"}; // just for debugging only
   static String M_strings[]={"IMM","MEM","MEMARR1","MEMARR2"}; // just for debugging only
 
-  static String O_strings[]={"XPARAMX","^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<=","<>","=>"};
+  static String O_strings[]={"XPARAMX","^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<=","<>","=>","NULL"};
   static String F_strings[]={"HLT___","sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",
 	                     "len","val","asc","mid$","left$","right$","str$","chr$","instr",
                              "ti","st","ti$","mathpi",

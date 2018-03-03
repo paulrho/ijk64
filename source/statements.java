@@ -798,6 +798,31 @@ boolean ReadStatement() throws BasicException
       case ST_OPEN:           if (ProcessOPENstatement()) { return true; } break;
       case ST_CLOSE:          if (ProcessCLOSEstatement()) { return true; } break;
       case ST_LIST:           if (ProcessLISTstatement()) { return true; } break;
+      case ST_CHDIR:          ProcessCHDIRstatement(getList()); return true;
+      case ST_DIR:            ProcessDIRstatement(getList()); return true;
+
+      case ST_ALERT:          ProcessALERTstatement(getList()); return true;
+      case ST_SLEEP:          ProcessSLEEPstatement(getList()); return true;
+      case ST_SCREEN:         ProcessGraphicsSCREENstatement(getList()); return true;
+      case ST_LINE:           ProcessGraphicsLINEstatement(getList()); return true;
+      case ST_RECT:           ProcessGraphicsRECTstatement(getList()); return true;
+      case ST_PSET:           ProcessGraphicsPSETstatement(getList()); return true;
+      case ST_CIRCLE:         ProcessGraphicsCIRCLEstatement(getList()); return true;
+      case ST_DRAWIMAGE:      ProcessGraphicsDRAWIMAGEstatement(getList()); return true;
+      case ST_GPRINT:         ProcessGraphicsGPRINTstatement(getList()); return true;
+      case ST_FSET:           ProcessGraphicsFSETstatement(getList()); return true;
+      case ST_LSET:           ProcessGraphicsLSETstatement(getList()); return true;
+      case ST_IMAGELOAD:      ProcessGraphicsIMAGELOADstatement(getList()); return true;
+      case ST_IMAGESAVE:      ProcessGraphicsIMAGESAVEstatement(getList()); return true;
+      case ST_ANTIALIAS:      ProcessGraphicsANTIALIASstatement(getList()); return true;
+      case ST_FILES:          machine.listFiles(); return true;
+      case ST_CLS:            if (machine.graphicsDevice!=null) machine.graphicsDevice.command_CLS();        return true;
+      case ST_BEGINFRAME:     if (machine.graphicsDevice!=null) machine.graphicsDevice.command_BEGINFRAME(); return true;
+      case ST_ENDFRAME:       if (machine.graphicsDevice!=null) machine.graphicsDevice.command_ENDFRAME();   return true;
+
+      case ST_HELP:           ProcessHELPstatement(getList()); return true;
+      case ST_META_VERBOSE:   ProcessMETAVERBOSEstatement(getList()); return true;
+      case ST_META_TIMING:    ProcessMETATIMINGstatement(getList()); return true;
       case ST_META_ROWS:      if (ProcessMETAROWSstatement()) { return true; } break;
       case ST_META_COLS:      if (ProcessMETACOLSstatement()) { return true; } break;
       case ST_META_BGTRANS:   if (ProcessMETABGTRANSstatement()) { return true; } break;
@@ -805,6 +830,7 @@ boolean ReadStatement() throws BasicException
       case ST_META_CHARSET:   if (ProcessMETACHARSETstatement()) { return true; } break;
       case ST_META_SCALE:     if (ProcessMETASCALEstatement()) { return true; } break;
       case ST_META_SCALEY:    if (ProcessMETASCALEYstatement()) { return true; } break;
+
       case ST_LABEL: /* just ignore it */ ReadExpression(); return true;
       case ST_STOP: 
         machine.save_executionpoint=pnt; // it is restartable
@@ -821,8 +847,21 @@ boolean ReadStatement() throws BasicException
           return true;
         }
         break;
+    }
+    return false;
+}
 
-      case ST_META_VERBOSE:
+
+// not used yet
+void ProcessSTOPstatement() throws BasicException
+{
+        machine.save_executionpoint=pnt; // it is restartable
+        if (verbose) System.out.printf("setting save_executionpoint to %d\n",machine.save_executionpoint);
+        throw new BasicBREAK("BREAK ON STOP");
+}
+
+void ProcessMETAVERBOSEstatement(GenericType gt) throws BasicException
+{
         ReadExpression();
         if (!keepExpression.equals("")) {
           int level=(int)machine.evaluate(keepExpression).num();
@@ -845,29 +884,11 @@ boolean ReadStatement() throws BasicException
           verbose=true; machine.verbose=true;
           machine.evaluate_engine.verbose=true;
         }
-        return true;
+        return;
+}
 
-      case ST_META_TIMING:
-        long markTime = System.currentTimeMillis();
-        // the parameter is an integer indicating HOW MANY things happened
-        ReadExpression();
-        int howmany=(int)machine.evaluate(keepExpression).num();
-        // ... the code being measured ...
-        // long estimatedTime = System.nanoTime() - startTime;
-        //System.out.printf("System time = %d nanoseconds\n",startTime);
-        if (lastTime==0) {
-          System.out.printf("System time = %d milliseconds\n",markTime);
-        }  else {
-          System.out.printf("Delta time = %d milliseconds\n",markTime-lastTime);
-          if (howmany>0) {
-            System.out.printf("Unit time  = %.6f milliseconds (%d iterations)\n",(markTime-lastTime)/(double)howmany,howmany);
-            System.out.printf("Rate       = %.6f iterations per second\n",howmany/(double)(markTime-lastTime)*1000.0);
-          }
-        }
-        lastTime=markTime;
-        return true;
-
-      case ST_HELP:
+void ProcessHELPstatement(GenericType gt) throws BasicException
+{
 //        machine.print("?help! help! try this: load\"$\",8 [enter]");
 //        machine.print("?help! try this: load\"$\",8 [enter]");
         machine.print("tokens: version "+version.programVersion+"\n");
@@ -886,12 +907,53 @@ boolean ReadStatement() throws BasicException
         machine.print("load\"$\",8   :rem loads internal dir\n");
         machine.print("load\"%\",8  :rem loads cloud directory\n");
         machine.print("list\n");
-        return true;
-        //break;
-      case ST_SCREEN:
-        { 
-          ReadExpression();
-          GenericType gt=machine.evaluate(keepExpression);
+        return;
+}
+
+void ProcessMETATIMINGstatement(GenericType gt) throws BasicException
+{
+        long markTime = System.currentTimeMillis();
+        // the parameter is an integer indicating HOW MANY things happened
+        //ReadExpression();
+        //int howmany=(int)machine.evaluate(keepExpression).num();
+        int howmany=(int)gt.num();
+        // ... the code being measured ...
+        // long estimatedTime = System.nanoTime() - startTime;
+        //System.out.printf("System time = %d nanoseconds\n",startTime);
+        if (lastTime==0) {
+          System.out.printf("System time = %d milliseconds\n",markTime);
+        }  else {
+          System.out.printf("Delta time = %d milliseconds\n",markTime-lastTime);
+          if (howmany>0) {
+            System.out.printf("Unit time  = %.6f milliseconds (%d iterations)\n",(markTime-lastTime)/(double)howmany,howmany);
+            System.out.printf("Rate       = %.6f iterations per second\n",howmany/(double)(markTime-lastTime)*1000.0);
+          }
+        }
+        lastTime=markTime;
+        return;
+}
+
+// semi-graphics
+void ProcessALERTstatement(GenericType gt) throws BasicException
+{
+        //PlaySound sound = new PlaySound("alert"+keepExpression+".wav");
+        PlaySound sound = new PlaySound("alert"+(int)gt.num()+".wav");
+        return;
+}
+
+void ProcessSLEEPstatement(GenericType gt) throws BasicException
+{
+        //if (machine.graphicsDevice!=null) machine.graphicsDevice.command_SLEEP((int)machine.evaluate(keepExpression).num());
+        // now call static version always
+        //GraphicsDevice.command_SLEEP((int)machine.evaluate(keepExpression).num());
+        GraphicsDevice.command_SLEEP((int)gt.num());
+        return;
+}
+
+// Graphics Parts
+
+void ProcessGraphicsSCREENstatement(GenericType gt) throws BasicException
+{
           if (gt.gttop==3) {
             if (machine.graphicsDevice==null) {
               machine.graphicsDevice = new GraphicsDevice(
@@ -920,62 +982,56 @@ boolean ReadStatement() throws BasicException
             }
           }
           if (true) machine.machinescreen.setVisible(true); // refocus on main
-          return true;
-        }
+          return;
+}
 
-      case ST_ALERT:
-        ReadExpression();
-        // ignored for now
-       
-        PlaySound sound = new PlaySound("alert"+keepExpression+".wav");
-        return true;
-
-      case ST_SLEEP:
-        ReadExpression();
-        //if (machine.graphicsDevice!=null) machine.graphicsDevice.command_SLEEP((int)machine.evaluate(keepExpression).num());
-        // now call static version always
-        GraphicsDevice.command_SLEEP((int)machine.evaluate(keepExpression).num());
-        return true;
-
-      case ST_CHDIR:
-	{
-          ReadExpression();
-          GenericType gt=machine.evaluate(keepExpression);
-          if (gt.gttop==1 && !gt.isNum() && !gt.str().equals("")) {
-            machine.doCHDIR(gt.str());
-	  } else {
-            //throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
-	    // should print the current dir
-            machine.print(machine.cloudNet+"\n");
-	  }
-          return true;
-	}
-      case ST_DIR:
-	{
-          ReadExpression();
-          GenericType gt=machine.evaluate(keepExpression);
-          machine.listDIR(gt.str(),keepExpression.startsWith("-"));
-          return true;
-	}
-      case ST_FILES:
-        machine.listFiles();
-        return true;
-      case ST_CLS:
-        if (machine.graphicsDevice!=null) machine.graphicsDevice.command_CLS();
-        return true;
-      case ST_BEGINFRAME:
-        if (machine.graphicsDevice!=null) machine.graphicsDevice.command_BEGINFRAME();
-        return true;
-      case ST_ENDFRAME:
-        if (machine.graphicsDevice!=null) machine.graphicsDevice.command_ENDFRAME();
-        return true;
-  //,"SCREEN","GPRINT","BEGINFRAME","ENDFRAME","CLS","LINE","FSET"
-
-      case ST_LINE:
+void ProcessGraphicsGPRINTstatement(GenericType gt) throws BasicException
+{
         if (machine.graphicsDevice!=null) {
-          //ReadExpression();
-          //GenericType gt=machine.evaluate(keepExpression);
-          GenericType gt=PSReadExpressionEvaluate();
+          if (gt.gttop==4) {
+              if (verbose) System.out.printf("about to draw string \"%s\"\n",gt.gtlist[0].str());
+              //for (int i=0; i<gt.gttop; ++i) System.out.printf("isNum[%d]=%s\n",i,gt.gtlist[i].isNum()?"yes":"no");
+              machine.graphicsDevice.command_GPRINT(
+                gt.gtlist[0].str(),
+                (int)gt.gtlist[1].num(),
+                (int)gt.gtlist[2].num(),
+                (int)gt.gtlist[3].num()
+               );
+              return;
+          } else throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
+        } else throw new BasicException("GRAPHICS NOT ACTIVE");
+}
+
+void ProcessGraphicsLSETstatement(GenericType gt) throws BasicException
+{
+        if (machine.graphicsDevice!=null) {
+          if (gt.gttop==2) {
+              if (verbose) System.out.printf("about to set line size\n");
+              machine.graphicsDevice.command_LSET(
+                (int)gt.gtlist[0].num(),
+                (int)gt.gtlist[1].num()
+               );
+              return;
+          } else throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
+        } else throw new BasicException("GRAPHICS NOT ACTIVE");
+}
+
+void ProcessGraphicsFSETstatement(GenericType gt) throws BasicException
+{
+        if (machine.graphicsDevice!=null) {
+          if (gt.gttop==2) {
+              machine.graphicsDevice.command_FSET(
+                gt.gtlist[0].str(),
+                (int)gt.gtlist[1].num()
+               );
+              return;
+          } else throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
+        } else throw new BasicException("GRAPHICS NOT ACTIVE");
+}
+
+void ProcessGraphicsLINEstatement(GenericType gt) throws BasicException
+{
+        if (machine.graphicsDevice!=null) {
           if (gt.gttop==5) {
               if (verbose) System.out.printf("about to draw line\n");
               machine.graphicsDevice.command_LINE(
@@ -985,93 +1041,15 @@ boolean ReadStatement() throws BasicException
                 (int)gt.gtlist[3].num(),
                 (int)gt.gtlist[4].num()
                );
-              return true;
-          } else
-            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
-
-        } else throw new BasicException("GRAPHICS NOT ACTIVE");
-        //break;
-
-      case ST_LSET:
-        if (machine.graphicsDevice!=null) {
-          ReadExpression();
-          GenericType gt=machine.evaluate(keepExpression);
-          if (gt.gttop==2) {
-              if (verbose) System.out.printf("about to set line size\n");
-              machine.graphicsDevice.command_LSET(
-                (int)gt.gtlist[0].num(),
-                (int)gt.gtlist[1].num()
-               );
-              return true;
-          } else
-            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
-
-        } else throw new BasicException("GRAPHICS NOT ACTIVE");
-        //break;
-	//
-      case ST_PSET:
-        if (machine.graphicsDevice!=null) {
-          //ReadExpression();
-          //GenericType gt=machine.evaluate(keepExpression);
-          GenericType gt=PSReadExpressionEvaluate();
-          if (gt.gttop==3) {
-              if (verbose) System.out.printf("about to set line size\n");
-              machine.graphicsDevice.command_PSET(
-                (int)gt.gtlist[0].num(),
-                (int)gt.gtlist[1].num(),
-                (int)gt.gtlist[2].num()
-               );
-              return true;
-          } else
-            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
-
-        } else throw new BasicException("GRAPHICS NOT ACTIVE");
-        //break;
-
-      case ST_ANTIALIAS:
-        if (machine.graphicsDevice!=null) {
-          ReadExpression();
-          GenericType gt=machine.evaluate(keepExpression);
-          if (gt.gttop==1) {
-              if (verbose) System.out.printf("about to set antialias\n");
-              machine.graphicsDevice.command_ANTIALIAS( (int)gt.num());
-              return true;
+              return;
           } else
             throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
         } else throw new BasicException("GRAPHICS NOT ACTIVE");
-        //break;
+}
 
-      case ST_CIRCLE:
+void ProcessGraphicsRECTstatement(GenericType gt) throws BasicException
+{
         if (machine.graphicsDevice!=null) {
-          //ReadExpression();
-          //GenericType gt=machine.evaluate(keepExpression);
-          GenericType gt=PSReadExpressionEvaluate();
-          if (gt.gttop==1) {
-            // special - command the offset type
-	    
-            machine.graphicsDevice.command_CIRCLE_CONTROL((int)gt.num());
-              return true;
-	  } else if (gt.gttop==5) {
-              if (verbose) System.out.printf("about to draw circle\n");
-              machine.graphicsDevice.command_CIRCLE(
-                (int)gt.gtlist[0].num(),
-                (int)gt.gtlist[1].num(),
-                (int)gt.gtlist[2].num(),
-                (int)gt.gtlist[3].num(),
-                (int)gt.gtlist[4].num()
-               );
-              return true;
-          } else
-            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
-
-        } else throw new BasicException("GRAPHICS NOT ACTIVE");
-        //break;
-
-      case ST_RECT:
-        if (machine.graphicsDevice!=null) {
-          //ReadExpression();
-          //GenericType gt=machine.evaluate(keepExpression);
-          GenericType gt=PSReadExpressionEvaluate();
           if (gt.gttop==5) {
               if (verbose) System.out.printf("about to draw rect\n");
               machine.graphicsDevice.command_RECT(
@@ -1081,7 +1059,7 @@ boolean ReadStatement() throws BasicException
                 (int)gt.gtlist[3].num(),
                 (int)gt.gtlist[4].num()
                );
-              return true;
+              return;
           } else
           if (gt.gttop==9) {
               if (verbose) System.out.printf("about to filled quad poly \n");
@@ -1096,54 +1074,70 @@ boolean ReadStatement() throws BasicException
                 (int)gt.gtlist[7].num(),
                 (int)gt.gtlist[8].num()
                );
-              return true;
+              return;
           } else
             throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
-
         } else throw new BasicException("GRAPHICS NOT ACTIVE");
-        //break;
+}
 
-      case ST_GPRINT:
+void ProcessGraphicsPSETstatement(GenericType gt) throws BasicException
+{
         if (machine.graphicsDevice!=null) {
-          //ReadExpression();
-          //GenericType gt=machine.evaluate(keepExpression);
-          GenericType gt=PSReadExpressionEvaluate();
-          if (gt.gttop==4) {
-              if (verbose) System.out.printf("about to draw string \"%s\"\n",gt.gtlist[0].str());
-              //for (int i=0; i<gt.gttop; ++i) System.out.printf("isNum[%d]=%s\n",i,gt.gtlist[i].isNum()?"yes":"no");
-              machine.graphicsDevice.command_GPRINT(
-                gt.gtlist[0].str(),
+          if (gt.gttop==3) {
+              if (verbose) System.out.printf("about to set line size\n");
+              machine.graphicsDevice.command_PSET(
+                (int)gt.gtlist[0].num(),
+                (int)gt.gtlist[1].num(),
+                (int)gt.gtlist[2].num()
+               );
+              return;
+          } else
+            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
+        } else throw new BasicException("GRAPHICS NOT ACTIVE");
+}
+
+void ProcessGraphicsCIRCLEstatement(GenericType gt) throws BasicException
+{
+        if (machine.graphicsDevice!=null) {
+          if (gt.gttop==1) {
+            // special - command the offset type
+            machine.graphicsDevice.command_CIRCLE_CONTROL((int)gt.num());
+            return;
+	  } else if (gt.gttop==5) {
+              if (verbose) System.out.printf("about to draw circle\n");
+              machine.graphicsDevice.command_CIRCLE(
+                (int)gt.gtlist[0].num(),
                 (int)gt.gtlist[1].num(),
                 (int)gt.gtlist[2].num(),
-                (int)gt.gtlist[3].num()
+                (int)gt.gtlist[3].num(),
+                (int)gt.gtlist[4].num()
                );
-              return true;
+              return;
           } else
             throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
-
         } else throw new BasicException("GRAPHICS NOT ACTIVE");
-        //break;
-
-      case ST_FSET:
+}
+void ProcessGraphicsDRAWIMAGEstatement(GenericType gt) throws BasicException
+{
         if (machine.graphicsDevice!=null) {
-          ReadExpression();
-          GenericType gt=machine.evaluate(keepExpression);
-          if (gt.gttop==2) {
-              machine.graphicsDevice.command_FSET(
-                gt.gtlist[0].str(),
-                (int)gt.gtlist[1].num()
+          if (gt.gttop==5) {
+              if (verbose) System.out.printf("draw the image\n");
+              machine.graphicsDevice.command_DRAWIMAGE(
+                (int)gt.gtlist[0].num(),
+                (int)gt.gtlist[1].num(),
+                (int)gt.gtlist[2].num(),
+                (double)gt.gtlist[3].num(),
+                (double)gt.gtlist[4].num()
                );
-              return true;
-          } else
+              return;
+          } else //throw new BasicException("INCORRECT PARAMETERS");
             throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
-
         } else throw new BasicException("GRAPHICS NOT ACTIVE");
-        //break;
+}
 
-      case ST_IMAGELOAD:
+void ProcessGraphicsIMAGELOADstatement(GenericType gt) throws BasicException
+{
         if (machine.graphicsDevice!=null) {
-          ReadExpression();
-          GenericType gt=machine.evaluate(keepExpression);
           if (gt.gttop==1) {
               if (verbose) System.out.printf("load the image to reference\n");
               try { 
@@ -1156,17 +1150,15 @@ boolean ReadStatement() throws BasicException
                 if (verbose) { e.printStackTrace(); }
                 throw new BasicException("IMAGE LOAD ERROR");
               }
-              return true;
+              return;
           } else //throw new BasicException("INCORRECT PARAMETERS");
             throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
-
         } else throw new BasicException("GRAPHICS NOT ACTIVE");
-        //break;
+}
 
-      case ST_IMAGESAVE:
+void ProcessGraphicsIMAGESAVEstatement(GenericType gt) throws BasicException
+{
         if (machine.graphicsDevice!=null) {
-          ReadExpression();
-          GenericType gt=machine.evaluate(keepExpression);
           if (gt.gttop==1) {
               try { 
                 machine.graphicsDevice.command_SAVEIMAGE(
@@ -1176,57 +1168,43 @@ boolean ReadStatement() throws BasicException
                 if (verbose) { e.printStackTrace(); }
                 throw new BasicException("IMAGE SAVE ERROR");
               }
-              return true;
+              return;
           } else //throw new BasicException("INCORRECT PARAMETERS");
             throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
-
         } else throw new BasicException("GRAPHICS NOT ACTIVE");
-        //break;
-
-      case ST_DRAWIMAGE:
-        if (machine.graphicsDevice!=null) {
-          //ReadExpression();
-          //GenericType gt=machine.evaluate(keepExpression);
-          GenericType gt=PSReadExpressionEvaluate();
-          if (gt.gttop==5) {
-              if (verbose) System.out.printf("draw the image\n");
-              machine.graphicsDevice.command_DRAWIMAGE(
-                (int)gt.gtlist[0].num(),
-                (int)gt.gtlist[1].num(),
-                (int)gt.gtlist[2].num(),
-                (double)gt.gtlist[3].num(),
-                (double)gt.gtlist[4].num()
-               );
-              return true;
-          } else //throw new BasicException("INCORRECT PARAMETERS");
-            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
-
-        } else throw new BasicException("GRAPHICS NOT ACTIVE");
-        //break;
-    }
-    return false;
 }
 
-//GenericType optReadExpressionEvaluate() throws BasicException {
-      //GenericType gt;
-      //if (speeder && machine.petspeed.is_compiled(pnt)) { 
-	//try {
-	  //pnt=machine.petspeed.execute(pnt);
-	  //// and jump the pointer
-	//} catch (EvaluateException e) { throw new BasicException("EXECUTE ERROR"); }
-      //} else {
-        //if (speeder) { machine.petspeed.savestart(pnt); }
-        //ReadExpression();
-        //if (speeder) { machine.evaluate_engine.speeder_compile=true; }
- // 
-        ////machine.assignment(keepExpression);
-        //gt=machine.evaluate(keepExpression);
- // 
-        //if (speeder) { machine.evaluate_engine.speeder_compile=false; }
-        //if (speeder) { machine.petspeed.saveacode(pnt); }
-      //}
-      //return gt;
-//}
+void ProcessGraphicsANTIALIASstatement(GenericType gt) throws BasicException
+{
+        if (machine.graphicsDevice!=null) {
+          if (gt.gttop==1) {
+              if (verbose) System.out.printf("about to set antialias\n");
+              machine.graphicsDevice.command_ANTIALIAS( (int)gt.num());
+              return;
+          } else
+            throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
+        } else throw new BasicException("GRAPHICS NOT ACTIVE");
+}
+
+void ProcessCHDIRstatement(GenericType gt) throws BasicException
+{
+          if (gt.gttop==1 && !gt.isNum() && !gt.str().equals("")) {
+            machine.doCHDIR(gt.str());
+	  } else {
+            //throw new BasicException("ILLEGAL PARAMETERS ERROR"); // wrong number params
+	    // should print the current dir
+            machine.print(machine.cloudNet+"\n");
+	  }
+          return;
+}
+
+void ProcessDIRstatement(GenericType gt) throws BasicException
+{
+          machine.listDIR(gt.str(),gt.str().startsWith("-"));
+          return;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
 
 boolean ReadAssign() throws BasicException {
     // could be a null statement
@@ -1530,6 +1508,39 @@ boolean ProcessPRINThashstatement() throws BasicException
   }
   ReadColon(); // check
   return true;
+}
+
+// this is identical - just for the moment // also gets single value lists
+GenericType getList() throws BasicException
+{
+  GenericType gt;
+  if (speeder && machine.petspeed.is_compiled(pnt)) { 
+       if (verbose) System.out.printf("Found compiled at %d\n",pnt); 
+       try {
+         pnt=machine.petspeed.execute(pnt);
+         // jump the pointer
+       } catch (EvaluateException e) { throw new BasicException(e.getMessage()); }
+       gt= machine.petspeed.list; // not reentrant - FIX
+       
+       //machine.petspeed.atop-=machine.petspeed.listtop; // no longer required? CHECK
+       
+  } else {
+     if (speeder) { machine.petspeed.savestart(pnt); }
+     ReadExpression();
+     gt=machine.evaluate(keepExpression);
+     // for single ones - add it to list - NEW
+     if (speeder && gt.gttop==1) {
+          if (gt.isNum()) machine.petspeed.pushD();
+	  else machine.petspeed.pushS();
+     }
+     if (speeder && gt.gttop==0) {
+	  machine.petspeed.pushEmpty();
+     }
+
+     if (speeder) { machine.petspeed.saveacode(pnt); }
+     if (speeder) machine.petspeed.lastassign=-1; // invalidate // CHECK, is this the best spot for it?
+  }
+  return gt;
 }
 
 GenericType PSReadExpressionEvaluate() throws BasicException

@@ -1615,7 +1615,9 @@ boolean dontallowunbalancedopeningbracket=true; // here for now
 
     if (upto==0) {
       // return empty string
-      return new GenericType("");
+      // maybe this is wrong - it should be NULL!
+      //return new GenericType("");
+      return new GenericType(false); // effectively null
     }
     /* print the answer */
     if (verbose) {
