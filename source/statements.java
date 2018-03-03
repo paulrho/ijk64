@@ -171,7 +171,7 @@ static final int ST_DIM=12;
 static final int ST_GEThash=13; // this is just a work around for the moment
 static final int ST_POKE=14;
 static final int ST_OPEN=15;
-static final int ST_INPUT1=16;
+static final int ST_INPUThash=16;
 static final int ST_CLOSE=17;
 static final int ST_DATA=18;
 static final int ST_RUN=19;
@@ -766,54 +766,62 @@ boolean ReadStatement() throws BasicException
   if (verbose) { System.out.printf("In ReadStatement\n"); }
   if (verbose) { System.out.printf("Got %d as token\n",gotToken); }
     switch(gotToken) {
-      case ST_FOR: if (ProcessFORstatement()) { return true; } break;
-      case ST_NEXT: if (ProcessNEXTstatement()) { return true; } break;
-      case ST_IF: if (ProcessIFstatement()) { return true; } break;
-      case ST_ON: if (ProcessONstatement()) { return true; } break;
-      case ST_GOTO: if (ProcessGOTOstatement()) { return true; } break;
-      case ST_GOSUB: if (ProcessGOSUBstatement()) { return true; } break;
-      case ST_RETURN: if (ProcessRETURNstatement()) { return true; } break;
-      case ST_PRINT: if (ProcessPRINTstatement()) { return true; } break;
-      case ST_REM:
-                    if (ProcessREMstatement()) { return true; } break;
-      case ST_ELSE:
-                    if (ProcessELSEstatement()) { return true; } break;
-      case ST_PRINThash: // because it would have gone elsewhere
-        if (ProcessPRINThashstatement()) { return true; } break;
-      case ST_FAST:  // I wish - wish true: compiler for expressions!
-	machine.switchSpeeder(true); // see if this works CHECK
-        if (ProcessIGNOREstatement()) { return true; } break;
-      case ST_SLOW: 
-	machine.switchSpeeder(false); // see if this works CHECK
-        if (ProcessIGNOREstatement()) { return true; } break;
-      case ST_RESTORE: 
-        machine.uptoDATA=0; // revert back again
-        if (ProcessIGNOREstatement()) { return true; } return true;
-      case ST_READ: 
-        if (ProcessREADstatement()) { return true; }
-        // this is tricky, even though I added (and great effor) the
-        // ability to assign to "lists" of variables i.e. A,B=6,7
-        // this doesnt reall work for READ and DATA, as it is not a
-        // fix string of DATA, whereis we have a stream.
+      case ST_FOR:            if (ProcessFORstatement()) { return true; } break;
+      case ST_NEXT:           if (ProcessNEXTstatement()) { return true; } break;
+      case ST_IF:             if (ProcessIFstatement()) { return true; } break;
+      case ST_ON:             if (ProcessONstatement()) { return true; } break;
+      case ST_GOTO:           if (ProcessGOTOstatement()) { return true; } break;
+      case ST_GOSUB:          if (ProcessGOSUBstatement()) { return true; } break;
+      case ST_RETURN:         if (ProcessRETURNstatement()) { return true; } break;
+      case ST_PRINT:          if (ProcessPRINTstatement()) { return true; } break;
+      case ST_REM:            if (ProcessREMstatement()) { return true; } break;
+      case ST_ELSE:           if (ProcessELSEstatement()) { return true; } break;
+      case ST_PRINThash:      if (ProcessPRINThashstatement()) { return true; } break;
+      case ST_FAST:           machine.switchSpeeder(true); if (ProcessIGNOREstatement()) { return true; } break; // I wish - wish true: compiler for expressions!
+      case ST_SLOW:           machine.switchSpeeder(false); if (ProcessIGNOREstatement()) { return true; } break;
+      case ST_RESTORE:        machine.uptoDATA=0; /* revert back again */ if (ProcessIGNOREstatement()) { return true; } return true;
+      case ST_READ:           if (ProcessREADstatement()) { return true; } break;
+      case ST_CLR:            machine.variables_clr(); if (ProcessIGNOREstatement()) { return true; } break;
+      case ST_DATA:           if (ProcessIGNOREstatement()) { return true; } break;
+      case ST_CONT:           if (ProcessCONTstatement()) { return true; } break;
+      case ST_RUN:            if (ProcessRUNstatement()) { return true; } break;
+      case ST_DIM:            if (ProcessDIMstatement()) { return true; } break;
+      case ST_GET:            if (ProcessGETstatement()) { return true; } break;
+      case ST_GEThash:        if (ProcessGEThashstatement()) { return true; } break;
+      case ST_NEW:            machine.newProgramText(); return true;
+      case ST_SAVE:           if (ProcessSAVEstatement()) { return true; } break;
+      case ST_LOAD:           if (ProcessLOADstatement()) { return true; } break;
+      case ST_INPUT:          if (ProcessINPUTstatement(false)) { return true; } break;
+      case ST_INPUThash:      if (ProcessINPUTstatement(true)) { return true; } break;
+      case ST_SYS:            if (ProcessSYSstatement()) { return true; } break;
+      case ST_POKE:           if (ProcessPOKEstatement()) { return true; } break;
+      case ST_OPEN:           if (ProcessOPENstatement()) { return true; } break;
+      case ST_CLOSE:          if (ProcessCLOSEstatement()) { return true; } break;
+      case ST_LIST:           if (ProcessLISTstatement()) { return true; } break;
+      case ST_META_ROWS:      if (ProcessMETAROWSstatement()) { return true; } break;
+      case ST_META_COLS:      if (ProcessMETACOLSstatement()) { return true; } break;
+      case ST_META_BGTRANS:   if (ProcessMETABGTRANSstatement()) { return true; } break;
+      case ST_META_DUMPSTATE: machine.dumpstate(); return true;
+      case ST_META_CHARSET:   if (ProcessMETACHARSETstatement()) { return true; } break;
+      case ST_META_SCALE:     if (ProcessMETASCALEstatement()) { return true; } break;
+      case ST_META_SCALEY:    if (ProcessMETASCALEYstatement()) { return true; } break;
+      case ST_LABEL: /* just ignore it */ ReadExpression(); return true;
+      case ST_STOP: 
+        machine.save_executionpoint=pnt; // it is restartable
+        if (verbose) System.out.printf("setting save_executionpoint to %d\n",machine.save_executionpoint);
+        throw new BasicBREAK("BREAK ON STOP");
+      case ST_END: 
+        machine.save_executionpoint=pnt; // it is restartable // yes, END is restartable!
+        if (verbose) System.out.printf("setting save_executionpoint to %d\n",machine.save_executionpoint);
+        MachineEND();
+        return true; // just END!
+      case ST_EXIT: 
+        if (machine.performExit(true)) {
+          MachineEND(); // not sure if I also need this
+          return true;
+        }
         break;
-      case ST_CLR: 
-        machine.variables_clr();
-        if (ProcessIGNOREstatement()) { return true; } break;
-      case ST_DATA: 
-        if (ProcessIGNOREstatement()) { return true; } break;
-      case ST_CONT: 
-        if (ProcessCONTstatement()) { return true; } break;
-      case ST_RUN: 
-        if (ProcessRUNstatement()) { return true; } break;
-      case ST_DIM: 
-        if (ProcessDIMstatement()) { return true; } break;
-      case ST_GET:
-        if (ProcessGETstatement()) { return true; } break;
-      case ST_GEThash:
-        if (ProcessGEThashstatement()) { return true; } break;
-      case ST_META_DUMPSTATE:
-        machine.dumpstate();
-        return true;
+
       case ST_META_VERBOSE:
         ReadExpression();
         if (!keepExpression.equals("")) {
@@ -838,15 +846,7 @@ boolean ReadStatement() throws BasicException
           machine.evaluate_engine.verbose=true;
         }
         return true;
-      case ST_META_CHARSET:
-        if (ProcessMETACHARSETstatement()) { return true; } break;
-      case ST_META_SCALE:
-        if (ProcessMETASCALEstatement()) { return true; } break;
-      case ST_META_SCALEY:
-        if (ProcessMETASCALEYstatement()) { return true; } break;
-      case ST_NEW:
-        machine.newProgramText();
-        return true;
+
       case ST_META_TIMING:
         long markTime = System.currentTimeMillis();
         // the parameter is an integer indicating HOW MANY things happened
@@ -866,32 +866,7 @@ boolean ReadStatement() throws BasicException
         }
         lastTime=markTime;
         return true;
-      case ST_SAVE:
-        if (ProcessSAVEstatement()) { return true; } break;
-      case ST_LOAD:
-        if (ProcessLOADstatement()) { return true; } break;
-      case ST_META_ROWS:
-        if (ProcessMETAROWSstatement()) { return true; } break;
-      case ST_META_COLS:
-        if (ProcessMETACOLSstatement()) { return true; } break;
-      case ST_META_BGTRANS:
-        if (ProcessMETABGTRANSstatement()) { return true; } break;
-      case ST_INPUT:
-        if (ProcessINPUTstatement(false)) { return true; } break;
-      case ST_INPUT1:
-        if (ProcessINPUTstatement(true)) { return true; } break;
-      case ST_SYS:
-        if (ProcessSYSstatement()) { return true; } break;
-      case ST_POKE:
-        if (ProcessPOKEstatement()) { return true; } break;
-      case ST_OPEN:
-        if (ProcessOPENstatement()) { return true; } break;
-      case ST_CLOSE:
-        if (ProcessCLOSEstatement()) { return true; }
-        break;
-      case ST_LIST:
-        if (ProcessLISTstatement()) { return true; }
-        break;
+
       case ST_HELP:
 //        machine.print("?help! help! try this: load\"$\",8 [enter]");
 //        machine.print("?help! try this: load\"$\",8 [enter]");
@@ -913,38 +888,6 @@ boolean ReadStatement() throws BasicException
         machine.print("list\n");
         return true;
         //break;
-      case ST_STOP: 
-        machine.save_executionpoint=pnt; // it is restartable
-        if (verbose) {
-          System.out.printf("setting save_executionpoint to %d\n",machine.save_executionpoint);
-        }
-        throw new BasicBREAK("BREAK ON STOP");
-        //break;
-      case ST_END: 
-        machine.save_executionpoint=pnt; // it is restartable // yes, END is restartable!
-        if (verbose) {
-          System.out.printf("setting save_executionpoint to %d\n",machine.save_executionpoint);
-        }
-        MachineEND();
-        return true; // just END!
-      case ST_EXIT: 
-        if (machine.performExit(true)) {
-          MachineEND(); // not sure if I also need this
-          return true;
-        }
-        break;
-      case ST_LABEL:
-        // just ignore it
-        ReadExpression();
-        return true;
-
-      case ST_ALERT:
-        ReadExpression();
-        // ignored for now
-       
-        PlaySound sound = new PlaySound("alert"+keepExpression+".wav");
-        return true;
-
       case ST_SCREEN:
         { 
           ReadExpression();
@@ -979,6 +922,13 @@ boolean ReadStatement() throws BasicException
           if (true) machine.machinescreen.setVisible(true); // refocus on main
           return true;
         }
+
+      case ST_ALERT:
+        ReadExpression();
+        // ignored for now
+       
+        PlaySound sound = new PlaySound("alert"+keepExpression+".wav");
+        return true;
 
       case ST_SLEEP:
         ReadExpression();
@@ -2182,6 +2132,10 @@ boolean ProcessGEThashstatement() throws BasicException
 
 boolean ProcessREADstatement() throws BasicException
 {
+        // this is tricky, even though I added (and great effor) the
+        // ability to assign to "lists" of variables i.e. A,B=6,7
+        // this doesnt reall work for READ and DATA, as it is not a
+        // fix string of DATA, whereis we have a stream.
   // here we use the special feature of evaluate
   ReadExpression();
   if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
