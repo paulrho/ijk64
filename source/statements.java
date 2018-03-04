@@ -766,98 +766,104 @@ boolean ReadStatement() throws BasicException
   if (verbose) { System.out.printf("In ReadStatement\n"); }
   if (verbose) { System.out.printf("Got %d as token\n",gotToken); }
     switch(gotToken) {
-      case ST_FOR:            if (ProcessFORstatement()) { return true; } break;
-      case ST_NEXT:           if (ProcessNEXTstatement()) { return true; } break;
-      case ST_IF:             if (ProcessIFstatement()) { return true; } break;
-      case ST_ON:             if (ProcessONstatement()) { return true; } break;
-      case ST_GOTO:           if (ProcessGOTOstatement()) { return true; } break;
-      case ST_GOSUB:          if (ProcessGOSUBstatement()) { return true; } break;
-      case ST_RETURN:         if (ProcessRETURNstatement()) { return true; } break;
-      case ST_PRINT:          if (ProcessPRINTstatement()) { return true; } break;
-      case ST_REM:            if (ProcessREMstatement()) { return true; } break;
-      case ST_ELSE:           if (ProcessELSEstatement()) { return true; } break;
-      case ST_PRINThash:      if (ProcessPRINThashstatement()) { return true; } break;
-      case ST_FAST:           machine.switchSpeeder(true); if (ProcessIGNOREstatement()) { return true; } break; // I wish - wish true: compiler for expressions!
-      case ST_SLOW:           machine.switchSpeeder(false); if (ProcessIGNOREstatement()) { return true; } break;
-      case ST_RESTORE:        machine.uptoDATA=0; /* revert back again */ if (ProcessIGNOREstatement()) { return true; } return true;
-      case ST_READ:           if (ProcessREADstatement()) { return true; } break;
-      case ST_CLR:            machine.variables_clr(); if (ProcessIGNOREstatement()) { return true; } break;
-      case ST_DATA:           if (ProcessIGNOREstatement()) { return true; } break;
-      case ST_CONT:           if (ProcessCONTstatement()) { return true; } break;
-      case ST_RUN:            if (ProcessRUNstatement()) { return true; } break;
-      case ST_DIM:            if (ProcessDIMstatement()) { return true; } break;
-      case ST_GET:            if (ProcessGETstatement()) { return true; } break;
-      case ST_GEThash:        if (ProcessGEThashstatement()) { return true; } break;
-      case ST_NEW:            machine.newProgramText(); return true;
-      case ST_SAVE:           if (ProcessSAVEstatement()) { return true; } break;
-      case ST_LOAD:           if (ProcessLOADstatement()) { return true; } break;
+      case ST_FOR:            if (ProcessFORstatement())        { return true; } break;
+      case ST_NEXT:           if (ProcessNEXTstatement())       { return true; } break;
+      case ST_IF:             if (ProcessIFstatement())         { return true; } break;
+      case ST_ON:             if (ProcessONstatement())         { return true; } break;
+      case ST_GOTO:           if (ProcessGOTOstatement())       { return true; } break;
+      case ST_GOSUB:          if (ProcessGOSUBstatement())      { return true; } break;
+      case ST_RETURN:         if (ProcessRETURNstatement())     { return true; } break;
+      case ST_PRINT:          if (ProcessPRINTstatement())      { return true; } break;
+      case ST_REM:            if (ProcessREMstatement())        { return true; } break;
+      case ST_ELSE:           if (ProcessELSEstatement())       { return true; } break;
+      case ST_OPEN:           if (ProcessOPENstatement())       { return true; } break;
+      case ST_CLOSE:          if (ProcessCLOSEstatement())      { return true; } break;
+      case ST_PRINThash:      if (ProcessPRINThashstatement())  { return true; } break;
       case ST_INPUT:          if (ProcessINPUTstatement(false)) { return true; } break;
-      case ST_INPUThash:      if (ProcessINPUTstatement(true)) { return true; } break;
-      case ST_SYS:            if (ProcessSYSstatement()) { return true; } break;
-      case ST_POKE:           if (ProcessPOKEstatement()) { return true; } break;
-      case ST_OPEN:           if (ProcessOPENstatement()) { return true; } break;
-      case ST_CLOSE:          if (ProcessCLOSEstatement()) { return true; } break;
-      case ST_LIST:           if (ProcessLISTstatement()) { return true; } break;
-      case ST_CHDIR:          ProcessCHDIRstatement(getList()); return true;
-      case ST_DIR:            ProcessDIRstatement(getList()); return true;
+      case ST_INPUThash:      if (ProcessINPUTstatement(true))  { return true; } break;
+      case ST_GET:            if (ProcessGETstatement())        { return true; } break;
+      case ST_GEThash:        if (ProcessGEThashstatement())    { return true; } break;
+      case ST_RESTORE:        machine.uptoDATA=0;               if (ProcessIGNOREstatement()) { return true; } return true;
+      case ST_READ:           if (ProcessREADstatement())       { return true; } break;
+      case ST_DATA:           if (ProcessIGNOREstatement())     { return true; } break;
+      case ST_DIM:            if (ProcessDIMstatement())        { return true; } break;
+      case ST_CONT:           if (ProcessCONTstatement())       { return true; } break;
+      case ST_RUN:            if (ProcessRUNstatement())        { return true; } break;
+      case ST_NEW:            machine.newProgramText(); return true;
+      case ST_CLR:            machine.variables_clr();          if (ProcessIGNOREstatement()) { return true; } break;
+      case ST_SAVE:           if (ProcessSAVEstatement())       { return true; } break;
+      case ST_LOAD:           if (ProcessLOADstatement())       { return true; } break;
+      case ST_POKE:           if (ProcessPOKEstatement())       { return true; } break;
+      case ST_SYS:            if (ProcessSYSstatement())        { return true; } break;
+      case ST_LIST:           if (ProcessLISTstatement())       { return true; } break;
+			      // I wish - wish true: compiler for expressions!
+      case ST_FAST:           machine.switchSpeeder(true);      if (ProcessIGNOREstatement()) { return true; } break; 
+      case ST_SLOW:           machine.switchSpeeder(false);     if (ProcessIGNOREstatement()) { return true; } break;
 
-      case ST_ALERT:          ProcessALERTstatement(getList()); return true;
-      case ST_SLEEP:          ProcessSLEEPstatement(getList()); return true;
-      case ST_SCREEN:         ProcessGraphicsSCREENstatement(getList()); return true;
-      case ST_LINE:           ProcessGraphicsLINEstatement(getList()); return true;
-      case ST_RECT:           ProcessGraphicsRECTstatement(getList()); return true;
-      case ST_PSET:           ProcessGraphicsPSETstatement(getList()); return true;
-      case ST_CIRCLE:         ProcessGraphicsCIRCLEstatement(getList()); return true;
+			      // Graphics extension H1
+      case ST_CHDIR:          ProcessCHDIRstatement(getList());             return true;
+      case ST_DIR:            ProcessDIRstatement(getList());               return true;
+      case ST_ALERT:          ProcessALERTstatement(getList());             return true;
+      case ST_SLEEP:          ProcessSLEEPstatement(getList());             return true;
+      case ST_SCREEN:         ProcessGraphicsSCREENstatement(getList());    return true;
+      case ST_LINE:           ProcessGraphicsLINEstatement(getList());      return true;
+      case ST_RECT:           ProcessGraphicsRECTstatement(getList());      return true;
+      case ST_PSET:           ProcessGraphicsPSETstatement(getList());      return true;
+      case ST_CIRCLE:         ProcessGraphicsCIRCLEstatement(getList());    return true;
       case ST_DRAWIMAGE:      ProcessGraphicsDRAWIMAGEstatement(getList()); return true;
-      case ST_GPRINT:         ProcessGraphicsGPRINTstatement(getList()); return true;
-      case ST_FSET:           ProcessGraphicsFSETstatement(getList()); return true;
-      case ST_LSET:           ProcessGraphicsLSETstatement(getList()); return true;
+      case ST_GPRINT:         ProcessGraphicsGPRINTstatement(getList());    return true;
+      case ST_FSET:           ProcessGraphicsFSETstatement(getList());      return true;
+      case ST_LSET:           ProcessGraphicsLSETstatement(getList());      return true;
+      case ST_ANTIALIAS:      ProcessGraphicsANTIALIASstatement(getList()); return true;
       case ST_IMAGELOAD:      ProcessGraphicsIMAGELOADstatement(getList()); return true;
       case ST_IMAGESAVE:      ProcessGraphicsIMAGESAVEstatement(getList()); return true;
-      case ST_ANTIALIAS:      ProcessGraphicsANTIALIASstatement(getList()); return true;
       case ST_FILES:          machine.listFiles(); return true;
       case ST_CLS:            if (machine.graphicsDevice!=null) machine.graphicsDevice.command_CLS();        return true;
       case ST_BEGINFRAME:     if (machine.graphicsDevice!=null) machine.graphicsDevice.command_BEGINFRAME(); return true;
       case ST_ENDFRAME:       if (machine.graphicsDevice!=null) machine.graphicsDevice.command_ENDFRAME();   return true;
 
-      case ST_HELP:           ProcessHELPstatement(getList()); return true;
+			      // ijk64 Meta extension 1
+      case ST_HELP:           ProcessHELPstatement(getList());        return true;
       case ST_META_VERBOSE:   ProcessMETAVERBOSEstatement(getList()); return true;
-      case ST_META_TIMING:    ProcessMETATIMINGstatement(getList()); return true;
-      case ST_META_ROWS:      if (ProcessMETAROWSstatement()) { return true; } break;
-      case ST_META_COLS:      if (ProcessMETACOLSstatement()) { return true; } break;
-      case ST_META_BGTRANS:   if (ProcessMETABGTRANSstatement()) { return true; } break;
+      case ST_META_TIMING:    ProcessMETATIMINGstatement(getList());  return true;
+      case ST_META_ROWS:      if (ProcessMETAROWSstatement())     { return true; } break;
+      case ST_META_COLS:      if (ProcessMETACOLSstatement())     { return true; } break;
+      case ST_META_BGTRANS:   if (ProcessMETABGTRANSstatement())  { return true; } break;
       case ST_META_DUMPSTATE: machine.dumpstate(); return true;
-      case ST_META_CHARSET:   if (ProcessMETACHARSETstatement()) { return true; } break;
-      case ST_META_SCALE:     if (ProcessMETASCALEstatement()) { return true; } break;
-      case ST_META_SCALEY:    if (ProcessMETASCALEYstatement()) { return true; } break;
+      case ST_META_CHARSET:   if (ProcessMETACHARSETstatement())  { return true; } break;
+      case ST_META_SCALE:     if (ProcessMETASCALEstatement())    { return true; } break;
+      case ST_META_SCALEY:    if (ProcessMETASCALEYstatement())   { return true; } break;
 
-      case ST_LABEL: /* just ignore it */ ReadExpression(); return true;
-      case ST_STOP: 
-        machine.save_executionpoint=pnt; // it is restartable
-        if (verbose) System.out.printf("setting save_executionpoint to %d\n",machine.save_executionpoint);
-        throw new BasicBREAK("BREAK ON STOP");
-      case ST_END: 
-        machine.save_executionpoint=pnt; // it is restartable // yes, END is restartable!
-        if (verbose) System.out.printf("setting save_executionpoint to %d\n",machine.save_executionpoint);
-        MachineEND();
-        return true; // just END!
-      case ST_EXIT: 
-        if (machine.performExit(true)) {
-          MachineEND(); // not sure if I also need this
-          return true;
-        }
-        break;
+      case ST_LABEL:          /*just ignore it*/ ReadExpression();  return true; // should compile this as a skip FIX
+
+      case ST_STOP:           ProcessSTOPstatement();               return true;
+      case ST_END:            ProcessENDstatement();                return true; // just END!
+      case ST_EXIT:           if (ProcessEXITstatement())         { return true; } break;
     }
+    // could call extensions if > range - external class even
     return false;
 }
 
 
-// not used yet
 void ProcessSTOPstatement() throws BasicException
 {
         machine.save_executionpoint=pnt; // it is restartable
         if (verbose) System.out.printf("setting save_executionpoint to %d\n",machine.save_executionpoint);
         throw new BasicBREAK("BREAK ON STOP");
+}
+void ProcessENDstatement() throws BasicException
+{
+                              machine.save_executionpoint=pnt; // it is restartable // yes, END is restartable!
+                              if (verbose) System.out.printf("setting save_executionpoint to %d\n",machine.save_executionpoint);
+                              MachineEND();
+}
+boolean ProcessEXITstatement() throws BasicException
+{
+                              if (machine.performExit(true)) {
+                                MachineEND(); // not sure if I also need this
+                                return true;
+                              }
+                              return false;
 }
 
 void ProcessMETAVERBOSEstatement(GenericType gt) throws BasicException
@@ -1824,7 +1830,13 @@ boolean ProcessGOSUBstatement() throws BasicException
       pnt=machine.executionpoint; // we should now have a different execution point
       if (speeder) machine.petspeed.acpointer_next[fpnt]=pnt;
     } else {
-      throw new BasicException("GOSUB NOT IMPLEMENTED IN DIRECT MODE");
+
+      throw new BasicException("GOSUB NOT IMPLEMENTED IN DIRECT MODE - YET!");
+      //try this - not quite there yet
+      //if (verbose) System.out.printf("Got a GOSUB in direct mode\n");
+      //throw new BasicCONTrestart("Just restart the program and continue it",GOSUB",keepExpression);
+
+      
       //nodoesntwork//lets try this
       //nodoesntwork//machine.gosubLine(keepExpression,pnt);
       //nodoesntworkint savepnt=pnt;
