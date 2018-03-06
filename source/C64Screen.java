@@ -2394,7 +2394,7 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
           long freeMemory = Runtime.getRuntime().freeMemory();
           long allocatedMemory = (Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory());
           long presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
-      println(" java ram system   "+presumableFreeMemory+" bytes free");
+      println(" java ram system  "+presumableFreeMemory+" bytes free");
     }
   }
   public void startupscreen_blank() {
