@@ -15,6 +15,8 @@
 // Opt   IF return values - avoid creating tmp GenericType (just use int)
 // Opt   NEXT no more string usage
 // Opt15 (DEF) FN now in-line compiled (was not even compiled at all before)
+// Opt16 chew NOP goes from 7500 to 8000 mp2 = 6.7%
+// Opt17 detect and short circuit boring time consuming extra jumps
 // 
 ////////////////////////////////////////////////
 class Petspeed
@@ -93,6 +95,9 @@ class Petspeed
   //int listtop=0; // no advantage byte - does an extra i2b
   GenericType list;
 
+  void listadd() {
+    if (gatop==0) list=new GenericType(false);
+  }
   void listadd(double d) {
     if (gatop==0) list=new GenericType(d);
     else list.add(d,20); // hard code 20 for now FIX
@@ -141,6 +146,11 @@ class Petspeed
           //speedup// if (verbose) System.out.printf("Return parameter %d flagged as a double stack=%d ",gatop,atop);
           listadd(astack_d[gatop]);
 	  break;
+	case I_PRF | O_EMPTY :
+          //listadd();
+          if (gatop==0) list=new GenericType(false);
+	  break;
+
 	// most common at top
 	case I_FNC | F_NOP : // special Opt10 - don't really have to do this - just to make it a bit nicer
 	  continue;
@@ -473,6 +483,14 @@ class Petspeed
 	  }
 	  break; // just go to next instruction
 
+	  // just a speed test
+	//case 250 : break;
+	//case 251 : break;
+	//case 252 : break;
+	//case 253 : break;
+	//case 254 : break;
+	//case 255 : break;
+
 	default:
           if (verbose) System.out.printf("X ");
           System.out.printf("Instruction Fault at %d instruction %d\n",i,prog[i]);
@@ -501,6 +519,24 @@ class Petspeed
     //return nextpnt(x); // we've gone off the end
     // return -1; // don't get here now as we let it blow the array (catch will get it)
   }
+
+  void pushEmpty() {
+          addInstr(Petspeed.I_PRF | Petspeed.O_EMPTY); // flag a double
+  }
+
+  void pushD() {
+          addInstr(Petspeed.I_PRF | Petspeed.T_Dbl); // flag a double
+  }
+
+  void pushS() {
+          addInstr(Petspeed.I_PRF | Petspeed.T_Str); // flag a string
+  }
+
+  //String result(boolean isString)
+  //{
+    //// just pop the last result
+	  //return astack_s[--gatop];
+  //}
 
   double result()
   {
@@ -532,12 +568,15 @@ class Petspeed
     acpointer_next[then]=end;
   }
 
+
   void saveacode(int end) {
 	  if (record) {
 	    // push a HLT onto code
 	    addInstr(I_HLT); 
 	    acpointer[savestart_p]=savestart_ac;
 	    acpointer_next[savestart_p]=end;
+    // Opt17  // not used just yet
+    //NOTUSEDYET//if (acpointer_next[end]<=0) acpointer_next[end]=-savestart_p; // back link
 	    // this is now marked as a valid piece of code
 	    top=tmptop;
             if (verbose) System.out.printf("Saved code from %d to %d for location %d\n",savestart_ac,top,savestart_p);
@@ -554,10 +593,21 @@ class Petspeed
                   if (verbose) System.out.printf("want to change %d from HLT to GOTO %d\n",lastfinal,savestart_ac);
 		  if (lastfinal+1==savestart_ac) {
                     prog[lastfinal]=I_FNC|F_NOP; // dont have to - but just to make it look a bit nicer
+		    // crunch up the nop! (new Opt)
+		    for (int i=lastfinal; i<top-1; ++i) {
+                      prog[i]=prog[i+1];
+		      pargD[i]=pargD[i+1];
+		      pargmem[i]=pargmem[i+1];
+		      pargS[i]=pargS[i+1];
+		    }
+		    top--;
+		    acpointer[savestart_p]=savestart_ac-1; // I think I need to do this for those that jump half way in CHECK
 		  } else {
                     prog[lastfinal]=I_FNC|F_JMP; pargmem[lastfinal]=savestart_ac;
 		  }
 		  acpointer_next[lastassign]=end; // combine
+    // Opt17  // not used just yet
+    //NOTUSEDYET//if (acpointer_next[end]<=0) acpointer_next[end]=-lastassign; // back link
 	          lastfinal=top-1;
 		  return; // because we want to keep last assign at the original one!
 		}
@@ -576,6 +626,15 @@ class Petspeed
     lastassign=-1; //Opt10
   }
 
+  void reoptimise() {
+	  // look for REM chains
+	  int p;
+    for (int i=0; i<MAXPSIZE; ++i) if ((p=acpointer_next[i])>0) 
+	    while (p>0 && (pcache[p]==0 && pnext[p]>0 || pcache[p]==33 /* REM *//*FIX*/)) {
+              acpointer_next[i]=pnext[p];
+              p=acpointer_next[i];
+            }
+  }
   //////////////////////////////////////////////////////////////
   //
   // debugging
@@ -659,6 +718,7 @@ class Petspeed
   static final int O_le=15;
   static final int O_ne=16;
   static final int O_ge2=17;
+  static final int O_EMPTY=18;
 
   // these can overflow into the M bits and T, which aren't used for FNC .: 6 bits 64 vals
   static final int F_HLT=0;
@@ -706,7 +766,7 @@ class Petspeed
   static String I_strings[]={"PRF","PSH","STO","FNC"}; // just for debugging only
   static String M_strings[]={"IMM","MEM","MEMARR1","MEMARR2"}; // just for debugging only
 
-  static String O_strings[]={"XPARAMX","^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<=","<>","=>"};
+  static String O_strings[]={"XPARAMX","^","*","/","+","-","-ve","not","and","or","xor","=","<",">",">=","<=","<>","=>","NULL"};
   static String F_strings[]={"HLT___","sin","cos","int","log","sqr","sqrt","atn","tan","asin","acos","abs","rnd","exp","sgn",
 	                     "len","val","asc","mid$","left$","right$","str$","chr$","instr",
                              "ti","st","ti$","mathpi",

@@ -47,6 +47,12 @@ class GenericType {
     astring=thestring;
   }
 
+  GenericType(boolean no) {
+    type=-1;
+    astring=""; // just in case
+    gttop=0; // effectively a null list
+  }
+
   GenericType(double val) {
     type=ST_NUM;
     aval=val;

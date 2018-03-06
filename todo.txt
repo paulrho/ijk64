@@ -5,29 +5,21 @@ found 20180126
 * c64 DEFFN param should be local
 * c64 STR$(-5) should not return leading space
 * ask question on exit of changed program
-* F5 to run
 * create a standalone full mp2 like equivalent for timing
 
 c64 INT function should just truncate decimal, still allows very big values
 \ kept this as is - matches C64
 
-DONE acode MID needs to be copy of eval version
-DONE - mid needs 2 and 3 var version, did this by adding params for func
 
 --
 think about this:
 you could push Gosubs and Fors onto the acode runtime stack 
   both these stacks are now combined too - so logically it should work
   would alow acode coding of gosub/return for/next
-optimise the command parameter list petspeeding (currently it doesnt do it)
-
-optimise DEFFN (currently just rejected compile and interpreted)
-
-update LSET and others to go on both backing screens
+optimise the command parameter list petspeeding (currently it doesnt do it) - for other functions
 
 interesting...
 dump in acode and ainstructioncode format the whole execution compilation
-
 
 DOC
 profiling:
@@ -35,7 +27,10 @@ java -agentlib:hprof=cpu=samples,depth=100,interval=5,lineno=y,thread=y,file=out
 
 
 ==============
-done:
+DONE:
+DONE acode MID needs to be copy of eval version
+DONE - mid needs 2 and 3 var version, did this by adding params for func
+update LSET and others to go on both backing screens
 
 2) GOTO #
    GOSUB #
@@ -45,31 +40,56 @@ done:
 3) DEF FN - compile it
     (currently marked as reject)
     DONE!!
+optimise DEFFN (currently just rejected compile and interpreted)
 
 4) optimise the NEXT - currently string processing -
   at least turn it into near-a-code NEXT [mem] statements (where mem could be -2 (none))
     DONE!!
 (these three changes take it from 6800 to 7500 benchmark)
 
+5) add ELSE !!!! (search through line looking for :ELSE)
+    DONE - and compiled
+
+
 --------------------
 not done:
-1)
-LIST a,b,c=1,2,3  (now does a,b,c=3,2,1 ) - can be done
-   but note, this is a unintended language extension that I don't use anyway - 
-   could mark it as reject in the meantime
+0) optimise
+   work out why some things loose 5%
+
+1) FOR -> compile this too!
+
+2) compile IF e THEN A ..... \n B    to e BEQ toB | A ... B - requires compiling both sides initially = maybe redo ALL IF function
+    or a BEQ or BNE based on the first time compiled - but not filled out until the alternative path used
+
+4) make REM truely take no running time after compiling - attempted - looking for a nicer way
+
 5) allow sounds to load off web too
 
-6) when you list"prog" and it is not there - it should not do the list
+*) F5 to run!
 
-7) make poke198,0 clear the buffer!
+6) allow break from an io (especially net)
 
-8) make REM truely take no running time after compiling
+7) when you list"prog" and it is not there - it should not do the list
 
-9) check the goto gosub ifthen # optimisations to affect edge case (where the next instructions might overlap)
+8) when list program dont go ultra slow on large screens
 
-10) FOR -> compile this too!
+9) make poke198,0 clear the buffer!
+   make other pokes work
 
-11) allow break from an io (especially net)
+
+10) check the goto gosub ifthen # optimisations to affect edge case (where the next instructions might overlap)
+11) check the chained case where you jump into the commands half way through
+12) LIST a,b,c=1,2,3  (now does a,b,c=3,2,1 ) - can be done
+   but note, this is a unintended language extension that I don't use anyway - 
+   could mark it as reject in the meantime
+13) i/o from ports joysticks etc
+
+
+20) sprites
+21) superexpander graphics
+
+
+
 ---
 END
 ---
