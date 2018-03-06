@@ -2371,11 +2371,30 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
     borderColour = fullcolour[bg];
     clearscreen();
     reshapeScreen();            // just to see - this is a dodgy work around!!! when changing background or border colours, must reshape screen
-    if (!starttext) {
+    if (!starttext) startupbanner();
+  }
+  void startupbanner() {
+    if (false) {
+      println("");
+      println("    **** commodore 64 basic v2 ****");
+      println("");
+      println(" 64k ram system  38911 basic bytes free");
+    } else if (false) {
       println("");
       println(" **** c=64 approximator basic v2ae ****");
       println("");
       println(" java ram system  many basic bytes free");
+    } else {
+      println("");
+      println(" **** c=64 ijk64 basic "+version.programVersion.replace("_b",".")+" ****");
+      println("");
+      //println(" java ram system  many basic bytes free");
+          long maxMemory = Runtime.getRuntime().maxMemory();
+          long totalMemory = Runtime.getRuntime().totalMemory();
+          long freeMemory = Runtime.getRuntime().freeMemory();
+          long allocatedMemory = (Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory());
+          long presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
+      println(" java ram system   "+presumableFreeMemory+" bytes free");
     }
   }
   public void startupscreen_blank() {
@@ -2391,17 +2410,7 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
     borderColour = fullcolour[6 + 8];
     clearscreen();
     reshapeScreen();            // just to see - this is a dodgy work around!!! when changing background or border colours, must reshape screen
-    if (false) {
-      println("");
-      println("    **** commodore 64 basic v2 ****");
-      println("");
-      println(" 64k ram system  38911 basic bytes free");
-    } else {
-      println("");
-      println(" **** c=64 approximator basic v2ae ****");
-      println("");
-      println(" java ram system  many basic bytes free");
-    }
+    startupbanner();
   }
 
   public void initcolour() {
