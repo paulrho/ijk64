@@ -483,6 +483,14 @@ class Petspeed
 	  }
 	  break; // just go to next instruction
 
+	  // just a speed test
+	//case 250 : break;
+	//case 251 : break;
+	//case 252 : break;
+	//case 253 : break;
+	//case 254 : break;
+	//case 255 : break;
+
 	default:
           if (verbose) System.out.printf("X ");
           System.out.printf("Instruction Fault at %d instruction %d\n",i,prog[i]);

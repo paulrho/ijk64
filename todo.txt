@@ -47,14 +47,19 @@ optimise DEFFN (currently just rejected compile and interpreted)
     DONE!!
 (these three changes take it from 6800 to 7500 benchmark)
 
+5) add ELSE !!!! (search through line looking for :ELSE)
+    DONE - and compiled
+
+
 --------------------
 not done:
+0) optimise
+   work out why some things loose 5%
+
 1) FOR -> compile this too!
 
 2) compile IF e THEN A ..... \n B    to e BEQ toB | A ... B - requires compiling both sides initially = maybe redo ALL IF function
     or a BEQ or BNE based on the first time compiled - but not filled out until the alternative path used
-
-3) add ELSE !!!! (search through line looking for :ELSE)
 
 4) make REM truely take no running time after compiling - attempted - looking for a nicer way
 
@@ -66,16 +71,22 @@ not done:
 
 7) when you list"prog" and it is not there - it should not do the list
 
-8) make poke198,0 clear the buffer!
+8) when list program dont go ultra slow on large screens
+
+9) make poke198,0 clear the buffer!
+   make other pokes work
 
 
-9) check the goto gosub ifthen # optimisations to affect edge case (where the next instructions might overlap)
-10) check the chained case where you jump into the commands half way through
-11) LIST a,b,c=1,2,3  (now does a,b,c=3,2,1 ) - can be done
+10) check the goto gosub ifthen # optimisations to affect edge case (where the next instructions might overlap)
+11) check the chained case where you jump into the commands half way through
+12) LIST a,b,c=1,2,3  (now does a,b,c=3,2,1 ) - can be done
    but note, this is a unintended language extension that I don't use anyway - 
    could mark it as reject in the meantime
+13) i/o from ports joysticks etc
 
 
+20) sprites
+21) superexpander graphics
 
 
 

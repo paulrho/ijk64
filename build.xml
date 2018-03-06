@@ -53,6 +53,8 @@
       target="1.4"
       source="1.5"  // source is 1.5 - but moving to 1.6 to reduce compiler warnings
       target="1.5"
+      source="1.6"
+      target="1.6"
     -->
     <javac includeantruntime="false" srcdir="${source}" destdir="${build}"
       debug="true" debuglevel="lines,vars,source"
