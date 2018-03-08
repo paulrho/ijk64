@@ -602,10 +602,13 @@ class Petspeed
 		    }
 		    top--;
 		    acpointer[savestart_p]=savestart_ac-1; // I think I need to do this for those that jump half way in CHECK
+		    acpointer_next[savestart_p]=lastassign+1; // FixOpt10=> if you jump midway in, go to the first+1 which will jump to the real end
 		  } else {
                     prog[lastfinal]=I_FNC|F_JMP; pargmem[lastfinal]=savestart_ac;
 		  }
 		  acpointer_next[lastassign]=end; // combine
+		  pnext[lastassign+1]=end; // FixOpt10 => always keep the real end updated 
+		  pcache[lastassign+1]=33 /* REM */ /* FIX */; // FixOpt10 => always keep the real end updated - pretend it is a REM
     // Opt17  // not used just yet
     //NOTUSEDYET//if (acpointer_next[end]<=0) acpointer_next[end]=-lastassign; // back link
 	          lastfinal=top-1;
