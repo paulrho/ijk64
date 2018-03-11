@@ -238,8 +238,15 @@ class C64 {
 
       String result;
       do {
-        result=screen.screenInput();
-      } while (result.trim().equals("") && !pop.forcedcompletion);
+        result=screen.screenInput(true/*direct*/);
+      } while (result.trim().equals("") && !pop.forcedcompletion && !screen.forcedcompletion);
+      if (screen.forcedcompletion) {
+        result=screen.forcedcommand;
+        screen.forcedcompletion=false;
+        screen.forcedcommand=""; // not really necessary
+        /* read out the char that forced the line term (CR or BREAK) */
+        if (screen.hasinput()) screen.givemekey();
+      }
       if (pop.forcedcompletion) {
         pop.forcedcompletion=false;
         result=pop.command;

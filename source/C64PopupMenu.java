@@ -708,13 +708,18 @@ if (false) {
         command="list";       
 
       } else if (source.getText().equals("Run program")) {
-        forcedcompletion=true; addkey(PETSCII_ENTER);
-        command="run";       
+        //forcedcompletion=true; addkey(PETSCII_ENTER);
+        //command="run";       
+        screen.forcedcompletion=true; addkey((char)0);
+        screen.forcedcommand="run";       
 
-      } else if (source.getText().equals("Break run")) {
+      } else if (source.getText().equals("Break run   [Shift-Esc]")) {
+        //screen.has_controlC=true; // but chew it up
+        //forcedcompletion=false; addkey((char)C64Screen.BREAK_KEY); // no different to ENTER really
+        //command="";
+	//      System.out.printf("WAS screen.has_controlC=%s",(screen.has_controlC)?"true":"false");
         screen.has_controlC=true; // but chew it up
-        forcedcompletion=false; addkey((char)C64Screen.BREAK_KEY); // no different to ENTER really
-        command="";
+        addkey((char)C64Screen.BREAK_KEY);
         
       } else if (source.getText().equals("Save")) {
         System.out.print("Saving file...\n");

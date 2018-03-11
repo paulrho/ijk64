@@ -2533,6 +2533,103 @@ boolean ProcessIGNOREstatement()
 
 char metaCode=' ';
 
+// this should really live in machine or C64Screen ?
+class metaCodex {
+	String str;
+	char code;
+	metaCodex(String s, char c) {
+		str=s;
+		code=c;
+	}
+}
+
+//Object[][] metaTranslate = { 
+metaCodex[] metaTranslate = { 
+	new metaCodex("home", (char)(19)),
+	new metaCodex("up",   (char)(145)),
+	new metaCodex("down", (char)(17)),
+	new metaCodex("left", (char)(157)),
+	new metaCodex("rght", (char)(29)),
+	new metaCodex("clr",  (char)(147)),
+	new metaCodex("rvon", (char)(18)),
+	new metaCodex("rvof", (char)(146)),
+	new metaCodex("SHIFT-SPACE",(char)(160)),
+	new metaCodex("blk",  (char)(144)),
+	new metaCodex("wht",  (char)(5)),
+	new metaCodex("red",  (char)(28)),
+	new metaCodex("cyn",  (char)(159)),
+	new metaCodex("pur",  (char)(156)),
+	new metaCodex("grn",  (char)(30)),
+	new metaCodex("blu",  (char)(31)),
+	new metaCodex("yel",  (char)(158)),
+	new metaCodex("orng", (char)(129)),
+	new metaCodex("brn",  (char)(149)),
+	new metaCodex("lred", (char)(150)),
+	new metaCodex("gry1", (char)(151)),
+	new metaCodex("gry2", (char)(152)),
+	new metaCodex("lgrn", (char)(153)),
+	new metaCodex("lblu", (char)(154)),
+	new metaCodex("gry3", (char)(155)),
+		// need to add all the others here too... 
+		// make this more efficient
+	new metaCodex("CBM-+",(char)(96+6+64)),
+	new metaCodex("CBM-PLUS",(char)(96+6+64)),
+
+        new metaCodex("CBM-Q",(char) (125 /*11 + 96 + 64*/)),
+        new metaCodex("CBM-W",(char) (123 /*19 + 96 + 64*/)),
+        new metaCodex("CBM-E",(char) (17 + 96 + 64)),
+        new metaCodex("mathpi",(char) (126)),
+        new metaCodex("BLOCK",(char) (160)),
+        new metaCodex("SHIFT-POUND",(char) (169)),
+	/***  do these later
+        new metaCodex("BACK-TRIANGLE",(char) (127)),
+        new metaCodex("BACK-TRIANGLE-REV",(char) (159)),
+        new metaCodex("FORWARD-TRIANGLE",(char) (169)),
+        new metaCodex("FORWARD-TRIANGLE-REV",(char) ('i' + 128-32*1)),
+        new metaCodex("LOW-HLINE",(char) ('c' +32)),
+        new metaCodex("UPP-LEFT-LINE",(char) (189)),
+        new metaCodex("UPP-RIGHT-LINE",(char) (173)),
+        new metaCodex("LOW-LEFT-LINE",(char) (174)),
+        new metaCodex("LOW-RIGHT-LINE",(char) (176)),
+        new metaCodex("LEFT-CHECK",(char) (92)),
+        new metaCodex("BOT-CHECK",(char) (104)),
+        new metaCodex("VLINE",(char) (95)),
+        new metaCodex("HLINE",(char) (64)),
+        new metaCodex("SHIFT-@",(char) (185)),
+        new metaCodex("SHIFT-PLUS",(char) (123)),
+        new metaCodex("-",(char) (64)), 
+        new metaCodex("UP",(char) (128 + 'Q'-'A'+1+64)),
+        new metaCodex("DOWN",(char) (128 + 'Q'-'A'+1)),
+	new metaCodex("CBM-+",(char)(96+6+64)),
+	new metaCodex("CBM-PLUS",(char)(96+6+64)),
+        new metaCodex("CBM-R",(char) (18 + 96 + 64)),
+        new metaCodex("CBM-T",(char) (3 + 96 + 64)),
+        new metaCodex("CBM-Y",(char) (23 + 96 + 64)),
+        new metaCodex("CBM-U",(char) (24 + 96 + 64)),
+        new metaCodex("CBM-I",(char) (2 + 96 + 64)),
+        new metaCodex("CBM-@",(char) (4 + 96 + 64)),
+        new metaCodex("CBM-A",(char) (16 + 96 + 64)),
+        new metaCodex("CBM-S",(char) (14 + 96 + 64)),
+        new metaCodex("CBM-F",(char) (27 + 96 + 64)),
+        new metaCodex("CBM-Z",(char) (13 + 96 + 64)),
+        new metaCodex("CBM-X",(char) (29 + 96 + 64)),
+        new metaCodex("CBM-C",(char) (28 + 96 + 64)),
+        new metaCodex("CBM-V",(char) (30 + 96 + 64)),
+        new metaCodex("CBM-B",(char) (31 + 96 + 64)),
+        new metaCodex("CBM-D",(char) (12 + 96 + 64)),
+        new metaCodex("CBM-G",(char) (5 + 96 + 64)),
+        new metaCodex("CBM-POUND",(char) (8 + 96 + 64)),
+        new metaCodex("CBM-H",(char) (20 + 96 + 64)),
+        new metaCodex("CBM-J",(char) (21 + 96 + 64)),
+        new metaCodex("CBM-K",(char) (1 + 96 + 64)),
+        new metaCodex("CBM-L",(char) (22 + 96 + 64)),
+        new metaCodex("CBM-M",(char) (7 + 96 + 64)),
+        new metaCodex("CBM-N",(char) (10 + 96 + 64)),
+        new metaCodex("CBM-O",(char) (25 + 96 + 64)),
+        new metaCodex("CBM-P",(char) (15 + 96 + 64))
+		***/
+};
+
 boolean checkMetaCode()
 {
   // we assume that we have a pointer at pnt, which we wont move
@@ -2547,6 +2644,15 @@ boolean checkMetaCode()
       String metatest=line.substring(pnt+1,pnt+at); // skip the first one
       if (verbose) { System.out.printf("Testing for meta code %s\n",metatest); }
    
+      for (int i=0; i<metaTranslate.length; ++i) 
+        if (metatest.equals(metaTranslate[i].str)) {
+	  metaCode=metaTranslate[i].code;
+	  pnt+=at+1; 
+	  return true; 
+	}
+      return false;
+
+      /**
       if (metatest.equals("home")) metaCode=(char)(19);
       else if (metatest.equals("up")) metaCode=(char)(145);
       else if (metatest.equals("down")) metaCode=(char)(17);
@@ -2576,6 +2682,7 @@ boolean checkMetaCode()
       else return false;
       pnt+=at+1;
       return true; // if any matched
+      **/
     }
     at++;
   }

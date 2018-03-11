@@ -2,13 +2,6 @@
 TOFIX
 found 20180126
 
-* c64 DEFFN param should be local
-* c64 STR$(-5) should not return leading space
-* ask question on exit of changed program
-* create a standalone full mp2 like equivalent for timing
-
-c64 INT function should just truncate decimal, still allows very big values
-\ kept this as is - matches C64
 
 
 --
@@ -26,37 +19,46 @@ profiling:
 java -agentlib:hprof=cpu=samples,depth=100,interval=5,lineno=y,thread=y,file=out.hprof -jar C64.jar -z m.basic -r -x
 
 
-==============
-DONE:
+====================================================================================================================
+REJECTED
+c64 INT function should just truncate decimal, still allows very big values
+\ kept this as is - matches C64
+
+DONE
+~~~~
 DONE acode MID needs to be copy of eval version
 DONE - mid needs 2 and 3 var version, did this by adding params for func
-update LSET and others to go on both backing screens
-
+DONE - update LSET and others to go on both backing screens
 2) GOTO #
    GOSUB #
    IF THEN #
      DONE!!
-
 3) DEF FN - compile it
     (currently marked as reject)
     DONE!!
-optimise DEFFN (currently just rejected compile and interpreted)
-
+*) optimise DEFFN (currently just rejected compile and interpreted)
 4) optimise the NEXT - currently string processing -
   at least turn it into near-a-code NEXT [mem] statements (where mem could be -2 (none))
     DONE!!
-(these three changes take it from 6800 to 7500 benchmark)
-
+  (these three changes take it from 6800 to 7500 benchmark)
 5) add ELSE !!!! (search through line looking for :ELSE)
     DONE - and compiled
+11) check the chained case where you jump into the commands half way through
 
+====================================================================================================================
 
---------------------
 not done:
+
+#31) c64 DEFFN param should be local
+#32) c64 STR$(-5) should not return leading space
+#15) ask question on exit (close window) of changed program
+*    create a standalone full mp2 like equivalent for timing
+
 0) optimise
    work out why some things loose 5%
 
-1) FOR -> compile this too!
+#25) FOR -> compile this too!
+#26) F5 to run!
 
 2) compile IF e THEN A ..... \n B    to e BEQ toB | A ... B - requires compiling both sides initially = maybe redo ALL IF function
     or a BEQ or BNE based on the first time compiled - but not filled out until the alternative path used
@@ -65,7 +67,6 @@ not done:
 
 5) allow sounds to load off web too
 
-*) F5 to run!
 
 6) allow break from an io (especially net)
 
@@ -73,22 +74,18 @@ not done:
 
 8) when list program dont go ultra slow on large screens
 
-9) make poke198,0 clear the buffer!
-   make other pokes work
+#27) make poke198,0 clear the buffer!
+    make other pokes work
 
+#28) superexpander graphics
+#30) i/o from ports joysticks etc
 
 10) check the goto gosub ifthen # optimisations to affect edge case (where the next instructions might overlap)
-11) check the chained case where you jump into the commands half way through
 12) LIST a,b,c=1,2,3  (now does a,b,c=3,2,1 ) - can be done
    but note, this is a unintended language extension that I don't use anyway - 
    could mark it as reject in the meantime
-13) i/o from ports joysticks etc
-
 
 20) sprites
-21) superexpander graphics
-
-
 
 ---
 END
