@@ -911,7 +911,10 @@ public class Machine {
   }
 
   String getline() {
-    return machinescreen.screenInput();
+    //return machinescreen.screenInput();
+    String ret=machinescreen.screenInput(false/*not direct*/);
+    machinescreen.forcedcompletion=false; // don't allow in any mode except DIRECT
+    return ret;
   }
 /* for now -slow down a geta$ - will do a givemekey which has a sleep in it*/
   String getkey() {

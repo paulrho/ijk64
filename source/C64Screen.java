@@ -1336,7 +1336,7 @@ if (verbose) { System.out.printf("print char %d\n",num); }
         } else if (cS.equals("FORWARD-TRIANGLE")) { theChar = (char) ('i');
         } else if (cS.equals("FORWARD-TRIANGLE-REV")) { theChar = (char) ('i' + 128);
         } else if (cS.equals("LOW-HLINE")) { theChar = (char) ('c');
-        } else if (cS.equals("UPP-LEFT-LINE")) { theChar = (char) ('p');
+        } else if (cS.equals("UPP-LEFT-LINE")) { theChar = (char) ('p'); // wrong I think
         } else if (cS.equals("UPP-RIGHT-LINE")) { theChar = (char) ('n');
         } else if (cS.equals("LOW-LEFT-LINE")) { theChar = (char) ('m');
         } else if (cS.equals("LOW-RIGHT-LINE")) { theChar = (char) (']' + 32);
@@ -1349,8 +1349,8 @@ if (verbose) { System.out.printf("print char %d\n",num); }
                theChar = (char) (64);
 
         } else if (cS.startsWith("CBM-")) { 
-          if (cS.equals("CBM-Q")) { theChar = (char) (11 + 96);
-          } else if (cS.equals("CBM-W")) { theChar = (char) (19 + 96);
+          if (cS.equals("CBM-Q")) { theChar = (char) (11 + 96); // I think this is wrong FIX
+          } else if (cS.equals("CBM-W")) { theChar = (char) (19 + 96); // I think this is wrong FIX
           } else if (cS.equals("CBM-E")) { theChar = (char) (17 + 96);
           } else if (cS.equals("CBM-R")) { theChar = (char) (18 + 96);
           } else if (cS.equals("CBM-T")) { theChar = (char) (3 + 96);
@@ -2537,8 +2537,15 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
       tabdown = true;
       return;
     }
-    if (e.getKeyChar()==27) {
-      if (e.isShiftDown()) { // force it to be shifted (i.e. shift-runstop)
+    if (e.getKeyCode() == KeyEvent.VK_F5) {
+      forcedcompletion = true;
+      //addkey2buf((char)PETSCII_SHIFTENTER); // just anything really - force givemekey to return
+      addkey2buf((char)0); // just anything really - force givemekey to return
+      forcedcommand="run";
+      return;
+    }
+    if (e.getKeyCode() == KeyEvent.VK_PAUSE || e.getKeyChar()==27) {
+      if (e.isShiftDown() || e.getKeyCode()== KeyEvent.VK_PAUSE ) { // force it to be shifted (i.e. shift-runstop)
         has_controlC=true; // but chew it up
         addkey2buf((char)BREAK_KEY); // just anything really - force givemekey to return
         return;
@@ -2701,7 +2708,10 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
 
   boolean insertchars=true;
 
-  public String screenInput() {
+  boolean forcedcompletion=false;
+  String forcedcommand="";
+
+  public String screenInput(boolean direct) {
   // save the cursor input, if we remain on the same line, we will return only after the original cursor
     int from_cursX = cursX;
     int from_cursY = cursY;
@@ -2709,7 +2719,9 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
       char ch;
       ch = givemekey();
       if (verbose) { System.out.printf("got %d ",(int)ch); }
-      if (ch == BREAK_KEY) {
+      if (forcedcompletion && ch==0 && !direct) {
+        // just continue and ignore key
+      } else if (ch == BREAK_KEY || forcedcompletion && ch==0) {
         // arbitrary break key
         return ""; // is this good?
       } else if (ch == PETSCII_SHIFTENTER) {
