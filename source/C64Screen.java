@@ -2301,7 +2301,8 @@ if (verbose) System.out.printf("%d,%d to %d,%d\n",ox,oy,x,y);
     for (int j = 0; j < MAXmaxY; ++j) { //clear ALL the screen
       for (int i = 0; i < MAXmaxX; ++i) {
         screenchar[i][j] = ' ';
-        screencharColour[i][j] = 0;
+        //screencharColour[i][j] = 0; // this is wrong - should be cursor colour!!
+        screencharColour[i][j] = cursColour; // this is wrong - should be cursor colour!!
       }
     }
     /* contination mark */

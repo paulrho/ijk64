@@ -49,6 +49,18 @@ DONE - update LSET and others to go on both backing screens
 
 not done:
 
+) directory traversing (local/absolute/x:drives/cloud)
+ also think about (like cygdrive)
+  cloud/x/y/z
+  
+) visualise all progs (screendumps)
+
+) cloud drive explorer
+  maybe just a web page?
+
+) 3rd plane or sprites on graphics
+
+  
 #31) c64 DEFFN param should be local
 #32) c64 STR$(-5) should not return leading space
 #15) ask question on exit (close window) of changed program
