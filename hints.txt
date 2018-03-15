@@ -1,0 +1,6 @@
+programmability:
+
+recording screens on pi:
+
+pi@raspberrypi:~ $ byzanz-record --delay=5 --duration=60 --x=600 --y=302 --width=730 --height=512 a5.gif
+
