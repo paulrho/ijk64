@@ -11,8 +11,8 @@ $ cd basic
 $ java -jar ../jar/ijk64.jar
 </PRE>
 
-Using the <I>latest</I>:
-download latest/C64.jar - standalone
+-or- download <a href=https://github.com/paulrho/ijk64/raw/master/C64.jar>C64.jar</a>
+ - standalone (no other files required)
 
 <PRE>
 $ java -jar C64.jar
