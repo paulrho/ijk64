@@ -5,7 +5,7 @@ C64 like (approximate) emulator in pure java - experimental but extensible
 
 Now with just-in-time-compile which gets 50x speed increase on mp2.basic (heavy maths)
 
-<IMG SRC="http://www.futex.com.au/ijk64/ijk64-c64screen-1.jpg" WIDTH=50% />
+<IMG SRC="http://www.futex.com.au/ijk64/ijk64-c64screen-x2-2.gif" WIDTH=50% />
 <PRE>
 $ cd basic
 $ java -jar ../jar/ijk64.jar
