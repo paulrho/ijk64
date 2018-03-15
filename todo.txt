@@ -29,21 +29,22 @@ DONE
 DONE acode MID needs to be copy of eval version
 DONE - mid needs 2 and 3 var version, did this by adding params for func
 DONE - update LSET and others to go on both backing screens
-2) GOTO #
+DONE 2) GOTO #
    GOSUB #
    IF THEN #
      DONE!!
-3) DEF FN - compile it
+DONE 3) DEF FN - compile it
     (currently marked as reject)
     DONE!!
-*) optimise DEFFN (currently just rejected compile and interpreted)
-4) optimise the NEXT - currently string processing -
+DONE *) optimise DEFFN (currently just rejected compile and interpreted)
+DONE 4) optimise the NEXT - currently string processing -
   at least turn it into near-a-code NEXT [mem] statements (where mem could be -2 (none))
     DONE!!
   (these three changes take it from 6800 to 7500 benchmark)
-5) add ELSE !!!! (search through line looking for :ELSE)
+DONE 5) add ELSE !!!! (search through line looking for :ELSE)
     DONE - and compiled
-11) check the chained case where you jump into the commands half way through
+DONE 11) check the chained case where you jump into the commands half way through
+DONE * when clear screen - should set colour to cursor colour =DONE
 
 ====================================================================================================================
 
@@ -98,6 +99,36 @@ not done:
    could mark it as reject in the meantime
 
 20) sprites
+
+-----
+* doesn't allow input c : (treats as string)
+* exact 40 chars with ; - note sure this is an issue
+* DATA/READ cant read data unless run already (should force a caching somehow)
+* space between func name and ( (should be allowed but isnt')
+
+** Feature completions:
+*implement:
+. go
+. usr
+. cmd
+
+** Feature Expansions:
+* required feature:  copy paste part of screen and full log
+* required 128 expansions:
+  * print using
+  * else
+  * begin
+  * bend
+
+* implement:
+. Implement:
+. Graphics: GRAPHIC, SCNCLR, COLOR, BOX, CIRCLE, DRAW, PAINT, LOCATE, SCALE; CHAR
+. RCLR(), RDOT(), RGR()
+. Sprites & Shapes: SSHAPE, GSHAPE, SPRSAV, SPRDEF, SPRITE, SPRCOL, MOVSPR, RSPCOL(), RSPPOS(), RSPR()
+. COLINT, RBUMP()
+. Inputs: KEY, RJOY(), RPOT(), RPEN()
+. Music & Sound: TEMPO, TUNE, FILTER
+
 
 ---
 END
