@@ -953,7 +953,7 @@ class evaluate {
     if (using_machine!=null) {
       return using_machine.getvariable(variablename.toLowerCase(),params,(int)p1,(int)p2,(int)p3); // convert back to uppercase
     }
-    return new GenericType(0.0);
+    return new GenericType(0.0); // FIX - autodetect type (look for $ suffix)
   }
 
   GenericType get_value(String variablename) {
@@ -971,7 +971,7 @@ class evaluate {
     } else if (variablename.equals("a")) {
       return new GenericType(1.0);
     }
-    return new GenericType(0.0);
+    return new GenericType(0.0); // FIX - autodetect type (look for $ suffix)
   }
 
   void pushString(String thestring) {
@@ -1776,6 +1776,12 @@ if (verbose) { System.out.printf("in 003\n"); }
     // ignore stype passed,:
     int stype=stktype[index]; // i think this was an undected bug! - it was getting given rubbish types, but it seemed to work!
     // is this because it ignores it anyway and uses the type of the string?
+    // off the end of available input: // so create empty or 0 of CORRECT type
+    if (index>=upto) {
+      if (verbose) System.out.printf("Ran out of input\n");
+      if (dotypecast_tonum) { return new GenericType(0.0); }
+      else { return new GenericType(""); }
+    }
     if (stype==ST_NUM) {
       if (verbose) { System.out.printf("%f\n",stknum[index]); }
       return new GenericType(stknum[index]);
@@ -1838,6 +1844,7 @@ void ProcessAssignment() throws EvaluateException {
           if (parameters==0) {
             // simple setting
             GenericType rv=ReadValue(stackp,currentvalue++);
+	    // CHECK?? if it is "empty" we DONT want to assign anything - just pretend it never happened!!!
             if (using_machine!=null) {
               if (verbose) { 
                 System.out.printf("Wanting to set %s = %s\n",stkfunc[stackp],rv.print());

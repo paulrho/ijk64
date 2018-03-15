@@ -2387,7 +2387,7 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
       println(" java ram system  many basic bytes free");
     } else {
       println("");
-      println(" **** c=64 ijk64 basic "+version.programVersion.replace("_b",".")+" ****");
+      println(" *** c=64 ijk64 basic "+version.programVersion.replace("_b","   ".substring(0,13-version.programVersion.length())+"~")+" ***");
       println("");
       //println(" java ram system  many basic bytes free");
           long maxMemory = Runtime.getRuntime().maxMemory();
