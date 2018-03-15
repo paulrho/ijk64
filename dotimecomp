@@ -12,7 +12,8 @@ for COM in `cat lll`
 do
 	echo $COM
 	git checkout $COM latest/C64.jar
-        java -server -jar latest/C64.jar -z -r "basic/ml3.basic" -x | egrep "JEBI|^Rate" >lll2
+        #java -server -jar latest/C64.jar -z -r "basic/ml3.basic" -x | egrep "JEBI|^Rate" >lll2
+        java -client -jar latest/C64.jar -z -r "basic/ml3.basic" -x | egrep "JEBI|^Rate" >lll2
 	cat lll2
 	echo -n $COM " "
 	echo -n `grep JEBI lll2` " "
