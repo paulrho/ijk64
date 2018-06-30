@@ -196,53 +196,97 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
      else { circleCentered=false; }
    }
 
-   public void command_CIRCLE(int x1, int y1, int r, int col, int fill) {
+   //public void command_CIRCLE(int x1, int y1, int r, int col, int fill) {
+   public void command_CIRCLE(double x1, double y1, double r, int col, int fill) {
      newoffGraphics.setColor(colorindex[col]);
      if (circleCentered) {
        if (fill!=0) {
 	       // this change will break some of the newer programs
          //newoffGraphics.fillOval(x1-r/2,y1+tby-r/2,r,r); // was diameter
-         newoffGraphics.fillOval(x1-r,y1+tby-r,r*2,r*2);
+	 if ((smoothness&2)==0) {
+           newoffGraphics.fillOval((int)x1-(int)r,(int)y1+tby-(int)r,((int)r)*2,((int)r)*2);
+	 } else {
+	   newoffGraphics.fill(new Ellipse2D.Double(x1-r, y1+tby-r, r*2.0, r*2.0));
+	 }
        } else {
          //newoffGraphics.drawOval(x1-r/2,y1+tby-r/2,r,r); // was diameter
-         newoffGraphics.drawOval(x1-r,y1+tby-r,r*2,r*2);
+	 if ((smoothness&2)==0) {
+           newoffGraphics.drawOval((int)x1-(int)r,(int)y1+tby-(int)r,((int)r)*2,((int)r)*2);
+	 } else {
+	   newoffGraphics.draw(new Ellipse2D.Double(x1-r, y1+tby-r, r*2.0, r*2.0));
+	 }
        }
      } else {
        if (fill!=0) {
-         newoffGraphics.fillOval(x1,y1+tby,r,r);
+         newoffGraphics.fillOval((int)x1,(int)y1+tby,(int)r,(int)r);
        } else {
-         newoffGraphics.drawOval(x1,y1+tby,r,r);
+         newoffGraphics.drawOval((int)x1,(int)y1+tby,(int)r,(int)r);
        }
      }
      if (!inframe) doupdate();
    }
 
-   public void command_RECT(int x1, int y1, int x2, int y2, int col) {
+   //public void command_RECT(int x1, int y1, int x2, int y2, int col) {
+   public void command_RECT(double x1, double y1, double x2, double y2, int col) {
      newoffGraphics.setColor(colorindex[col]);
-     newoffGraphics.fillRect(x1,y1+tby,x2-x1,y2-y1);
+     if ((smoothness&2)==0) {
+       newoffGraphics.fillRect((int)x1,(int)y1+tby,(int)x2-(int)x1,(int)y2-(int)y1);
+     } else {
+       newoffGraphics.fill(new Rectangle2D.Double(x1,y1+tby,x2-x1,y2-y1));
+     }
      if (!inframe) doupdate();
    }
 
-   public void command_PSET(int x1, int y1, int col) {
+   //public void command_PSET(int x1, int y1, int col) {
+   public void command_PSET(double x1, double y1, int col) {
      newoffGraphics.setColor(colorindex[col]);
-     newoffGraphics.fillRect(x1,y1+tby,1,1);
+     if ((smoothness&2)==0) {
+       newoffGraphics.fillRect((int)x1,(int)y1+tby,1,1);
+     } else {
+       //newoffGraphics.draw(new Rectangle2D.Double(x1,y1+tby,1.0,1.0));
+       newoffGraphics.draw(new Line2D.Double(x1,y1+tby,x1,y1+tby)); //line to itself
+     }
      if (!inframe) doupdate();
    }
 
-   public void command_FILL(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, int col) {
-     int xpoints[]= {x1, x2, x3, x4, x1};
-     int ypoints[]= {y1+tby, y2+tby, y3+tby, y4+tby, y1+tby};
+   //public void command_FILL(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, int col) {
+   public void command_FILL(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, int col) {
      if (col<16) 
        newoffGraphics.setColor(colorindex[col]);
      else
        newoffGraphics.setColor(new Color(col));
-     newoffGraphics.fillPolygon(xpoints,ypoints,5);
+     if ((smoothness&2)==0) {
+       int xpoints[]= {(int)x1, (int)x2, (int)x3, (int)x4, (int)x1};
+       int ypoints[]= {(int)y1+tby, (int)y2+tby, (int)y3+tby, (int)y4+tby, (int)y1+tby};
+       newoffGraphics.fillPolygon(xpoints,ypoints,5);
+     } else {
+       double xpoints[]= {x1, x2, x3, x4, x1};
+       double ypoints[]= {y1+tby, y2+tby, y3+tby, y4+tby, y1+tby};
+       Path2D prettyPoly = new Path2D.Double();
+       boolean isFirst = true;
+       for (int i = 0; i < 4; i++) {
+         if (isFirst) {
+           prettyPoly.moveTo(xpoints[i], ypoints[i]);
+           isFirst = false;
+         } else {
+           prettyPoly.lineTo(xpoints[i], ypoints[i]);
+         }
+       }
+       prettyPoly.closePath();
+       //wanted newoffGraphics.fill(new Polygon2D(xpoints,ypoints,5));
+       newoffGraphics.fill(prettyPoly);
+     }
      if (!inframe) doupdate();
    }
 
-   public void command_LINE(int x1, int y1, int x2, int y2, int col) {
+   //public void command_LINE(int x1, int y1, int x2, int y2, int col) {
+   public void command_LINE(double x1, double y1, double x2, double y2, int col) {
      newoffGraphics.setColor(colorindex[col]);
-     newoffGraphics.drawLine(x1,y1+tby,x2,y2+tby);
+     if ((smoothness&2)==0) {
+       newoffGraphics.drawLine((int)x1,(int)y1+tby,(int)x2,(int)y2+tby);
+     } else {
+       newoffGraphics.draw(new Line2D.Double(x1,y1+tby,x2,y2+tby));
+     }
      if (!inframe) doupdate();
    }
 
@@ -252,20 +296,39 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
      fsize=s;
    }
 
+   int smoothness=0;
+   // aa smooth
+   // 0->0
+   // 1->1
+   // 2->3 = antialias and smooth (double) drawing
    public void command_ANTIALIAS(int aa) {
+	   if (aa>=2) aa=3; 
+    smoothness=aa; // keep this for deciding if we do double based line and point draws
     if (blitting) {
-       if (aa==0)  {
+       if ((aa&1)==0)  {
           newoffGraphicsB[0].setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
           newoffGraphicsB[1].setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
        } else {
           newoffGraphicsB[0].setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
           newoffGraphicsB[1].setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
        }
+       if ((aa&2)==0)  {
+          newoffGraphicsB[0].setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_DEFAULT); // was DEFAULT
+          newoffGraphicsB[1].setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_DEFAULT); // was DEFAULT
+       } else {
+          newoffGraphicsB[0].setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+          newoffGraphicsB[1].setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+       }
     } else {
-       if (aa==0)  {
+       if ((aa&1)==0)  {
          newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
        } else {
          newoffGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+       }
+       if ((aa&2)==0)  {
+          newoffGraphics.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_DEFAULT);
+       } else {
+          newoffGraphics.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
        }
     }
    }

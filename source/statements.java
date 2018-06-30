@@ -1041,10 +1041,10 @@ void ProcessGraphicsLINEstatement(GenericType gt) throws BasicException
           if (gt.gttop==5) {
               if (verbose) System.out.printf("about to draw line\n");
               machine.graphicsDevice.command_LINE(
-                (int)gt.gtlist[0].num(),
-                (int)gt.gtlist[1].num(),
-                (int)gt.gtlist[2].num(),
-                (int)gt.gtlist[3].num(),
+                gt.gtlist[0].num(),
+                gt.gtlist[1].num(),
+                gt.gtlist[2].num(),
+                gt.gtlist[3].num(),
                 (int)gt.gtlist[4].num()
                );
               return;
@@ -1059,10 +1059,10 @@ void ProcessGraphicsRECTstatement(GenericType gt) throws BasicException
           if (gt.gttop==5) {
               if (verbose) System.out.printf("about to draw rect\n");
               machine.graphicsDevice.command_RECT(
-                (int)gt.gtlist[0].num(),
-                (int)gt.gtlist[1].num(),
-                (int)gt.gtlist[2].num(),
-                (int)gt.gtlist[3].num(),
+                gt.gtlist[0].num(),
+                gt.gtlist[1].num(),
+                gt.gtlist[2].num(),
+                gt.gtlist[3].num(),
                 (int)gt.gtlist[4].num()
                );
               return;
@@ -1070,14 +1070,14 @@ void ProcessGraphicsRECTstatement(GenericType gt) throws BasicException
           if (gt.gttop==9) {
               if (verbose) System.out.printf("about to filled quad poly \n");
               machine.graphicsDevice.command_FILL(
-                (int)gt.gtlist[0].num(),
-                (int)gt.gtlist[1].num(),
-                (int)gt.gtlist[2].num(),
-                (int)gt.gtlist[3].num(),
-                (int)gt.gtlist[4].num(),
-                (int)gt.gtlist[5].num(),
-                (int)gt.gtlist[6].num(),
-                (int)gt.gtlist[7].num(),
+                gt.gtlist[0].num(),
+                gt.gtlist[1].num(),
+                gt.gtlist[2].num(),
+                gt.gtlist[3].num(),
+                gt.gtlist[4].num(),
+                gt.gtlist[5].num(),
+                gt.gtlist[6].num(),
+                gt.gtlist[7].num(),
                 (int)gt.gtlist[8].num()
                );
               return;
@@ -1092,8 +1092,8 @@ void ProcessGraphicsPSETstatement(GenericType gt) throws BasicException
           if (gt.gttop==3) {
               if (verbose) System.out.printf("about to set line size\n");
               machine.graphicsDevice.command_PSET(
-                (int)gt.gtlist[0].num(),
-                (int)gt.gtlist[1].num(),
+                gt.gtlist[0].num(),
+                gt.gtlist[1].num(),
                 (int)gt.gtlist[2].num()
                );
               return;
@@ -1112,9 +1112,9 @@ void ProcessGraphicsCIRCLEstatement(GenericType gt) throws BasicException
 	  } else if (gt.gttop==5) {
               if (verbose) System.out.printf("about to draw circle\n");
               machine.graphicsDevice.command_CIRCLE(
-                (int)gt.gtlist[0].num(),
-                (int)gt.gtlist[1].num(),
-                (int)gt.gtlist[2].num(),
+                gt.gtlist[0].num(),
+                gt.gtlist[1].num(),
+                gt.gtlist[2].num(),
                 (int)gt.gtlist[3].num(),
                 (int)gt.gtlist[4].num()
                );
