@@ -1556,7 +1556,7 @@ boolean findtoken() {
           if (n==4) cs();
           p+=gotlen;
           //if (hs==0) out+=" ";
-          if (i==3 || i==4 || i==6 || i==17+1) { out+=sepchar+d8+got.toLowerCase()+d0+sepchar; }
+          if (i==3 || i==4 || i==6+1 || i==17+1) { out+=sepchar+d8+got.toLowerCase()+d0+sepchar; }
           else if (i==14+1 || i==15+1 || i==16+1) { out+=sepchar+d9+got.toLowerCase()+d0+sepchar; }
           else { out+=sepchar+d2+got.toLowerCase()+d0+sepchar; }
           if (i<=3+1) n=5; else n=2;
