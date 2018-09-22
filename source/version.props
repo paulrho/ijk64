@@ -1,10 +1,10 @@
 #build number and date
-#Sat, 22 Sep 2018 16:40:08 +1000
+#Sun, 23 Sep 2018 09:05:37 +1000
 #Tue Sep 04 23:24:04 EST 2012
-build-date=20180922-1640
-rev=10
+build-date=20180923-0905
 build.user.name=paulsalanitri
-major=3
 build.computer=${env.HOSTNAME}
+major=3
 minor=7
-build-number=2355
+rev=11
+build-number=2362

@@ -2504,17 +2504,19 @@ boolean ProcessPOKEstatement() throws BasicException
 
 boolean ProcessSYSstatement() throws BasicException
 {
-  ReadExpression();
-  if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
-  if (verbose) { System.out.printf("inputting to %s\n",machine.evaluate(keepExpression).print()); }
+  //ReadExpression();
+  GenericType gt=PSReadExpressionEvaluate();
+  //if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
+  //if (verbose) { System.out.printf("inputting to %s\n",machine.evaluate(keepExpression).print()); }
   if (verbose) { machine.dumpstate(); }
-  if (!keepExpression.equals("")) {
-    machine.performSYS(machine.evaluate(keepExpression));
-    machine.machinescreen.startupscreen();
-    return true;
-  } else {
-    throw new BasicException("TOO FEW PARAMETERS");
-  }
+  //if (!keepExpression.equals("")) {
+    //machine.performSYS(machine.evaluate(keepExpression));
+    //machine.performSYS(machine.evaluate(keepExpression));
+  //} else {
+    //throw new BasicException("TOO FEW PARAMETERS");
+  //}
+  machine.performSYS(gt);
+  return true;
 }
 
 boolean ProcessIGNOREstatement() 

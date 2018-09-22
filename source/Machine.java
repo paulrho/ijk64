@@ -782,6 +782,10 @@ public class Machine {
       memloc=(int)gt.num();
       if (verbose) { System.out.printf("Sysing to memory location %d\n",memloc); }
       performSYS(memloc);
+    } else if (gt.gttop==2) {
+      memloc=(int)gt.gtlist[0].num();
+      int memval=(int)gt.gtlist[1].num();
+      performSYS_2(memloc,memval);
     } else {
       System.out.printf("Wrong number of parameters\n");
       throw new BasicException("WRONG NUMBER OF PARAMETERS");
@@ -789,6 +793,90 @@ public class Machine {
   }
 
   void performSYS(int memloc) {
+		switch (memloc) {
+		  case 64738:
+        machinescreen.startupscreen();
+				break;
+		}
+    return;
+  }
+
+  void performSYS_2(int memloc, int memval) {
+		switch (memloc) {
+		  case 64738:
+        machinescreen.startupscreen();
+				break;
+      case 65000:
+        basictimer=(memval!=0)?true:false;
+        System.out.printf("basictimer switched %s\n",basictimer?"on":"off");
+				break;
+      case 65001:
+        // arbirary,  test cos, sin, tan, sqrt x the number in the value
+        // acos
+				{
+        double x=0; double w=0.5;
+        for (int i=0; i<memval; i++)
+          x+=Math.acos(w+=0.0001);
+        System.out.printf("final acos = %f\n",x);
+				}
+				break;
+      case 65002:
+				{
+        double x=0; double w=0.0;
+        for (int i=0; i<memval; i++)
+          x+=Math.cos(w+=0.1);
+        System.out.printf("final cos = %f\n",x);
+				}
+				break;
+      case 65003:
+			  {
+        double x=0; double w=0.0;
+        for (int i=0; i<memval; i++)
+          x+=Math.sin(w+=0.1);
+        System.out.printf("final sin = %f\n",x);
+				}
+				break;
+      case 65004:
+			  {
+        double x=0; double w=0.0;
+        for (int i=0; i<memval; i++)
+          x+=Math.sqrt(w+=0.1);
+        System.out.printf("final sqrt = %f\n",x);
+				}
+				break;
+      case 65005:
+			  {
+        double x=0; double w=0.0;
+        for (int i=0; i<memval; i++)
+          x+=Math.atan(w+=0.1);
+        System.out.printf("final atn = %f\n",x);
+				}
+				break;
+      case 65006:
+			  {
+        double x=0; double w=0.0;
+        for (int i=0; i<memval; i++)
+          x+=Math.pow(w+=0.1,2.0);
+        System.out.printf("final x^2 = %f\n",x);
+				}
+				break;
+      case 65007:
+			  {
+        double x=0; double w=0.0;
+        for (int i=0; i<memval; i++)
+          x+=(double)((int)(w+=0.153));
+        System.out.printf("final int() = %f\n",x);
+				}
+				break;
+      case 65008:
+			  {
+        double x=0; double w=0.0;
+        for (int i=0; i<memval; i++)
+          x+=Math.pow(256.0,2.0)*(double)(int)((1.0-0.12124)*255.0)+256.0*(double)(int)((1.0-0.125412)*255.0)+(double)(int)((1.0-0.23523*(1.0-0.236))*255.0);
+        System.out.printf("final comp256^2.. = %f\n",x);
+				}
+				break;
+			}
     return;
   }
 
@@ -813,6 +901,7 @@ public class Machine {
       PlaySound a = new PlaySound("test.wav");
     } else if (memloc==198) {
       // clear the key buffer if you get this // FIX
+			machinescreen.keybufbot=machinescreen.keybuftop; // chew it up
     } else if (memloc==199) { // ijk64 special - switch to fast mode
       ksfast=(memval>0)?true:false;
     } else if (memloc==53281) {
@@ -836,52 +925,6 @@ public class Machine {
       int x=(memloc-55296)%40;
       int y=(memloc-55296)/40;
       machinescreen.setCharColour(x,y,(char)memval);
-    } else if (memloc==65000) {
-      basictimer=(memval!=0)?true:false;
-      System.out.printf("basictimer switched %s\n",basictimer?"on":"off");
-    } else if (memloc==65001) {
-      // arbirary,  test cos, sin, tan, sqrt x the number in the value
-      // acos
-      double x=0; double w=0.5;
-      for (int i=0; i<memval; i++)
-        x+=Math.acos(w+=0.0001);
-      System.out.printf("final acos = %f\n",x);
-    } else if (memloc==65002) {
-      double x=0; double w=0.0;
-      for (int i=0; i<memval; i++)
-        x+=Math.cos(w+=0.1);
-      System.out.printf("final cos = %f\n",x);
-    } else if (memloc==65003) {
-      double x=0; double w=0.0;
-      for (int i=0; i<memval; i++)
-        x+=Math.sin(w+=0.1);
-      System.out.printf("final sin = %f\n",x);
-    } else if (memloc==65004) {
-      double x=0; double w=0.0;
-      for (int i=0; i<memval; i++)
-        x+=Math.sqrt(w+=0.1);
-      System.out.printf("final sqrt = %f\n",x);
-    } else if (memloc==65005) {
-      double x=0; double w=0.0;
-      for (int i=0; i<memval; i++)
-        x+=Math.atan(w+=0.1);
-      System.out.printf("final atn = %f\n",x);
-    } else if (memloc==65006) {
-      double x=0; double w=0.0;
-      for (int i=0; i<memval; i++)
-        x+=Math.pow(w+=0.1,2.0);
-      System.out.printf("final x^2 = %f\n",x);
-    } else if (memloc==65007) {
-      double x=0; double w=0.0;
-      for (int i=0; i<memval; i++)
-        x+=(double)((int)(w+=0.153));
-      System.out.printf("final int() = %f\n",x);
-    } else if (memloc==65008) {
-      double x=0; double w=0.0;
-      for (int i=0; i<memval; i++)
-        x+=Math.pow(256.0,2.0)*(double)(int)((1.0-0.12124)*255.0)+256.0*(double)(int)((1.0-0.125412)*255.0)+(double)(int)((1.0-0.23523*(1.0-0.236))*255.0);
-
-      System.out.printf("final comp256^2.. = %f\n",x);
     }
 
   }
@@ -1487,7 +1530,7 @@ int hs;
        "AND","OR","NOT",
        "ON",
        "GET#5,",
-       "POKE","OPEN","INPUT#,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST",
+       "POKE","OPEN","INPUT#","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST",
        "META-VERBOSE",
        "SYS","CLR",
        "META-SCALEY","META-ROWS",
@@ -1501,6 +1544,7 @@ int hs;
        ,"IMAGELOAD","DRAWIMAGE","DESTROYIMAGE"
        ,"CIRCLE","ANTIALIAS"
        ,"HELP"
+			 ,"PSET","IMAGESAVE","DIR","PWD","CHDIR","MKDIR","DEF","LET","SLOW"
     };
   String got;
   String syntaxHighlight(String line) {
