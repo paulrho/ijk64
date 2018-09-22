@@ -1,0 +1,23 @@
+#rewriting a commit 
+
+  773  rm -rf ijk64
+  774  git clone https://github.com/paulrho/ijk64
+  777  cd ijk64/
+  778  ls -l
+  779  git checkout maintenance
+  780  git log
+  781  git checkout d3ef133c58c25ad9bcf05fdcb49f270f061565c8
+  782  git commit --amend --author "paulrho <paul.salanitri@gmail.com>"
+  783  git log
+  784  git checkout maintenance
+  785  git rebase -i 5251d760147d8bf352769c2527848be11bf70cb5
+  786  git log
+  787  gif diff
+  799  git diff 5251d760147d8bf352769c2527848be11bf70cb5
+  800  git log
+  801  git diff 6eb6192f4abcf1789e3a00ff9738c27b59b2d69e
+  802  ls -l
+  803  git branch
+  805  git push   # won't work - rejected
+  806  git push --force-with-lease
+
