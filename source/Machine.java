@@ -990,6 +990,9 @@ public class Machine {
     return true;
   }
   
+  static final int ENC_NORMAL=0;
+  static final int ENC_ISO88=8;
+
   void newProgramText() throws BasicException
   {
     if (program_modified) {
@@ -1016,14 +1019,15 @@ public class Machine {
     String filename;
     int mode;
     int type;
+		int enc;
     int dev;
     String bufLine;
     int bufOffset;
     Writer output;
     BufferedReader input;
     FileHandle() { fileno=-1; }; //initialise
-    void newFileHandle(int fh, int dev, String filename, char type, boolean overwrite) throws BasicException {
-      if (verbose) System.out.printf("new fh = %d filename=%s dev=%d type=%c overwrite=%s\n",topHandle,filename,dev,type,overwrite?"true":"false");
+    void newFileHandle(int fh, int dev, String filename, char type, int enc, boolean overwrite) throws BasicException {
+      if (verbose) System.out.printf("new fh = %d filename=%s dev=%d type=%c enc=%d overwrite=%s\n",topHandle,filename,dev,type,enc,overwrite?"true":"false");
       // look for free spot:
       int hand;
       for (hand=0; hand<topHandle; ++hand) {
@@ -1033,6 +1037,7 @@ public class Machine {
       handleHash[hand]=new FileHandle();
       handleHash[hand].fileno=fh;
       handleHash[hand].type=type;
+      handleHash[hand].enc=enc;
       handleHash[hand].dev=dev;
       handleHash[hand].filename=filename;
       //if (!filename.equals("KB")) {
@@ -1045,7 +1050,12 @@ public class Machine {
             handleHash[hand].bufOffset = -1;
           } else if (type=='W') {
             if (verbose) { System.out.printf("Write mode\n"); }
-            handleHash[hand].output = new BufferedWriter(new FileWriter(filename, !overwrite));
+						if (enc!=ENC_ISO88) {
+              handleHash[hand].output = new BufferedWriter(new FileWriter(filename, !overwrite));
+						} else {
+              handleHash[hand].output = 
+						    new OutputStreamWriter(new FileOutputStream(filename), "ISO-8859-1");
+						}
           }
         } catch (Exception e) { System.out.printf("open exception\n");
 	  if (verbose) { e.printStackTrace(); }	// should do real exception handling 
@@ -1074,6 +1084,7 @@ public class Machine {
      String format="seq";
      char type='R';
      boolean overwrite=false;
+		 int enc=ENC_NORMAL;
      if (dev==4) { overwrite=false; param="printer,s,w"; }
      if (param.startsWith("@")) {
        overwrite=true;
@@ -1097,7 +1108,11 @@ public class Machine {
      String filename=data[0]+"."+format;
      if (data.length>2 && data[2].equals("w")) { type='W'; }
      filename=filename.replace('/','_');
-     dummyhandleHash.newFileHandle(fh,dev,filename,type,overwrite);
+     if (format.equals("usr")) { 
+		   // set the format to do the ISO-88.. thing
+			 enc=ENC_ISO88; // ISO-88 ... 1 byte, direct, raw
+		 }
+     dummyhandleHash.newFileHandle(fh,dev,filename,type,enc,overwrite);
      fileio_ST=0;
   }
 
@@ -1142,7 +1157,8 @@ public class Machine {
   void PrintFile(String raw) {
     if (verbose) System.out.printf("use = %d raw test = %s\n",foff,raw);
     try {
-    handleHash[foff].output.append(raw);
+		  //if (handleHash[foff].enc!=ENC_ISO88) {
+      handleHash[foff].output.append(raw);
     } catch (Exception e) { System.out.printf("append exception\n"); }
   }
  // input from file

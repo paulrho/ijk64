@@ -296,9 +296,9 @@ class Petspeed
 	case I_FNC | F_strD : 
 	  // I think the leading space is wrong - it should be -ve if it is.... FIX
 	  if (astack_d[atop-1]-(int)astack_d[atop-1]==0.0) {
-	    astack_s[atop-1]=" "+(int)astack_d[atop-1];
+	    astack_s[atop-1]=((astack_d[atop-1]<0.0)?"":" ")+(int)astack_d[atop-1];
           } else {
-	    astack_s[atop-1]=" "+(new Double(astack_d[atop-1]).toString());
+	    astack_s[atop-1]=((astack_d[atop-1]<0.0)?"":" ")+(new Double(astack_d[atop-1]).toString());
           }
 	  break;
 	case I_FNC | F_len : 

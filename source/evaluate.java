@@ -681,9 +681,9 @@ class evaluate {
         if (parameters==1) {
           stktype[upto-2]=ST_STRING;
           if (stknum[upto-1]-(int)stknum[upto-1]==0.0) {
-            stkstring[upto-2]=" "+(int)(stknum[upto-1]);
+						stkstring[upto-2]=((stknum[upto-1]<0.0)?"":" ")+(int)(stknum[upto-1]);
           } else {
-            stkstring[upto-2]=" "+(new Double(stknum[upto-1]).toString());
+					  stkstring[upto-2]=((stknum[upto-1]<0.0)?"":" ")+(new Double(stknum[upto-1]).toString());
           }
           return;
         }
