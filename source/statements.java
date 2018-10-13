@@ -1148,7 +1148,7 @@ void ProcessGraphicsIMAGELOADstatement(GenericType gt) throws BasicException
               if (verbose) System.out.printf("load the image to reference\n");
               try { 
                 int imgno=machine.graphicsDevice.command_LOADIMAGE(
-                  machine.fileUnalias(gt.str())
+                  machine.fileUnalias(gt.str(),false)
                  );
                  // special case here! so if it works
                 machine.assignment("imgno="+imgno);
@@ -2368,7 +2368,7 @@ boolean ProcessLOADstatement() throws BasicException
   String filename=machine.evaluate(keepExpression).str();
   // only add basic if it doesnt have it already
   // consider using fileUnalias
-  String newfile=machine.fileUnalias(filename);
+  String newfile=machine.fileUnalias(filename,false);
   if (!newfile.equals(filename)) {
     machine.print("\n");
     machine.print("searching for "+filename.toLowerCase()+"\n");

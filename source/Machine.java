@@ -1650,18 +1650,27 @@ void chewcr() {
 
   }
   
-  String fileUnalias(String filename) {
-    if (filename.equals("%%")) {
+  String fileUnalias(String filename, boolean isDir) {
+    if (filename.equals("%%") && !isDir) {
       filename=filename.replaceFirst("%",cloudNet+"/basic/dirod.php");
-    } else if (filename.equals("%")) {
+    } else if (filename.equals("%") && !isDir) {
       filename=filename.replaceFirst("%",cloudNet+"/basic/dir.php");
+    } else if (filename.startsWith("%%") && isDir) {
+      filename=filename.replaceFirst("%",cloudNet+"/basic/dirp.php?t=1&m=");
+      filename=filename.replaceFirst("%","");
+    } else if (filename.startsWith("%") && isDir) {
+      filename=filename.replaceFirst("%",cloudNet+"/basic/dirp.php?t=0&m=");
+      //filename=filename.replaceFirst("%","");
     } else if (filename.equals("*")) {
       filename=filename.replaceFirst("\\*",cloudNet+"/basic/dir.php");
     } else if (filename.startsWith("%") &&
        (   filename.toLowerCase().endsWith(".png")
           || filename.toLowerCase().endsWith(".jpg")
           || filename.toLowerCase().endsWith(".jpeg")
-	  || filename.toLowerCase().endsWith(".bmp") 
+          || filename.toLowerCase().endsWith(".bmp")
+          || filename.toLowerCase().endsWith(".au") 
+          || filename.toLowerCase().endsWith(".wav") 
+          || filename.toLowerCase().endsWith(".mp3") 
         )) {
       filename=filename.replaceFirst("%",cloudNet+"/cloudimages/");
     } else if (filename.startsWith("%")) {
@@ -1685,7 +1694,7 @@ void chewcr() {
           || filename.toLowerCase().endsWith(".jpeg")
 	  || filename.toLowerCase().endsWith(".bmp") 
         ) {
-        machinescreen.load_bgimage(fileUnalias(filename));
+        machinescreen.load_bgimage(fileUnalias(filename,false));
         return true;
       } else {
         if (reset && program_modified) {
@@ -1813,7 +1822,7 @@ void chewcr() {
     if (param != null && param.startsWith("%")) {
       String stashText = programText;
       String stashProgram_name=program_name;
-      String filename = fileUnalias(param);
+      String filename = fileUnalias(param,true);
       loadProgram(filename,false);
       listProgram(-1,-1);
       programText=stashText;

@@ -16,6 +16,8 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.Line;
 import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
+import java.net.*; // for reading from http
+import java.io.InputStreamReader;
 /**
  * Handles playing, stoping, and looping of sounds for the game.
  * @author Tyler Thomas
@@ -44,8 +46,32 @@ class ClipTest {
         //InputStream inRequest = this.getClass().getResourceAsStream(fileName);
         //InputStream inRequest = this.getClass().getResourceAsStream("noise.wav");
 
-      AudioInputStream sound=AudioSystem.getAudioInputStream(
-      new BufferedInputStream(new FileInputStream(fileName)));
+	//if (filename.startsWith("http")) {
+	  //URL url = new URL(filename);
+          //bgImage = ImageIO.read(url.openStream());
+	//} else {
+          //bgImage = ImageIO.read(new File(filename));
+        //}
+      //BufferedReader in = new BufferedReader(
+            //new InputStreamReader(
+            //url.openStream()));
+
+      //AudioInputStream sound=AudioSystem.getAudioInputStream(
+      //new BufferedInputStream(new FileInputStream(fileName)));
+
+      AudioInputStream sound;
+	    if (fileName.startsWith("http")) {
+	        URL url = new URL(fileName);
+         // bgImage = ImageIO.read(url.openStream());
+			  sound=AudioSystem.getAudioInputStream(
+           new BufferedInputStream(
+           //new InputStreamReader(
+           url.openStream()));
+			} else {
+			  sound=AudioSystem.getAudioInputStream(
+          new BufferedInputStream(new FileInputStream(fileName)));
+			}
+
 
         //AudioInputStream sound = AudioSystem.getAudioInputStream(inRequest);
 
