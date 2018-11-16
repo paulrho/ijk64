@@ -1,10 +1,10 @@
 #build number and date
-#Sat, 13 Oct 2018 17:46:06 +1000
+#Fri, 16 Nov 2018 23:09:46 +1000
 #Tue Sep 04 23:24:04 EST 2012
-build-date=20181013-1746
-build.user.name=paulsalanitri
-build.computer=${env.HOSTNAME}
+build-date=20181116-2309
+build.user.name=pgs
+build.computer=localhost.localdomain
 major=3
 minor=7
 rev=11
-build-number=2375
+build-number=2380
