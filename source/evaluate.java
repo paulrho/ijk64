@@ -1836,6 +1836,7 @@ void ProcessAssignment() throws EvaluateException {
       int currentvalue=firstvalue;
       int parameters=0; // singleton
       int stackvar=0;
+      if (speeder_compile) { using_machine.petspeed.saverev(); }
       for (int stackp=0; stackp<firstvalue; ++stackp) {
         if (verbose) { System.out.printf("stackp=%d\n",stackp); }
         if (stkop[stackp].equals("===") || stkop[stackp].equals("===,")) {
@@ -1902,6 +1903,10 @@ void ProcessAssignment() throws EvaluateException {
           parameters++;
         }
       }
+      /* special work around to reverse the popping off the list for a,b=1,2a
+       * simply switch all STO around, pair by pair
+       */
+      if (speeder_compile) { using_machine.petspeed.reverseSTO(); }
     }
 
 }

@@ -25,6 +25,7 @@ class Petspeed
   // store program memory
   int top=1; // because 0 is a special pointer to show invalid
   int tmptop;
+  int tmptoprev;
   boolean record=false;
   int []prog= new int[MAX]; // program memory instruction
   double [] pargD = new double[MAX]; // double arg
@@ -75,6 +76,37 @@ class Petspeed
     tmptop--;
   }
    
+  void saverev() {
+    tmptoprev=tmptop;
+  }
+  void reverseSTO() {
+    int i,j;
+    // work from bottom and top evenly
+    i=tmptoprev;
+    j=tmptop-1;
+    while(i<j) {
+      while ((prog[i]&(64+128))!=I_STO && i<j) i++;
+      while ((prog[j]&(64+128))!=I_STO && i<j) j++;
+      if (i<j) {
+        // swap them
+        int    tmpprog=prog[i];
+        double tmppargD=pargD[i];
+        int    tmppargmem=pargmem[i];
+        String tmppargS=pargS[i];
+	prog[i]=prog[j];
+	pargD[i]=pargD[j];
+	pargmem[i]=pargmem[j];
+	pargS[i]=pargS[j];
+        prog[j]=tmpprog;
+        pargD[j]=tmppargD;
+	pargmem[j]=tmppargmem;
+	pargS[j]=tmppargS;
+	if (verbose) { System.out.printf("A-COMPILER switch STO i=%d j=%d\n",i,j); }
+	i++; j--;
+      } else break;
+    }
+  }
+
   static int ftoken(String f) {
     for (int i=0; i<O_strings.length; ++i)
       if (O_strings[i].equals(f)) return i;
