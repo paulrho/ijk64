@@ -373,8 +373,13 @@ class evaluate {
           // do we need toLower?
           String param=using_machine.getvariable("fn_"+function.toLowerCase()+"_param").str();
           String form=using_machine.getvariable("fn_"+function.toLowerCase()+"_function").str();
+	  //
+	  // to make multiparameter: (this is non standard C64/128)
+	  // here you need to do this for each parameter on the list (and pop something off the result stack
+	  //  .. to do...
           if (verbose) { System.out.printf("About to set %s to %f\n",param.toLowerCase(),right); }
-          using_machine.setvariable(param.toLowerCase(),new GenericType(right));
+          //using_machine.setvariable(param.toLowerCase(),new GenericType(right));
+          using_machine.variables.createvariable_local(param.toLowerCase(),new GenericType(right));
           if (verbose) { System.out.printf("form:%s\n",form); }
 
 	  if (speeder_compile) {
@@ -399,6 +404,7 @@ class evaluate {
 	  if (speeder_compile) {
 	          //using_machine.petspeed.addInstr(Petspeed.I_RTN); - no because I'm doing it in-line
 	  }
+	  using_machine.variables.popvariable_local();
           if (verbose) { System.out.printf("Returned from evaluate\n"); }
           if (verbose) { show_state(); }
         } else {
