@@ -1,3 +1,6 @@
+NEW 20190117
+TOFIX
+* FOR Loop creation needs to be optimised too (still interpreted) - note: this is Issue#25 (previously)
 
 TOFIX
 found 20180126
@@ -45,6 +48,11 @@ DONE 5) add ELSE !!!! (search through line looking for :ELSE)
     DONE - and compiled
 DONE 11) check the chained case where you jump into the commands half way through
 DONE * when clear screen - should set colour to cursor colour =DONE
+DONE #26) F5 to run!
+DONE #27) make poke198,0 clear the buffer!
+DONE #31) c64 DEFFN param should be local
+DONE #32) c64 STR$(-5) should not return leading space
+
 
 ====================================================================================================================
 
@@ -62,8 +70,6 @@ not done:
 ) 3rd plane or sprites on graphics
 
   
-#31) c64 DEFFN param should be local
-#32) c64 STR$(-5) should not return leading space
 #15) ask question on exit (close window) of changed program
 *    create a standalone full mp2 like equivalent for timing
 
@@ -71,7 +77,6 @@ not done:
    work out why some things loose 5%
 
 #25) FOR -> compile this too!
-#26) F5 to run!
 
 2) compile IF e THEN A ..... \n B    to e BEQ toB | A ... B - requires compiling both sides initially = maybe redo ALL IF function
     or a BEQ or BNE based on the first time compiled - but not filled out until the alternative path used
@@ -87,7 +92,6 @@ not done:
 
 8) when list program dont go ultra slow on large screens
 
-#27) make poke198,0 clear the buffer!
     make other pokes work
 
 #28) superexpander graphics
