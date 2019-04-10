@@ -702,7 +702,8 @@ boolean hasFocus=false;
     } else {
       charsetUpp = kit.getImage(C64Screen.class.getResource("images/c64_low.gif"));
       charsetUpp2 = kit.getImage(C64Screen.class.getResource("images/c64_low_2.gif"));
-      charsetUpp2x1 = kit.getImage(C64Screen.class.getResource("images/c64_low_2x1.gif"));
+      //charsetUpp2x1 = kit.getImage(C64Screen.class.getResource("images/c64_low_2x1.gif"));
+      charsetUpp2x1 = kit.getImage(C64Screen.class.getResource(ConfigOptions.charsetLow2x1));
       charsetUpp3 = kit.getImage(C64Screen.class.getResource("images/c64_low_3.gif"));
       currentcharset=1;
     }
