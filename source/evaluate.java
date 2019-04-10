@@ -373,8 +373,13 @@ class evaluate {
           // do we need toLower?
           String param=using_machine.getvariable("fn_"+function.toLowerCase()+"_param").str();
           String form=using_machine.getvariable("fn_"+function.toLowerCase()+"_function").str();
+	  //
+	  // to make multiparameter: (this is non standard C64/128)
+	  // here you need to do this for each parameter on the list (and pop something off the result stack
+	  //  .. to do...
           if (verbose) { System.out.printf("About to set %s to %f\n",param.toLowerCase(),right); }
-          using_machine.setvariable(param.toLowerCase(),new GenericType(right));
+          //using_machine.setvariable(param.toLowerCase(),new GenericType(right));
+          using_machine.variables.createvariable_local(param.toLowerCase(),new GenericType(right));
           if (verbose) { System.out.printf("form:%s\n",form); }
 
 	  if (speeder_compile) {
@@ -399,6 +404,7 @@ class evaluate {
 	  if (speeder_compile) {
 	          //using_machine.petspeed.addInstr(Petspeed.I_RTN); - no because I'm doing it in-line
 	  }
+	  using_machine.variables.popvariable_local();
           if (verbose) { System.out.printf("Returned from evaluate\n"); }
           if (verbose) { show_state(); }
         } else {
@@ -681,9 +687,9 @@ class evaluate {
         if (parameters==1) {
           stktype[upto-2]=ST_STRING;
           if (stknum[upto-1]-(int)stknum[upto-1]==0.0) {
-            stkstring[upto-2]=" "+(int)(stknum[upto-1]);
+						stkstring[upto-2]=((stknum[upto-1]<0.0)?"":" ")+(int)(stknum[upto-1]);
           } else {
-            stkstring[upto-2]=" "+(new Double(stknum[upto-1]).toString());
+					  stkstring[upto-2]=((stknum[upto-1]<0.0)?"":" ")+(new Double(stknum[upto-1]).toString());
           }
           return;
         }
@@ -1836,6 +1842,7 @@ void ProcessAssignment() throws EvaluateException {
       int currentvalue=firstvalue;
       int parameters=0; // singleton
       int stackvar=0;
+      if (speeder_compile) { using_machine.petspeed.saverev(); }
       for (int stackp=0; stackp<firstvalue; ++stackp) {
         if (verbose) { System.out.printf("stackp=%d\n",stackp); }
         if (stkop[stackp].equals("===") || stkop[stackp].equals("===,")) {
@@ -1902,6 +1909,10 @@ void ProcessAssignment() throws EvaluateException {
           parameters++;
         }
       }
+      /* special work around to reverse the popping off the list for a,b=1,2a
+       * simply switch all STO around, pair by pair
+       */
+      if (speeder_compile) { using_machine.petspeed.reverseSTO(); }
     }
 
 }

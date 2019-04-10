@@ -782,6 +782,10 @@ public class Machine {
       memloc=(int)gt.num();
       if (verbose) { System.out.printf("Sysing to memory location %d\n",memloc); }
       performSYS(memloc);
+    } else if (gt.gttop==2) {
+      memloc=(int)gt.gtlist[0].num();
+      int memval=(int)gt.gtlist[1].num();
+      performSYS_2(memloc,memval);
     } else {
       System.out.printf("Wrong number of parameters\n");
       throw new BasicException("WRONG NUMBER OF PARAMETERS");
@@ -789,6 +793,90 @@ public class Machine {
   }
 
   void performSYS(int memloc) {
+		switch (memloc) {
+		  case 64738:
+        machinescreen.startupscreen();
+				break;
+		}
+    return;
+  }
+
+  void performSYS_2(int memloc, int memval) {
+		switch (memloc) {
+		  case 64738:
+        machinescreen.startupscreen();
+				break;
+      case 65000:
+        basictimer=(memval!=0)?true:false;
+        System.out.printf("basictimer switched %s\n",basictimer?"on":"off");
+				break;
+      case 65001:
+        // arbirary,  test cos, sin, tan, sqrt x the number in the value
+        // acos
+				{
+        double x=0; double w=0.5;
+        for (int i=0; i<memval; i++)
+          x+=Math.acos(w+=0.0001);
+        System.out.printf("final acos = %f\n",x);
+				}
+				break;
+      case 65002:
+				{
+        double x=0; double w=0.0;
+        for (int i=0; i<memval; i++)
+          x+=Math.cos(w+=0.1);
+        System.out.printf("final cos = %f\n",x);
+				}
+				break;
+      case 65003:
+			  {
+        double x=0; double w=0.0;
+        for (int i=0; i<memval; i++)
+          x+=Math.sin(w+=0.1);
+        System.out.printf("final sin = %f\n",x);
+				}
+				break;
+      case 65004:
+			  {
+        double x=0; double w=0.0;
+        for (int i=0; i<memval; i++)
+          x+=Math.sqrt(w+=0.1);
+        System.out.printf("final sqrt = %f\n",x);
+				}
+				break;
+      case 65005:
+			  {
+        double x=0; double w=0.0;
+        for (int i=0; i<memval; i++)
+          x+=Math.atan(w+=0.1);
+        System.out.printf("final atn = %f\n",x);
+				}
+				break;
+      case 65006:
+			  {
+        double x=0; double w=0.0;
+        for (int i=0; i<memval; i++)
+          x+=Math.pow(w+=0.1,2.0);
+        System.out.printf("final x^2 = %f\n",x);
+				}
+				break;
+      case 65007:
+			  {
+        double x=0; double w=0.0;
+        for (int i=0; i<memval; i++)
+          x+=(double)((int)(w+=0.153));
+        System.out.printf("final int() = %f\n",x);
+				}
+				break;
+      case 65008:
+			  {
+        double x=0; double w=0.0;
+        for (int i=0; i<memval; i++)
+          x+=Math.pow(256.0,2.0)*(double)(int)((1.0-0.12124)*255.0)+256.0*(double)(int)((1.0-0.125412)*255.0)+(double)(int)((1.0-0.23523*(1.0-0.236))*255.0);
+        System.out.printf("final comp256^2.. = %f\n",x);
+				}
+				break;
+			}
     return;
   }
 
@@ -813,6 +901,7 @@ public class Machine {
       PlaySound a = new PlaySound("test.wav");
     } else if (memloc==198) {
       // clear the key buffer if you get this // FIX
+			machinescreen.keybufbot=machinescreen.keybuftop; // chew it up
     } else if (memloc==199) { // ijk64 special - switch to fast mode
       ksfast=(memval>0)?true:false;
     } else if (memloc==53281) {
@@ -836,52 +925,6 @@ public class Machine {
       int x=(memloc-55296)%40;
       int y=(memloc-55296)/40;
       machinescreen.setCharColour(x,y,(char)memval);
-    } else if (memloc==65000) {
-      basictimer=(memval!=0)?true:false;
-      System.out.printf("basictimer switched %s\n",basictimer?"on":"off");
-    } else if (memloc==65001) {
-      // arbirary,  test cos, sin, tan, sqrt x the number in the value
-      // acos
-      double x=0; double w=0.5;
-      for (int i=0; i<memval; i++)
-        x+=Math.acos(w+=0.0001);
-      System.out.printf("final acos = %f\n",x);
-    } else if (memloc==65002) {
-      double x=0; double w=0.0;
-      for (int i=0; i<memval; i++)
-        x+=Math.cos(w+=0.1);
-      System.out.printf("final cos = %f\n",x);
-    } else if (memloc==65003) {
-      double x=0; double w=0.0;
-      for (int i=0; i<memval; i++)
-        x+=Math.sin(w+=0.1);
-      System.out.printf("final sin = %f\n",x);
-    } else if (memloc==65004) {
-      double x=0; double w=0.0;
-      for (int i=0; i<memval; i++)
-        x+=Math.sqrt(w+=0.1);
-      System.out.printf("final sqrt = %f\n",x);
-    } else if (memloc==65005) {
-      double x=0; double w=0.0;
-      for (int i=0; i<memval; i++)
-        x+=Math.atan(w+=0.1);
-      System.out.printf("final atn = %f\n",x);
-    } else if (memloc==65006) {
-      double x=0; double w=0.0;
-      for (int i=0; i<memval; i++)
-        x+=Math.pow(w+=0.1,2.0);
-      System.out.printf("final x^2 = %f\n",x);
-    } else if (memloc==65007) {
-      double x=0; double w=0.0;
-      for (int i=0; i<memval; i++)
-        x+=(double)((int)(w+=0.153));
-      System.out.printf("final int() = %f\n",x);
-    } else if (memloc==65008) {
-      double x=0; double w=0.0;
-      for (int i=0; i<memval; i++)
-        x+=Math.pow(256.0,2.0)*(double)(int)((1.0-0.12124)*255.0)+256.0*(double)(int)((1.0-0.125412)*255.0)+(double)(int)((1.0-0.23523*(1.0-0.236))*255.0);
-
-      System.out.printf("final comp256^2.. = %f\n",x);
     }
 
   }
@@ -990,6 +1033,9 @@ public class Machine {
     return true;
   }
   
+  static final int ENC_NORMAL=0;
+  static final int ENC_ISO88=8;
+
   void newProgramText() throws BasicException
   {
     if (program_modified) {
@@ -1016,14 +1062,15 @@ public class Machine {
     String filename;
     int mode;
     int type;
+		int enc;
     int dev;
     String bufLine;
     int bufOffset;
     Writer output;
     BufferedReader input;
     FileHandle() { fileno=-1; }; //initialise
-    void newFileHandle(int fh, int dev, String filename, char type, boolean overwrite) throws BasicException {
-      if (verbose) System.out.printf("new fh = %d filename=%s dev=%d type=%c overwrite=%s\n",topHandle,filename,dev,type,overwrite?"true":"false");
+    void newFileHandle(int fh, int dev, String filename, char type, int enc, boolean overwrite) throws BasicException {
+      if (verbose) System.out.printf("new fh = %d filename=%s dev=%d type=%c enc=%d overwrite=%s\n",topHandle,filename,dev,type,enc,overwrite?"true":"false");
       // look for free spot:
       int hand;
       for (hand=0; hand<topHandle; ++hand) {
@@ -1033,6 +1080,7 @@ public class Machine {
       handleHash[hand]=new FileHandle();
       handleHash[hand].fileno=fh;
       handleHash[hand].type=type;
+      handleHash[hand].enc=enc;
       handleHash[hand].dev=dev;
       handleHash[hand].filename=filename;
       //if (!filename.equals("KB")) {
@@ -1045,7 +1093,12 @@ public class Machine {
             handleHash[hand].bufOffset = -1;
           } else if (type=='W') {
             if (verbose) { System.out.printf("Write mode\n"); }
-            handleHash[hand].output = new BufferedWriter(new FileWriter(filename, !overwrite));
+						if (enc!=ENC_ISO88) {
+              handleHash[hand].output = new BufferedWriter(new FileWriter(filename, !overwrite));
+						} else {
+              handleHash[hand].output = 
+						    new OutputStreamWriter(new FileOutputStream(filename), "ISO-8859-1");
+						}
           }
         } catch (Exception e) { System.out.printf("open exception\n");
 	  if (verbose) { e.printStackTrace(); }	// should do real exception handling 
@@ -1074,6 +1127,7 @@ public class Machine {
      String format="seq";
      char type='R';
      boolean overwrite=false;
+		 int enc=ENC_NORMAL;
      if (dev==4) { overwrite=false; param="printer,s,w"; }
      if (param.startsWith("@")) {
        overwrite=true;
@@ -1097,7 +1151,11 @@ public class Machine {
      String filename=data[0]+"."+format;
      if (data.length>2 && data[2].equals("w")) { type='W'; }
      filename=filename.replace('/','_');
-     dummyhandleHash.newFileHandle(fh,dev,filename,type,overwrite);
+     if (format.equals("usr")) { 
+		   // set the format to do the ISO-88.. thing
+			 enc=ENC_ISO88; // ISO-88 ... 1 byte, direct, raw
+		 }
+     dummyhandleHash.newFileHandle(fh,dev,filename,type,enc,overwrite);
      fileio_ST=0;
   }
 
@@ -1142,7 +1200,8 @@ public class Machine {
   void PrintFile(String raw) {
     if (verbose) System.out.printf("use = %d raw test = %s\n",foff,raw);
     try {
-    handleHash[foff].output.append(raw);
+		  //if (handleHash[foff].enc!=ENC_ISO88) {
+      handleHash[foff].output.append(raw);
     } catch (Exception e) { System.out.printf("append exception\n"); }
   }
  // input from file
@@ -1471,7 +1530,7 @@ int hs;
        "AND","OR","NOT",
        "ON",
        "GET#5,",
-       "POKE","OPEN","INPUT#,","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST",
+       "POKE","OPEN","INPUT#","CLOSE","DATA","RUN","READ","RESTORE","INPUT","LIST",
        "META-VERBOSE",
        "SYS","CLR",
        "META-SCALEY","META-ROWS",
@@ -1485,6 +1544,7 @@ int hs;
        ,"IMAGELOAD","DRAWIMAGE","DESTROYIMAGE"
        ,"CIRCLE","ANTIALIAS"
        ,"HELP"
+			 ,"PSET","IMAGESAVE","DIR","PWD","CHDIR","MKDIR","DEF","LET","SLOW"
     };
   String got;
   String syntaxHighlight(String line) {
@@ -1556,7 +1616,7 @@ boolean findtoken() {
           if (n==4) cs();
           p+=gotlen;
           //if (hs==0) out+=" ";
-          if (i==3 || i==4 || i==6 || i==17+1) { out+=sepchar+d8+got.toLowerCase()+d0+sepchar; }
+          if (i==3 || i==4 || i==6+1 || i==17+1) { out+=sepchar+d8+got.toLowerCase()+d0+sepchar; }
           else if (i==14+1 || i==15+1 || i==16+1) { out+=sepchar+d9+got.toLowerCase()+d0+sepchar; }
           else { out+=sepchar+d2+got.toLowerCase()+d0+sepchar; }
           if (i<=3+1) n=5; else n=2;
@@ -1590,18 +1650,27 @@ void chewcr() {
 
   }
   
-  String fileUnalias(String filename) {
-    if (filename.equals("%%")) {
+  String fileUnalias(String filename, boolean isDir) {
+    if (filename.equals("%%") && !isDir) {
       filename=filename.replaceFirst("%",cloudNet+"/basic/dirod.php");
-    } else if (filename.equals("%")) {
+    } else if (filename.equals("%") && !isDir) {
       filename=filename.replaceFirst("%",cloudNet+"/basic/dir.php");
+    } else if (filename.startsWith("%%") && isDir) {
+      filename=filename.replaceFirst("%",cloudNet+"/basic/dirp.php?t=1&m=");
+      filename=filename.replaceFirst("%","");
+    } else if (filename.startsWith("%") && isDir) {
+      filename=filename.replaceFirst("%",cloudNet+"/basic/dirp.php?t=0&m=");
+      //filename=filename.replaceFirst("%","");
     } else if (filename.equals("*")) {
       filename=filename.replaceFirst("\\*",cloudNet+"/basic/dir.php");
     } else if (filename.startsWith("%") &&
        (   filename.toLowerCase().endsWith(".png")
           || filename.toLowerCase().endsWith(".jpg")
           || filename.toLowerCase().endsWith(".jpeg")
-	  || filename.toLowerCase().endsWith(".bmp") 
+          || filename.toLowerCase().endsWith(".bmp")
+          || filename.toLowerCase().endsWith(".au") 
+          || filename.toLowerCase().endsWith(".wav") 
+          || filename.toLowerCase().endsWith(".mp3") 
         )) {
       filename=filename.replaceFirst("%",cloudNet+"/cloudimages/");
     } else if (filename.startsWith("%")) {
@@ -1625,7 +1694,7 @@ void chewcr() {
           || filename.toLowerCase().endsWith(".jpeg")
 	  || filename.toLowerCase().endsWith(".bmp") 
         ) {
-        machinescreen.load_bgimage(fileUnalias(filename));
+        machinescreen.load_bgimage(fileUnalias(filename,false));
         return true;
       } else {
         if (reset && program_modified) {
@@ -1753,7 +1822,7 @@ void chewcr() {
     if (param != null && param.startsWith("%")) {
       String stashText = programText;
       String stashProgram_name=program_name;
-      String filename = fileUnalias(param);
+      String filename = fileUnalias(param,true);
       loadProgram(filename,false);
       listProgram(-1,-1);
       programText=stashText;

@@ -1148,7 +1148,7 @@ void ProcessGraphicsIMAGELOADstatement(GenericType gt) throws BasicException
               if (verbose) System.out.printf("load the image to reference\n");
               try { 
                 int imgno=machine.graphicsDevice.command_LOADIMAGE(
-                  machine.fileUnalias(gt.str())
+                  machine.fileUnalias(gt.str(),false)
                  );
                  // special case here! so if it works
                 machine.assignment("imgno="+imgno);
@@ -2368,7 +2368,7 @@ boolean ProcessLOADstatement() throws BasicException
   String filename=machine.evaluate(keepExpression).str();
   // only add basic if it doesnt have it already
   // consider using fileUnalias
-  String newfile=machine.fileUnalias(filename);
+  String newfile=machine.fileUnalias(filename,false);
   if (!newfile.equals(filename)) {
     machine.print("\n");
     machine.print("searching for "+filename.toLowerCase()+"\n");
@@ -2504,17 +2504,19 @@ boolean ProcessPOKEstatement() throws BasicException
 
 boolean ProcessSYSstatement() throws BasicException
 {
-  ReadExpression();
-  if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
-  if (verbose) { System.out.printf("inputting to %s\n",machine.evaluate(keepExpression).print()); }
+  //ReadExpression();
+  GenericType gt=PSReadExpressionEvaluate();
+  //if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
+  //if (verbose) { System.out.printf("inputting to %s\n",machine.evaluate(keepExpression).print()); }
   if (verbose) { machine.dumpstate(); }
-  if (!keepExpression.equals("")) {
-    machine.performSYS(machine.evaluate(keepExpression));
-    machine.machinescreen.startupscreen();
-    return true;
-  } else {
-    throw new BasicException("TOO FEW PARAMETERS");
-  }
+  //if (!keepExpression.equals("")) {
+    //machine.performSYS(machine.evaluate(keepExpression));
+    //machine.performSYS(machine.evaluate(keepExpression));
+  //} else {
+    //throw new BasicException("TOO FEW PARAMETERS");
+  //}
+  machine.performSYS(gt);
+  return true;
 }
 
 boolean ProcessIGNOREstatement() 

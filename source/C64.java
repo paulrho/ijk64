@@ -146,11 +146,14 @@ class C64 {
           System.out.printf("  -2 : double size\n");
           System.out.printf("  -3 : triple size\n");
           System.out.printf("  -z : petspeed [default]\n");  // make this the default
-          System.out.printf("  --slow  : no petspeed\n");  // make this the default
-          System.out.printf("  --https : use https for cloud\n");  // make this the default
-          System.out.printf("  --black : white on black on black\n");  // make this the default
+          System.out.printf("  --slow    : no petspeed\n");  // make this the default
+          System.out.printf("  --https   : use https for cloud\n");  // make this the default
+          System.out.printf("  --black   : white on black on black\n");  // make this the default
+          System.out.printf("  --font-pc : 2x1 lower is pc typeface [default:pet]\n"); 
         } else if (args[i].substring(0,2).equals("-b")) {
           blankscreen=true;
+        } else if (args[i].equals("--font-pc")) {
+          ConfigOptions.charsetLow2x1 = ConfigOptions.charsetLow2x1_pc;
         } else if (args[i].equals("--black")) {
           blankscreen=true; screendeco=1;
         } else if (args[i].substring(0,2).equals("-n")) {

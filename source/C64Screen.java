@@ -702,7 +702,8 @@ boolean hasFocus=false;
     } else {
       charsetUpp = kit.getImage(C64Screen.class.getResource("images/c64_low.gif"));
       charsetUpp2 = kit.getImage(C64Screen.class.getResource("images/c64_low_2.gif"));
-      charsetUpp2x1 = kit.getImage(C64Screen.class.getResource("images/c64_low_2x1.gif"));
+      //charsetUpp2x1 = kit.getImage(C64Screen.class.getResource("images/c64_low_2x1.gif"));
+      charsetUpp2x1 = kit.getImage(C64Screen.class.getResource(ConfigOptions.charsetLow2x1));
       charsetUpp3 = kit.getImage(C64Screen.class.getResource("images/c64_low_3.gif"));
       currentcharset=1;
     }
@@ -888,7 +889,10 @@ boolean hasFocus=false;
 
   // only allow 1 or 2 when scale (x) = 1
   public boolean setScaleY(int scaley) {
-    if (this.scale >= 1 && this.scale <= 1 & scaley >= 1 && scaley <= 2) {
+    // just set the overall scale to 1
+    //if (this.scale >= 1 && this.scale <= 1 & scaley >= 1 && scaley <= 2) {
+    if (scaley >= 1 && scaley <= 2) {
+      this.scale = 1;
       this.scaley = scaley;
       //if (bgtrans) { setBackgroundTransparent(bgtrans); } // to get a new zerod background
       reshapeScreen();

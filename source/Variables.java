@@ -21,7 +21,9 @@ class Variables {
   static final int V_ARRAY_DOUBLE2=102;
   static final int V_ARRAY_STRING1=111;
   static final int V_ARRAY_STRING2=112;
-  int     topvariable=0;
+  int     s0=10; // move the start up to allow for local vars for FN
+  int     s0_stack=10; // the s0 minus the size of the stack
+  int     topvariable=s0;
   String  variablename[];
   int     variabletype[];
   double  variablevalue[];
@@ -44,8 +46,27 @@ class Variables {
     variablearrayvalue2=new double[MAXVARIABLES][][];
     variablearraystring1=new String[MAXVARIABLES][];
     variablearraystring2=new String[MAXVARIABLES][][];
-    topvariable=0;
+    topvariable=s0; // moved start
   }
+
+  void createvariable_local(String variable, GenericType contents) {
+    if (s0_stack>0) s0_stack--; else return; // this should be an error
+    variablename[s0_stack]=variable;
+    if (contents.isNum()) {
+      variablevalue[s0_stack]=contents.num();
+      variabletype[s0_stack]=V_DOUBLE;
+    } else {
+      variablestring[s0_stack]=contents.str();
+      variabletype[s0_stack]=V_STRING;
+    }
+    //topvariable++;
+    if (verbose) { dumpstate(); }
+    return;
+  }
+  void popvariable_local() {
+    if (s0_stack<s0) s0_stack++;
+  }
+
   private void createvariable(String variable, GenericType contents) {
     variablename[topvariable]=variable;
     if (contents.isNum()) {
@@ -108,7 +129,7 @@ class Variables {
   // used only for evuated parsed assignment
   void setvariable(String variable, int params, int p1, int p2, int p3, GenericType contents) {
     if (verbose) { System.out.printf("This is a array parms=%d [%d][%d][%d] for array %s\n",params,p1,p2,p3,variable); }
-    for (int i=0; i<topvariable; ++i) {
+    for (int i=s0_stack; i<topvariable; ++i) {
       if (variable.equals(variablename[i])) {
         // found it, so set it
         if (variabletype[i]==V_ARRAY_DOUBLE1) {
@@ -136,7 +157,7 @@ class Variables {
 
   void setvariable(String variable, GenericType contents) {
     // search for this variable, if it isn't there - then create it
-    for (int i=0; i<topvariable; ++i) {
+    for (int i=s0_stack; i<topvariable; ++i) {
       if (variable.equals(variablename[i])) {
         // found it, so set it
         if (contents.isNum()) {
@@ -156,7 +177,7 @@ class Variables {
   GenericType getvariable(String variable, int param, int p1, int p2, int p3) {
     // array
     if (verbose) { System.out.printf("getvariable(%s,param=%d,%d,%d,%d\n",variable,param,p1,p2,p3); }
-    for (int i=0; i<topvariable; ++i) {
+    for (int i=s0_stack; i<topvariable; ++i) {
       if (variable.equals(variablename[i])) {
         if (param==1) {
           if (verbose) { System.out.printf("Returning value of array variablearrayvalue1[%d][%d]\n",i,p1); }
@@ -211,7 +232,7 @@ class Variables {
   // this is not finished yet - used for speedcompile
   int getvarindex(String variable) {
     if (variable.length()==0) return -2; // this is done for NEXT
-    for (int i=0; i<topvariable; ++i) {
+    for (int i=s0_stack; i<topvariable; ++i) {
       if (variable.equals(variablename[i])) {
 	      return i;
       }
@@ -221,7 +242,7 @@ class Variables {
 
   GenericType getvariable(String variable) {
     // if we try to get a non existant variable, create it and set its value to 0.0
-    for (int i=0; i<topvariable; ++i) {
+    for (int i=s0_stack; i<topvariable; ++i) {
       if (variable.equals(variablename[i])) {
         // found it, so set it
         if (variabletype[i]==V_DOUBLE) {
@@ -242,7 +263,7 @@ class Variables {
   }
 
   void dumpstate() {
-    for (int i=0; i<topvariable; ++i) {
+    for (int i=s0_stack; i<topvariable; ++i) {
       if (variabletype[i]==V_DOUBLE) {
         System.out.printf("  variable %s = %f\n",variablename[i],variablevalue[i]);
       } else if (variabletype[i]==V_STRING) {

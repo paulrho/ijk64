@@ -1,0 +1,81 @@
+5 poke53280,0:poke53281,0:print"(wht)(clr)";
+   10 open6,4,6:print#6,chr$(22):close6
+  110 it=560:input"ran,gen";it,w
+  115 input"bx,by";bx,by
+  120 printrnd(-it)
+  130 deffnr(a)=int(rnd(it)*a)
+  140 dimh%(bx,by)
+  141 ifw=3then2200
+  142 ifw=2then2100
+  145 ifw=0then2000
+  147 input"drips";xx
+  150 forp=1toxx
+  160 px=fnr(bx/2)+fnr(bx/2):py=fnr(by/2)+fnr(by/2)
+  170 r=fnr(13)+3:h=fnr(80)-30:ifpx-r<0orpy-r<0orpx+r=>bxorpy+r=>byorabs(h)<5then160
+180 s=r*r:k=(mathpi)/r
+  200 fory=-rtor:forx=-rtor
+  210 d=x*x+y*y:ifd=>sthen290
+  220 t=h*(1+cos(k*sqr(d)))
+  230 tx=x+px:ty=y+py
+  235 iftx>=bxortx<0orty>=byorty<0then290
+  280 h%(tx,ty)=h%(tx,ty)+t
+  290 nextx,y
+300 print"(rvon)";p;
+  310 nextp
+1000 open8,8,8,"land"+str$(it)+",u,w"
+ 1010 fory=0toby-1:forx=0tobx-1:print#8,chr$(h%(x,y));:nextx,y
+ 1020 close8
+1100 goto6000
+ 1999 end
+2000 open8,8,8,"land"+str$(it)+",u,r"
+ 2010 fory=0toby-1:forx=0tobx-1:get#8,a$:h%(x,y)=asc(a$+chr$(0)):nextx,y
+ 2020 close8:goto6000
+ 2100 open8,8,8,"land"+str$(it)+",s,r"
+ 2110 fory=0toby-1:forx=0tobx-1:gosub2150:h%(x,y)=val(a$):nextx,y
+ 2120 close8:goto6000
+ 2150 a$=""
+ 2160 get#8,b$:ifb$=","thenprintval(a$);:return
+ 2170 a$=a$+b$:goto2160
+ 2200 open8,8,8,"land"+str$(it)+",s,r"
+ 2210 fory=0toby-1:forx=0tobx-1:get#8,a$:printa$;:nextx,y
+ 2220 close8:goto6000
+ 3000 w1=0:w2=78:goto6000
+ 3005 open4,4:fory=0toby-1:forx=w1tow2
+ 3010 w=int((h%(x,y)-14)/5)+47:ifw=47thenw=32
+ 3020 print#4,chr$(w);
+ 3030 nextx:print#4:nexty:ifw1=79then3040
+ 3035 w1=79:w2=bx-1:close4:goto3005
+ 3040 end
+ 5000 open15,8,15:input#15,a$,b$:close15
+ 6000 x(3)=1:x(2)=1:y(3)=1:y(4)=1
+ 6010 xt=bx-2:yt=by-2:ml=1.67:xs=0:ys=0
+ 6015 s1=5.45:s2=75.45:s0=10
+ 6016 s1=10.45:s0=20:s2=30.45
+ 6017 s1=18.45:s2=28.45:s0=2:ml=11:xt=12:yt=18:xu=0:yu=10:ys=yu:xs=xu
+ 6018 rems1=18.45:s2=54.45:s0=4:ml=11:xt=28:yt=18:xu=30:yu=60:ys=yu:xs=xu
+6019 s1=1.45-100:s2=98.45+300:s0=2:ml=11:xt=12*3:yt=18*2:xu=0:yu=10:ys=yu:xs=xu
+6020 screen1:cls:antialias2
+6029 yt=yt+yu:xt=xt+xu:mf=1:af=-18.45
+6030 screen1:cls:antialias2
+ 6120 fory=ystoyt:forx=xstoxt:h1=h%(x,y):h2=h%(x+1,y):h4=h%(x,y+1):h3=h%(x+1,y+1)
+ 6125 px=x+.5:py=y+.5:h(1)=h1:h(2)=h2:h(3)=h3:h(4)=h4:forc=s1tos2steps0
+6127 remstop
+ 6130 ifh1>candh2>cthenifh3>candh4>cthen6270
+ 6140 ifh1<candh2<cthenifh3<candh4<cthen6270
+ 6170 p=(h1+h2+h3+h4)/4:fori=1to4:ifnot((h(i)>candp<c)or(h(i)<candp>c))then6195
+ 6185 f=(c-p)/(h(i)-p):xn=f*(x+x(i))+px*(1-f):yn=f*(y+y(i))+py*(1-f)
+ 6190 a(i)=1:w(i)=ml*(xn-xu)+mf*c+af:z(i)=(yn-yu)*ml
+ 6195 nexti
+ 6200 fori=1to4:j=i+1:ifj>4thenj=1
+ 6220 ifnot((h(i)>candh(j)<c)or(h(i)<candh(j)>c))then6260
+ 6235 f=(c-h(i))/(h(j)-h(i)):xn=(x(j)-x(i))*f+x(i)+x:yn=(y(j)-y(i))*f+y(i)+y
+ 6250 a(4+i)=1:w(4+i)=ml*(xn-xu)+mf*c+af:z(4+i)=(yn-yu)*ml
+ 6260 nexti
+ 6265 gosub6300
+ 6270 nextc,x,y:end
+ 6300 fori=1to4:j=j+1:k=i+4:ifj>4thenj=1
+6310 ifa(i)<>0anda(j)<>0then:linew(i),z(i),w(j),z(j),4
+6315 ifa(k)=0then6340
+6320 ifa(i)<>0then:linew(i),z(i),w(k),z(k),4
+6330 ifa(j)<>0then:linew(j),z(j),w(k),z(k),4
+ 6340 nexti:fori=1to8:a(i)=0:next:return
