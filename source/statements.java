@@ -766,22 +766,22 @@ boolean ReadStatement() throws BasicException
   if (verbose) { System.out.printf("In ReadStatement\n"); }
   if (verbose) { System.out.printf("Got %d as token\n",gotToken); }
     switch(gotToken) {
-      case ST_FOR:            if (ProcessFORstatement())        { return true; } break;
-      case ST_NEXT:           if (ProcessNEXTstatement())       { return true; } break;
-      case ST_IF:             if (ProcessIFstatement())         { return true; } break;
-      case ST_ON:             if (ProcessONstatement())         { return true; } break;
-      case ST_GOTO:           if (ProcessGOTOstatement())       { return true; } break;
-      case ST_GOSUB:          if (ProcessGOSUBstatement())      { return true; } break;
-      case ST_RETURN:         if (ProcessRETURNstatement())     { return true; } break;
-      case ST_PRINT:          if (ProcessPRINTstatement())      { return true; } break;
-      case ST_REM:            if (ProcessREMstatement())        { return true; } break;
-      case ST_ELSE:           if (ProcessELSEstatement())       { return true; } break;
+      case ST_FOR:            if (ProcessFORstatement())        { return true; } break; // ---------------1
+      case ST_NEXT:           if (ProcessNEXTstatement())       { return true; } break; //petspeeded
+      case ST_IF:             if (ProcessIFstatement())         { return true; } break; //petspeeded
+      case ST_ON:             if (ProcessONstatement())         { return true; } break; // ---------------
+      case ST_GOTO:           if (ProcessGOTOstatement())       { return true; } break; //petspeeded
+      case ST_GOSUB:          if (ProcessGOSUBstatement())      { return true; } break; //petspeeded
+      case ST_RETURN:         if (ProcessRETURNstatement())     { return true; } break; // ---------------
+      case ST_PRINT:          if (ProcessPRINTstatement())      { return true; } break; // ---------------2
+      case ST_REM:            if (ProcessREMstatement())        { return true; } break; //petspeeded
+      case ST_ELSE:           if (ProcessELSEstatement())       { return true; } break; //petspeeded
       case ST_OPEN:           if (ProcessOPENstatement())       { return true; } break;
       case ST_CLOSE:          if (ProcessCLOSEstatement())      { return true; } break;
-      case ST_PRINThash:      if (ProcessPRINThashstatement())  { return true; } break;
+      case ST_PRINThash:      if (ProcessPRINThashstatement())  { return true; } break; // ---------------
       case ST_INPUT:          if (ProcessINPUTstatement(false)) { return true; } break;
-      case ST_INPUThash:      if (ProcessINPUTstatement(true))  { return true; } break;
-      case ST_GET:            if (ProcessGETstatement())        { return true; } break;
+      case ST_INPUThash:      if (ProcessINPUTstatement(true))  { return true; } break; // ---------------
+      case ST_GET:            if (ProcessGETstatement())        { return true; } break; // ---------------
       case ST_GEThash:        if (ProcessGEThashstatement())    { return true; } break;
       case ST_RESTORE:        machine.uptoDATA=0;               if (ProcessIGNOREstatement()) { return true; } return true;
       case ST_READ:           if (ProcessREADstatement())       { return true; } break;
@@ -793,7 +793,7 @@ boolean ReadStatement() throws BasicException
       case ST_CLR:            machine.variables_clr();          if (ProcessIGNOREstatement()) { return true; } break;
       case ST_SAVE:           if (ProcessSAVEstatement())       { return true; } break;
       case ST_LOAD:           if (ProcessLOADstatement())       { return true; } break;
-      case ST_POKE:           if (ProcessPOKEstatement())       { return true; } break;
+      case ST_POKE:           if (ProcessPOKEstatement())       { return true; } break; //petspeeded params
       case ST_SYS:            if (ProcessSYSstatement())        { return true; } break;
       case ST_LIST:           if (ProcessLISTstatement())       { return true; } break;
 			      // I wish - wish true: compiler for expressions!
@@ -801,31 +801,31 @@ boolean ReadStatement() throws BasicException
       case ST_SLOW:           machine.switchSpeeder(false);     if (ProcessIGNOREstatement()) { return true; } break;
 
 			      // Graphics extension H1
-      case ST_CHDIR:          ProcessCHDIRstatement(getList());             return true;
-      case ST_DIR:            ProcessDIRstatement(getList());               return true;
-      case ST_ALERT:          ProcessALERTstatement(getList());             return true;
-      case ST_SLEEP:          ProcessSLEEPstatement(getList());             return true;
-      case ST_SCREEN:         ProcessGraphicsSCREENstatement(getList());    return true;
-      case ST_LINE:           ProcessGraphicsLINEstatement(getList());      return true;
-      case ST_RECT:           ProcessGraphicsRECTstatement(getList());      return true;
-      case ST_PSET:           ProcessGraphicsPSETstatement(getList());      return true;
-      case ST_CIRCLE:         ProcessGraphicsCIRCLEstatement(getList());    return true;
-      case ST_DRAWIMAGE:      ProcessGraphicsDRAWIMAGEstatement(getList()); return true;
-      case ST_GPRINT:         ProcessGraphicsGPRINTstatement(getList());    return true;
-      case ST_FSET:           ProcessGraphicsFSETstatement(getList());      return true;
-      case ST_LSET:           ProcessGraphicsLSETstatement(getList());      return true;
-      case ST_ANTIALIAS:      ProcessGraphicsANTIALIASstatement(getList()); return true;
-      case ST_IMAGELOAD:      ProcessGraphicsIMAGELOADstatement(getList()); return true;
-      case ST_IMAGESAVE:      ProcessGraphicsIMAGESAVEstatement(getList()); return true;
+      case ST_CHDIR:          ProcessCHDIRstatement(getList());             return true; //petspeeded params
+      case ST_DIR:            ProcessDIRstatement(getList());               return true; //petspeeded params
+      case ST_ALERT:          ProcessALERTstatement(getList());             return true; //petspeeded params
+      case ST_SLEEP:          ProcessSLEEPstatement(getList());             return true; //petspeeded params
+      case ST_SCREEN:         ProcessGraphicsSCREENstatement(getList());    return true; //petspeeded params
+      case ST_LINE:           ProcessGraphicsLINEstatement(getList());      return true; //petspeeded params
+      case ST_RECT:           ProcessGraphicsRECTstatement(getList());      return true; //petspeeded params
+      case ST_PSET:           ProcessGraphicsPSETstatement(getList());      return true; //petspeeded params
+      case ST_CIRCLE:         ProcessGraphicsCIRCLEstatement(getList());    return true; //petspeeded params
+      case ST_DRAWIMAGE:      ProcessGraphicsDRAWIMAGEstatement(getList()); return true; //petspeeded params
+      case ST_GPRINT:         ProcessGraphicsGPRINTstatement(getList());    return true; //petspeeded params
+      case ST_FSET:           ProcessGraphicsFSETstatement(getList());      return true; //petspeeded params
+      case ST_LSET:           ProcessGraphicsLSETstatement(getList());      return true; //petspeeded params
+      case ST_ANTIALIAS:      ProcessGraphicsANTIALIASstatement(getList()); return true; //petspeeded params
+      case ST_IMAGELOAD:      ProcessGraphicsIMAGELOADstatement(getList()); return true; //petspeeded params
+      case ST_IMAGESAVE:      ProcessGraphicsIMAGESAVEstatement(getList()); return true; //petspeeded params
       case ST_FILES:          machine.listFiles(); return true;
       case ST_CLS:            if (machine.graphicsDevice!=null) machine.graphicsDevice.command_CLS();        return true;
       case ST_BEGINFRAME:     if (machine.graphicsDevice!=null) machine.graphicsDevice.command_BEGINFRAME(); return true;
       case ST_ENDFRAME:       if (machine.graphicsDevice!=null) machine.graphicsDevice.command_ENDFRAME();   return true;
 
 			      // ijk64 Meta extension 1
-      case ST_HELP:           ProcessHELPstatement(getList());        return true;
-      case ST_META_VERBOSE:   ProcessMETAVERBOSEstatement(getList()); return true;
-      case ST_META_TIMING:    ProcessMETATIMINGstatement(getList());  return true;
+      case ST_HELP:           ProcessHELPstatement(getList());        return true; //petspeeded params
+      case ST_META_VERBOSE:   ProcessMETAVERBOSEstatement(getList()); return true; //petspeeded params
+      case ST_META_TIMING:    ProcessMETATIMINGstatement(getList());  return true; //petspeeded params
       case ST_META_ROWS:      if (ProcessMETAROWSstatement())     { return true; } break;
       case ST_META_COLS:      if (ProcessMETACOLSstatement())     { return true; } break;
       case ST_META_BGTRANS:   if (ProcessMETABGTRANSstatement())  { return true; } break;
