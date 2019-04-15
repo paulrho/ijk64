@@ -1937,6 +1937,8 @@ boolean ProcessNEXTstatement() throws BasicException
 
 boolean ProcessFORstatement() throws BasicException
 {
+  if (speeder) return ProcessFORps_statement();
+
   String forto;
   String forstep="1";
   if (verbose) { System.out.printf("Processing FOR statement\n"); }
@@ -1985,6 +1987,119 @@ boolean ProcessFORstatement() throws BasicException
   ReadColon(); // check
   machine.createFORloop(pnt, keepVariable.toLowerCase(), machine.evaluate(forto).num(), machine.evaluate(forstep).num());
   return true;
+}
+
+boolean ProcessFORps_statement() throws BasicException
+{
+ //if (machine.petspeed.is_compiled(pnt)) {
+  //ReadAssign();
+  //GenericType gt_to=PSReadExpressionEvaluate();
+
+    //machine.createFORloop(pnt, keepVariable.toLowerCase(), machine.evaluate(forto).num(), machine.evaluate(forstep).num());
+    //return true;
+ //} else {
+  if (verbose) { System.out.printf("Processing (ps) FOR statement\n"); }
+
+  int vv;
+  int pntkeep=pnt;
+  // check to see if compiled...
+  if (machine.petspeed.is_compiled(pnt)) {
+    // stash it in a place we can get it
+    // special place - next location contains vv
+    vv=machine.petspeed.pcache[pntkeep+1];
+    if (verbose) System.out.printf("Got vv=%d\n",vv);
+    ReadAssign(); 
+  } else {
+    ReadAssignment();
+             if (verbose) System.out.printf("keepVariable=%s\n",keepVariable);
+    pnt=pntkeep; // rewind it back before assignment
+    if (keepVariable==null || keepVariable.equals("")) {
+      System.out.printf("?SYNTAX ERROR : NO VARIABLE\n");
+      throw new BasicException("SYNTAX ERROR : NO VARIABLE");
+    }
+    ReadAssign(); // need to do this first - might be first time seen
+    // trim spaces
+    keepVariable=keepVariable.trim().toLowerCase();
+    vv=machine.variables.getvarindex(keepVariable);
+    machine.petspeed.pcache[pntkeep+1]=vv;
+     if (verbose) System.out.printf("Got vv=%d\n",vv);
+  }
+  if (verbose) System.out.printf("post ReadAssign pnt=%d\n",pnt);
+
+  //GenericType gt_to;
+  double dbl_to;
+
+  int fpnt=pnt;
+  boolean is_compiled=false;
+  if (machine.petspeed.pcache[fpnt]!=ST_TO+2) {
+    ReadStatementToken(); // note MUST be TO
+    if (gotToken!=ST_TO) {
+      System.out.printf("?SYNTAX ERROR 104: did not get TO token\n");
+      throw new BasicException("SYNTAX ERROR : NO TO");
+      //return false;
+    }
+            if (verbose) System.out.printf("Setting pcache[%d]=%d\n",fpnt,gotToken+2);
+    machine.petspeed.pcache[fpnt]=gotToken+2;
+    machine.petspeed.pnext[fpnt]=pnt;
+    //gt_to=PSReadExpressionEvaluate();
+    dbl_to=PSReadExpressionEvaluate().num();
+  } else {
+    is_compiled=true;
+    //pnt=machine.petspeed.pnext[fpnt];
+             if (verbose) System.out.printf("Found cached TO token\n");
+    PSReadExpressionEvaluate();
+    //gt_to=new GenericType(machine.petspeed.result());
+    dbl_to=machine.petspeed.result();
+  }
+       //if (machine.petspeed.result()==0.0) { // num only returns a num
+  //GenericType gt_step;
+  double dbl_step;
+
+  //if (verbose) { System.out.printf("NEXT: to string = %s\n",forto); }
+  fpnt=pnt;
+  if (machine.petspeed.pcache[fpnt]==ST_STEP+2) {
+            if (verbose) System.out.printf("Found cached STEP at pnt=%d\n",pnt);
+      PSReadExpressionEvaluate();
+            if (verbose) System.out.printf("After acode run at pnt=%d\n",pnt);
+      //gt_step=new GenericType(machine.petspeed.result());
+      dbl_step=machine.petspeed.result();
+      pnt=machine.petspeed.pnext[fpnt];
+            if (verbose) System.out.printf("After acode run and change at pnt=%d\n",pnt);
+  } else if (is_compiled) { // no step - but we have compiled before
+      //gt_step=new GenericType(1.0);
+      dbl_step=1;
+  } else {
+    if (!ReadColon() && pnt<linelength && !line.substring(pnt,pnt+1).equals("\n")) {
+      ReadStatementToken(); // note CAN be STEP
+      if (gotToken==ST_STEP) {
+        machine.petspeed.pcache[fpnt]=gotToken+2;
+            if (verbose) System.out.printf("Setting pnext[%d]=%d\n",fpnt,pnt);
+        //gt_step=PSReadExpressionEvaluate();
+        dbl_step=PSReadExpressionEvaluate().num();
+        machine.petspeed.pnext[fpnt]=pnt;
+      } else {
+        System.out.printf("?SYNTAX ERROR 105: did not get STEP token\n");
+        throw new BasicException("SYNTAX ERROR : NOT STEP");
+      }
+    } else {
+      // no STEP keyword
+      // just push on a "1" to STEP
+      //gt_step=new GenericType(1.0);
+      dbl_step=1;
+    }
+  }
+  // MachineProcessFOR...
+  // should to be an expression or a evaluated number?
+  //machine.processFOR(/*position*/pnt,/*variable*/..,/*to*/..,/*step*/..);
+  ReadColon(); // check
+            if (verbose) System.out.printf("At pnt=%d near end of FORps\n",pnt);
+//if (gt_to == null) System.out.printf("gt_to is null\n");
+//if (gt_step == null) System.out.printf("gt_step is null\n");
+  //machine.createFORloop(pnt, keepVariable.toLowerCase(), gt_to.num(), gt_step.num());
+  //machine.createFORloop(pnt, keepVariable.toLowerCase(), dbl_to, dbl_step);
+  machine.createFORloop_speeder(pnt, vv, dbl_to, dbl_step);
+  return true;
+ //}
 }
 
 void IgnoreRestofLine()

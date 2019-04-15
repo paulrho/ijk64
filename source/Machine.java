@@ -349,6 +349,34 @@ public class Machine {
     topforloopstack++;
   }
 
+  void createFORloop_speeder(int current, int vv, double forto, double forstep) throws BasicException
+  {
+    for (int i=0; i<topforloopstack; ++i) {
+      if (forloopstack_varpnt[i]==vv) {
+        if (topforloopstack-i>1) { // check this
+          for (int j=i; j<topforloopstack-1; ++j) {
+            forloopstack[j]=forloopstack[j+1];
+            forloopstack_var[j]=forloopstack_var[j+1];
+            forloopstack_to[j]=forloopstack_to[j+1];
+            forloopstack_step[j]=forloopstack_step[j+1];
+	    forloopstack_varpnt[j]=forloopstack_varpnt[j+1]; // because we can switch this on and off after compile  - need to always do this
+          }
+        }
+        topforloopstack--;
+        break;
+      }
+    }
+    if (verbose) { System.out.printf("processing FOR %s(%d) to %f step %f at current=%d at FORSTACK=%d\n",variables.variablename[vv],vv,forto,forstep,current,topforloopstack); }
+    forloopstack[topforloopstack]=current;
+    //forloopstack_var[topforloopstack]=variable; // ignore - is this okay?
+    forloopstack_var[topforloopstack]=variables.variablename[vv]; // needs this for two reasons, 1 for gosub (not null) and if we switch to SLOW mid program
+    forloopstack_varpnt[topforloopstack]=vv; // because we can switch this on and off after compile  - need to always do this
+    forloopstack_to[topforloopstack]=forto;
+    forloopstack_step[topforloopstack]=forstep;
+    if (topforloopstack==MAXFORS-1) throw new BasicException("OUT OF MEMORY");
+    topforloopstack++;
+  }
+
   // ready for the next stage
   int processNEXTspeeder(int vv) throws BasicException {
     // vv==-1 if blank, otherwise
