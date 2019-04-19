@@ -428,6 +428,14 @@ class C64Screen extends JFrame
         addWindowFocusListener(this); // this is so we dont move the cursor when only trying to get focus on the window
       }    
 
+if (false) {
+  RepaintManager rm = RepaintManager.currentManager(this);
+  boolean b = rm.isDoubleBufferingEnabled();
+  System.out.printf("double buf = %d\n",b?1:0);
+  rm.setDoubleBufferingEnabled(false);
+  b = rm.isDoubleBufferingEnabled();
+  System.out.printf("double buf = %d\n",b?1:0);
+}
     //setWindowOpacity(this, 0.5f);
     //com.sun.awt.AWTUtilities.setWindowOpacity(this, 0.5f);
  
@@ -904,6 +912,7 @@ boolean hasFocus=false;
 
 // this isn't working
   long cursflash = 0;
+          ////new//boolean bb=false;
   public void create_screen_updater() {
     
     javax.swing.Timer timer1 = new javax.swing.Timer(screenUpatems, 
@@ -911,6 +920,9 @@ boolean hasFocus=false;
         public void actionPerformed(ActionEvent event) {
           // blink cursor
           if (System.currentTimeMillis() - cursflash >= flashtimems) {
+          ////new//bb=!bb;
+          ////new//if (bb) {
+            //System.out.printf("timer=%d\n",System.currentTimeMillis()-cursflash);
             cursflash = System.currentTimeMillis();
             cursVisible = !cursVisible;
             screenneedsupdate = true;
@@ -1942,6 +1954,7 @@ if (verbose) System.out.printf("%d,%d to %d,%d\n",ox,oy,x,y);
   long ttime_paintm;
   long tcount_paint = 0;
 
+      long last_paint=0L;
 //         Graphics2D offGraphics;
 
 //public void paint(Graphics g)
@@ -1952,6 +1965,8 @@ if (verbose) System.out.printf("%d,%d to %d,%d\n",ox,oy,x,y);
     if (true) {
       tstart = System.currentTimeMillis();
       tcount_paint++;
+      if (verbose) System.out.printf("paint lat.: %d cursvis=%d\n",tstart-last_paint,cursVisible?1:0);
+      last_paint=tstart;
     }
   // sometimes this is not ready yet
     if (offGraphics != null) {
@@ -2046,6 +2061,9 @@ if (verbose) System.out.printf("%d,%d to %d,%d\n",ox,oy,x,y);
 
     if (true) {
       ttime_paint = System.currentTimeMillis() - tstart;
+      if (verbose) System.out.printf("  paint t : %d\n",ttime_paint);
+      if (ConfigOptions.do_syncPaint) Toolkit.getDefaultToolkit().sync(); // this is the key function that stops the linux missing paint effect (e.g. blink cursor)
+      if (verbose) System.out.printf("  paint sync %d\n",System.currentTimeMillis()-(tstart+ttime_paint));
     }
   }
 
