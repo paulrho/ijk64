@@ -953,7 +953,16 @@ public class Machine {
       int x=(memloc-55296)%40;
       int y=(memloc-55296)/40;
       machinescreen.setCharColour(x,y,(char)memval);
-    }
+
+
+    // ijk specials
+    } else if (memloc==70100) {
+      machinescreen.paint_throttle_ms=memval;
+    } else if (memloc==70101) {
+      machinescreen.paint_throttle_slow_ms=memval;
+    } else if (memloc==70102) {
+      ConfigOptions.do_syncPaint=((memval>0)?true:false);
+    } 
 
   }
   

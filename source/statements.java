@@ -586,7 +586,7 @@ void doBasicTimer(boolean finalprint) {
                  (line.substring(i,(i+15>line.length()-1?line.length()-1:i+15))+"...").replaceAll("^[ ]*:","").replaceAll("\\r.*|\\n.*|:.*", "")
               );
             else
-              System.out.printf("  %5d %8d %9d %11.4f  %5s %s\n",
+              System.out.printf("  %5d %8d %9d %13.6f %5s %s\n",
                 i,basictimer_times[i],basictimer_count[i],
                 (double)basictimer_times[i]/(double)basictimer_count[i],
                  machine.getCurrentLine(i),
@@ -826,6 +826,7 @@ boolean ReadStatement() throws BasicException
       case ST_HELP:           ProcessHELPstatement(getList());        return true; //petspeeded params
       case ST_META_VERBOSE:   ProcessMETAVERBOSEstatement(getList()); return true; //petspeeded params
       case ST_META_TIMING:    ProcessMETATIMINGstatement(getList());  return true; //petspeeded params
+      //tmp//case ST_META_TIMING:    ProcessREMstatement();  return true; //petspeeded params
       case ST_META_ROWS:      if (ProcessMETAROWSstatement())     { return true; } break;
       case ST_META_COLS:      if (ProcessMETACOLSstatement())     { return true; } break;
       case ST_META_BGTRANS:   if (ProcessMETABGTRANSstatement())  { return true; } break;
@@ -1523,10 +1524,12 @@ GenericType getList() throws BasicException
   if (speeder && machine.petspeed.is_compiled(pnt)) { 
        if (verbose) System.out.printf("Found compiled at %d\n",pnt); 
        try {
-         pnt=machine.petspeed.execute(pnt);
+         //TRY//pnt=machine.petspeed.execute(pnt);
+         /*TRY*/pnt=machine.petspeed.execute2(pnt);
          // jump the pointer
        } catch (EvaluateException e) { throw new BasicException(e.getMessage()); }
        gt= machine.petspeed.list; // not reentrant - FIX
+       //gt=new GenericType(1.0); //TRY//
        
        //machine.petspeed.atop-=machine.petspeed.listtop; // no longer required? CHECK
        
@@ -1538,6 +1541,7 @@ GenericType getList() throws BasicException
      if (speeder && gt.gttop==1) {
           if (gt.isNum()) machine.petspeed.pushD();
 	  else machine.petspeed.pushS();
+///*TRY*/machine.petspeed.addInstr(Petspeed.I_STO | Petspeed.T_Dbl | Petspeed.M_MEM,16);
      }
      if (speeder && gt.gttop==0) {
 	  machine.petspeed.pushEmpty();

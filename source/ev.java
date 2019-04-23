@@ -234,11 +234,13 @@ class ev {
     evaluate_engine.interpret_string("(1+2+3+4+5+6)",1+2+3+4+5+6);
     evaluate_engine.interpret_string("4*(1+2+3+4+5+6)",4*(1+2+3+4+5+6));
     evaluate_engine.interpret_string("(1+2+3+4+5+6)*4",4*(1+2+3+4+5+6));
-    evaluate_engine.interpret_string("2^3^4",4*(1+2+3+4+5+6));
-    evaluate_engine.interpret_string("-2^3^4",4*(1+2+3+4+5+6));
-    evaluate_engine.interpret_string("-2^-3^4",4*(1+2+3+4+5+6));
-    evaluate_engine.interpret_string("(-2)^-3^4",4*(1+2+3+4+5+6));
-    evaluate_engine.interpret_string("(-2)^(-3)^4",4*(1+2+3+4+5+6));
+    evaluate_engine.interpret_string("2^3^4",4096);
+    evaluate_engine.interpret_string("-2^3^4",-4096);
+    evaluate_engine.interpret_string("-5^2^4",-390625);
+    evaluate_engine.interpret_string("(-5)^2^4",390625);
+    evaluate_engine.interpret_string("-2^-3^4*1e25",-4.1359030627651384); // not zero, just very small
+    //evaluate_engine.interpret_string("(-2)^-3^4",4*(1+2+3+4+5+6));
+    //evaluate_engine.interpret_string("(-2)^(-3)^4",4*(1+2+3+4+5+6));
     }
     }
   } // end func

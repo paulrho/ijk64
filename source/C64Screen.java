@@ -2934,15 +2934,18 @@ boolean has_controlC;
     }
   }
 
+  static int paint_throttle_slow_ms=10;
+  static int paint_throttle_ms=100;
+
   public void repaint() {
   //if (qval%100==0) { // this works!
   // the value 100 needs tuning, 100 gives mostly good output on powerful, non-loaded machine
   // this is an extreme slowdown...
-    if (true && slowdown && System.currentTimeMillis() - qval > 10) {   // was 200 // was 200 again
+    if (true && slowdown && System.currentTimeMillis() - qval > paint_throttle_slow_ms) {   // was 200 // was 200 again
     // call the real one
       super.repaint();
       qval = System.currentTimeMillis();
-    } else if ((false || !slowdown) && System.currentTimeMillis() - qval > 100) {       // was 200 // was 200 again // had it set to 50 for a while
+    } else if ((false || !slowdown) && System.currentTimeMillis() - qval > paint_throttle_ms) {       // was 200 // was 200 again // had it set to 50 for a while
     // call the real one
       super.repaint();
       qval = System.currentTimeMillis();

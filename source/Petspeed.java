@@ -552,6 +552,407 @@ class Petspeed
     // return -1; // don't get here now as we let it blow the array (catch will get it)
   }
 
+  int execute2(int x) throws EvaluateException,BasicException {
+    int atop=gatop;
+    if (atop!=0) throw new EvaluateException("STACK CREEP");
+    //listtop=atop; // extra overhead - want to avoid this if can - FIX
+
+    try { // safety catch!
+    for (int i=acpointer[x]; /* i<MAX*/true; ++i) {
+      //if (prog[i]==I_HLT) break;
+      /// just for now to gain 5.5% speed// if (verbose) System.out.printf("\nEXECUTING %d %d %d %f %s  ",i,prog[i],pargmem[i],pargD[i],pargS[i]);
+      switch(prog[i]) {
+        case I_HLT: 
+          if (verbose) {
+            System.out.printf("\n");
+	    if (verbose && gatop>0) { System.out.printf("pushed %d onto gt list\n",gatop); }
+	  }
+	  if (gatop==0 && atop!=0 && atop!=1) System.out.printf("atop not at zero or one (%d)\n",atop);
+	  //if (verbose) { System.out.printf("about to return nextpnt(x)= %d\n",nextpnt(x)); }
+	  gatop=atop-gatop; //? CHECK
+	  return nextpnt(x);
+	case I_PRF | T_Str :
+          //speedup// if (verbose) System.out.printf("Return parameter %d flagged as a string stack=%d ",gatop,atop);
+          listadd(astack_s[gatop]);
+	  break;
+	case I_PRF | T_Dbl :
+          //speedup// if (verbose) System.out.printf("Return parameter %d flagged as a double stack=%d ",gatop,atop);
+          listadd(astack_d[gatop]);
+	  break;
+	case I_PRF | O_EMPTY :
+          //listadd();
+          if (gatop==0) list=new GenericType(false);
+	  break;
+
+	// most common at top
+	case I_FNC | F_NOP : // special Opt10 - don't really have to do this - just to make it a bit nicer
+	  continue;
+	case I_PSH | T_Dbl | M_IMM : 
+	  astack_d[atop++]=pargD[i];
+	  break;
+	case I_PSH | T_Dbl | M_MEM : 
+	  //astack_d[atop++]=using_machine.variables.variablevalue[pargmem[i]];
+	  astack_d[atop++]=vv[pargmem[i]];
+	  continue;
+	case I_PRF | O_mul : 
+	  //astack_d[atop-2]= astack_d[atop-2] * astack_d[atop-1]; atop--;
+	  astack_d[--atop-1]*= astack_d[atop];
+	  continue;
+	case I_PRF | O_add : 
+	  //astack_d[atop-2]= astack_d[atop-2] + astack_d[atop-1]; atop--;
+	  astack_d[--atop-1]+= astack_d[atop];
+	  continue;
+	case I_PRF | O_sub : 
+	  //astack_d[atop-2]= astack_d[atop-2] - astack_d[atop-1]; atop--;
+	  astack_d[--atop-1]-= astack_d[atop];
+	  continue;
+	case I_PRF | O_div : 
+	  //astack_d[atop-2]= astack_d[atop-2] / astack_d[atop-1]; atop--;
+	  astack_d[--atop-1]/= astack_d[atop];
+	  continue;
+	case I_STO | T_Dbl | M_MEM : 
+	  //using_machine.variables.variablevalue[pargmem[i]]=astack_d[--atop];
+	  vv[pargmem[i]]=astack_d[--atop];
+	  continue;
+
+	case I_FNC | F_sin : 
+	  astack_d[atop-1]= Math.sin(astack_d[atop-1]);
+	  break;
+	case I_FNC | F_cos : 
+	  astack_d[atop-1]= Math.cos(astack_d[atop-1]);
+	  break;
+	case I_FNC | F_int : 
+	  astack_d[atop-1]= (double)((int)(astack_d[atop-1]));
+	  break;
+	case I_FNC | F_log : 
+	  astack_d[atop-1]= Math.log(astack_d[atop-1]);
+	  break;
+	case I_FNC | F_tan : 
+	  astack_d[atop-1]= Math.tan(astack_d[atop-1]);
+	  break;
+	case I_FNC | F_atn : 
+	  astack_d[atop-1]= Math.atan(astack_d[atop-1]);
+	  break;
+	case I_FNC | F_sqr : 
+	case I_FNC | F_sqrt : 
+	  astack_d[atop-1]= Math.sqrt(astack_d[atop-1]);
+	  break;
+	case I_FNC | F_asin : 
+	  astack_d[atop-1]= Math.asin(astack_d[atop-1]);
+	  break;
+	case I_FNC | F_acos : 
+	  astack_d[atop-1]= Math.acos(astack_d[atop-1]);
+	  break;
+	case I_FNC | F_abs : 
+	  astack_d[atop-1]= Math.abs(astack_d[atop-1]);
+	  break;
+	case I_FNC | F_rnd : 
+          if (astack_d[atop-1]<0) { using_machine.evaluate_engine.generator = new java.util.Random((long)-astack_d[atop-1]); } // added this in for seeds
+	  astack_d[atop-1]=using_machine.evaluate_engine.generator.nextDouble();
+	  break;
+	case I_FNC | F_exp : 
+	  astack_d[atop-1]= Math.exp(astack_d[atop-1]);
+	  break;
+	case I_FNC | F_sgn : 
+	  if (astack_d[atop-1]<0.0) astack_d[atop-1]=-1.0;
+	  else if (astack_d[atop-1]==0.0) astack_d[atop-1]=0.0;
+	  else astack_d[atop-1]=1.0;
+	  break;
+
+	case I_FNC | F_val : 
+          // takes a string but returns a double
+          try {
+            astack_d[atop-1]=Double.parseDouble(astack_s[atop-1]); 
+          } catch (Exception e) { 
+            // maybe just a "." should be coverted to 0 or a ""???
+            // throw new EvaluateException("NON NUMERIC STRING"); // look at what the C64 really does
+            astack_d[atop-1]=0.0;
+          }
+	  break;
+
+	case I_FNC | F_instr : 
+          astack_d[atop-2]=0;
+          for (int j=0; j<=astack_s[atop-2].length()-astack_s[atop-1].length(); ++j) {
+            if (astack_s[atop-2].substring(j,j+astack_s[atop-1].length()).equals(astack_s[atop-1])) {
+              astack_d[atop-2]=j+1;
+              break;
+            }
+          }
+	  atop--;
+	  break;
+
+	case I_FNC | F_frm : 
+          try {          
+            astack_s[atop-2]=String.format(astack_s[atop-2],astack_d[atop-1]);
+	    atop--;
+          } catch(Exception e) {
+	    gatop=atop;
+            throw new EvaluateException("BAD FORMAT");              
+          }
+	  break;
+	case I_FNC | F_midD : 
+          try {          
+	    if (pargmem[i]==3) {
+	      astack_s[atop-3]=astack_s[atop-3].substring((int)astack_d[atop-2]-1,(int)astack_d[atop-2]-1+(int)astack_d[atop-1]);
+	      atop--;
+	      atop--;
+	    } else {
+	      astack_s[atop-2]=astack_s[atop-2].substring((int)astack_d[atop-1]-1);
+	      atop--;
+	    }
+          } catch(Exception e) {
+	    gatop=atop;
+            throw new EvaluateException("BAD SUBSTRING INDEX");              
+          }
+	  break;
+	case I_FNC | F_leftD : 
+          //try {          
+	    //astack_s[atop-2]=astack_s[atop-2].substring(0,(int)astack_d[atop-1]);
+
+            if ((int)astack_d[atop-1]<=0) { astack_s[atop-2]=""; }
+            else if ((int)astack_d[atop-1]>astack_s[atop-2].length()) { }
+            else { astack_s[atop-2]=astack_s[atop-2].substring(0,(int)astack_d[atop-1]); }
+	    atop--;
+          //} catch(Exception e) {
+            //throw new EvaluateException("BAD SUBSTRING INDEX");              
+          //}
+	  break;
+	case I_FNC | F_rightD : 
+          try {          
+	    astack_s[atop-2]=astack_s[atop-2].substring(astack_s[atop-2].length()-(int)astack_d[atop-1]);
+	    atop--;
+          } catch(Exception e) {
+	    gatop=atop;
+            throw new EvaluateException("BAD SUBSTRING INDEX");              
+          }
+	  break;
+	case I_FNC | F_strD : 
+	  // I think the leading space is wrong - it should be -ve if it is.... FIX
+	  if (astack_d[atop-1]-(int)astack_d[atop-1]==0.0) {
+	    astack_s[atop-1]=((astack_d[atop-1]<0.0)?"":" ")+(int)astack_d[atop-1];
+          } else {
+	    astack_s[atop-1]=((astack_d[atop-1]<0.0)?"":" ")+(new Double(astack_d[atop-1]).toString());
+          }
+	  break;
+	case I_FNC | F_len : 
+          try {          
+	    astack_d[atop-1]=astack_s[atop-1].length();
+          } catch(Exception e) {
+	    gatop=atop;
+            throw new EvaluateException("BAD SUBSTRING INDEX");              
+          }
+	  break;
+
+	case I_FNC | F_peek : 
+	  astack_d[atop-1]=using_machine.peek((int)astack_d[atop-1]);
+	  break;
+	case I_FNC | F_pos : 
+	  {
+            int cursx=using_machine.machinescreen.cursX;
+            astack_d[atop-1]=cursx;
+          }
+	  break;
+
+	case I_FNC | F_asc : 
+	  {
+            if (astack_s[atop-1]=="") {
+	      gatop=atop;
+              throw new EvaluateException("ILLEGAL QUANTITY");
+	    }
+            int v=(int)((astack_s[atop-1].charAt(0))&0xFF);
+            if (v>=65&&v<=90) v+=128; 
+            else if (v>=65&&v<=90) v+=32;
+            else if (v>=97&&v<=122) v-=32; 
+            else if (v>=193&&v<=218) v-=96; 
+            else if (v==95) v=96; 
+            else if (v==96) v=95; 
+            else if (v==123) v=179; else if (v==179) v=123;
+            else if (v==124) v=125; 
+            else if (v==125) v=171; 
+            else if (v==171) v=124;  
+            astack_d[atop-1]=v;
+	  }
+	  break;
+	case I_FNC | F_chrD : 
+	  {
+            int v=(int)astack_d[atop-1];
+            if (v>=193&&v<=218) v=v-128; 
+            else if (v>=65&&v<=90) v=v+32; 
+            else if (v>=97&&v<=122) v=v+96; 
+            else if (v==95) v=96; 
+            else if (v==96) v=95; 
+            else if (v==123) v=179; else if (v==179) v=123;
+            else if (v==124) v=171; 
+            else if (v==125) v=124; 
+            else if (v==171) v=125;  
+            astack_s[atop-1]=""+(char)v;
+	  }
+	  break;
+
+	case I_FNC | F_var_ti : 
+	  astack_d[atop++]= (double)(int)((System.currentTimeMillis()/16.66666666)%1073741824);
+	  break;
+	case I_FNC | F_var_st : 
+	  astack_d[atop++]=using_machine.fileio_ST; using_machine.fileio_ST=0;
+	  break;
+	case I_FNC | F_var_tiD : 
+	  astack_s[atop++]= localDateFormat.format( System.currentTimeMillis());
+	  break;
+	case I_FNC | F_var_pi : 
+	  astack_d[atop++]= Math.PI;
+	  break;
+
+	case I_PRF | T_Str | O_add : 
+	  astack_s[atop-2]= astack_s[atop-2] + astack_s[atop-1]; atop--;
+	  break;
+
+	case I_PRF | O_pow : 
+	  astack_d[atop-2]= Math.pow(astack_d[atop-2],astack_d[atop-1]); atop--;
+	  break;
+	case I_PRF | O_neg : 
+	  astack_d[atop-1]= -astack_d[atop-1];
+	  break;
+	case I_PRF | O_lt : 
+	  astack_d[atop-2]= (astack_d[atop-2] < astack_d[atop-1])?-1:0; atop--;
+	  break;
+	case I_PRF | O_le : 
+	  astack_d[atop-2]= (astack_d[atop-2] <= astack_d[atop-1])?-1:0; atop--;
+	  break;
+	case I_PRF | O_eq : 
+	  astack_d[atop-2]= (astack_d[atop-2] == astack_d[atop-1])?-1:0; atop--;
+	  break;
+	case I_PRF | O_ge : 
+	case I_PRF | O_ge2 : 
+	  astack_d[atop-2]= (astack_d[atop-2] >= astack_d[atop-1])?-1:0; atop--;
+	  break;
+	case I_PRF | O_gt : 
+	  astack_d[atop-2]= (astack_d[atop-2] > astack_d[atop-1])?-1:0; atop--;
+	  break;
+	case I_PRF | O_ne : 
+	  astack_d[atop-2]= (astack_d[atop-2] != astack_d[atop-1])?-1:0; atop--;
+	  break;
+	case I_PRF | O_not : 
+	  astack_d[atop-1]= (double)(~(int)(astack_d[atop-1]));
+	  break;
+	case I_PRF | O_and : 
+	  astack_d[atop-2]= (((int)(astack_d[atop-2])) & ((int)(astack_d[atop-1]))); atop--;
+	  break;
+	case I_PRF | O_or : 
+	  astack_d[atop-2]= (((int)(astack_d[atop-2])) | ((int)(astack_d[atop-1]))); atop--;
+	  break;
+	case I_PRF | O_xor : 
+	  astack_d[atop-2]= (((int)(astack_d[atop-2])) ^ ((int)(astack_d[atop-1]))); atop--;
+	  break;
+
+	case I_PRF | T_Str | O_gt : 
+	  astack_d[atop-2]= (astack_s[atop-2].compareTo(astack_s[atop-1])>0)?-1:0; atop--;
+	  break;
+	case I_PRF | T_Str | O_lt : 
+	  astack_d[atop-2]= (astack_s[atop-1].compareTo(astack_s[atop-2])>0)?-1:0; atop--;
+	  break;
+	case I_PRF | T_Str | O_ne : 
+	  astack_d[atop-2]= (astack_s[atop-2].equals(astack_s[atop-1]))?0:-1; atop--;
+	  break;
+	case I_PRF | T_Str | O_eq : 
+	  astack_d[atop-2]= (astack_s[atop-2].equals(astack_s[atop-1]))?-1:0; atop--;
+	  break;
+	case I_PSH | T_Str | M_IMM : 
+	  astack_s[atop++]=pargS[i];
+	  break;
+	case I_PSH | T_Str | M_MEM : 
+	  astack_s[atop++]=using_machine.variables.variablestring[pargmem[i]];
+	  break;
+	case I_PSH | T_Str | M_MEMARR1 : 
+	  astack_s[atop-1]=using_machine.variables.variablearraystring1[pargmem[i]][(int)astack_d[atop-1]];
+	  break;
+	case I_PSH | T_Str | M_MEMARR2 : 
+	  astack_s[atop-2]=using_machine.variables.variablearraystring2[pargmem[i]][(int)astack_d[atop-2]][(int)astack_d[atop-1]]; atop--;
+	  break;
+	case I_STO | T_Str | M_MEM : 
+	  using_machine.variables.variablestring[pargmem[i]]=astack_s[--atop];
+	  break;
+	case I_STO | T_Str | M_MEMARR1 : 
+	  using_machine.variables.variablearraystring1[pargmem[i]][(int)astack_d[atop-2]]=astack_s[atop-1];
+	  atop--; atop--;
+	  break;
+	case I_STO | T_Str | M_MEMARR2 : 
+	  using_machine.variables.variablearraystring2[pargmem[i]][(int)astack_d[atop-3]][(int)astack_d[atop-2]]=astack_s[atop-1];
+	  atop--; atop--; atop--;
+	  break;
+
+	case I_PSH | T_Dbl | M_MEMARR1 : 
+	  astack_d[atop-1]=using_machine.variables.variablearrayvalue1[pargmem[i]][(int)astack_d[atop-1]];
+	  break;
+	case I_PSH | T_Dbl | M_MEMARR2 : 
+	  astack_d[atop-2]=using_machine.variables.variablearrayvalue2[pargmem[i]][(int)astack_d[atop-2]][(int)astack_d[atop-1]];
+          atop--;
+	  break;
+	case I_STO | T_Dbl | M_MEMARR1 : 
+	  using_machine.variables.variablearrayvalue1[pargmem[i]][(int)astack_d[atop-2]]=astack_d[atop-1];
+	  atop--; atop--;
+	  break;
+	case I_STO | T_Dbl | M_MEMARR2 : 
+	  using_machine.variables.variablearrayvalue2[pargmem[i]][(int)astack_d[atop-3]][(int)astack_d[atop-2]]=astack_d[atop-1];
+	  atop--; atop--; atop--;
+	  break;
+	case I_FNC | F_JMP : // special Opt10
+	  i=pargmem[i]-1; // goto / jmp
+	  continue;
+	  /**
+	case I_FNC | F_JSR :
+	  astack_d[atop++]=i+1; // push next pc // better to be int
+	  i=pargmem[i]-1; // goto / jmp
+	  continue;
+	case I_FNC | F_RTN : // special Opt10
+	  i=(int)astack_d[--atop]; // pop the pc // better to be int
+	  continue;
+	   **/
+ 	case I_NXT : 
+	  { int p;
+	    if ((p=using_machine.processNEXTspeeder(pargmem[i]))>=0) {
+              // jump
+              return p;
+	    }
+	  }
+	  break; // just go to next instruction
+
+	  // just a speed test
+	//case 250 : break;
+	//case 251 : break;
+	//case 252 : break;
+	//case 253 : break;
+	//case 254 : break;
+	//case 255 : break;
+
+	default:
+          if (verbose) System.out.printf("X ");
+          System.out.printf("Instruction Fault at %d instruction %d\n",i,prog[i]);
+	  // should through an error! Instruction Fault
+	  gatop=atop;
+          throw new EvaluateException("INSTRUCTION FAULT");              
+	  //break;
+      } // case
+    } // for
+      } catch (BasicLineNotFoundError e) { 
+        e.printStackTrace();
+	gatop=atop;
+        throw e;
+      } catch (ArrayIndexOutOfBoundsException e) { 
+        e.printStackTrace();
+	gatop=atop;
+        throw new EvaluateException("ILLEGAL QUANTITIY");              
+      } catch(Exception e) {
+	//System.out.println(e.getMessage());
+	e.printStackTrace();
+	System.out.println(e);
+	gatop=atop;
+        throw new EvaluateException("EXECUTE ERROR");              
+      }
+    
+    //return nextpnt(x); // we've gone off the end
+    // return -1; // don't get here now as we let it blow the array (catch will get it)
+  }
+
   void pushEmpty() {
           addInstr(Petspeed.I_PRF | Petspeed.O_EMPTY); // flag a double
   }
