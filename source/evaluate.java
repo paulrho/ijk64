@@ -381,17 +381,20 @@ class evaluate {
 	  for (int i=0; i<param.length; ++i) {
             //using_machine.variables.createvariable_local(param.toLowerCase(),new GenericType(right));
                            //double right=stknum[upto-1];
-            using_machine.variables.createvariable_local(param[i].toLowerCase(),new GenericType(stknum[upto-1+i]));
+            if (verbose) { System.out.printf("About to set %s to %f\n",param[i].toLowerCase(),stknum[upto-1+i]); }
+            if (!using_machine.variables.createvariable_local(param[i].toLowerCase(),new GenericType(stknum[upto-1+i]))) {
+               // normally throw at lower level, but we'll do it here
+               throw new EvaluateException("LOCAL STACK OVERFLOW");
+            }
 	  }
+          if (verbose) { System.out.printf("form:%s\n",form); }
 	  if (speeder_compile) {
 	    // rewind one step in compiled (to undo invalid fnc)
 	    using_machine.petspeed.rewind();
 
 	    for (int i=param.length-1; i>=0; --i) {
 	      // now set them all in one go by executing it!
-              if (verbose) { System.out.printf("About to set %s to %f\n",param[i].toLowerCase(),right); }
               //using_machine.setvariable(param.toLowerCase(),new GenericType(right));
-              if (verbose) { System.out.printf("form:%s\n",form); }
 
 		  // STO current stack into param var
 	          //int v = using_machine.getvarindex(param.toLowerCase());
