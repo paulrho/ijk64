@@ -1,10 +1,10 @@
 #build number and date
-#Sat, 20 Apr 2019 08:58:20 +1000
+#Thu, 16 May 2019 16:58:34 +1000
 #Tue Sep 04 23:24:04 EST 2012
-build-date=20190420-0858
+build-date=20190516-1658
 build.user.name=pgs
 build.computer=localhost.localdomain
 major=3
 minor=7
 rev=12
-build-number=2482
+build-number=2499

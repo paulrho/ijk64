@@ -1,0 +1,5 @@
+10 deffny(a,b)=a*100+b*10
+15 fori=1to3
+20 x=fny(3,2)
+25 printx
+30 next
