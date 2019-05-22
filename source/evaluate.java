@@ -371,26 +371,39 @@ class evaluate {
         if (verbose) { System.out.printf("Wanting to use predefined function %s with parameter %f\n",function,right); }
         if (using_machine!=null) {
           // do we need toLower?
-          String param=using_machine.getvariable("fn_"+function.toLowerCase()+"_param").str();
+          String params=using_machine.getvariable("fn_"+function.toLowerCase()+"_params").str();
           String form=using_machine.getvariable("fn_"+function.toLowerCase()+"_function").str();
 	  //
 	  // to make multiparameter: (this is non standard C64/128)
 	  // here you need to do this for each parameter on the list (and pop something off the result stack
 	  //  .. to do...
-          if (verbose) { System.out.printf("About to set %s to %f\n",param.toLowerCase(),right); }
-          //using_machine.setvariable(param.toLowerCase(),new GenericType(right));
-          using_machine.variables.createvariable_local(param.toLowerCase(),new GenericType(right));
+	  String [] param=params.split(",");
+	  for (int i=0; i<param.length; ++i) {
+            //using_machine.variables.createvariable_local(param.toLowerCase(),new GenericType(right));
+                           //double right=stknum[upto-1];
+            if (verbose) { System.out.printf("About to set %s to %f\n",param[i].toLowerCase(),stknum[upto-1+i]); }
+            if (!using_machine.variables.createvariable_local(param[i].toLowerCase(),new GenericType(stknum[upto-1+i]))) {
+               // normally throw at lower level, but we'll do it here
+               throw new EvaluateException("LOCAL STACK OVERFLOW");
+            }
+	  }
           if (verbose) { System.out.printf("form:%s\n",form); }
-
 	  if (speeder_compile) {
+	    // rewind one step in compiled (to undo invalid fnc)
+	    using_machine.petspeed.rewind();
+
+	    for (int i=param.length-1; i>=0; --i) {
+	      // now set them all in one go by executing it!
+              //using_machine.setvariable(param.toLowerCase(),new GenericType(right));
+
 		  // STO current stack into param var
-	          int v = using_machine.getvarindex(param.toLowerCase());
+	          //int v = using_machine.getvarindex(param.toLowerCase());
+	          int v = using_machine.getvarindex(param[i].toLowerCase());
 		  // for now - assume double! - FIX
-		  // rewind one step in compiled (to undo invalid fnc)
-		  using_machine.petspeed.rewind();
 	          using_machine.petspeed.addInstr(Petspeed.I_STO | Petspeed.T_Dbl | Petspeed.M_MEM,v);
 		  // compile the function string - should leave a sing thing on stack
 		  if (verbose) { System.out.printf("About to compile in-line the FN\n"); }
+	    }
 	  }
           evaluate evaluate_engine = new evaluate(using_machine); //probably very cpu expensive
 	  if (speeder_compile) {
@@ -404,7 +417,8 @@ class evaluate {
 	  if (speeder_compile) {
 	          //using_machine.petspeed.addInstr(Petspeed.I_RTN); - no because I'm doing it in-line
 	  }
-	  using_machine.variables.popvariable_local();
+	  for (int i=0; i<param.length; ++i)
+	    using_machine.variables.popvariable_local();
           if (verbose) { System.out.printf("Returned from evaluate\n"); }
           if (verbose) { show_state(); }
         } else {
@@ -1259,7 +1273,11 @@ class evaluate {
                return;
 
             } 
-              else if (g_is_assignment && upto==1 && stkop[upto-1].equals(OP_OPEN_BRACKET) && is_defining_function) { // we are in a defining function
+              else if (g_is_assignment && (
+			         upto==1 && stkop[upto-1].equals(OP_OPEN_BRACKET)
+			      || stkop[0].equals(OP_OPEN_BRACKET)
+			         && upto>=1 && stktype[upto-1]==ST_PARAM
+			      ) && is_defining_function) { // we are in a defining function
     
               // special case where we find that we are defining a function AND we are within the brackets               if (verbose) { System.out.printf("Not resolving the variable, keeping it BECAUSE we are going to use it as a parameter in a function definition\n"); }
                stkop[upto]="=f=";  // what should this be?
@@ -1531,12 +1549,20 @@ boolean dontallowextraclosingbrackets=true; // here for now
           // if we are defining a function - the rest of this goes into a storage location in the machine and we finish up - not processing anything else
           if (is_defining_function) {
             if (verbose) { System.out.printf("We are going to ignore the rest of the string and finish\n"); }
-            if (upto==2) { // in time, well add all parameters and join them together like this A,B,C,D
+            if (upto>=2) { // in time, well add all parameters and join them together like this A,B,C,D
               if (verbose) { System.out.printf("Rest of string:%s\n", intstring.substring(ispnt+1,intstring.length())); }
-              if (verbose) { System.out.printf("Should set fn_%s_param=%s\n",stkfunc[0],stkfunc[1]); }
+              //if (verbose) { System.out.printf("Should set fn_%s_param=%s\n",stkfunc[0],stkfunc[1]); }
               if (verbose) { System.out.printf("Should set fn_%s_function=%s\n",stkfunc[0],intstring.substring(ispnt+1,intstring.length())); }
               if (using_machine!=null) {
-                using_machine.setvariable("fn_"+stkfunc[0].toLowerCase()+"_param",new GenericType(stkfunc[1]));
+		// do this for each parameter, separate by comma
+		String all="";
+		for (int i=1; i<upto; ++i) {
+                  all+=stkfunc[i];
+		  if (i<upto-1) all+=",";
+		}
+                if (verbose) { System.out.printf("Should set fn_%s_params=%s\n",stkfunc[0],all); }
+                using_machine.setvariable("fn_"+stkfunc[0].toLowerCase()+"_params",new GenericType(all));
+                //using_machine.setvariable("fn_"+stkfunc[0].toLowerCase()+"_param",new GenericType(stkfunc[1]));
                 using_machine.setvariable("fn_"+stkfunc[0].toLowerCase()+"_function",new GenericType(intstring.substring(ispnt+1,intstring.length())));
 		// here we should compile it - and link to a pseudo variable that points to the execute point
 		// note, it should end in RTN not HLT

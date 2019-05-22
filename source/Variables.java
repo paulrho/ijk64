@@ -14,15 +14,16 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 class Variables {
-  static final int MAXVARIABLES=300;
+  static final int LSTACKOFFSET=20; // was 10 -- allows for slightly deeper FN nesting
+  static final int MAXVARIABLES=300 /*+LSTACKOFFSET*/; // should actually be 20 higher than it was
   static final int V_DOUBLE=0;
   static final int V_STRING=1;
   static final int V_ARRAY_DOUBLE1=101;
   static final int V_ARRAY_DOUBLE2=102;
   static final int V_ARRAY_STRING1=111;
   static final int V_ARRAY_STRING2=112;
-  int     s0=10; // move the start up to allow for local vars for FN
-  int     s0_stack=10; // the s0 minus the size of the stack
+  int     s0=LSTACKOFFSET; // move the start up to allow for local vars for FN
+  int     s0_stack=LSTACKOFFSET; // the s0 minus the size of the stack
   int     topvariable=s0;
   String  variablename[];
   int     variabletype[];
@@ -49,8 +50,8 @@ class Variables {
     topvariable=s0; // moved start
   }
 
-  void createvariable_local(String variable, GenericType contents) {
-    if (s0_stack>0) s0_stack--; else return; // this should be an error
+  boolean createvariable_local(String variable, GenericType contents) {
+    if (s0_stack>0) s0_stack--; else return false; // this should be an error
     variablename[s0_stack]=variable;
     if (contents.isNum()) {
       variablevalue[s0_stack]=contents.num();
@@ -61,7 +62,7 @@ class Variables {
     }
     //topvariable++;
     if (verbose) { dumpstate(); }
-    return;
+    return true;
   }
   void popvariable_local() {
     if (s0_stack<s0) s0_stack++;
