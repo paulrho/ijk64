@@ -1322,6 +1322,26 @@ boolean ReadStatementToken() {
   return false;
 }
 
+// this is still quite intensive, only to throw away most
+// this allows commands to be embedded in variable names (with exceptions)
+boolean ReadStatementTokenSubset() {
+ if (ReadStatementToken()) {
+   switch(gotToken) {
+     case ST_TO:
+     case ST_STEP:
+     case ST_THEN:
+     case ST_GOTO:
+     /*
+     case ST_AND:
+     case ST_OR:
+     case ST_NOT:
+     */
+       return true;
+   }
+ }
+ return false;
+}
+
 boolean ReadStatementToken_old() {
   startTime=System.currentTimeMillis(); 
   for (int tok=0; tok<basicTokens.length; ++tok) {
@@ -2831,7 +2851,8 @@ boolean ReadExpression()
         }
       }
       if (!quoted // no difference && a.compareToIgnoreCase("a")>=0 && a.compareTo("z")<=0
-        && ReadStatementToken()) { break; }
+        && (start==pnt && ReadStatementToken()
+         || start!=pnt && ReadStatementTokenSubset())) { break; } // only match expression from start of text
       if (a.equals("\"")) { quoted=!quoted; }
       pnt++;
     }
