@@ -413,14 +413,35 @@ class evaluate {
           evaluate_engine.generator=generator;
           evaluate_engine.verbose=verbose;
           evaluate_engine.quiet=true;
-          answer=evaluate_engine.interpret_string(form).num();
+          //answer=evaluate_engine.interpret_string(form).num();
+          GenericType answerG=evaluate_engine.interpret_string(form);
+
 	  if (speeder_compile) {
 	          //using_machine.petspeed.addInstr(Petspeed.I_RTN); - no because I'm doing it in-line
 	  }
 	  for (int i=0; i<param.length; ++i)
 	    using_machine.variables.popvariable_local();
+
+          if (verbose) { show_state(); }
+
+          if (answerG.gttop==1) {
+            stktype[upto-2]=ST_NUM;
+            stknum[upto-2]=answerG.num();
+          } else {
+            for (int i=0; i<answerG.gttop; ++i) {
+	      using_machine.petspeed.rewind(); // guess - take off the PARAM bits
+              stktype[upto-2]=ST_NUM;
+              stknum[upto-2]=answerG.gtlist[i].num();
+              if (i<answerG.gttop-1) stkop[upto-2]=","; // complete guess
+              upto++;
+            }
+            stkop[upto-2]=""; // complete guess
+            upto-=1; // guess
+          }
+
           if (verbose) { System.out.printf("Returned from evaluate\n"); }
           if (verbose) { show_state(); }
+          return; // because we already pushed the answer
         } else {
           // this is just a made up value as we dont have a machine
           answer=100.0; // evaulate it (recurse)
