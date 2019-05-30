@@ -1,0 +1,20 @@
+10 deffnf1(x,y)=7*x+8*y,9*x+10*y
+20 deffnmul(x1,y1,x2,y2)=x1*y2+x2*y1,y1/x2+y2/x1
+30 fori=1to3
+40 a,b=fnf1(5,6)
+45 m1,m2=fn mul(4,5,6,7)
+47 print m1;m2
+50 printa,b
+55 rema[4]=b[5]+c[6]
+60 next
+70 remdeffnatan2(y,x)=atn(y/x)*-(x<>0)+(mathpi)/2*(x=0)*((y>0)-(y<0))+(mathpi)*(x<0)*((y>=0)-(y<0))
+72 deffnatan2(y,x)=atn(y/x)+(mathpi)*(x<0)*((y>=0)-(y<0))
+80 printfnatan2(2,3)
+82 printfnatan2(2,0)
+83 printfnatan2(-2,0)
+84 printfnatan2(0,2)
+86 printfnatan2(0,0)
+88 printfnatan2(0,-2)
+90 printfnatan2(-2,-3)
+92 printfnatan2(2,-3)
+94 printfnatan2(-0.1,+1)
