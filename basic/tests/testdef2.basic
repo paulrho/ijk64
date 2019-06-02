@@ -1,0 +1,5 @@
+10 deffnf1(x,y)=7*x+8*y,9*x+10*y
+20 a=1
+30 b=1
+40 a,b=fnf1(5,6)
+50 printa,b
