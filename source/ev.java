@@ -234,6 +234,11 @@ class ev {
     evaluate_engine.interpret_string("(1+2+3+4+5+6)",1+2+3+4+5+6);
     evaluate_engine.interpret_string("4*(1+2+3+4+5+6)",4*(1+2+3+4+5+6));
     evaluate_engine.interpret_string("(1+2+3+4+5+6)*4",4*(1+2+3+4+5+6));
+    evaluate_engine.interpret_string("2^3^4",4*(1+2+3+4+5+6));
+    evaluate_engine.interpret_string("-2^3^4",4*(1+2+3+4+5+6));
+    evaluate_engine.interpret_string("-2^-3^4",4*(1+2+3+4+5+6));
+    evaluate_engine.interpret_string("(-2)^-3^4",4*(1+2+3+4+5+6));
+    evaluate_engine.interpret_string("(-2)^(-3)^4",4*(1+2+3+4+5+6));
     }
     }
   } // end func

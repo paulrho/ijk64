@@ -766,22 +766,22 @@ boolean ReadStatement() throws BasicException
   if (verbose) { System.out.printf("In ReadStatement\n"); }
   if (verbose) { System.out.printf("Got %d as token\n",gotToken); }
     switch(gotToken) {
-      case ST_FOR:            if (ProcessFORstatement())        { return true; } break;
-      case ST_NEXT:           if (ProcessNEXTstatement())       { return true; } break;
-      case ST_IF:             if (ProcessIFstatement())         { return true; } break;
-      case ST_ON:             if (ProcessONstatement())         { return true; } break;
-      case ST_GOTO:           if (ProcessGOTOstatement())       { return true; } break;
-      case ST_GOSUB:          if (ProcessGOSUBstatement())      { return true; } break;
-      case ST_RETURN:         if (ProcessRETURNstatement())     { return true; } break;
-      case ST_PRINT:          if (ProcessPRINTstatement())      { return true; } break;
-      case ST_REM:            if (ProcessREMstatement())        { return true; } break;
-      case ST_ELSE:           if (ProcessELSEstatement())       { return true; } break;
+      case ST_FOR:            if (ProcessFORstatement())        { return true; } break; // ---------------1
+      case ST_NEXT:           if (ProcessNEXTstatement())       { return true; } break; //petspeeded
+      case ST_IF:             if (ProcessIFstatement())         { return true; } break; //petspeeded
+      case ST_ON:             if (ProcessONstatement())         { return true; } break; // ---------------
+      case ST_GOTO:           if (ProcessGOTOstatement())       { return true; } break; //petspeeded
+      case ST_GOSUB:          if (ProcessGOSUBstatement())      { return true; } break; //petspeeded
+      case ST_RETURN:         if (ProcessRETURNstatement())     { return true; } break; // ---------------
+      case ST_PRINT:          if (ProcessPRINTstatement())      { return true; } break; // ---------------2
+      case ST_REM:            if (ProcessREMstatement())        { return true; } break; //petspeeded
+      case ST_ELSE:           if (ProcessELSEstatement())       { return true; } break; //petspeeded
       case ST_OPEN:           if (ProcessOPENstatement())       { return true; } break;
       case ST_CLOSE:          if (ProcessCLOSEstatement())      { return true; } break;
-      case ST_PRINThash:      if (ProcessPRINThashstatement())  { return true; } break;
+      case ST_PRINThash:      if (ProcessPRINThashstatement())  { return true; } break; // ---------------
       case ST_INPUT:          if (ProcessINPUTstatement(false)) { return true; } break;
-      case ST_INPUThash:      if (ProcessINPUTstatement(true))  { return true; } break;
-      case ST_GET:            if (ProcessGETstatement())        { return true; } break;
+      case ST_INPUThash:      if (ProcessINPUTstatement(true))  { return true; } break; // ---------------
+      case ST_GET:            if (ProcessGETstatement())        { return true; } break; // ---------------
       case ST_GEThash:        if (ProcessGEThashstatement())    { return true; } break;
       case ST_RESTORE:        machine.uptoDATA=0;               if (ProcessIGNOREstatement()) { return true; } return true;
       case ST_READ:           if (ProcessREADstatement())       { return true; } break;
@@ -793,7 +793,7 @@ boolean ReadStatement() throws BasicException
       case ST_CLR:            machine.variables_clr();          if (ProcessIGNOREstatement()) { return true; } break;
       case ST_SAVE:           if (ProcessSAVEstatement())       { return true; } break;
       case ST_LOAD:           if (ProcessLOADstatement())       { return true; } break;
-      case ST_POKE:           if (ProcessPOKEstatement())       { return true; } break;
+      case ST_POKE:           if (ProcessPOKEstatement())       { return true; } break; //petspeeded params
       case ST_SYS:            if (ProcessSYSstatement())        { return true; } break;
       case ST_LIST:           if (ProcessLISTstatement())       { return true; } break;
 			      // I wish - wish true: compiler for expressions!
@@ -801,31 +801,31 @@ boolean ReadStatement() throws BasicException
       case ST_SLOW:           machine.switchSpeeder(false);     if (ProcessIGNOREstatement()) { return true; } break;
 
 			      // Graphics extension H1
-      case ST_CHDIR:          ProcessCHDIRstatement(getList());             return true;
-      case ST_DIR:            ProcessDIRstatement(getList());               return true;
-      case ST_ALERT:          ProcessALERTstatement(getList());             return true;
-      case ST_SLEEP:          ProcessSLEEPstatement(getList());             return true;
-      case ST_SCREEN:         ProcessGraphicsSCREENstatement(getList());    return true;
-      case ST_LINE:           ProcessGraphicsLINEstatement(getList());      return true;
-      case ST_RECT:           ProcessGraphicsRECTstatement(getList());      return true;
-      case ST_PSET:           ProcessGraphicsPSETstatement(getList());      return true;
-      case ST_CIRCLE:         ProcessGraphicsCIRCLEstatement(getList());    return true;
-      case ST_DRAWIMAGE:      ProcessGraphicsDRAWIMAGEstatement(getList()); return true;
-      case ST_GPRINT:         ProcessGraphicsGPRINTstatement(getList());    return true;
-      case ST_FSET:           ProcessGraphicsFSETstatement(getList());      return true;
-      case ST_LSET:           ProcessGraphicsLSETstatement(getList());      return true;
-      case ST_ANTIALIAS:      ProcessGraphicsANTIALIASstatement(getList()); return true;
-      case ST_IMAGELOAD:      ProcessGraphicsIMAGELOADstatement(getList()); return true;
-      case ST_IMAGESAVE:      ProcessGraphicsIMAGESAVEstatement(getList()); return true;
+      case ST_CHDIR:          ProcessCHDIRstatement(getList());             return true; //petspeeded params
+      case ST_DIR:            ProcessDIRstatement(getList());               return true; //petspeeded params
+      case ST_ALERT:          ProcessALERTstatement(getList());             return true; //petspeeded params
+      case ST_SLEEP:          ProcessSLEEPstatement(getList());             return true; //petspeeded params
+      case ST_SCREEN:         ProcessGraphicsSCREENstatement(getList());    return true; //petspeeded params
+      case ST_LINE:           ProcessGraphicsLINEstatement(getList());      return true; //petspeeded params
+      case ST_RECT:           ProcessGraphicsRECTstatement(getList());      return true; //petspeeded params
+      case ST_PSET:           ProcessGraphicsPSETstatement(getList());      return true; //petspeeded params
+      case ST_CIRCLE:         ProcessGraphicsCIRCLEstatement(getList());    return true; //petspeeded params
+      case ST_DRAWIMAGE:      ProcessGraphicsDRAWIMAGEstatement(getList()); return true; //petspeeded params
+      case ST_GPRINT:         ProcessGraphicsGPRINTstatement(getList());    return true; //petspeeded params
+      case ST_FSET:           ProcessGraphicsFSETstatement(getList());      return true; //petspeeded params
+      case ST_LSET:           ProcessGraphicsLSETstatement(getList());      return true; //petspeeded params
+      case ST_ANTIALIAS:      ProcessGraphicsANTIALIASstatement(getList()); return true; //petspeeded params
+      case ST_IMAGELOAD:      ProcessGraphicsIMAGELOADstatement(getList()); return true; //petspeeded params
+      case ST_IMAGESAVE:      ProcessGraphicsIMAGESAVEstatement(getList()); return true; //petspeeded params
       case ST_FILES:          machine.listFiles(); return true;
       case ST_CLS:            if (machine.graphicsDevice!=null) machine.graphicsDevice.command_CLS();        return true;
       case ST_BEGINFRAME:     if (machine.graphicsDevice!=null) machine.graphicsDevice.command_BEGINFRAME(); return true;
       case ST_ENDFRAME:       if (machine.graphicsDevice!=null) machine.graphicsDevice.command_ENDFRAME();   return true;
 
 			      // ijk64 Meta extension 1
-      case ST_HELP:           ProcessHELPstatement(getList());        return true;
-      case ST_META_VERBOSE:   ProcessMETAVERBOSEstatement(getList()); return true;
-      case ST_META_TIMING:    ProcessMETATIMINGstatement(getList());  return true;
+      case ST_HELP:           ProcessHELPstatement(getList());        return true; //petspeeded params
+      case ST_META_VERBOSE:   ProcessMETAVERBOSEstatement(getList()); return true; //petspeeded params
+      case ST_META_TIMING:    ProcessMETATIMINGstatement(getList());  return true; //petspeeded params
       case ST_META_ROWS:      if (ProcessMETAROWSstatement())     { return true; } break;
       case ST_META_COLS:      if (ProcessMETACOLSstatement())     { return true; } break;
       case ST_META_BGTRANS:   if (ProcessMETABGTRANSstatement())  { return true; } break;
@@ -1320,6 +1320,26 @@ boolean ReadStatementToken() {
 //if (true) { end_timing(TIME_ReadStatementToken); }
 
   return false;
+}
+
+// this is still quite intensive, only to throw away most
+// this allows commands to be embedded in variable names (with exceptions)
+boolean ReadStatementTokenSubset() {
+ if (ReadStatementToken()) {
+   switch(gotToken) {
+     case ST_TO:
+     case ST_STEP:
+     case ST_THEN:
+     case ST_GOTO:
+     /*
+     case ST_AND:
+     case ST_OR:
+     case ST_NOT:
+     */
+       return true;
+   }
+ }
+ return false;
 }
 
 boolean ReadStatementToken_old() {
@@ -1937,6 +1957,8 @@ boolean ProcessNEXTstatement() throws BasicException
 
 boolean ProcessFORstatement() throws BasicException
 {
+  if (speeder) return ProcessFORps_statement();
+
   String forto;
   String forstep="1";
   if (verbose) { System.out.printf("Processing FOR statement\n"); }
@@ -1985,6 +2007,119 @@ boolean ProcessFORstatement() throws BasicException
   ReadColon(); // check
   machine.createFORloop(pnt, keepVariable.toLowerCase(), machine.evaluate(forto).num(), machine.evaluate(forstep).num());
   return true;
+}
+
+boolean ProcessFORps_statement() throws BasicException
+{
+ //if (machine.petspeed.is_compiled(pnt)) {
+  //ReadAssign();
+  //GenericType gt_to=PSReadExpressionEvaluate();
+
+    //machine.createFORloop(pnt, keepVariable.toLowerCase(), machine.evaluate(forto).num(), machine.evaluate(forstep).num());
+    //return true;
+ //} else {
+  if (verbose) { System.out.printf("Processing (ps) FOR statement\n"); }
+
+  int vv;
+  int pntkeep=pnt;
+  // check to see if compiled...
+  if (machine.petspeed.is_compiled(pnt)) {
+    // stash it in a place we can get it
+    // special place - next location contains vv
+    vv=machine.petspeed.pcache[pntkeep+1];
+    if (verbose) System.out.printf("Got vv=%d\n",vv);
+    ReadAssign(); 
+  } else {
+    ReadAssignment();
+             if (verbose) System.out.printf("keepVariable=%s\n",keepVariable);
+    pnt=pntkeep; // rewind it back before assignment
+    if (keepVariable==null || keepVariable.equals("")) {
+      System.out.printf("?SYNTAX ERROR : NO VARIABLE\n");
+      throw new BasicException("SYNTAX ERROR : NO VARIABLE");
+    }
+    ReadAssign(); // need to do this first - might be first time seen
+    // trim spaces
+    keepVariable=keepVariable.trim().toLowerCase();
+    vv=machine.variables.getvarindex(keepVariable);
+    machine.petspeed.pcache[pntkeep+1]=vv;
+     if (verbose) System.out.printf("Got vv=%d\n",vv);
+  }
+  if (verbose) System.out.printf("post ReadAssign pnt=%d\n",pnt);
+
+  //GenericType gt_to;
+  double dbl_to;
+
+  int fpnt=pnt;
+  boolean is_compiled=false;
+  if (machine.petspeed.pcache[fpnt]!=ST_TO+2) {
+    ReadStatementToken(); // note MUST be TO
+    if (gotToken!=ST_TO) {
+      System.out.printf("?SYNTAX ERROR 104: did not get TO token\n");
+      throw new BasicException("SYNTAX ERROR : NO TO");
+      //return false;
+    }
+            if (verbose) System.out.printf("Setting pcache[%d]=%d\n",fpnt,gotToken+2);
+    machine.petspeed.pcache[fpnt]=gotToken+2;
+    machine.petspeed.pnext[fpnt]=pnt;
+    //gt_to=PSReadExpressionEvaluate();
+    dbl_to=PSReadExpressionEvaluate().num();
+  } else {
+    is_compiled=true;
+    //pnt=machine.petspeed.pnext[fpnt];
+             if (verbose) System.out.printf("Found cached TO token\n");
+    PSReadExpressionEvaluate();
+    //gt_to=new GenericType(machine.petspeed.result());
+    dbl_to=machine.petspeed.result();
+  }
+       //if (machine.petspeed.result()==0.0) { // num only returns a num
+  //GenericType gt_step;
+  double dbl_step;
+
+  //if (verbose) { System.out.printf("NEXT: to string = %s\n",forto); }
+  fpnt=pnt;
+  if (machine.petspeed.pcache[fpnt]==ST_STEP+2) {
+            if (verbose) System.out.printf("Found cached STEP at pnt=%d\n",pnt);
+      PSReadExpressionEvaluate();
+            if (verbose) System.out.printf("After acode run at pnt=%d\n",pnt);
+      //gt_step=new GenericType(machine.petspeed.result());
+      dbl_step=machine.petspeed.result();
+      pnt=machine.petspeed.pnext[fpnt];
+            if (verbose) System.out.printf("After acode run and change at pnt=%d\n",pnt);
+  } else if (is_compiled) { // no step - but we have compiled before
+      //gt_step=new GenericType(1.0);
+      dbl_step=1;
+  } else {
+    if (!ReadColon() && pnt<linelength && !line.substring(pnt,pnt+1).equals("\n")) {
+      ReadStatementToken(); // note CAN be STEP
+      if (gotToken==ST_STEP) {
+        machine.petspeed.pcache[fpnt]=gotToken+2;
+            if (verbose) System.out.printf("Setting pnext[%d]=%d\n",fpnt,pnt);
+        //gt_step=PSReadExpressionEvaluate();
+        dbl_step=PSReadExpressionEvaluate().num();
+        machine.petspeed.pnext[fpnt]=pnt;
+      } else {
+        System.out.printf("?SYNTAX ERROR 105: did not get STEP token\n");
+        throw new BasicException("SYNTAX ERROR : NOT STEP");
+      }
+    } else {
+      // no STEP keyword
+      // just push on a "1" to STEP
+      //gt_step=new GenericType(1.0);
+      dbl_step=1;
+    }
+  }
+  // MachineProcessFOR...
+  // should to be an expression or a evaluated number?
+  //machine.processFOR(/*position*/pnt,/*variable*/..,/*to*/..,/*step*/..);
+  ReadColon(); // check
+            if (verbose) System.out.printf("At pnt=%d near end of FORps\n",pnt);
+//if (gt_to == null) System.out.printf("gt_to is null\n");
+//if (gt_step == null) System.out.printf("gt_step is null\n");
+  //machine.createFORloop(pnt, keepVariable.toLowerCase(), gt_to.num(), gt_step.num());
+  //machine.createFORloop(pnt, keepVariable.toLowerCase(), dbl_to, dbl_step);
+  machine.createFORloop_speeder(pnt, vv, dbl_to, dbl_step);
+  return true;
+ //}
 }
 
 void IgnoreRestofLine()
@@ -2716,7 +2851,8 @@ boolean ReadExpression()
         }
       }
       if (!quoted // no difference && a.compareToIgnoreCase("a")>=0 && a.compareTo("z")<=0
-        && ReadStatementToken()) { break; }
+        && (start==pnt && ReadStatementToken()
+         || start!=pnt && ReadStatementTokenSubset())) { break; } // only match expression from start of text
       if (a.equals("\"")) { quoted=!quoted; }
       pnt++;
     }

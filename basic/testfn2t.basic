@@ -1,0 +1,6 @@
+10 deffny(a,b)=a*100+b*10
+12 tt=ti
+15 fori=1to10000000
+20 x=fny(3,2)
+30 next
+40 print(ti-tt)/60

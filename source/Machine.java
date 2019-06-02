@@ -349,6 +349,34 @@ public class Machine {
     topforloopstack++;
   }
 
+  void createFORloop_speeder(int current, int vv, double forto, double forstep) throws BasicException
+  {
+    for (int i=0; i<topforloopstack; ++i) {
+      if (forloopstack_varpnt[i]==vv) {
+        if (topforloopstack-i>1) { // check this
+          for (int j=i; j<topforloopstack-1; ++j) {
+            forloopstack[j]=forloopstack[j+1];
+            forloopstack_var[j]=forloopstack_var[j+1];
+            forloopstack_to[j]=forloopstack_to[j+1];
+            forloopstack_step[j]=forloopstack_step[j+1];
+	    forloopstack_varpnt[j]=forloopstack_varpnt[j+1]; // because we can switch this on and off after compile  - need to always do this
+          }
+        }
+        topforloopstack--;
+        break;
+      }
+    }
+    if (verbose) { System.out.printf("processing FOR %s(%d) to %f step %f at current=%d at FORSTACK=%d\n",variables.variablename[vv],vv,forto,forstep,current,topforloopstack); }
+    forloopstack[topforloopstack]=current;
+    //forloopstack_var[topforloopstack]=variable; // ignore - is this okay?
+    forloopstack_var[topforloopstack]=variables.variablename[vv]; // needs this for two reasons, 1 for gosub (not null) and if we switch to SLOW mid program
+    forloopstack_varpnt[topforloopstack]=vv; // because we can switch this on and off after compile  - need to always do this
+    forloopstack_to[topforloopstack]=forto;
+    forloopstack_step[topforloopstack]=forstep;
+    if (topforloopstack==MAXFORS-1) throw new BasicException("OUT OF MEMORY");
+    topforloopstack++;
+  }
+
   // ready for the next stage
   int processNEXTspeeder(int vv) throws BasicException {
     // vv==-1 if blank, otherwise
@@ -1525,7 +1553,7 @@ int hs;
      String[] token={
        "REM",
        "GOTO","GOSUB","THEN","ELSE",
-       "TO","STEP",
+       "TO","STEP","FN",
        "IF","FOR","NEXT","RETURN","PRINT#","PRINT","ENDFRAME","DIM",
        "AND","OR","NOT",
        "ON",
@@ -1582,7 +1610,7 @@ int hs;
       if (n==1 || n==4)            if (findtoken())             /*n=0,2,5*/            break;
       if (n!=3 && a==':')                       {      cs(); p++; n=1; out=out+a;      break; }
       if (n==3 && a=='"')                       { p++; cs();      n=4; nest=0;         break; }
-      if (n==4 && (a==',' || a==';') && nest>0) {      cs(); p++; n=2; out=out+a;      break; }
+      if (n==4 && (a==',' || a==';') && nest>0) {      cs(); p++; n=4; out=out+a;      break; }
       if (n==4 && a=='"')                       {      cs();      n=3; f=p; }
       else if ((n==2||n==1) && a=='"')          {                 n=3; } // n==1 special case DIR
       else if (n==2)                            {                 n=4; nest=0; continue; }
@@ -1611,13 +1639,13 @@ boolean findtoken() {
       for (i=0; i<token.length; ++i) { 
         got=token[i]; gotlen=got.length();
         if (n==1 && p==f && t.length()>=f+gotlen && t.substring(f,f+gotlen).equalsIgnoreCase(got) ||
-            n==4 && (i<=5+1||i>=14+1&&i<=16+1) && t.length()>=p+gotlen && t.substring(p,p+gotlen).equalsIgnoreCase(got)) {
+            n==4 && (i<=5+2||i>=14+2&&i<=16+2) && t.length()>=p+gotlen && t.substring(p,p+gotlen).equalsIgnoreCase(got)) {
           if (i==0) { out+=d6; out+=sepchar; n=0; chewcr(); return true; }
           if (n==4) cs();
           p+=gotlen;
           //if (hs==0) out+=" ";
-          if (i==3 || i==4 || i==6+1 || i==17+1) { out+=sepchar+d8+got.toLowerCase()+d0+sepchar; }
-          else if (i==14+1 || i==15+1 || i==16+1) { out+=sepchar+d9+got.toLowerCase()+d0+sepchar; }
+          if (i==3 || i==4 || i==6+2 || i==17+2) { out+=sepchar+d8+got.toLowerCase()+d0+sepchar; }
+          else if (i==14+2 || i==15+2 || i==16+2) { out+=sepchar+d9+got.toLowerCase()+d0+sepchar; }
           else { out+=sepchar+d2+got.toLowerCase()+d0+sepchar; }
           if (i<=3+1) n=5; else n=2;
           return true;
