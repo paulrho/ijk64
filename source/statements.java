@@ -2641,6 +2641,9 @@ boolean ProcessSYSstatement() throws BasicException
 {
   //ReadExpression();
   GenericType gt=PSReadExpressionEvaluate();
+       if (machine.petspeed.gatop==1) { // assuming not string! // gt should be NULL
+         gt= new GenericType(machine.petspeed.result());
+       }
   //if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
   //if (verbose) { System.out.printf("inputting to %s\n",machine.evaluate(keepExpression).print()); }
   if (verbose) { machine.dumpstate(); }
