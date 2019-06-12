@@ -499,7 +499,7 @@ void precache_all_data()
 		machine.cacheLine(keepLine,pnt); //was start
 		keeppnt=pnt;
 		SkipSpaces();
-		if (ReadStatementToken()) {
+		while (ReadStatementToken()) {
 		  if (gotToken==ST_DATA) {
 			if (verbose) { System.out.printf("Found a data line\n"); }
 			// from here to the end of the line is to be cached
@@ -528,6 +528,9 @@ void precache_all_data()
 			machine.cacheLabel(building.trim(),pnt); //cache the label - not the line
 			if (verbose) { System.out.printf("Label %s\n",building); }
 		  }
+                  // skip to colon (except in quotes)
+                  ProcessIGNOREstatement();
+                  ReadColon();
 		}
     }
     IgnoreRestofLine();
