@@ -1046,7 +1046,7 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
     else if (ch >= '0' && ch <= '9' || ch >= ' ' && ch <= '?')
       pos = (ch);
 
-    else if (ch == 164) // was 196
+    else if (ch == 196)
       pos = 64;               // new translation
     else if (ch == '_')
       pos = 100;               // new translation //try new
@@ -1119,7 +1119,7 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
 
     else if (pos >= 27 && pos<=30) ch=pos+64; // technical - not normally used
     else if (pos == 31) ch='`'; // 96
-    else if (pos == 64) ch=164; // to match petconvert // was 196
+    else if (pos == 64) ch=196; // to match petconvert
     else if (pos == 100) ch='_'; // to match petconvert // try new
     else if (pos == 93) ch='|'; // to match petconvert  124
     else if (pos == 94) ch=126; // to match petconvert  
@@ -1196,8 +1196,7 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
     else if (pos == 23+96) return "(CBM-Y)"; 
     else if (pos == 24+96) return "(CBM-U)"; 
     else if (pos == 2+96) return "(CBM-I)"; 
-    //else if (pos == 4+96) return "(CBM-@)"; 
-    else if (pos == 4+96) return "_";  // try new
+    else if (pos == 4+96) return "(CBM-@)"; 
     else if (pos == 16+96) return "(CBM-A)"; 
     else if (pos == 14+96) return "(CBM-S)"; 
     else if (pos == 27+96) return "(CBM-F)"; 
@@ -2686,7 +2685,7 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
           case 24: keybuf[keybuftop] = 189+64*0; break;
           case 25: keybuf[keybuftop] = 183+64*0; break;
           case 26: keybuf[keybuftop] = 173+64*0; break;
-          case 45: keybuf[keybuftop] = 164; break; // ijkscii rep of horizontal bar // was 196
+          case 45: keybuf[keybuftop] = 196; break; // ijkscii rep of horizontal bar
           default:
             keybuf[keybuftop] += 'a' + 128 - 1;
         }
