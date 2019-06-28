@@ -59,7 +59,9 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 tby=3700;
 
     sizex=x;
-    setResizable(false);
+    //
+    ////setResizable(false);  // for now
+    //
     //sizey=tby+y;
     //setSize(sizex,sizey);
     getRootPane().setPreferredSize(new Dimension(x,y));
