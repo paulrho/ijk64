@@ -19,6 +19,7 @@ import java.awt.geom.*;
 
 import java.net.*; // for reading from http
 
+
 public class GraphicsDevice extends JFrame implements MouseListener, MouseMotionListener {
 
   Image newoffImage;
@@ -28,6 +29,8 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
   Graphics2D[] newoffGraphicsB=new Graphics2D[2];
 
   Random generator = new Random();
+  final static boolean graphics_debug=false;
+
 
 //  int sizex=1000; 
 //  int sizey=1000;
@@ -51,10 +54,64 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
   }
   
   void initDevice(int x, int y) {
+    System.out.printf("Graphics window insets = left=%d right=%d top=%d bottom=%d\n",getInsets().left,getInsets().right,getInsets().top,getInsets().bottom);
+
+tby=3700;
+
     sizex=x;
-    sizey=tby+y;
-    setSize(sizex,sizey);
+    setResizable(false);
+    //sizey=tby+y;
+    //setSize(sizex,sizey);
+    getRootPane().setPreferredSize(new Dimension(x,y));
+//tby=0; setUndecorated(true);
+    pack();
     setVisible(true); // start AWT painting.
+    //tby=getHeight()-sizey;
+    //System.out.printf("Graphics: getHeight()=%d tby=%d getWidth()=%d\n",getRootPane().getHeight(),tby,getRootPane().getWidth());
+
+// very bad - but just for now
+    try { Thread.sleep(100); } 
+    catch(InterruptedException ex) {
+      Thread.currentThread().interrupt();
+    }
+
+    tby=getInsets().top;
+    sizey=tby+y;
+
+    if (graphics_debug) {
+      System.out.printf("Graphics: getHeight()=%d tby=%d getWidth()=%d\n",getRootPane().getHeight(),tby,getRootPane().getWidth());
+      System.out.printf("Graphics window insets = left=%d right=%d top=%d bottom=%d\n",getInsets().left,getInsets().right,getInsets().top,getInsets().bottom);
+      System.out.printf("Graphics contentPane insets = left=%d right=%d top=%d bottom=%d\n",getContentPane().getInsets().left,getContentPane().getInsets().right,getContentPane().getInsets().top,getContentPane().getInsets().bottom);
+      System.out.printf("Graphics contentPane insets = left=%d right=%d top=%d bottom=%d\n",getRootPane().getInsets().left,getRootPane().getInsets().right,getRootPane().getInsets().top,getRootPane().getInsets().bottom);
+      System.out.println("frame width : "+getWidth());
+      System.out.println("frame height: "+getHeight());
+      System.out.println("frame width : "+getWidth());
+      System.out.println("frame height: "+getLayeredPane().getComponent(0).getHeight());
+      //System.out.println("frame height: "+getLayeredPane().getComponent(1).getHeight());
+      System.out.println("content pane width : "+getContentPane().getWidth());
+      System.out.println("content pane height: "+getContentPane().getHeight());
+      System.out.println("width  of left + right  borders: "+(getWidth()-getContentPane ().getWidth()));
+      System.out.println("height of top  + bottom borders: "+(getHeight()-getContentPane().getHeight()));
+      System.out.println("title height = "+(getBounds().height-getContentPane().getBounds().height) );
+    }
+      System.out.printf("Graphics window insets = left=%d right=%d top=%d bottom=%d\n",getInsets().left,getInsets().right,getInsets().top,getInsets().bottom);
+      System.out.println("title height = "+(getBounds().height-getContentPane().getBounds().height) );
+
+    if (true)
+      setResizable(true); // sometimes too soon
+    else {
+    // so wait for 2 seconds
+    new java.util.Timer().schedule( 
+      new java.util.TimerTask() {
+        //@Override
+        public void run() {
+          setResizable(true);
+            // your code here
+        }
+      }, 2000 
+    );
+    }
+
     addMouseListener(this);
     addMouseMotionListener(this);
         if (blitting) {
@@ -83,10 +140,12 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
   void save(String filename) throws IOException {
     //Graphics2D cg = newoffImage.createGraphics();
     //try {
+
       BufferedImage image;
       if (blitting) { image = (BufferedImage)newoffImageB[paintblit]; }
       else  image=(BufferedImage)newoffImage;
-      if (ImageIO.write(image, "png", new File(filename+".png"))) {
+      //if (ImageIO.write(image, "png", new File(filename+".png"))) {
+      if (ImageIO.write(image.getSubimage(0,tby,sizex,sizey-tby), "png", new File(filename+".png"))) {
         System.out.println("-- saved");
       }
     //} catch (IOException e) {
