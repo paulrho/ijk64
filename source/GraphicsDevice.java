@@ -35,6 +35,7 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
 //  int sizex=1000; 
 //  int sizey=1000;
   int tby=30;
+  int tbx=0;
   final int default_sizex=768;
   final int default_sizey=1004+tby;
   int sizex=default_sizex;   
@@ -78,6 +79,7 @@ tby=3700;
     }
 
     tby=getInsets().top;
+    tbx=getInsets().left;
     sizey=tby+y;
 
     if (graphics_debug) {
@@ -570,10 +572,10 @@ tby=3700;
           //g2d.drawImage(newoffImageB[1-blit], 0, 0, this);
       //else
        if (!inframe || paintblit!=blit)
-          g2d.drawImage(newoffImageB[paintblit], 0, 0, this);
+          g2d.drawImage(newoffImageB[paintblit], tbx, 0, this);
     } else {
       if(!inframe)
-          g2d.drawImage(newoffImage, 0, 0, this);
+          g2d.drawImage(newoffImage, tbx, 0, this);
     }
 
   }
