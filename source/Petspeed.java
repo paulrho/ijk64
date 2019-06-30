@@ -362,6 +362,8 @@ class Petspeed
             if (v>=65&&v<=90) v+=128; 
             else if (v>=65&&v<=90) v+=32;
             else if (v>=97&&v<=122) v-=32; 
+            else if (v==95) v=164;
+            else if (v==164) v=96;
             else if (v>=193&&v<=218) v-=96; 
             else if (v==95) v=96; 
             else if (v==96) v=95; 
@@ -378,6 +380,8 @@ class Petspeed
             if (v>=193&&v<=218) v=v-128; 
             else if (v>=65&&v<=90) v=v+32; 
             else if (v>=97&&v<=122) v=v+96; 
+            else if (v==96) v=164;
+            else if (v==164) v=95;
             else if (v==95) v=96; 
             else if (v==96) v=95; 
             else if (v==123) v=179; else if (v==179) v=123;
