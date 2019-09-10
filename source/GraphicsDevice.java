@@ -55,6 +55,8 @@ public class GraphicsDevice extends JFrame implements MouseListener, MouseMotion
   }
   
   void initDevice(int x, int y) {
+     System.out.println("Created GUI on EDT? "+
+		                     SwingUtilities.isEventDispatchThread());
     System.out.printf("Graphics window insets = left=%d right=%d top=%d bottom=%d\n",getInsets().left,getInsets().right,getInsets().top,getInsets().bottom);
 
 tby=3700;
@@ -182,8 +184,20 @@ tby=3700;
   }
    
   void doupdate() {
+	  //
+	
+    long startTime=System.currentTimeMillis();
+     System.out.printf("G.doupdate %s %d\n",(SwingUtilities.isEventDispatchThread())?"true":"false",startTime-previousTime_doupdate);
+     previousTime_doupdate=startTime;
 	  // after every draw OR at the endfram   
-     repaint();
+     //repaint();
+     //this.repaint();
+     //paintImmediately(0,0,500,500);
+     Graphics g = getGraphics();
+     if (g != null) {
+       paint(g);
+       g.dispose();
+     }
   }
 
 /*******************************************************************************************/
@@ -563,9 +577,15 @@ tby=3700;
 	}
 	  
    
+  long previousTime_paint;
+  long previousTime_update;
+  long previousTime_doupdate;
   public synchronized void paint(Graphics g) {
     Graphics2D g2d = (Graphics2D) g;
 
+    long startTime=System.currentTimeMillis();
+     System.out.printf("G.Paint %s %d (since update=%d)\n",(SwingUtilities.isEventDispatchThread())?"true":"false",startTime-previousTime_paint,startTime-previousTime_doupdate);
+     previousTime_paint=startTime;
 
     if(blitting) {
       //if(!inframe)
@@ -577,12 +597,21 @@ tby=3700;
       if(!inframe)
           g2d.drawImage(newoffImage, tbx, 0, this);
     }
+    //Toolkit.getDefaultToolkit().sync();
+    //g2d.dispose();
+     System.out.printf("  G.Paint time %d\n",System.currentTimeMillis()-startTime);
 
   }
 
   public void update(Graphics g) {
-    if(!inframe)
+
+    long startTime=System.currentTimeMillis();
+     System.out.printf("G.update (inframe=%s) %s %d\n",inframe?"true":"false",(SwingUtilities.isEventDispatchThread())?"true":"false",startTime-previousTime_update);
+     previousTime_update=startTime;
+
+    if(!inframe) {
       paint(g);
+      }
   }
 
         public static void main(String[] args) {

@@ -1953,6 +1953,7 @@ if (verbose) System.out.printf("%d,%d to %d,%d\n",ox,oy,x,y);
 
 // Timings
   long tstart;
+  long ttime_paint_final=0L;
   long ttime_paint;
   long ttime_paintl;
   long ttime_paintm;
@@ -1969,7 +1970,7 @@ if (verbose) System.out.printf("%d,%d to %d,%d\n",ox,oy,x,y);
     if (true) {
       tstart = System.currentTimeMillis();
       tcount_paint++;
-      if (verbose) System.out.printf("paint lat.: %d cursvis=%d\n",tstart-last_paint,cursVisible?1:0);
+      if (verbose || true) System.out.printf("C64paint lat.: %d cursvis=%d since=%d\n",tstart-last_paint,cursVisible?1:0,tstart-ttime_paint_final);
       last_paint=tstart;
     }
   // sometimes this is not ready yet
@@ -2065,9 +2066,10 @@ if (verbose) System.out.printf("%d,%d to %d,%d\n",ox,oy,x,y);
 
     if (true) {
       ttime_paint = System.currentTimeMillis() - tstart;
-      if (verbose) System.out.printf("  paint t : %d\n",ttime_paint);
+      if (verbose || true) System.out.printf("  C64paint t : %d\n",ttime_paint);
       if (ConfigOptions.do_syncPaint) Toolkit.getDefaultToolkit().sync(); // this is the key function that stops the linux missing paint effect (e.g. blink cursor)
-      if (verbose) System.out.printf("  paint sync %d\n",System.currentTimeMillis()-(tstart+ttime_paint));
+      ttime_paint_final = System.currentTimeMillis();
+      if (verbose || true) System.out.printf("  C64paint sync %d\n",ttime_paint_final-(tstart+ttime_paint));
     }
   }
 
@@ -2446,7 +2448,11 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
     modImage2x1 = toBufferedImage(charsetUpp2x1);
     modImage3 = toBufferedImage(charsetUpp3);
   }
+    static long last_update_time=0;
   public void update(Graphics g) {
+    long this_update_time=System.currentTimeMillis();
+    if (verbose || true) System.out.printf("  C64S.update %d\n",this_update_time-last_update_time);
+    last_update_time=this_update_time;
     paint(g);
   }
 

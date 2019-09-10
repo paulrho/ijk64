@@ -1,0 +1,17 @@
+5 meta-timing1
+7 tt=ti
+10 screen1
+15 remlset1,4
+20 tu=ti:beginframe:cls
+21   line50+5+cos(x/100)*500,50+5+sin(x/100)*500,50,50,12
+22   circle50+cos(x/10)*50,50+sin(x/10)*50,10,8,1
+23 forj=1to300step3
+24   remlinernd(0)*1000,x-rnd(0)*100,1000,x+j,5+rnd(0)*10
+25 next
+26 gprintstr$(int(1/((ti-tt)/60/x)*10)/10)+" fps",20,20,5
+27 endframe
+28 remsleep1
+29 ss=ss+ti-tu:sc=sc+1
+30 x=x+1:ifx<1000then20
+40 meta-timing1
+50 printss/sc
