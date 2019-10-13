@@ -681,6 +681,17 @@ if (false) {
     }
   }
 
+/* helper only */
+void scrolltoend() {
+	// we only scroll if the cursor is on the last logical line, but continuation says it should be further along
+  /* from cursor and down, confirm we see an end line, if not,scroll until we do */
+  int y=cursY;
+  while(y<maxY && contmark[y]>0) { y++; }
+  if (y==maxY)
+    while(contmark[maxY-1]>0) {
+      bufferscrollup(1); cursY--;
+    }
+}
 ///////////////////////////////////////////
 // window listener events
 
@@ -1627,7 +1638,11 @@ if (verbose) { System.out.printf("print char %d\n",num); }
       } else if ((int) (theChar & 0xFF) == PETSCII_RGHT) {
           if (print_quotes_on) theChar = (char) (128+PETSCII_RGHT);
           else {
-            gotoXY(cursX + 1, cursY);
+            if (true && cursY==maxY-1 && cursX==maxX-1) {
+              bufferscrollup(1);
+              gotoXY(0, cursY);
+	    } else
+              gotoXY(cursX + 1, cursY);
             continue;
           }
       } else if ((int) (theChar & 0xFF) == PETSCII_RVON) {
@@ -1858,6 +1873,8 @@ if (verbose) System.out.printf("backspacing (new)\n\r");
 
   public void insertspace() {
 
+   /* before we even start, if there is a continuation at end of screen, get in right spot */
+   scrolltoend();
       /* continuation mark */
       /* new backspace */
       /* do it to the end of the logical (contination) line */
@@ -2386,6 +2403,7 @@ if (verbose) System.out.printf("Got a contination!\n\r");
     for (int i = from_cursX; i < maxX; ++i) {
       rets = rets + petunconvert_encoded(screenchar[i][y]);
     }
+    if (true && cursY==maxY-1) { bufferscrollup(1); cursY--; }
     println();                  // do it the other way around!
 
 if (verbose) System.out.printf("About to return line %s\n",rets);
@@ -2754,6 +2772,8 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
         return ""; // is this good?
       } else if (ch == PETSCII_SHIFTENTER) {
         print_quotes_on=false; // special - fix up the quotes
+	/* if a continue on this line, scroll until not */
+	scrolltoend();
         getline(0);  
         from_cursX = cursX;
         from_cursY = cursY;
@@ -2762,6 +2782,8 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
         int upto_cursX = cursX;
         int upto_cursY = cursY; // in case we have scrolled the screen!        
         print_quotes_on=false; // special - fix up the quotes
+	/* if a continue on this line, scroll until not */
+	scrolltoend();
 
         /* contination mark */
         /* if we have a continued line - do the default input */
