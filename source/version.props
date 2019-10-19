@@ -1,13 +1,13 @@
 #build number and date
-#Sun, 13 Oct 2019 11:19:01 +1000
+#Tue, 15 Oct 2019 17:48:35 +1000
 #Thu, 23 May 2019 08:40:09 +1000
 #Tue Sep 04 23:24:04 EST 2012
 #Thu, 16 May 2019 23:47:26 +1000
 #Tue Sep 04 23:24:04 EST 2012
-build-date=20191013-1119
+build-date=20191015-1748
 build.user.name=pi
 build.computer=${env.HOSTNAME}
 major=3
 minor=7
 rev=14
-build-number=2665
+build-number=2666
