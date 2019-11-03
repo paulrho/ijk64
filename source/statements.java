@@ -900,7 +900,7 @@ void ProcessHELPstatement(GenericType gt) throws BasicException
 {
 //        machine.print("?help! help! try this: load\"$\",8 [enter]");
 //        machine.print("?help! try this: load\"$\",8 [enter]");
-        machine.print("tokens: version "+version.programVersion+"\n");
+        machine.print("tokens: version\nijk64 "+version.programVersion+"\n");
         { String collect=""; int x=0;
           for (int tok=0; tok<basicTokens.length; ++tok) {
             x+=basicTokens[tok].length()+1;
