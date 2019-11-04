@@ -256,6 +256,8 @@ class C64Screen extends JFrame
   static boolean static_handles = false;        // for a dodgy initialisation
   static boolean static_centre = false;        // for a dodgy initialisation
   static int static_scale = 1;        // for a dodgy initialisation
+  static int static_scaley = 1;        // for a dodgy initialisation
+  static int static_maxX = 40;        // for a dodgy initialisation
 
   boolean sendToBack = false;
 
@@ -367,7 +369,8 @@ class C64Screen extends JFrame
     bgshadow = static_bgtrans;
 
     scale = static_scale;
-    scaley = static_scale;
+    scaley = static_scaley;
+    maxX = static_maxX;
   //bgtrans_ability=static_bgtrans;
   //reshapeScreen();
   //if (bgtrans_ability) { setUndecorated(true); }

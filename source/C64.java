@@ -123,6 +123,7 @@ class C64 {
 
     // new default
     C64Screen.static_scale=2;
+    C64Screen.static_scaley=2;
     C64Screen.static_centre=true;
 
     for (int i=0; i<args.length; ++i) {
@@ -148,8 +149,10 @@ class C64 {
           System.out.printf("  -v : version\n");
           System.out.printf("  -x : exit immediately\n");
           System.out.printf("  -1 : single size\n");
+          System.out.printf("  -y2: 1x2\n");
           System.out.printf("  -2 : double size [default]\n");
           System.out.printf("  -3 : triple size\n");
+          System.out.printf("  -80: screen width 80\n");
           System.out.printf("  -z : petspeed [default]\n");  // make this the default
           System.out.printf("  --slow    : no petspeed\n");  // make this the default
           System.out.printf("  --https   : use https for cloud\n");  // make this the default
@@ -178,13 +181,22 @@ class C64 {
           speeder=false;
         } else if (args[i].equals("--https")) {
           cloudNet="https://futex.com.au";
+        } else if (args[i].equals("-y2")) {
+          C64Screen.static_scale=1;
+          C64Screen.static_scaley=2;
+	  //System.out.printf("%dx%d\n",C64Screen.static_scale,C64Screen.static_scaley);
         } else if (args[i].substring(0,2).equals("-1")) {
           C64Screen.static_scale=1;
+          C64Screen.static_scaley=1;
         } else if (args[i].substring(0,2).equals("-2")) {
           C64Screen.static_scale=2;
+          C64Screen.static_scaley=2;
         } else if (args[i].substring(0,2).equals("-3")) {
           //screen.setScale(3);
           C64Screen.static_scale=3;
+          C64Screen.static_scaley=3;
+        } else if (args[i].equals("-80")) {
+          C64Screen.static_maxX=80;
         } else if (args[i].substring(0,2).equals("-c")) {
           //screen.setLocationRelativeTo(null); 
           C64Screen.static_centre=true; // make this the default ?? FIX
