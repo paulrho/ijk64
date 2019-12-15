@@ -616,6 +616,8 @@ public class Machine {
   int toplinecache=0;
   int linecacheline[]=new int[MAXLINES]; // when we get to them, we store the pointer into the code of each line // of course we have to read ahead one we get a GOTO or GOSUB
   int linecachepnt[]=new int[MAXLINES];
+  int linecacheuuid[]=new int[MAXLINES]; // create a uuid for each line
+  static int lcuuid=100; // start here
 
   void cacheLine(String lineNostr, int pnt) {
     int value=Integer.parseInt(lineNostr); // this could fail?
