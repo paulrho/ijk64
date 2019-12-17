@@ -461,6 +461,7 @@ void precache_all_lines()
     int start=pnt;
     if (!ReadLineNo()) {
       if (verbose) { System.out.printf("No line # -skipping\n"); }
+      // will need to cache these too - but with blank/invalid line # for uuid
       //break;
     } else {
       // got a line # cache it
@@ -481,6 +482,10 @@ void precache_all_lines()
 
 void precache_all_data()
 {
+  // new = clear the Label and DATA cache
+  if (true) machine.toplabcache=0;
+  if (true) machine.allDATA="";
+
   int keeppnt;
   // read_all_lines
   // read the line# first
@@ -492,10 +497,12 @@ void precache_all_data()
     int start=pnt;
     if (!ReadLineNo()) {
       if (verbose) { System.out.printf("No line # -skipping\n"); }
+      // this will need to change, data and labels without line #s seem to be impossible currently //tofix
       //break;
     } else {
 		// got a line # cache it
 		// shoud this be done here too?
+                // this isnt really appropriate //tofix
 		machine.cacheLine(keepLine,pnt); //was start
 		keeppnt=pnt;
 		SkipSpaces();
@@ -625,8 +632,13 @@ void interpret_string(String passed_line, int startat, String lineNo)
   if (machine.hasControlC()) { } // do nothing - just clear it initially!
 
   // skip to the chase, and just read the line #s
-  precache_all_lines();
-  precache_all_data();
+  if (machine.dirtyLineCache && machine.program_running) {
+    // note - both old and new if changing program, then doing goto from direct, cache isn't up to date // tofix
+    System.out.printf("Recaching lines&data\n");
+    precache_all_lines();
+    precache_all_data();
+    machine.dirtyLineCache=false;
+  }
   if (verbose) { System.out.printf("DATA is:\n%s\n",machine.allDATA); }
 
   if (!lineNo.equals("")) {
