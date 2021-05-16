@@ -1,0 +1,13 @@
+5 dimh(365)
+7 remfori=1to365:h(i)=0:next
+10 fori=1to50:rem23*2
+20 b=int(rnd(0)*365+1)
+30 h(b)=h(b)+1
+40 next
+50 print"(clr)"
+70 print" i  n"
+100 fori=1to365
+110   t=0:forj=1to365
+120     ifh(j)>h(t)thent=j
+130   next:ift=0orh(t)>=0thenl2=lt:lt=h(t):h(t)=-1:if(l2=0andlt>0)orl2>ltthenprinti;lt
+140 next

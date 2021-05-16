@@ -1662,6 +1662,11 @@ boolean ProcessIFstatement() throws BasicException
           if (a.equals("\n")) break;
 	  if (a.equals("\"")) { quote=!quote; if (quote) looktoken=false; }
 	  if (a.equals(":") && !quote) looktoken=true;
+	  if (looktoken && a.toLowerCase().equals("r") && line.substring(pp,pp+3).toLowerCase().equals("rem")) {
+	    if (verbose) System.out.printf("looking for else, found rem, skipping all!\n");
+            while (pp<linelength && !line.substring(pp,pp+1).equals("\n")) pp++;
+	    continue;
+	  }
 	  if (looktoken && a.toLowerCase().equals("e") && line.substring(pp,pp+4).toLowerCase().equals("else")) { 
 	    pp=pp+4; 
 	    // it may be a line# -> so check
@@ -1704,6 +1709,11 @@ boolean ProcessIFstatement() throws BasicException
           if (a.equals("\n")) break;
 	  if (a.equals("\"")) { quote=!quote; if (quote) looktoken=false; }
 	  if (a.equals(":") && !quote) looktoken=true;
+	  if (looktoken && a.toLowerCase().equals("r") && line.substring(pp,pp+3).toLowerCase().equals("rem")) {
+	    if (verbose) System.out.printf("looking for else, found rem, skipping all!\n");
+            while (pp<linelength && !line.substring(pp,pp+1).equals("\n")) pp++;
+	    continue;
+	  }
 	  if (looktoken && a.toLowerCase().equals("e") && line.substring(pp,pp+4).toLowerCase().equals("else")) { 
 	    pp=pp+4; 
 	    // it may be a line# -> so check
