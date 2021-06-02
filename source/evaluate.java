@@ -635,6 +635,8 @@ class evaluate {
           if (v>=65&&v<=90) stknum[upto-2]=v+128; 
           else if (v>=65&&v<=90) stknum[upto-2]=v+32;  //try 2
           else if (v>=97&&v<=122) stknum[upto-2]=v-32; 
+          else if (v==95) stknum[upto-2]=164;  // try new
+          else if (v==164) stknum[upto-2]=96;  // try new // was 196
           else if (v>=193&&v<=218) stknum[upto-2]=v-96; 
           else if (v==95) stknum[upto-2]=96; 
           else if (v==96) stknum[upto-2]=95; 
@@ -662,6 +664,8 @@ class evaluate {
           //else if (v>=97&&v<=122) v=v-32;   // quick test try
 
           else if (v>=97&&v<=122) v=v+96; 
+          else if (v==96) v=164;  // try new // was 196
+          else if (v==164) v=95;  // try new
           else if (v==95) v=96; 
           else if (v==96) v=95; 
           else if (v==123) v=179; else if (v==179) v=123;  //try this

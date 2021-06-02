@@ -3,7 +3,9 @@ ijk64
 
 C64 like (approximate) emulator in pure java - experimental but extensible
 
-Now with just-in-time-compile which gets 50x speed increase on mp2.basic (heavy maths)
+Now with just-in-time-compile which gets 50x+ speed increase on mp2.basic (heavy maths)
+
+More information - see https://futex.com.au/basic
 
 <IMG SRC="http://www.futex.com.au/ijk64/ijk64-c64screen-x2-2.gif" WIDTH=75% />
 <PRE>

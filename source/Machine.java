@@ -945,6 +945,12 @@ public class Machine {
         machinescreen.borderColour = machinescreen.fullcolour[memval];
         machinescreen.reshapeScreen(); // just to see - this is a dodgy work around!!! when changing background or border colours, mu
       }
+    } else if (memloc==211) {
+      // x
+      machinescreen.cursX=memval;
+    } else if (memloc==214) {
+      // y
+      machinescreen.cursY=memval;
     } else if (memloc>=1024 && memloc<1024+1000) {
       int x=(memloc-1024)%40;
       int y=(memloc-1024)/40;

@@ -499,7 +499,7 @@ void precache_all_data()
 		machine.cacheLine(keepLine,pnt); //was start
 		keeppnt=pnt;
 		SkipSpaces();
-		if (ReadStatementToken()) {
+		while (ReadStatementToken()) {
 		  if (gotToken==ST_DATA) {
 			if (verbose) { System.out.printf("Found a data line\n"); }
 			// from here to the end of the line is to be cached
@@ -528,6 +528,9 @@ void precache_all_data()
 			machine.cacheLabel(building.trim(),pnt); //cache the label - not the line
 			if (verbose) { System.out.printf("Label %s\n",building); }
 		  }
+                  // skip to colon (except in quotes)
+                  ProcessIGNOREstatement();
+                  ReadColon();
 		}
     }
     IgnoreRestofLine();
@@ -2641,6 +2644,9 @@ boolean ProcessSYSstatement() throws BasicException
 {
   //ReadExpression();
   GenericType gt=PSReadExpressionEvaluate();
+       if (machine.petspeed.gatop==1) { // assuming not string! // gt should be NULL
+         gt= new GenericType(machine.petspeed.result());
+       }
   //if (verbose) { System.out.printf("inputting to %s\n",keepExpression); }
   //if (verbose) { System.out.printf("inputting to %s\n",machine.evaluate(keepExpression).print()); }
   if (verbose) { machine.dumpstate(); }
