@@ -201,12 +201,12 @@ public class Machine {
   String cloudNet="http://test.futex.com.au"; // /cloud /basic
 
   void clearMachineState() {
-    toplinecache=0; // optimisation only & goto/gosub lookup & findcurrentline
-    toplabcache=0;
+    if (false) toplinecache=0; // optimisation only & goto/gosub lookup & findcurrentline
+    if (false) toplabcache=0;
     topforloopstack=0;
     topgosubstack=0;
     // also clear data
-    allDATA="";
+    if (false) allDATA="";
     uptoDATA=0;
     CloseAllFiles();
     //topHandle=0; // clear open files list // should really close all open nicely!
@@ -616,6 +616,8 @@ public class Machine {
   int toplinecache=0;
   int linecacheline[]=new int[MAXLINES]; // when we get to them, we store the pointer into the code of each line // of course we have to read ahead one we get a GOTO or GOSUB
   int linecachepnt[]=new int[MAXLINES];
+  int linecacheuuid[]=new int[MAXLINES]; // create a uuid for each line
+  static int lcuuid=100; // start here
 
   void cacheLine(String lineNostr, int pnt) {
     int value=Integer.parseInt(lineNostr); // this could fail?
@@ -1051,6 +1053,7 @@ public class Machine {
   String program_name="";         // this is to keep a reference to what we save/loaded this program as
   boolean program_modified=false;
   boolean program_running=false; // true if NOT in direct mode PGS20150210
+  boolean dirtyLineCache=false;
   
   boolean performExit(boolean checkprogram) throws BasicException {
     if (checkprogram) {
@@ -1081,6 +1084,7 @@ public class Machine {
       printnewline();
     }
     programText=""; // NEW program
+    dirtyLineCache=true;
     program_modified=false;
     program_name=""; // clear this too
     crlfText=false;
@@ -1748,6 +1752,7 @@ void chewcr() {
           //}
           filename=filename.replace("..","X"); // safety - no http should have a .. in it
           programText=read_http(filename);
+          dirtyLineCache=true;
 	  // just to show the short hand name
           if(filename.startsWith(cloudNet+"/cloud/c64x")) {
             filename=filename.replaceFirst(cloudNet+"/cloud/c64x","");
@@ -1759,10 +1764,12 @@ void chewcr() {
             //print("\n");
           //}
           programText=read_a_file(filename);
+          dirtyLineCache=true;
         }
         // fix CR LF issue, just remove CR LF and replace with (unix) LF
         if (programText.contains("\r\n")) {
           programText=programText.replaceAll("\r\n","\n");
+          dirtyLineCache=true;
           crlfText=true; // use this to convert back on save!
           if (verbose) System.out.printf("Flagging as crlf (and stripping)\n");
         } else crlfText=false;
@@ -2029,6 +2036,10 @@ void chewcr() {
         if (verbose) { System.out.printf("replace line -startpos=%d\n",startpos[0]); }
         ret=findLine(lineno,false,endpos);
         if (verbose) {System.out.printf("got %d from findLine (2nd time)\n",ret); }
+
+        // find the equiv line
+        find_in_cache(advancepnt(startpos[0]),true);
+
         if (ret<0) { // last line of program
           programText = 
             programText.substring(0,startpos[0]) + line;
@@ -2038,6 +2049,10 @@ void chewcr() {
         }
       } else if (ret==1) {
         // insert it
+
+        // find the equiv line
+        find_in_cache(advancepnt(startpos[0]),false);
+
         if (verbose) { System.out.printf("insert line\n"); }
         programText = 
           programText.substring(0,startpos[0]) + line + programText.substring(startpos[0]);
@@ -2048,6 +2063,7 @@ void chewcr() {
           programText + line;
       }
       program_modified=true;
+      dirtyLineCache=true;
       //machinescreen.setTitle(baseTitle+" - "+program_name+"*"); // try this
       machinescreen.setTitle("*"+program_name+" - "+baseTitle); // try this
       if (graphicsDevice!=null) graphicsDevice.setTitle("*"+program_name+" - "+baseTitle+" graphics");
@@ -2055,6 +2071,30 @@ void chewcr() {
     } else
       return false;
   }
+
+int advancepnt(int p) {
+    int at=p;
+    while (at<programText.length()) {
+      String a=programText.substring(at,at+1);
+      if (a.equals(" ")) at++; // dodgy
+      if (!(a.compareTo("0")>=0 && a.compareTo("9")<=0)) {
+        break;
+      }
+      at++;
+    }
+    return at;
+}
+int find_in_cache(int p, boolean repl) {
+  for (int i=0; i<toplinecache; ++i) {
+    //System.out.printf("NOT cache entry %d for pnt=%d cachedpnt=%d lineno=%d\n",i,p,linecachepnt[i],linecacheline[i]);
+    if (linecachepnt[i]==p) {
+      System.out.printf("Found cache entry %d for pnt=%d lineno=%d\n",i,p,linecacheline[i]);
+      return i;
+    }
+  }
+  System.out.printf("Did not find\n");
+  return -1;
+}
 
   String machineReadLineNo(String line) {
     int at=0;

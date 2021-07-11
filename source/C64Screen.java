@@ -187,6 +187,7 @@ class C64Screen extends JFrame
   short cursColour = 2;
   boolean cursVisible = false;
   boolean cursEnabled = false;
+  boolean feature_endlineinsert=true;
   boolean verbose = false; // only recent
   boolean verbosePrint = false;
   boolean shiftbgimage = true; // now true
@@ -255,6 +256,8 @@ class C64Screen extends JFrame
   static boolean static_handles = false;        // for a dodgy initialisation
   static boolean static_centre = false;        // for a dodgy initialisation
   static int static_scale = 1;        // for a dodgy initialisation
+  static int static_scaley = 1;        // for a dodgy initialisation
+  static int static_maxX = 40;        // for a dodgy initialisation
 
   boolean sendToBack = false;
 
@@ -366,7 +369,8 @@ class C64Screen extends JFrame
     bgshadow = static_bgtrans;
 
     scale = static_scale;
-    scaley = static_scale;
+    scaley = static_scaley;
+    maxX = static_maxX;
   //bgtrans_ability=static_bgtrans;
   //reshapeScreen();
   //if (bgtrans_ability) { setUndecorated(true); }
@@ -580,6 +584,20 @@ if (false) {
             if (ch.length>1) contmark[maxY-1]=(short)ch[ch.length-1];
           }
   }
+  void partialbufferscrollup(int from) {
+
+//            print(botScrollArray.pull());
+            String str;
+            char ch[];//=new char[maxX];
+            
+            ch=botScrollArray.pull();
+//            System.out.printf("size o char = %d\n",ch.length);
+            for (int i=0; i<ch.length && i<maxX; ++i) screencharColour[i][maxY-1]=(short)(ch[i]&0x0F);
+//            for (int i=0; i<maxX; ++i) screencharColour[i][maxY-1]=(short)(1);
+            ch=botScrollArray.pull();
+            for (int i=0; i<ch.length-1 && i<maxX; ++i) screenchar[i][maxY-1]=ch[i];            
+            if (ch.length>1) contmark[maxY-1]=(short)ch[ch.length-1];
+  }
 
   class C64MouseWheel implements MouseWheelListener {
    public void mouseWheelMoved(MouseWheelEvent e) {
@@ -663,7 +681,13 @@ if (false) {
       if (size==0) return new char[0];
       i=head;
       size--;
-      head--; if (head<0) head=maxsize-1;
+      head--; if (head<0) head=maxsize-1; // checkthis
+      return buffer[i];
+    }
+    char[] peek(int n) { // 1 is first, 2 is next
+      int i;
+      if (size<n) return new char[0];
+      i=head-(n-1); if (i<0) i=maxsize+i;
       return buffer[i];
     }
     void flush() {
@@ -681,6 +705,34 @@ if (false) {
     }
   }
 
+/* helper only */
+void scrolltoend() {
+  scrolltobegin();
+	// we only scroll if the cursor is on the last logical line, but continuation says it should be further along
+  /* from cursor and down, confirm we see an end line, if not,scroll until we do */
+  int y=cursY;
+  while(y<maxY && contmark[y]>0) { y++; }
+  if (y==maxY)
+    while(contmark[maxY-1]>0) {
+      bufferscrollup(1); cursY--;
+    }
+}	
+void scrolltobegin() {
+  int y=cursY;
+  while(y>=1 && contmark[y-1]>0) { y--; }
+  if (y==0) { // get contmark from buffer lines
+    while(true) {
+      char ch[]; short getcontmark=0;
+      ch=topScrollArray.peek(2); // to get the contmark
+      //for (int i=0; i<ch.length-1 && i<maxX; ++i) screenchar[i][0]=ch[i];
+      if (ch.length>1) getcontmark=(short)ch[ch.length-1];
+      if (getcontmark==0) break;
+      bufferscrolldown(1); cursY++;
+      System.out.printf("Scrolldown1\n");
+    }
+
+  }
+}
 ///////////////////////////////////////////
 // window listener events
 
@@ -973,13 +1025,49 @@ if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
 
   //drawrelevent(0,maxX,0,maxY);
   }
+  private synchronized void scrollscreen(int line) {
+  //private void scrollscreen() {
+  // scroll them
+    if (false && allow_scrolling) {
+      //String buf="";
+      //for (int i = 0; i < maxX; ++i)
+      //  buf+=screenchar[i][maxY-1];      
+      //topScrollArray.push(buf);
+      char ar[]=new char[maxX+1]; // add the contmark too
+      for (int i=0;i<maxX;++i) ar[i]=screenchar[i][0];
+      ar[maxX]=(char)contmark[0];
+      topScrollArray.push(ar);
+      ar=new char[maxX];
+      for (int i=0;i<maxX;++i) ar[i]=(char)screencharColour[i][0];
+      topScrollArray.push(ar);
+    }
+    for (int j = line; j < maxY - 1; ++j) {
+      for (int i = 0; i < maxX; ++i) {
+        screenchar[i][j] = screenchar[i][j + 1];
+        screencharColour[i][j] = screencharColour[i][j + 1];
+      }
+    }
+    for (int i = 0; i < maxX; ++i) {
+      screenchar[i][maxY-1] = ' '; // this was cursY, change it now
+    }
+   
+    /* continuation mark */
+    for (int j = line; j < maxY-1; ++j) {
+      contmark[j]=contmark[j+1];
+if (verbose) screencharColour[maxX-2][j] = (contmark[j]==1)?(short)7:0;
+    }
+    contmark[maxY-1]=0;
+    /* continuation mark */
+
+  //drawrelevent(0,maxX,0,maxY);
+  }
 
   private synchronized void scrolldown(int y) {
     // if we are trying to push the bottom line - scroll up!
     //if (y==maxY) { scrollscreen(); return; }
   // scroll them
 
-    if (y==0) {
+    if (y==0 || feature_endlineinsert) {
       if (allow_scrolling) {
         //String buf="";
         //for (int i = 0; i < maxX; ++i)
@@ -1502,6 +1590,7 @@ if (verbose) { System.out.printf("print char %d\n",num); }
         continue;
       } else if (theChar == EXTENDSCII_END) {
         /* dont quote this */
+	if (feature_endlineinsert) scrolltoend();
         gotoendline();
         continue;
       } else if (theChar == EXTENDSCII_PGDN) {
@@ -1627,7 +1716,11 @@ if (verbose) { System.out.printf("print char %d\n",num); }
       } else if ((int) (theChar & 0xFF) == PETSCII_RGHT) {
           if (print_quotes_on) theChar = (char) (128+PETSCII_RGHT);
           else {
-            gotoXY(cursX + 1, cursY);
+            if (true && cursY==maxY-1 && cursX==maxX-1) {
+              bufferscrollup(1);
+              gotoXY(0, cursY);
+	    } else
+              gotoXY(cursX + 1, cursY);
             continue;
           }
       } else if ((int) (theChar & 0xFF) == PETSCII_RVON) {
@@ -1775,6 +1868,40 @@ if (verbose) { System.out.printf("print char %d\n",num); }
     repaint();
   }
 
+  /* detect we are at end of line (space after, or any space beyond) */
+  public boolean isendline() {
+    /* continuation mark */
+    /* new backspace */
+    /* do it to the end of the logical (contination) line */
+    int x;
+    int y;
+    int nx,ny;
+    int ox=cursX;
+    int oy=cursY;
+    //if (verbose) System.out.printf("gotoendline\n\r");
+    x=cursX;
+    y=cursY;
+
+    while (true) {
+      nx=x+1; ny=y; if (nx==maxX) { if (contmark[y]==1) { nx=0; ny++; } else { ny=maxY; } }
+      if (ny==maxY) { 
+        //screenchar[x][y] = ' ';
+        // we are now at the end - work back to the last non space
+        break;
+      }
+      x=nx; y=ny;
+    }
+
+    /* now work back from x,y to ox,oy */
+    while (ox!=x || oy!=y) {
+      nx=x-1; ny=y; if (nx<0) { nx=maxX-1; ny--; }
+      if (screenchar[nx][ny]!=' ') break;
+      x=nx; y=ny;
+    }
+    if (ox==x && oy==y) return true;
+    else return false;
+  }
+
   public void gotoendline() {
     /* continuation mark */
     /* new backspace */
@@ -1812,7 +1939,27 @@ if (verbose) { System.out.printf("print char %d\n",num); }
   // make a new backspace that will pull all characters back on the current SOFT line
   // first draft now
   public void backspace(int xmove) {
+	  if (true) scrolltoend();
     if (true) {
+	    if (feature_endlineinsert) {
+              if (cursY>0 && cursX+xmove<0) {
+                /* if the line above has no continue and is blank, just delete it */
+		if (isendline() && cursX==0) {
+                  System.out.printf("I would delete line here\n");
+		  scrollscreen(cursY);
+                  partialbufferscrollup(1);
+		  //contmark[cursY-1]=contmark[cursY];
+		  contmark[cursY-1]=0;
+		  System.out.printf("Contmark=%d\n",contmark[cursY-1]);
+                  cursX+=xmove;
+		  cursX=maxX-1; cursY--; 
+                  screenchar[cursX][cursY] = ' ';
+		  // move to end (skip spaces)
+		  for (int i=cursX; i>0; i--) if (screenchar[i][cursY]!=' ') { break; } else { cursX=i; }
+		  return;
+		} 
+	      }
+	    }
 
       /* continuation mark */
       /* new backspace */
@@ -1841,6 +1988,8 @@ if (verbose) System.out.printf("backspacing (new)\n\r");
         }
       }
       /* continuation mark */
+      else {
+      }
 
     } else {
       if (cursX > 0) {
@@ -1855,9 +2004,47 @@ if (verbose) System.out.printf("backspacing (new)\n\r");
   // first draft now
 
   boolean contmarks_infinite=true;
+  
+  public void insertlineafter() {
+   /* before we even start, if there is a continuation at end of screen, get in right spot */
+   scrolltoend();
+      /* continuation mark */
+      /* new backspace */
+      /* do it to the end of the logical (contination) line */
+        int ox=cursX;
+        int oy=cursY;
+        int x=cursX;
+        int y=cursY;
+        int nx,ny;
+if (verbose) System.out.printf("insertspace (new)\n\r");
+
+        while (true) {
+          nx=x+1; ny=y; 
+          if (nx==maxX) { 
+            nx=0; ny++;
+            if (contmark[y]==0) break;
+          }
+          if (ny==maxY) break;
+          x=nx; y=ny;
+        }
+        /* x,y now contain the LAST character */
+        if (contmark[y]==0) {
+
+            if (y==maxY-1) { // we need to scroll up - and change all our variables
+              scrollscreen();
+	      ///bufferscrollup(1);
+              oy--; ny--; cursY--;
+            } else {
+              scrolldown(y+1); /* lines y+1 onward scroll down one line */
+	      //bufferscrolldown(y+1);
+	    }
+	}
+  }
 
   public void insertspace() {
 
+   /* before we even start, if there is a continuation at end of screen, get in right spot */
+   scrolltoend();
       /* continuation mark */
       /* new backspace */
       /* do it to the end of the logical (contination) line */
@@ -1890,8 +2077,11 @@ if (verbose) System.out.printf("insertspace (new)\n\r");
             if (y==maxY-1) { // we need to scroll up - and change all our variables
               scrollscreen();
               oy--; ny--; cursY--;
-            } else 
+	      //bufferscrollup(1);
+            } else {
+	      //bufferscrolldown(1);
               scrolldown(y+1); /* lines y+1 onward scroll down one line */
+	    }
             /* I THINK we need to advance the marker */
             x=nx; y=ny;
           } else {
@@ -2386,6 +2576,7 @@ if (verbose) System.out.printf("Got a contination!\n\r");
     for (int i = from_cursX; i < maxX; ++i) {
       rets = rets + petunconvert_encoded(screenchar[i][y]);
     }
+    if (true && cursY==maxY-1) { bufferscrollup(1); cursY--; }
     println();                  // do it the other way around!
 
 if (verbose) System.out.printf("About to return line %s\n",rets);
@@ -2413,7 +2604,9 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
       println(" java ram system  many basic bytes free");
     } else {
       println("");
-      println(" *** c=64 ijk64 basic "+version.programVersion.replace("_b","   ".substring(0,13-version.programVersion.length())+"~")+" ***");
+      String tempv=version.programVersion.replaceAll("-.*$","");
+      println(" *** c=64 ijk64 basic "+tempv.replace("_b","   ".substring(0,13-tempv.length())+"~")+" ***");
+      //println(" *** c=64 ijk64 basic "+tempv+" ***");
       println("");
       //println(" java ram system  many basic bytes free");
           long maxMemory = Runtime.getRuntime().maxMemory();
@@ -2754,6 +2947,19 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
         return ""; // is this good?
       } else if (ch == PETSCII_SHIFTENTER) {
         print_quotes_on=false; // special - fix up the quotes
+        //if (feature_endlineinsert && isendline()) {
+          /* at end of line exactly? */
+	//}
+	/* if a continue on this line, scroll until not */
+	scrolltoend();
+	/* if was at the end of the line, also do line insert */
+        if (feature_endlineinsert) {
+          if (isendline()) {
+            // insert a line after this
+	    if (verbose) System.out.printf("I would insert a line now\n");
+	    insertlineafter();
+	  } else { if (verbose) System.out.printf("%d %d\n",cursX,cursY); }
+	}
         getline(0);  
         from_cursX = cursX;
         from_cursY = cursY;
@@ -2762,6 +2968,14 @@ if (verbose) System.out.printf("About to return line %s\n",rets);
         int upto_cursX = cursX;
         int upto_cursY = cursY; // in case we have scrolled the screen!        
         print_quotes_on=false; // special - fix up the quotes
+	/* if a continue on this line, scroll until not */
+	scrolltoend();
+        if (feature_endlineinsert) {
+          if (cursX!=0 && isendline()) {
+            // insert a line after this
+            insertlineafter();
+	  }
+	}
 
         /* contination mark */
         /* if we have a continued line - do the default input */

@@ -461,6 +461,7 @@ void precache_all_lines()
     int start=pnt;
     if (!ReadLineNo()) {
       if (verbose) { System.out.printf("No line # -skipping\n"); }
+      // will need to cache these too - but with blank/invalid line # for uuid
       //break;
     } else {
       // got a line # cache it
@@ -481,6 +482,10 @@ void precache_all_lines()
 
 void precache_all_data()
 {
+  // new = clear the Label and DATA cache
+  if (true) machine.toplabcache=0;
+  if (true) machine.allDATA="";
+
   int keeppnt;
   // read_all_lines
   // read the line# first
@@ -492,10 +497,12 @@ void precache_all_data()
     int start=pnt;
     if (!ReadLineNo()) {
       if (verbose) { System.out.printf("No line # -skipping\n"); }
+      // this will need to change, data and labels without line #s seem to be impossible currently //tofix
       //break;
     } else {
 		// got a line # cache it
 		// shoud this be done here too?
+                // this isnt really appropriate //tofix
 		machine.cacheLine(keepLine,pnt); //was start
 		keeppnt=pnt;
 		SkipSpaces();
@@ -625,8 +632,13 @@ void interpret_string(String passed_line, int startat, String lineNo)
   if (machine.hasControlC()) { } // do nothing - just clear it initially!
 
   // skip to the chase, and just read the line #s
-  precache_all_lines();
-  precache_all_data();
+  if (machine.dirtyLineCache && machine.program_running) {
+    // note - both old and new if changing program, then doing goto from direct, cache isn't up to date // tofix
+    System.out.printf("Recaching lines&data\n");
+    precache_all_lines();
+    precache_all_data();
+    machine.dirtyLineCache=false;
+  }
   if (verbose) { System.out.printf("DATA is:\n%s\n",machine.allDATA); }
 
   if (!lineNo.equals("")) {
@@ -900,7 +912,7 @@ void ProcessHELPstatement(GenericType gt) throws BasicException
 {
 //        machine.print("?help! help! try this: load\"$\",8 [enter]");
 //        machine.print("?help! try this: load\"$\",8 [enter]");
-        machine.print("tokens: version "+version.programVersion+"\n");
+        machine.print("tokens: version\nijk64 "+version.programVersion+"\n");
         { String collect=""; int x=0;
           for (int tok=0; tok<basicTokens.length; ++tok) {
             x+=basicTokens[tok].length()+1;
@@ -1650,6 +1662,11 @@ boolean ProcessIFstatement() throws BasicException
           if (a.equals("\n")) break;
 	  if (a.equals("\"")) { quote=!quote; if (quote) looktoken=false; }
 	  if (a.equals(":") && !quote) looktoken=true;
+	  if (looktoken && a.toLowerCase().equals("r") && line.substring(pp,pp+3).toLowerCase().equals("rem")) {
+	    if (verbose) System.out.printf("looking for else, found rem, skipping all!\n");
+            while (pp<linelength && !line.substring(pp,pp+1).equals("\n")) pp++;
+	    continue;
+	  }
 	  if (looktoken && a.toLowerCase().equals("e") && line.substring(pp,pp+4).toLowerCase().equals("else")) { 
 	    pp=pp+4; 
 	    // it may be a line# -> so check
@@ -1692,6 +1709,11 @@ boolean ProcessIFstatement() throws BasicException
           if (a.equals("\n")) break;
 	  if (a.equals("\"")) { quote=!quote; if (quote) looktoken=false; }
 	  if (a.equals(":") && !quote) looktoken=true;
+	  if (looktoken && a.toLowerCase().equals("r") && line.substring(pp,pp+3).toLowerCase().equals("rem")) {
+	    if (verbose) System.out.printf("looking for else, found rem, skipping all!\n");
+            while (pp<linelength && !line.substring(pp,pp+1).equals("\n")) pp++;
+	    continue;
+	  }
 	  if (looktoken && a.toLowerCase().equals("e") && line.substring(pp,pp+4).toLowerCase().equals("else")) { 
 	    pp=pp+4; 
 	    // it may be a line# -> so check
