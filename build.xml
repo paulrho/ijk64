@@ -28,6 +28,10 @@
           depends="build.uptodate?"
           unless="build.uptodate"
           description="Maintain build-number and build-date properties.">
+	  <exec executable="git" outputproperty="git.branch"
+		   failifexecutionfails="false">
+		   <arg line="rev-parse --abbrev-ref HEAD"/>
+	   </exec>
     <propertyfile file="${version.props}"
              comment="build number and date">
       <entry key="build-number" type="int" operation="+" pattern="0000" default="0000"/>
@@ -35,11 +39,12 @@
       <entry key="build.user.name" value="${user.name}"/>
       <!-- COMPUTERNAME on windows? -->
       <entry key="build.computer" value="${env.COMPUTERNAME}"/>
+      <entry key="buld.branch" value="${git.branch}"/>
     </propertyfile>
     <property file="${source}/version.props"/>
     <replaceregexp file="${source}/version.java"
                          match="programVersion = (.*)"
-                         replace="programVersion = &#34;${major}.${minor}.${rev}_b${build-number}&#34;;"
+	    replace="programVersion = &#34;${major}.${minor}.${rev}_b${build-number}-${git.branch}&#34;;"
                          byline="true" />
     <echo message="Updated the build number"/>
   </target>
