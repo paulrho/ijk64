@@ -155,7 +155,8 @@ class C64 {
           System.out.printf("  -80: screen width 80\n");
           System.out.printf("  -z : petspeed [default]\n");  // make this the default
           System.out.printf("  --slow    : no petspeed\n");  // make this the default
-          System.out.printf("  --https   : use https for cloud\n");  // make this the default
+          System.out.printf("  --http    : use http  for cloud\n");  
+          System.out.printf("  --https   : use https for cloud\n");  // make this the default now
           System.out.printf("  --black   : white on black on black\n");  // make this the default
           System.out.printf("  --font-pc : 2x1 lower is pc typeface [default:pet]\n"); 
           System.out.printf("  --[no-]sync-paint : default:1\n"); 
@@ -181,6 +182,8 @@ class C64 {
           speeder=false;
         } else if (args[i].equals("--https")) {
           cloudNet="https://futex.com.au";
+        } else if (args[i].equals("--http")) {
+          cloudNet="http://futex.com.au";
         } else if (args[i].equals("-y2")) {
           C64Screen.static_scale=1;
           C64Screen.static_scaley=2;

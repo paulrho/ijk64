@@ -198,7 +198,8 @@ public class Machine {
       Empty DCache
   **/
 
-  String cloudNet="http://test.futex.com.au"; // /cloud /basic
+  //String cloudNet="http://test.futex.com.au"; // /cloud /basic
+  String cloudNet="https://futex.com.au"; // /cloud /basic
 
   void clearMachineState() {
     if (false) toplinecache=0; // optimisation only & goto/gosub lookup & findcurrentline
