@@ -32,4 +32,5 @@ Load files from cloud
    RUN
 </PRE>
 
+<a rel="me" href="https://fosstodon.org/@ijk64">Mastodon</a>
 <IMG SRC="http://www.futex.com.au/ijk64/b.php" />
